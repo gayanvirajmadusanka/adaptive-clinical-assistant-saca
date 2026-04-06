@@ -1,0 +1,26 @@
+# Backend generated artifacts
+backend/data_processed/
+backend/models/
+backend/build/
+backend/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pkl
+*.npz
+*.npy
+.venv/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
