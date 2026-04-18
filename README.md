@@ -32,6 +32,18 @@ adaptive-clinical-assistant-saca/
 │   ├── data/                       # Raw dataset and Warlpiri phrase map
 │   └── requirements.txt
 ├── mobile/                         # React Native mobile app (Android)
-├── desktop/                        # JavaFX desktop app (Windows)
+├── windows_app/                    # JavaFX desktop app (Windows)
+│   ├── src/                        # Source files of Windows app
+│   │   ├── main/  
+│   │   │   ├── java/
+│   │   │   │   ├── controller/     # Java Controller files 
+│   │   │   │   ├── model/          # Java Models
+│   │   │   │   ├── MainApp.java    # Main class of windows app
+│   │   │   │   ├── resources/      # Includes all resources
+│   │   │   │   │   ├── icons       # Supportive icons
+│   │   │   │   │   ├── images      # Supportive images/ backgrounds 
+│   │   │   │   │   ├── styles      # Contains CSS styles
+│   │   │   │   │   ├── view        # FXML files
+│   ├── pom.xml                     # Core configurations for Windows app
 └── README.md
 ```
