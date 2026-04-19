@@ -32,6 +32,33 @@ adaptive-clinical-assistant-saca/
 │   ├── data/                       # Raw dataset and Warlpiri phrase map
 │   └── requirements.txt
 ├── mobile/                         # React Native mobile app (Android)
+│   ├── android/                    # Android native configuration
+│   ├── assets/                     # Images, icons, and other static files
+│   ├── src/                        # Source files of mobile app
+│   │   ├── components/             # Reusable UI components
+│   │   │   ├── Button.js           # Custom button component
+│   │   │   ├── InputField.js       # Text input component
+│   │   │   ├── VoiceInput.js       # Voice input component
+│   │   │   ├── BodyMap.js          # Body map component
+│   │   │   └── LanguageSelector.js # Language selection component
+│   │   ├── screens/                # Application screens
+│   │   │   ├── WelcomeScreen.js
+│   │   │   ├── LanguageScreen.js
+│   │   │   ├── InputScreen.js
+│   │   │   ├── VoiceScreen.js
+│   │   │   ├── BodyMapScreen.js
+│   │   │   └── ResultScreen.js
+│   │   ├── navigation/             # Navigation configuration
+│   │   │   └── AppNavigator.js
+│   │   ├── services/               # API and backend communication
+│   │   │   └── apiService.js
+│   │   ├── styles/                 # Styling files
+│   │   │   └── globalStyles.js
+│   │   ├── utils/                  # Helper functions
+│   │   │   └── helpers.js
+│   │   └── App.js                  # Main entry point of mobile app
+│   ├── package.json                # Dependencies and scripts
+│   └── README.md                   # Mobile app documentation
 ├── windows_app/                    # JavaFX desktop app (Windows)
 │   ├── src/                        # Source files of Windows app
 │   │   ├── main/  
