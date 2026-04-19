@@ -31,7 +31,7 @@ adaptive-clinical-assistant-saca/
 │   ├── results/                    # Training charts and evaluation results
 │   ├── data/                       # Raw dataset and Warlpiri phrase map
 │   └── requirements.txt
-├── mobile/                         # React Native mobile app (Android)
+├── mobile_app/                         # React Native mobile app (Android)
 │   ├── android/                    # Android native configuration
 │   ├── assets/                     # Images, icons, and other static files
 │   ├── src/                        # Source files of mobile app
