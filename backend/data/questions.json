@@ -1,0 +1,262 @@
+{
+  "mandatory": [
+    {
+      "id": "1",
+      "text": "How long have you had these symptoms?",
+      "text_wp": "Ngurrju-warnu nyinami?",
+      "options": [
+        {
+          "id": "1a",
+          "text": "Today",
+          "text_wp": "Palka",
+          "value": 0
+        },
+        {
+          "id": "1b",
+          "text": "1-3 days",
+          "text_wp": "Jinta-kurra",
+          "value": 1
+        },
+        {
+          "id": "1c",
+          "text": "More than 3 days",
+          "text_wp": "Panu-kurra",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "text": "How severe do you feel overall?",
+      "text_wp": "Nyarrpa-kurra pirli nyinami?",
+      "options": [
+        {
+          "id": "2a",
+          "text": "Mild",
+          "text_wp": "Warru",
+          "intensity": 0
+        },
+        {
+          "id": "2b",
+          "text": "Moderate",
+          "text_wp": "Yuwayi",
+          "intensity": 1
+        },
+        {
+          "id": "2c",
+          "text": "Severe",
+          "text_wp": "Wiri-wiri",
+          "intensity": 2
+        }
+      ]
+    }
+  ],
+  "symptom_questions": {
+    "fever": [
+      {
+        "id": "10",
+        "text": "Has the fever lasted more than 2 days?",
+        "text_wp": "Wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "11",
+        "text": "Do you have chills or shivering?",
+        "text_wp": "Karlarra nyinami?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "headache": [
+      {
+        "id": "12",
+        "text": "Is the headache sudden and very severe?",
+        "text_wp": "Ngarru wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "13",
+        "text": "Do you have neck stiffness?",
+        "text_wp": "Marlpa-kurra nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "chest pain": [
+      {
+        "id": "14",
+        "text": "Does the pain spread to your arm or jaw?",
+        "text_wp": "Marlpa-kurra wiri?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "15",
+        "text": "Is the pain sudden and severe?",
+        "text_wp": "Wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "shortness breath": [
+      {
+        "id": "16",
+        "text": "Do you feel breathless at rest?",
+        "text_wp": "Karlarra nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "17",
+        "text": "Did it start suddenly?",
+        "text_wp": "Palka nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "abdominal pain": [
+      {
+        "id": "18",
+        "text": "Is the pain severe and constant?",
+        "text_wp": "Wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "19",
+        "text": "Do you have nausea or vomiting with it?",
+        "text_wp": "Yuwayi nyinami?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "cough": [
+      {
+        "id": "20",
+        "text": "Do you cough up blood?",
+        "text_wp": "Yirdi nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "21",
+        "text": "Has the cough lasted more than a week?",
+        "text_wp": "Panu-kurra nyinami?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "dizziness": [
+      {
+        "id": "22",
+        "text": "Do you feel like you might faint?",
+        "text_wp": "Wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "loss of consciousness": [
+      {
+        "id": "23",
+        "text": "Did you lose consciousness recently?",
+        "text_wp": "Wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "vomiting": [
+      {
+        "id": "24",
+        "text": "Have you vomited more than 5 times today?",
+        "text_wp": "Panu nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "25",
+        "text": "Can you keep fluids down?",
+        "text_wp": "Yuwayi nyinami?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "diarrhea": [
+      {
+        "id": "26",
+        "text": "Is there blood in your stool?",
+        "text_wp": "Yirdi nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "27",
+        "text": "Do you feel severely dehydrated?",
+        "text_wp": "Wiri nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ]
+  },
+  "critical_symptoms": [
+    "loss of consciousness",
+    "chest pain",
+    "difficulty breathing",
+    "shortness breath",
+    "coughing blood",
+    "vomiting blood",
+    "seizure",
+    "stroke",
+    "coma",
+    "paralysis",
+    "slurred speech",
+    "sudden numbness",
+    "uncontrolled bleeding",
+    "excessive bleeding",
+    "abnormal bleeding",
+    "heavy bleeding",
+    "bleeding from anus",
+    "rectal bleeding",
+    "bright red rectal bleeding",
+    "blood urine",
+    "blood stool",
+    "bloody diarrhea",
+    "passing out",
+    "decreased consciousness",
+    "alterations in levels of consciousness",
+    "brief lapses in consciousness",
+    "inability to speak",
+    "inability to swallow",
+    "fast weak pulse",
+    "weak pulse",
+    "low blood pressure",
+    "blue skin lips fingernails",
+    "bluish skin coloration",
+    "pale clammy skin",
+    "shock",
+    "delirium",
+    "confusion",
+    "hallucination",
+    "psychosis",
+    "suicide intensity",
+    "thoughts of harming oneself",
+    "life threatening condition",
+    "fetal distress",
+    "absence of fetal heart tone",
+    "stopping fetal movement",
+    "trouble breathing",
+    "rapid breathing",
+    "fast heart rate",
+    "irregular heartbeat",
+    "stabbing chest pain",
+    "chest pressure",
+    "chest tightness",
+    "severe pain",
+    "severe illness",
+    "abnormal breathing pattern",
+    "shallow breathing",
+    "fast breathing",
+    "increased breathing rate"
+  ]
+}
