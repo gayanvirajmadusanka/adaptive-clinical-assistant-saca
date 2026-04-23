@@ -28,7 +28,7 @@ def get_questions(symptoms: list, language: str = LANG_EN) -> dict:
     """
     Build the question list for a given set of symptoms.
     Mandatory questions are included first, followed by
-    up to 2 symptom-specific questions per symptom (max 5 total).
+    up to 2 symptom-specific questions per symptom (max 3 total).
     :param symptoms: List of extracted symptom strings
     :param language: Language code - 'en' or 'wp'
     :return: Dict with language and list of formatted questions
@@ -41,7 +41,7 @@ def get_questions(symptoms: list, language: str = LANG_EN) -> dict:
     symptom_questions_added = 0
     for symptom in symptoms:
         symptom_lower = symptom.lower().strip()
-        if symptom_lower in SYMPTOM_QUESTIONS and symptom_questions_added < 5:
+        if symptom_lower in SYMPTOM_QUESTIONS and symptom_questions_added < 3:
             for question in SYMPTOM_QUESTIONS[symptom_lower][:2]:
                 questions.append(_format_question(question, language))
                 symptom_questions_added += 1
