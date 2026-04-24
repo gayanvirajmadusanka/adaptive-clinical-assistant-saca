@@ -27,8 +27,8 @@ _QUESTION_LOOKUP = {
 def get_questions(symptoms: list, language: str = LANG_EN) -> dict:
     """
     Build the question list for a given set of symptoms.
-    Mandatory questions are included first, followed by
-    up to 2 symptom-specific questions per symptom (max 3 total).
+    Mandatory questions always included first, followed by exactly
+    2 symptom-specific questions selected based on number of symptoms.
     :param symptoms: List of extracted symptom strings
     :param language: Language code - 'en' or 'wp'
     :return: Dict with language and list of formatted questions
@@ -38,13 +38,27 @@ def get_questions(symptoms: list, language: str = LANG_EN) -> dict:
     for question in MANDATORY_QUESTIONS:
         questions.append(_format_question(question, language))
 
-    symptom_questions_added = 0
-    for symptom in symptoms:
-        symptom_lower = symptom.lower().strip()
-        if symptom_lower in SYMPTOM_QUESTIONS and symptom_questions_added < 3:
-            for question in SYMPTOM_QUESTIONS[symptom_lower][:2]:
-                questions.append(_format_question(question, language))
-                symptom_questions_added += 1
+    # find symptoms that have questions defined
+    matched_symptoms = [
+        symptom for symptom in symptoms
+        if symptom.lower().strip() in SYMPTOM_QUESTIONS
+    ]
+
+    if len(matched_symptoms) == 0:
+        pass  # no symptom questions to add
+
+    elif len(matched_symptoms) == 1:
+        # 1 symptom - take up to 2 questions from it
+        symptom = matched_symptoms[0].lower().strip()
+        for question in SYMPTOM_QUESTIONS[symptom][:2]:
+            questions.append(_format_question(question, language))
+
+    else:
+        # 2+ symptoms - take 1 question from each of first 2 matched symptoms
+        for symptom in matched_symptoms[:2]:
+            symptom_lower = symptom.lower().strip()
+            first_question = SYMPTOM_QUESTIONS[symptom_lower][0]
+            questions.append(_format_question(first_question, language))
 
     return {
         "language": language,
@@ -110,22 +124,22 @@ def resolve_answers(answers: list, symptoms: list) -> dict:
 
         # mandatory - duration question
         if qid == '1':
-            if aid == '1a':
-                duration_value = 0  # today
-            elif aid == '1b':
-                duration_value = 0  # 1-3 days
-            elif aid == '1c':
-                duration_value = 1  # more than 3 days
+            if aid == '1a' or aid == '1b' or aid == '1c':  # today / yesterday / 2-3 days
+                duration_value = 0
+            elif aid == '1d' or aid == '1e':  # About a week / More than a week
+                duration_value = 1
 
         # mandatory - overall severity question
         elif qid == '2':
-            if aid == '2a':
-                intensity_signal = max(intensity_signal, 0)
-            elif aid == '2b':
-                intensity_signal = max(intensity_signal, 1)
+            if aid == '2a' or aid == '2b':  # none / a little
+                intensity_signal = 0
             elif aid == '2c':
-                intensity_signal = max(intensity_signal, 2)
-                has_critical = 1  # self-reported severe always escalates
+                intensity_signal = 1  # moderate
+            elif aid == '2d':
+                intensity_signal = 2  # very bad
+            elif aid == '2e':
+                intensity_signal = 2
+                has_critical = 1  # unbearable - auto escalate
 
         # symptom-specific questions
         else:
