@@ -134,10 +134,14 @@ class TriagePredictor:
         :return: Encoded integer 0-4
         """
         if isinstance(age, int):
-            if age < 6:   return 0  # below 5 years
-            if age < 16:  return 1  # 6-15 years
-            if age < 46:  return 2  # 16-45 years
-            if age < 61:  return 3  # above 45 years
+            if age < 6:
+                return 0  # below 5 years
+            if age < 16:
+                return 1  # 6-15 years
+            if age < 46:
+                return 2  # 16-45 years
+            if age < 61:
+                return 3  # above 45 years
             return 4  # above 60 years
 
         # string bracket fallback

@@ -61,7 +61,7 @@ class TestResolveAnswers:
         assert result['duration_value'] == 0
 
     def test_duration_more_than_3_days_gives_one(self):
-        answers = [{'question_id': '1', 'answer_id': '1c'}]
+        answers = [{'question_id': '1', 'answer_id': '1d'}]
         result = resolve_answers(answers, [])
         assert result['duration_value'] == 1
 
@@ -71,12 +71,12 @@ class TestResolveAnswers:
         assert result['intensity_signal'] == 0
 
     def test_severity_moderate_gives_intensity_one(self):
-        answers = [{'question_id': '2', 'answer_id': '2b'}]
+        answers = [{'question_id': '2', 'answer_id': '2c'}]
         result = resolve_answers(answers, [])
         assert result['intensity_signal'] == 1
 
     def test_severity_severe_gives_intensity_two_and_critical(self):
-        answers = [{'question_id': '2', 'answer_id': '2c'}]
+        answers = [{'question_id': '2', 'answer_id': '2e'}]
         result = resolve_answers(answers, [])
         assert result['intensity_signal'] == 2
         assert result['has_critical'] == 1

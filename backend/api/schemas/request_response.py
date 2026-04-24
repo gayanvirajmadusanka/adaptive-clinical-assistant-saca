@@ -17,8 +17,8 @@ class Answer(BaseModel):
 class ClassifyRequest(BaseModel):
     symptoms: list[str]
     answers: list[Answer]
-    age: Union[int, str] = 30
-    gender: Optional[str] = 'male'
+    age: Union[int, str]
+    gender: Optional[str]
     language: str = 'en'
 
 

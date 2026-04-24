@@ -99,13 +99,6 @@ class TestClassifyEndpoint:
         data = response.json()
         assert data['severity'] in {'Mild', 'Moderate', 'Severe'}
 
-    def test_classify_uses_default_age_and_gender(self):
-        response = client.post('/classify', json={
-            'symptoms': ['headache'],
-            'answers': []
-        })
-        assert response.status_code == 200
-
     def test_classify_invalid_body_returns_422(self):
         response = client.post('/classify', json={})
         assert response.status_code == 422

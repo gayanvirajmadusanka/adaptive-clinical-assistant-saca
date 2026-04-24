@@ -37,8 +37,8 @@ class TestClassify:
         classify(
             symptoms=['fever'],
             answers=[
-                {'question_id': '1', 'answer_id': '1c'},  # more than 3 days
-                {'question_id': '2', 'answer_id': '2c'}  # severe
+                {'question_id': '1', 'answer_id': '1d'},  # more than 3 days
+                {'question_id': '2', 'answer_id': '2e'}  # severe
             ],
             age='16-45 years',
             gender='female'
