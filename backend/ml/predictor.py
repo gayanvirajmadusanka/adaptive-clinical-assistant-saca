@@ -133,19 +133,17 @@ class TriagePredictor:
         :param age: Age as string bracket or integer
         :return: Encoded integer 0-4
         """
+        if isinstance(age, int):
+            if age < 6:   return 0  # below 5 years
+            if age < 16:  return 1  # 6-15 years
+            if age < 46:  return 2  # 16-45 years
+            if age < 61:  return 3  # above 45 years
+            return 4  # above 60 years
+
+        # string bracket fallback
         age_map = {
             'below 5 years': 0, '6-15 years': 1,
-            '16-45 years': 2, '16-60 years': 2,
-            'above 45 years': 3, 'above 60 years': 4
+            '16-45 years': 2, '46-60 years': 3,
+            'above 60 years': 4
         }
-        if isinstance(age, str):
-            return age_map.get(age.lower().strip(), 2)
-        if age < 6:
-            return 0
-        if age < 16:
-            return 1
-        if age < 46:
-            return 2
-        if age < 61:
-            return 3
-        return 4
+        return age_map.get(str(age).lower().strip(), 2)
