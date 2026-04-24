@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -17,7 +17,7 @@ class Answer(BaseModel):
 class ClassifyRequest(BaseModel):
     symptoms: list[str]
     answers: list[Answer]
-    age: Optional[str] = '16-45 years'
+    age: Union[int, str] = 30
     gender: Optional[str] = 'male'
     language: str = 'en'
 
