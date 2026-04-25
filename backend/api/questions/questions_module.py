@@ -94,7 +94,7 @@ def _format_question(question: dict, language: str) -> dict:
         formatted[TYPE] = 'yes_no'
         formatted[OPTIONS] = [
             {ID: question[ID] + 'y', TEXT: "Yes" if language == LANG_EN else "Yuwayi"},
-            {ID: question[ID] + 'n', TEXT: "No" if language == LANG_EN else "Wiya"}
+            {ID: question[ID] + 'n', TEXT: "No" if language == LANG_EN else "Lawa"}
         ]
 
     return formatted
@@ -108,6 +108,8 @@ def resolve_answers(answers: list, symptoms: list) -> dict:
     :param symptoms: List of symptom strings to check against critical list
     :return: Dict with intensity_signal, has_critical, duration_value
     """
+    gender = None
+    age_group = None
     intensity_signal = 0
     has_critical = 0
     duration_value = 0
@@ -122,36 +124,55 @@ def resolve_answers(answers: list, symptoms: list) -> dict:
         qid = answer.get('question_id', '')
         aid = answer.get('answer_id', '')
 
-        # mandatory - duration question
-        if qid == '1':
-            if aid == '1a' or aid == '1b' or aid == '1c':  # today / yesterday / 2-3 days
+        # gender question
+        if qid == '0a':
+            if aid == '0a1':
+                gender = 'male'
+            elif aid == '0a2':
+                gender = 'female'
+
+        # age group question
+        elif qid == '0b':
+            age_map = {
+                '0b1': 'child',
+                '0b2': 'youth',
+                '0b3': 'adult',
+                '0b4': 'elder'
+            }
+            age_group = age_map.get(aid)
+
+        # duration question
+        elif qid == '1':
+            if aid in ('1a', '1b', '1c'):  # today / yesterday / 2-3 days
                 duration_value = 0
-            elif aid == '1d' or aid == '1e':  # About a week / More than a week
+            elif aid in ('1d', '1e'):  # About a week / More than a week
                 duration_value = 1
 
-        # mandatory - overall severity question
+        # severity question
         elif qid == '2':
-            if aid == '2a' or aid == '2b':  # none / a little
+            if aid in ('2a', '2b'):  # none / a little
                 intensity_signal = 0
-            elif aid == '2c':
-                intensity_signal = 1  # moderate
-            elif aid == '2d':
-                intensity_signal = 2  # very bad
-            elif aid == '2e':
+            elif aid == '2c':  # moderate
+                intensity_signal = 1
+            elif aid == '2d':  # very bad
                 intensity_signal = 2
-                has_critical = 1  # unbearable - auto escalate
+            elif aid == '2e':  # unbearable - auto escalate
+                intensity_signal = 2
+                has_critical = 1
 
         # symptom-specific questions
         else:
             q_def = _find_question_def(qid)
-            if q_def and q_def.get('critical_if') == 'yes' and aid.endswith('y'):  # yes answer
+            if q_def and q_def.get('critical_if') == 'yes' and aid.endswith('y'):
                 has_critical = 1
                 intensity_signal = max(intensity_signal, 2)
 
     return {
         'intensity_signal': intensity_signal,
         'has_critical': has_critical,
-        'duration_value': duration_value
+        'duration_value': duration_value,
+        'gender': gender,
+        'age_group': age_group
     }
 
 

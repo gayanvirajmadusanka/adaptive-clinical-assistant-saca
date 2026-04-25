@@ -27,27 +27,27 @@ SEVERITY_MAP = {
 RECOMMENDED_ACTIONS = {
     'Mild': {
         'en': 'You can treat this at home with over-the-counter medication. See a doctor if symptoms worsen.',
-        'wp': 'Nyurruwiyi yimi karrimi. Ngaka-kurra yirdi-manu puraji.'
+        'wp': 'Mirrijini nyuntu mardarni. Ngangkayikurra yanta kaji wirinyayirni.'
     },
     'Moderate': {
         'en': 'Please visit the clinic or health worker today.',
-        'wp': 'Nyampu-kurra karrija health clinic-kirra.'
+        'wp': 'Jalangu ngangkayikurra yanta.'
     },
     'Severe': {
         'en': 'Seek emergency medical attention immediately or call 000.',
-        'wp': 'Wirliya-kurra karrija nyurnu-kurra. 000 yimi wangkaja.'
+        'wp': 'Kapanku ngangkayikurra yanta. 000 wangkaya.'
     }
 }
 
 SEVERITY_TRANSLATIONS = {
-    'Mild': {'en': 'Mild', 'wp': 'Warru'},
-    'Moderate': {'en': 'Moderate', 'wp': 'Yuwayi'},
-    'Severe': {'en': 'Severe', 'wp': 'Wiri-wiri'}
+    'Mild': {'en': 'Mild', 'wp': 'Witapardu'},
+    'Moderate': {'en': 'Moderate', 'wp': 'Wiriwiri'},
+    'Severe': {'en': 'Severe', 'wp': 'Wirinyayirni'}
 }
 
 RECOMMENDATION_TRANSLATIONS = {
-    'Doctor Consultation': {'en': 'Doctor Consultation', 'wp': 'Ngaka-kurra karrija'},
-    'OTC Drug': {'en': 'OTC Drug', 'wp': 'Puraji-kurra'}
+    'Doctor Consultation': {'en': 'Doctor Consultation', 'wp': 'Ngangkayi nyanyi'},
+    'OTC Drug': {'en': 'OTC Drug', 'wp': 'Mirrijini'}
 }
 
 
@@ -73,7 +73,7 @@ class TriagePredictor:
     def predict(
             self,
             symptoms: list,
-            age,
+            age: str,
             gender: str,
             duration_value: int,
             intensity_signal: int,
@@ -127,27 +127,18 @@ class TriagePredictor:
         }
 
     @staticmethod
-    def _encode_age(age) -> int:
+    def _encode_age(age: str) -> int:
         """
-        Convert age string or integer to ordinal encoded value.
-        :param age: Age as string bracket or integer
+        Convert age group or integer to ordinal encoded value.
+        :param age: Age as string group
         :return: Encoded integer 0-4
         """
-        if isinstance(age, int):
-            if age < 6:
-                return 0  # below 5 years
-            if age < 16:
-                return 1  # 6-15 years
-            if age < 46:
-                return 2  # 16-45 years
-            if age < 61:
-                return 3  # above 45 years
-            return 4  # above 60 years
-
-        # string bracket fallback
-        age_map = {
-            'below 5 years': 0, '6-15 years': 1,
-            '16-45 years': 2, '46-60 years': 3,
-            'above 60 years': 4
+        # handle age_group strings from questions
+        age_group_map = {
+            'child': 1,  # maps to 6-15 years bracket
+            'youth': 1,  # also 6-15 years bracket
+            'adult': 2,  # 16-45 years bracket
+            'elder': 4  # above 60 years bracket
         }
-        return age_map.get(str(age).lower().strip(), 2)
+
+        return age_group_map.get((age or '').lower().strip(), 2)  # safe default - adult

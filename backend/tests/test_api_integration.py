@@ -52,7 +52,7 @@ class TestClassifyEndpoint:
 
     @pytest.fixture(autouse=True)
     def mock_predictor(self):
-        with patch('api.services.pipeline_service.predictor') as mock:
+        with patch('backend.api.services.pipeline_service.predictor') as mock:
             mock.predict.return_value = {
                 'recommendation': 'Doctor Consultation',
                 'severity': 'Moderate',
@@ -67,34 +67,32 @@ class TestClassifyEndpoint:
         response = client.post('/classify', json={
             'symptoms': ['headache', 'fever'],
             'answers': [
+                {'question_id': '0a', 'answer_id': '0a1'},
+                {'question_id': '0b', 'answer_id': '0b3'},
                 {'question_id': '1', 'answer_id': '1b'},
                 {'question_id': '2', 'answer_id': '2b'}
-            ],
-            'age': '16-45 years',
-            'gender': 'male'
+            ]
         })
         assert response.status_code == 200
 
     def test_classify_response_has_required_fields(self):
         response = client.post('/classify', json={
             'symptoms': ['headache'],
-            'answers': [],
-            'age': '16-45 years',
-            'gender': 'male'
+            'answers': []
         })
         data = response.json()
         expected_keys = {
             'symptoms', 'severity', 'recommendation',
-            'confidence', 'recommended_action', 'has_critical', 'intensity_signal'
+            'confidence', 'recommended_action',
+            'has_critical', 'intensity_signal',
+            'age_group', 'gender'
         }
         assert expected_keys.issubset(data.keys())
 
     def test_classify_severity_is_valid_value(self):
         response = client.post('/classify', json={
             'symptoms': ['fever'],
-            'answers': [],
-            'age': '16-45 years',
-            'gender': 'male'
+            'answers': []
         })
         data = response.json()
         assert data['severity'] in {'Mild', 'Moderate', 'Severe'}
@@ -106,9 +104,7 @@ class TestClassifyEndpoint:
     def test_classify_confidence_between_0_and_1(self):
         response = client.post('/classify', json={
             'symptoms': ['fever'],
-            'answers': [],
-            'age': '16-45 years',
-            'gender': 'male'
+            'answers': []
         })
         data = response.json()
         assert 0.0 <= data['confidence'] <= 1.0

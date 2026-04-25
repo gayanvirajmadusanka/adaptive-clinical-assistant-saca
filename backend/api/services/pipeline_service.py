@@ -12,22 +12,21 @@ predictor = TriagePredictor(
 )
 
 
-def classify(symptoms: list, answers: list, age, gender: str, language='en') -> dict:
+def classify(symptoms: list, answers: list, language='en') -> dict:
     """
     Orchestrate the full classification pipeline.
     Resolves answers to signals then runs ML inference.
     :param symptoms: List of extracted English symptom strings
     :param answers: List of answer dicts from frontend
-    :param age: Patient age as string or integer
-    :param gender: Patient gender string
+    :param language: Language to use
     :return: Full triage result dict for API response
     """
     resolved = resolve_answers(answers, symptoms)
 
     result = predictor.predict(
         symptoms=symptoms,
-        age=age,
-        gender=gender,
+        age=resolved['age_group'],
+        gender=resolved['gender'],
         duration_value=resolved['duration_value'],
         intensity_signal=resolved['intensity_signal'],
         has_critical=resolved['has_critical'],
@@ -37,5 +36,7 @@ def classify(symptoms: list, answers: list, age, gender: str, language='en') -> 
 
     return {
         'symptoms': symptoms,
+        'age_group': resolved.get('age_group'),
+        'gender': resolved.get('gender'),
         **result
     }

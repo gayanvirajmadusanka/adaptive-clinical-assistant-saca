@@ -1,38 +1,82 @@
 {
   "mandatory": [
     {
+      "id": "0a",
+      "text": "What is your gender?",
+      "text_wp": "Nyuntu wati manu karnta?",
+      "options": [
+        {
+          "id": "0a1",
+          "text": "Male",
+          "text_wp": "Wati"
+        },
+        {
+          "id": "0a2",
+          "text": "Female",
+          "text_wp": "Karnta"
+        }
+      ]
+    },
+    {
+      "id": "0b",
+      "text": "What is your age?",
+      "text_wp": "Nyarrpa kurdu nyuntu?",
+      "options": [
+        {
+          "id": "0b1",
+          "text": "Child (0-12)",
+          "text_wp": "Kurdu"
+        },
+        {
+          "id": "0b2",
+          "text": "Youth (13-17)",
+          "text_wp": "Mangi"
+        },
+        {
+          "id": "0b3",
+          "text": "Adult (18-59)",
+          "text_wp": "Kurduwangu"
+        },
+        {
+          "id": "0b4",
+          "text": "Elder (60+)",
+          "text_wp": "Purlka"
+        }
+      ]
+    },
+    {
       "id": "1",
       "text": "How long have you had these symptoms?",
-      "text_wp": "Ngurrju-warnu nyinami?",
+      "text_wp": "Nyarrpajarrirla nyinami?",
       "options": [
         {
           "id": "1a",
           "text": "Today",
-          "text_wp": "Palka",
+          "text_wp": "Jalangu",
           "value": 0
         },
         {
           "id": "1b",
           "text": "Yesterday",
-          "text_wp": "Jinta-kurra",
+          "text_wp": "Pirrarni",
           "value": 1
         },
         {
           "id": "1c",
           "text": "2-3 days",
-          "text_wp": "Panu-kurra",
+          "text_wp": "Pirrarnijarrakurra",
           "value": 2
         },
         {
           "id": "1d",
           "text": "About a week",
-          "text_wp": "Jinta-kurra",
+          "text_wp": "Wiikikurra",
           "value": 1
         },
         {
           "id": "1e",
           "text": "More than a week",
-          "text_wp": "Jinta-kurra",
+          "text_wp": "Wiikipanukurra",
           "value": 1
         }
       ]
@@ -40,36 +84,36 @@
     {
       "id": "2",
       "text": "How bad is your pain?",
-      "text_wp": "Nyarrpa-kurra pirli nyinami?",
+      "text_wp": "Nyarrpakurra purrkunypa ka nyinami?",
       "options": [
         {
           "id": "2a",
           "text": "None",
-          "text_wp": "Warru",
+          "text_wp": "Lawa",
           "intensity": 0
         },
         {
           "id": "2b",
           "text": "A little",
-          "text_wp": "Yuwayi",
+          "text_wp": "Witapardu",
           "intensity": 1
         },
         {
           "id": "2c",
           "text": "Moderate",
-          "text_wp": "Wiri-wiri",
+          "text_wp": "Wiriwiri",
           "intensity": 2
         },
         {
           "id": "2d",
           "text": "Very bad",
-          "text_wp": "Wiri-wiri",
+          "text_wp": "Wirinyayirni",
           "intensity": 2
         },
         {
           "id": "2e",
           "text": "Unbearable",
-          "text_wp": "Wiri-wiri",
+          "text_wp": "Kuurrnyinamijuku",
           "intensity": 2
         }
       ]
@@ -79,15 +123,15 @@
     "fever": [
       {
         "id": "10",
-        "text": "Is the temperature more than 38°C?",
-        "text_wp": "Wiri nyinami?",
+        "text": "Is your body temperature very high?",
+        "text_wp": "Ngirlilpa wiri ka nyinami nyuntu?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "11",
         "text": "Do you have chills or shivering?",
-        "text_wp": "Karlarra nyinami?",
+        "text_wp": "Mirrmirrkarrimi ka nyuntu?",
         "type": "yes_no",
         "critical_if": null
       }
@@ -96,14 +140,14 @@
       {
         "id": "12",
         "text": "Is the headache sudden and very severe?",
-        "text_wp": "Ngarru wiri nyinami?",
+        "text_wp": "Walpawalpa ka wirinyayirni nyinami?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "13",
         "text": "Do you have neck stiffness?",
-        "text_wp": "Marlpa-kurra nyinami?",
+        "text_wp": "Nguku ka kantalkantal nyinami?",
         "type": "yes_no",
         "critical_if": "yes"
       }
@@ -112,14 +156,14 @@
       {
         "id": "14",
         "text": "Does the pain spread to your arm or jaw?",
-        "text_wp": "Marlpa-kurra wiri?",
+        "text_wp": "Purrkunypa ka kilpirlikirra manu wirlkikirra luwarni?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "15",
         "text": "Is the pain sudden and severe?",
-        "text_wp": "Wiri nyinami?",
+        "text_wp": "Purrkunypa ka wirinyayirni nyinami?",
         "type": "yes_no",
         "critical_if": "yes"
       }
@@ -128,14 +172,14 @@
       {
         "id": "16",
         "text": "Do you feel breathless at rest?",
-        "text_wp": "Karlarra nyinami?",
+        "text_wp": "Nguurlnguurlpa ka nyinami nyuntu?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "17",
         "text": "Did it start suddenly?",
-        "text_wp": "Palka nyinami?",
+        "text_wp": "Jalangu karna yirrarnu?",
         "type": "yes_no",
         "critical_if": "yes"
       }
@@ -144,14 +188,14 @@
       {
         "id": "18",
         "text": "Is the pain severe and constant?",
-        "text_wp": "Wiri nyinami?",
+        "text_wp": "Miyalu purrkunypa ka wirinyayirni nyinami?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "19",
         "text": "Do you have nausea or vomiting with it?",
-        "text_wp": "Yuwayi nyinami?",
+        "text_wp": "Ngarlungarlu manu yurlkulyu ka nyinami?",
         "type": "yes_no",
         "critical_if": null
       }
@@ -160,14 +204,14 @@
       {
         "id": "20",
         "text": "Do you cough up blood?",
-        "text_wp": "Yirdi nyinami?",
+        "text_wp": "Kuntulpinyi ka jaarlkurlu?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "21",
         "text": "Has the cough lasted more than a week?",
-        "text_wp": "Panu-kurra nyinami?",
+        "text_wp": "Kuntulpinyi ka wiikipanukurra nyinami?",
         "type": "yes_no",
         "critical_if": null
       }
@@ -176,7 +220,7 @@
       {
         "id": "22",
         "text": "Do you feel like you might faint?",
-        "text_wp": "Wiri nyinami?",
+        "text_wp": "Kurruru ka nyinami nyuntu?",
         "type": "yes_no",
         "critical_if": "yes"
       }
@@ -185,7 +229,7 @@
       {
         "id": "23",
         "text": "Did you lose consciousness recently?",
-        "text_wp": "Wiri nyinami?",
+        "text_wp": "Tiirnki karna nyinami pirrarni?",
         "type": "yes_no",
         "critical_if": "yes"
       }
@@ -194,14 +238,14 @@
       {
         "id": "24",
         "text": "Have you vomited more than 5 times today?",
-        "text_wp": "Panu nyinami?",
+        "text_wp": "Yurlkulyu ka panu nyinami jalangu?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "25",
         "text": "Can you keep fluids down?",
-        "text_wp": "Yuwayi nyinami?",
+        "text_wp": "Ngapa ka nyuntu mardarni?",
         "type": "yes_no",
         "critical_if": null
       }
@@ -210,14 +254,14 @@
       {
         "id": "26",
         "text": "Is there blood in your stool?",
-        "text_wp": "Yirdi nyinami?",
+        "text_wp": "Jinirrpa ka jaarlkurlu nyinami?",
         "type": "yes_no",
         "critical_if": "yes"
       },
       {
         "id": "27",
         "text": "Do you feel severely dehydrated?",
-        "text_wp": "Wiri nyinami?",
+        "text_wp": "Nantu ka wirinyayirni nyinami nyuntu?",
         "type": "yes_no",
         "critical_if": "yes"
       }
