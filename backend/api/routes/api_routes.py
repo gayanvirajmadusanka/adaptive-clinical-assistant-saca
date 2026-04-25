@@ -29,7 +29,5 @@ def classify_endpoint(req: ClassifyRequest) -> dict:
     return run_classify(
         symptoms=req.symptoms,
         answers=answers_dicts,
-        age=req.age,
-        gender=req.gender,
         language=req.language
     )

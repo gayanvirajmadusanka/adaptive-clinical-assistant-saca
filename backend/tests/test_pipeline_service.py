@@ -9,7 +9,6 @@ class TestClassify:
 
     @pytest.fixture(autouse=True)
     def mock_predictor(self):
-        # mock predictor so tests don't need actual model files
         with patch('backend.api.services.pipeline_service.predictor') as mock:
             mock.predict.return_value = {
                 'recommendation': 'Doctor Consultation',
@@ -25,11 +24,11 @@ class TestClassify:
         result = classify(
             symptoms=['headache', 'fever'],
             answers=[
+                {'question_id': '0a', 'answer_id': '0a1'},
+                {'question_id': '0b', 'answer_id': '0b3'},
                 {'question_id': '1', 'answer_id': '1b'},
                 {'question_id': '2', 'answer_id': '2b'}
-            ],
-            age='16-45 years',
-            gender='male'
+            ]
         )
         assert result['symptoms'] == ['headache', 'fever']
 
@@ -37,11 +36,11 @@ class TestClassify:
         classify(
             symptoms=['fever'],
             answers=[
-                {'question_id': '1', 'answer_id': '1d'},  # more than 3 days
-                {'question_id': '2', 'answer_id': '2e'}  # severe
-            ],
-            age='16-45 years',
-            gender='female'
+                {'question_id': '0a', 'answer_id': '0a2'},
+                {'question_id': '0b', 'answer_id': '0b3'},
+                {'question_id': '1', 'answer_id': '1d'},
+                {'question_id': '2', 'answer_id': '2e'}
+            ]
         )
         call_kwargs = mock_predictor.predict.call_args.kwargs
         assert call_kwargs['duration_value'] == 1
@@ -52,22 +51,35 @@ class TestClassify:
     def test_classify_returns_all_expected_fields(self):
         result = classify(
             symptoms=['headache'],
-            answers=[],
-            age='16-45 years',
-            gender='male'
+            answers=[]
         )
         expected_keys = {
             'symptoms', 'recommendation', 'severity',
-            'confidence', 'recommended_action', 'has_critical', 'intensity_signal'
+            'confidence', 'recommended_action',
+            'has_critical', 'intensity_signal',
+            'age_group', 'gender'
         }
         assert expected_keys.issubset(result.keys())
 
     def test_critical_symptom_sets_has_critical_in_predictor_call(self, mock_predictor):
         classify(
             symptoms=['chest pain'],
-            answers=[],
-            age='16-45 years',
-            gender='male'
+            answers=[]
         )
         call_kwargs = mock_predictor.predict.call_args.kwargs
         assert call_kwargs['has_critical'] == 1
+
+    def test_gender_resolved_from_answers(self, mock_predictor):
+        classify(
+            symptoms=['headache'],
+            answers=[{'question_id': '0a', 'answer_id': '0a1'}]
+        )
+        call_kwargs = mock_predictor.predict.call_args.kwargs
+        assert call_kwargs['gender'] == 'male'
+
+    def test_age_group_resolved_from_answers(self):
+        result = classify(
+            symptoms=['headache'],
+            answers=[{'question_id': '0b', 'answer_id': '0b1'}]
+        )
+        assert result['age_group'] == 'child'

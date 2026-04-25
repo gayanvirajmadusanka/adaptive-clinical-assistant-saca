@@ -34,7 +34,7 @@ class TestSeverityMap:
     def test_all_severity_map_keys_have_valid_values(self):
         valid = {'Mild', 'Moderate', 'Severe'}
         for key, val in SEVERITY_MAP.items():
-            assert val in valid, f"Invalid severity value {val} for key {key}"
+            assert val in valid
 
 
 class TestRecommendedActions:
@@ -52,31 +52,24 @@ class TestEncodeAge:
 
     @pytest.fixture
     def predictor(self):
-        # mock the file loading so we dont need actual model files
         with patch('builtins.open', MagicMock()):
             with patch('pickle.load', MagicMock()):
                 return TriagePredictor('m.pkl', 't.pkl', 'l.pkl')
 
-    def test_below_5_encodes_to_0(self, predictor):
-        assert predictor._encode_age('below 5 years') == 0
+    def test_child_encodes_to_1(self, predictor):
+        assert predictor._encode_age('child') == 1
 
-    def test_6_15_encodes_to_1(self, predictor):
-        assert predictor._encode_age('6-15 years') == 1
+    def test_youth_encodes_to_1(self, predictor):
+        assert predictor._encode_age('youth') == 1
 
-    def test_16_45_encodes_to_2(self, predictor):
-        assert predictor._encode_age('16-45 years') == 2
+    def test_adult_encodes_to_2(self, predictor):
+        assert predictor._encode_age('adult') == 2
 
-    def test_above_60_encodes_to_4(self, predictor):
-        assert predictor._encode_age('above 60 years') == 4
+    def test_elder_encodes_to_4(self, predictor):
+        assert predictor._encode_age('elder') == 4
+
+    def test_none_defaults_to_2(self, predictor):
+        assert predictor._encode_age(None) == 2
 
     def test_unknown_string_defaults_to_2(self, predictor):
-        assert predictor._encode_age('unknown bracket') == 2
-
-    def test_integer_age_3_encodes_to_0(self, predictor):
-        assert predictor._encode_age(3) == 0
-
-    def test_integer_age_25_encodes_to_2(self, predictor):
-        assert predictor._encode_age(25) == 2
-
-    def test_integer_age_70_encodes_to_4(self, predictor):
-        assert predictor._encode_age(70) == 4
+        assert predictor._encode_age('unknown') == 2

@@ -6,51 +6,68 @@ class TestGetQuestions:
     def test_returns_mandatory_questions_always(self):
         result = get_questions([], 'en')
         assert result['language'] == 'en'
-        # mandatory questions always included even with no symptoms
-        assert len(result['questions']) >= 2
-        assert result['questions'][0]['id'] == '1'
-        assert result['questions'][1]['id'] == '2'
+        # now 4 mandatory questions: 0a, 0b, 1, 2
+        assert len(result['questions']) >= 4
+        assert result['questions'][0]['id'] == '0a'
+        assert result['questions'][1]['id'] == '0b'
+        assert result['questions'][2]['id'] == '1'
+        assert result['questions'][3]['id'] == '2'
 
     def test_returns_symptom_questions_for_known_symptom(self):
         result = get_questions(['fever'], 'en')
         question_ids = [q['id'] for q in result['questions']]
-        # fever questions are 10 and 11
         assert '10' in question_ids or '11' in question_ids
 
     def test_unknown_symptom_returns_only_mandatory(self):
         result = get_questions(['some random thing'], 'en')
-        assert len(result['questions']) == 2
+        assert len(result['questions']) == 4  # 4 mandatory now
 
-    def test_max_symptom_questions_capped_at_5(self):
-        # pass many symptoms to trigger cap
+    def test_max_symptom_questions_capped(self):
         symptoms = ['fever', 'headache', 'cough', 'dizziness', 'vomiting', 'diarrhea']
         result = get_questions(symptoms, 'en')
-        # mandatory (2) + symptom questions (max 5) = max 7
-        assert len(result['questions']) <= 7
+        # mandatory (4) + symptom questions (max 2) = max 6
+        assert len(result['questions']) <= 6
 
     def test_warlpiri_language_returns_wp_text(self):
         result = get_questions([], 'wp')
         assert result['language'] == 'wp'
-        # mandatory question text should be warlpiri
+        # first mandatory question is gender (0a)
         first_q = result['questions'][0]
-        assert first_q['text'] == 'Ngurrju-warnu nyinami?'
+        assert first_q['text'] == 'Nyuntu wati manu karnta?'
+        # duration question is index 2
+        duration_q = result['questions'][2]
+        assert duration_q['text'] == 'Nyarrpajarrirla nyinami?'
 
     def test_yes_no_question_has_yes_no_options(self):
         result = get_questions(['fever'], 'en')
-        # find a symptom question (not mandatory ones which have multiple choice)
         symptom_qs = [q for q in result['questions'] if q.get('type') == 'yes_no']
         assert len(symptom_qs) > 0
         options = symptom_qs[0]['options']
         option_ids = [o['id'] for o in options]
-        # yes option ends with y, no option ends with n
         assert any(oid.endswith('y') for oid in option_ids)
         assert any(oid.endswith('n') for oid in option_ids)
 
     def test_mandatory_questions_are_multiple_choice(self):
         result = get_questions([], 'en')
-        for q in result['questions'][:2]:
+        # all 4 mandatory questions should be multiple choice
+        for q in result['questions'][:4]:
             assert q['type'] == 'multiple_choice'
             assert len(q['options']) > 0
+
+    def test_gender_question_has_two_options(self):
+        result = get_questions([], 'en')
+        gender_q = result['questions'][0]
+        assert gender_q['id'] == '0a'
+        assert len(gender_q['options']) == 2
+        option_texts = [o['text'] for o in gender_q['options']]
+        assert 'Male' in option_texts
+        assert 'Female' in option_texts
+
+    def test_age_question_has_four_options(self):
+        result = get_questions([], 'en')
+        age_q = result['questions'][1]
+        assert age_q['id'] == '0b'
+        assert len(age_q['options']) == 4
 
 
 class TestResolveAnswers:
@@ -90,7 +107,6 @@ class TestResolveAnswers:
         assert result['has_critical'] == 0
 
     def test_yes_to_critical_question_sets_flag(self):
-        # fever question 10 has critical_if yes
         answers = [{'question_id': '10', 'answer_id': '10y'}]
         result = resolve_answers(answers, [])
         assert result['has_critical'] == 1
@@ -102,10 +118,9 @@ class TestResolveAnswers:
         assert result['has_critical'] == 0
 
     def test_intensity_takes_max_value(self):
-        # mild overall but severe symptom question answer
         answers = [
-            {'question_id': '2', 'answer_id': '2a'},  # mild
-            {'question_id': '10', 'answer_id': '10y'}  # critical yes
+            {'question_id': '2', 'answer_id': '2a'},
+            {'question_id': '10', 'answer_id': '10y'}
         ]
         result = resolve_answers(answers, [])
         assert result['intensity_signal'] == 2
@@ -115,6 +130,28 @@ class TestResolveAnswers:
         assert result['intensity_signal'] == 0
         assert result['has_critical'] == 0
         assert result['duration_value'] == 0
+        assert result['gender'] is None
+        assert result['age_group'] is None
+
+    def test_gender_male_resolved(self):
+        answers = [{'question_id': '0a', 'answer_id': '0a1'}]
+        result = resolve_answers(answers, [])
+        assert result['gender'] == 'male'
+
+    def test_gender_female_resolved(self):
+        answers = [{'question_id': '0a', 'answer_id': '0a2'}]
+        result = resolve_answers(answers, [])
+        assert result['gender'] == 'female'
+
+    def test_age_group_child_resolved(self):
+        answers = [{'question_id': '0b', 'answer_id': '0b1'}]
+        result = resolve_answers(answers, [])
+        assert result['age_group'] == 'child'
+
+    def test_age_group_elder_resolved(self):
+        answers = [{'question_id': '0b', 'answer_id': '0b4'}]
+        result = resolve_answers(answers, [])
+        assert result['age_group'] == 'elder'
 
 
 class TestFindQuestionDef:
