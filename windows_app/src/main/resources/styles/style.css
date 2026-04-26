@@ -3,6 +3,7 @@
 @import "select-language.css";
 @import "dashboard.css";
 @import "sidebar.css";
+@import "dialog.css";
 
 .root {
     -fx-font-family: "Segoe UI";
