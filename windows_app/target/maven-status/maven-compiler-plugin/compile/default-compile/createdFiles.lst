@@ -1,0 +1,5 @@
+org/saca/model/TextInput.class
+org/saca/MainApp.class
+org/saca/controller/WelcomeController.class
+org/saca/utility/manager/LanguageManager.class
+org/saca/controller/MainController.class
