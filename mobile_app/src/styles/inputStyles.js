@@ -26,6 +26,7 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
+    color: '#111',
   },
 
   subtitle: {
@@ -33,6 +34,7 @@ export default StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 30,
     marginBottom: 30,
+    color: '#333',
   },
 
   card: {
@@ -54,8 +56,14 @@ export default StyleSheet.create({
     backgroundColor: '#D96C8C',
   },
 
-  cardIcon: {
-    fontSize: 30,
+  cardPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  cardImage: {
+    width: 50,
+    height: 50,
     marginBottom: 10,
   },
 
@@ -66,7 +74,7 @@ export default StyleSheet.create({
   },
 
   footer: {
-    height: 70,
+    height: 55,
     backgroundColor: '#000',
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -78,13 +86,13 @@ export default StyleSheet.create({
   },
 
   footerIcon: {
-    fontSize: 26,
+    fontSize: 22,
     color: '#fff',
   },
 
   footerText: {
     color: '#fff',
-    fontSize: 12,
-    marginTop: 3,
+    fontSize: 10,
+    marginTop: 2,
   },
 });

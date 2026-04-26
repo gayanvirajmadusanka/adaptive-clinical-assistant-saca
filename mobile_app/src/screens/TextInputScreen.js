@@ -2,16 +2,17 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   ImageBackground,
   Pressable,
   StatusBar,
   SafeAreaView,
-  Image,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import styles from '../styles/inputStyles';
+import styles from '../styles/textInputStyles';
 
-export default function InputScreen() {
+export default function TextInputScreen() {
   const router = useRouter();
 
   return (
@@ -25,55 +26,44 @@ export default function InputScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-            <Text style={styles.title}>Hi, Tell us how you feel</Text>
-
-            <Text style={styles.subtitle}>
-              You can speak, type or use the body map to describe your symptoms.
-            </Text>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.card,
-                pressed && styles.cardPressedGrey,
-              ]}
-              onPress={() => router.push('/textinput')}
-            >
+            <View style={styles.headerBar}>
+              <Text style={styles.headerText}>Text</Text>
               <Image
                 source={require('../../assets/images/text.png')}
-                style={styles.cardImage}
+                style={styles.headerIcon}
                 resizeMode="contain"
               />
-              <Text style={styles.cardText}>TEXT</Text>
+            </View>
+
+            <View style={styles.inputBox}>
+              <Text style={styles.questionText}>What can I help with?</Text>
+
+              <TextInput
+                style={styles.textInput}
+                multiline
+                placeholder="Describe your Symptoms and press Continue"
+                placeholderTextColor="#555"
+              />
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.continueButton,
+                pressed && styles.continuePressedGreen,
+              ]}
+            >
+              <Text style={styles.continueText}>Continue</Text>
+              <Text style={styles.arrow}>→</Text>
             </Pressable>
 
             <Pressable
               style={({ pressed }) => [
-                styles.card,
-                styles.voiceCard,
-                pressed && styles.cardPressedGrey,
+                styles.backButton,
+                pressed && styles.backPressedGrey,
               ]}
+              onPress={() => router.back()}
             >
-              <Image
-                source={require('../../assets/images/voice.png')}
-                style={styles.cardImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.cardText}>VOICE</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.card,
-                styles.bodyCard,
-                pressed && styles.cardPressedGrey,
-              ]}
-            >
-              <Image
-                source={require('../../assets/images/body.png')}
-                style={styles.cardImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.cardText}>BODY</Text>
+              <Text style={styles.backText}>← Back</Text>
             </Pressable>
           </View>
 
