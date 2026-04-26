@@ -1,6 +1,8 @@
 @import "welcome.css";
 @import "about.css";
 @import "select-language.css";
+@import "dashboard.css";
+@import "sidebar.css";
 
 .root {
     -fx-font-family: "Segoe UI";
