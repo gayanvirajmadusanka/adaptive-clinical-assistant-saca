@@ -1,0 +1,133 @@
+export const translations = {
+  en: {
+    welcome: 'Welcome',
+    start: 'Start',
+    about: 'About SACA',
+
+    select_language: 'Select Language',
+    warlpiri: 'Warlpiri',
+    english: 'English',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    change_language: 'Change language?',
+    no: 'NO',
+    yes: 'YES',
+
+    input_title: 'Hi, Tell us how you feel',
+    input_subtitle:
+      'You can speak, type or use the body map to describe your symptoms.',
+    text: 'TEXT',
+    voice: 'VOICE',
+    body: 'BODY',
+    home: 'Home',
+    language: 'Language',
+
+    text_input_title: 'Text',
+    text_input_question: 'What can I help with?',
+    text_placeholder: 'Describe your symptoms and press Continue',
+    continue: 'Continue',
+    back: '← Back',
+
+    detected_title: 'Detected Symptoms',
+    detected_question: 'Does this match you?',
+    detected_speak:
+      'Detected symptoms are headache, fever, body pain, and tiredness.',
+
+    tell_more_title: 'Tell Us More',
+    pain_level: 'PAIN LEVEL',
+    pain_question: 'How bad is your pain?',
+    duration_title: 'HOW LONG',
+    duration_question: 'How long have you felt this way?',
+
+    none: 'None',
+    little: 'A little',
+    moderate: 'Moderate',
+    very_bad: 'Very bad',
+    unbearable: 'Unbearable',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    days: '2–3 days',
+    week: 'About a week',
+    more_week: 'More than a week',
+
+    loading_symptoms: 'Checking your Symptoms...',
+    loading_severity: 'Checking your Severity...',
+    loading: 'LOADING',
+    wait: 'This may take a few minutes please wait...',
+
+    final_results: 'Final Results',
+    severity_mild: 'Severity: Mild',
+    severity_moderate: 'Severity: Moderate',
+    severity_severe: '⚠ SEVERE — Seek help now',
+    recommendations: 'Recommendations',
+    symptoms: 'Symptoms',
+    call_help: '📞 Call for Help',
+    start_again: 'Start again',
+  },
+
+  wp: {
+    welcome: 'Nyampu nyinami',
+    start: 'Yangka',
+    about: 'SACA Kurlu',
+
+    select_language: 'Wangka',
+    warlpiri: 'Warlpiri',
+    english: 'Ingkirliji',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    change_language: 'Wangka kutju-kurlu nyampu?',
+    no: 'LAWA',
+    yes: 'YUWA',
+
+    input_title: 'Yimi nyuntu nyampuju',
+    input_subtitle:
+      'Nyuntu wangka, yimi, manu body map-kurlu symptoms yimi.',
+    text: 'YIMI',
+    voice: 'WANGKA',
+    body: 'BODY',
+    home: 'Ngurra',
+    language: 'Wangka',
+
+    text_input_title: 'Yimi',
+    text_input_question: 'Nyiya ka nyuntu nyampuju?',
+    text_placeholder: 'Symptoms yimi manu Continue nyuntu press',
+    continue: 'Yangka',
+    back: '← Yankirri',
+
+    detected_title: 'Symptoms nyangu',
+    detected_question: 'Nyampu nyuntu-kurra?',
+    detected_speak:
+      'Symptoms nyangu headache, fever, body pain, manu tiredness.',
+
+    tell_more_title: 'Yimi More',
+    pain_level: 'PAIN LEVEL',
+    pain_question: 'Pain nyuntu nyampu?',
+    duration_title: 'HOW LONG',
+    duration_question: 'Nyarrpara-jangka nyuntu nyampu?',
+
+    none: 'Lawa',
+    little: 'Pina-pina',
+    moderate: 'Moderate',
+    very_bad: 'Very bad',
+    unbearable: 'Unbearable',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    days: '2–3 days',
+    week: 'About a week',
+    more_week: 'More than a week',
+
+    loading_symptoms: 'Symptoms nyanyi...',
+    loading_severity: 'Severity nyanyi...',
+    loading: 'LOADING',
+    wait: 'Please wait...',
+
+    final_results: 'Final Results',
+    severity_mild: 'Severity: Mild',
+    severity_moderate: 'Severity: Moderate',
+    severity_severe: '⚠ SEVERE — Seek help now',
+    recommendations: 'Recommendations',
+    symptoms: 'Symptoms',
+    call_help: '📞 Call for Help',
+    start_again: 'Start again',
+  },
+};
