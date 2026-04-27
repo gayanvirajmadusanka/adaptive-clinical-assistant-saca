@@ -1,0 +1,45 @@
+.loading-bg {
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+.loading-container {
+    -fx-alignment: CENTER;
+    -fx-padding: 60 40 60 40;
+}
+
+.loading-title {
+    -fx-font-family: "Kreon";
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a2a1a;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
+}
+
+.loading-percent {
+    -fx-font-family: "Kreon";
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5a3a1a;
+    -fx-alignment: CENTER;
+}
+
+.loading-sub {
+    -fx-font-family: "Kreon";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #8a6a4a;
+    -fx-letter-spacing: 3px;
+    -fx-alignment: CENTER;
+}
+
+.loading-hint {
+    -fx-font-family: "Kreon";
+    -fx-font-size: 15px;
+    -fx-text-fill: #7a5a3a;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
+    -fx-font-style: italic;
+}
