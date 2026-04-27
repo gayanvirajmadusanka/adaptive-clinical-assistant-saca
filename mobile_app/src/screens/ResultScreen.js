@@ -6,8 +6,10 @@ import {
   StatusBar,
   SafeAreaView,
   ImageBackground,
+  Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as Speech from 'expo-speech';
 import styles, { resultTheme } from '../styles/resultStyles';
 
 export default function ResultScreen() {
@@ -51,6 +53,18 @@ export default function ResultScreen() {
     ],
   };
 
+  const symptoms = ['Headache', 'Fever', 'Body pain', 'Tiredness'];
+
+  const speakContent = () => {
+    const text = `
+      Your severity level is ${severityLevel}.
+      Recommendations are ${recommendations[severityLevel].join(', ')}.
+      Symptoms include ${symptoms.join(', ')}.
+    `;
+
+    Speech.speak(text);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
@@ -62,16 +76,50 @@ export default function ResultScreen() {
           resizeMode="cover"
         >
           <View style={styles.contentWrapper}>
-            <View style={[styles.resultCard, { backgroundColor: theme.cardBackground }]}>
-              <View style={[styles.headerBar, { backgroundColor: theme.header }]}>
+            <View
+              style={[
+                styles.resultCard,
+                { backgroundColor: theme.cardBackground },
+              ]}
+            >
+              <View
+                style={[
+                  styles.headerBar,
+                  { backgroundColor: theme.header },
+                ]}
+              >
                 <Text style={[styles.headerText, { color: theme.headerText }]}>
                   Final Results
                 </Text>
               </View>
 
               <View style={styles.content}>
-                <View style={[styles.severityBadge, { backgroundColor: theme.severityFill }]}>
-                  <Text style={[styles.severityText, { color: theme.severityText }]}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.speakerButton,
+                    pressed && styles.pressedButton,
+                  ]}
+                  onPress={speakContent}
+                >
+                  <Image
+                    source={require('../../assets/images/speaker.png')}
+                    style={styles.speakerIcon}
+                    resizeMode="contain"
+                  />
+                </Pressable>
+
+                <View
+                  style={[
+                    styles.severityBadge,
+                    { backgroundColor: theme.severityFill },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.severityText,
+                      { color: theme.severityText },
+                    ]}
+                  >
                     {theme.severityLabel}
                   </Text>
                 </View>
@@ -87,19 +135,50 @@ export default function ResultScreen() {
                   </Pressable>
                 )}
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.infoTitle}>Recommendations</Text>
+                <View
+                  style={[
+                    styles.infoBox,
+                    {
+                      backgroundColor: theme.boxBackground,
+                      borderColor: theme.boxBorder,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.infoTitle, { color: theme.boxText }]}>
+                    Recommendations
+                  </Text>
+
                   {recommendations[severityLevel].map((item) => (
-                    <Text key={item} style={styles.infoText}>• {item}</Text>
+                    <Text
+                      key={item}
+                      style={[styles.infoText, { color: theme.boxText }]}
+                    >
+                      • {item}
+                    </Text>
                   ))}
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.infoTitle}>Symptoms</Text>
-                  <Text style={styles.infoText}>• Headache</Text>
-                  <Text style={styles.infoText}>• Fever</Text>
-                  <Text style={styles.infoText}>• Body pain</Text>
-                  <Text style={styles.infoText}>• Tiredness</Text>
+                <View
+                  style={[
+                    styles.infoBox,
+                    {
+                      backgroundColor: theme.boxBackground,
+                      borderColor: theme.boxBorder,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.infoTitle, { color: theme.boxText }]}>
+                    Symptoms
+                  </Text>
+
+                  {symptoms.map((item) => (
+                    <Text
+                      key={item}
+                      style={[styles.infoText, { color: theme.boxText }]}
+                    >
+                      • {item}
+                    </Text>
+                  ))}
                 </View>
 
                 <Pressable
@@ -110,7 +189,12 @@ export default function ResultScreen() {
                   ]}
                   onPress={() => router.replace('/')}
                 >
-                  <Text style={[styles.startAgainText, { color: theme.startAgain }]}>
+                  <Text
+                    style={[
+                      styles.startAgainText,
+                      { color: theme.startAgain },
+                    ]}
+                  >
                     Start again
                   </Text>
                 </Pressable>
@@ -119,12 +203,18 @@ export default function ResultScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Pressable style={styles.footerItem} onPress={() => router.replace('/input')}>
+            <Pressable
+              style={styles.footerItem}
+              onPress={() => router.replace('/input')}
+            >
               <Text style={styles.footerIcon}>🏠</Text>
               <Text style={styles.footerText}>Home</Text>
             </Pressable>
 
-            <Pressable style={styles.footerItem} onPress={() => router.replace('/language')}>
+            <Pressable
+              style={styles.footerItem}
+              onPress={() => router.replace('/language')}
+            >
               <Text style={styles.footerIcon}>🌐</Text>
               <Text style={styles.footerText}>Language</Text>
             </Pressable>

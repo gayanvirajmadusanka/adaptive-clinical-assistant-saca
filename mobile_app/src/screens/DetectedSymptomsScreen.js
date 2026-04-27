@@ -9,10 +9,18 @@ import {
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Speech from 'expo-speech';
 import styles from '../styles/detectedSymptomsStyles';
 
 export default function DetectedSymptomsScreen() {
   const router = useRouter();
+
+  const speakSymptoms = () => {
+    Speech.stop();
+    Speech.speak(
+      'Detected symptoms are headache, fever, body pain, and tiredness.'
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,11 +45,19 @@ export default function DetectedSymptomsScreen() {
                 • tiredness
               </Text>
 
-              <Image
-                source={require('../../assets/images/speaker.png')}
-                style={styles.speakerIcon}
-                resizeMode="contain"
-              />
+              <Pressable
+                style={({ pressed }) => [
+                  styles.speakerButton,
+                  pressed && styles.speakerPressed,
+                ]}
+                onPress={speakSymptoms}
+              >
+                <Image
+                  source={require('../../assets/images/speaker.png')}
+                  style={styles.speakerIcon}
+                  resizeMode="contain"
+                />
+              </Pressable>
             </View>
 
             <Text style={styles.questionText}>Does this match you?</Text>

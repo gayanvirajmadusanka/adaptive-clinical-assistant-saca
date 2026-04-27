@@ -5,30 +5,49 @@ export const resultTheme = {
     cardBackground: '#8B3A1C',
     header: '#4A0A04',
     headerText: '#F5E6C8',
+
     severityFill: '#4A0A04',
     severityText: '#F5E6C8',
     severityLabel: '⚠ SEVERE — Seek help now',
+
     startAgain: '#F5E6C8',
+
+    /* 🔥 NEW */
+    boxBackground: '#F5E6C8',
+    boxBorder: '#F5E6C8',
+    boxText: '#2C1A0E',
   },
 
   moderate: {
     cardBackground: '#F5E6C8',
     header: '#8B3A1C',
     headerText: '#F5E6C8',
+
     severityFill: '#C47A3A',
     severityText: '#F5E6C8',
     severityLabel: 'Severity: Moderate',
+
     startAgain: '#8B3A1C',
+
+    boxBackground: '#F5E6C8',
+    boxBorder: '#D4A96A',
+    boxText: '#2C1A0E',
   },
 
   mild: {
     cardBackground: '#F5E6C8',
     header: '#C47A3A',
     headerText: '#2C1A0E',
+
     severityFill: '#5C8A3C',
     severityText: '#F5E6C8',
     severityLabel: 'Severity: Mild',
+
     startAgain: '#C47A3A',
+
+    boxBackground: '#F5E6C8',
+    boxBorder: '#D4A96A',
+    boxText: '#2C1A0E',
   },
 };
 
@@ -77,6 +96,16 @@ export default StyleSheet.create({
     padding: 22,
   },
 
+  speakerButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 10,
+  },
+
+  speakerIcon: {
+    width: 28,
+    height: 28,
+  },
+
   severityBadge: {
     width: '100%',
     minHeight: 55,
@@ -107,11 +136,11 @@ export default StyleSheet.create({
     color: '#4A0A04',
   },
 
+  /* 🔥 BASE (will be overridden dynamically) */
   infoBox: {
     width: '100%',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#D4A96A',
     padding: 18,
     marginBottom: 18,
     minHeight: 125,
@@ -125,7 +154,6 @@ export default StyleSheet.create({
 
   infoText: {
     fontSize: 15,
-    color: '#2C1A0E',
     marginBottom: 7,
     lineHeight: 20,
   },

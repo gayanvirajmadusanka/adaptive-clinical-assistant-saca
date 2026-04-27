@@ -58,11 +58,24 @@ export default StyleSheet.create({
     flex: 1,
   },
 
+  speakerButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+
+  speakerPressed: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.9 }],
+  },
+
   speakerIcon: {
     width: 35,
     height: 35,
-    marginLeft: 10,
-    alignSelf: 'center',
   },
 
   questionText: {
