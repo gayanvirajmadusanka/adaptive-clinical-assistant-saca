@@ -25,6 +25,11 @@ class ExtractTextRequest(BaseModel):
     language: str = 'en'
 
 
+class ExtractAudioRequest(BaseModel):
+    audio_b64: str  # base64 encoded audio file
+    language: str = 'en'
+
+
 # response schemas
 class QuestionOption(BaseModel):
     id: str
