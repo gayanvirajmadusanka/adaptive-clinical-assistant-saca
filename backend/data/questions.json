@@ -1,0 +1,330 @@
+{
+  "mandatory": [
+    {
+      "id": "0a",
+      "text": "What is your gender?",
+      "text_wp": "Nyuntu wati manu karnta?",
+      "options": [
+        {
+          "id": "0a1",
+          "text": "Male",
+          "text_wp": "Wati"
+        },
+        {
+          "id": "0a2",
+          "text": "Female",
+          "text_wp": "Karnta"
+        }
+      ]
+    },
+    {
+      "id": "0b",
+      "text": "What is your age?",
+      "text_wp": "Nyarrpa kurdu nyuntu?",
+      "options": [
+        {
+          "id": "0b1",
+          "text": "Child (0-12)",
+          "text_wp": "Kurdu"
+        },
+        {
+          "id": "0b2",
+          "text": "Youth (13-17)",
+          "text_wp": "Mangi"
+        },
+        {
+          "id": "0b3",
+          "text": "Adult (18-59)",
+          "text_wp": "Kurduwangu"
+        },
+        {
+          "id": "0b4",
+          "text": "Elder (60+)",
+          "text_wp": "Purlka"
+        }
+      ]
+    },
+    {
+      "id": "1",
+      "text": "How long have you had these symptoms?",
+      "text_wp": "Nyarrpajarrirla nyinami?",
+      "options": [
+        {
+          "id": "1a",
+          "text": "Today",
+          "text_wp": "Jalangu",
+          "value": 0
+        },
+        {
+          "id": "1b",
+          "text": "Yesterday",
+          "text_wp": "Pirrarni",
+          "value": 1
+        },
+        {
+          "id": "1c",
+          "text": "2-3 days",
+          "text_wp": "Pirrarnijarrakurra",
+          "value": 2
+        },
+        {
+          "id": "1d",
+          "text": "About a week",
+          "text_wp": "Wiikikurra",
+          "value": 1
+        },
+        {
+          "id": "1e",
+          "text": "More than a week",
+          "text_wp": "Wiikipanukurra",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "text": "How bad is your pain?",
+      "text_wp": "Nyarrpakurra purrkunypa ka nyinami?",
+      "options": [
+        {
+          "id": "2a",
+          "text": "None",
+          "text_wp": "Lawa",
+          "intensity": 0
+        },
+        {
+          "id": "2b",
+          "text": "A little",
+          "text_wp": "Witapardu",
+          "intensity": 1
+        },
+        {
+          "id": "2c",
+          "text": "Moderate",
+          "text_wp": "Wiriwiri",
+          "intensity": 2
+        },
+        {
+          "id": "2d",
+          "text": "Very bad",
+          "text_wp": "Wirinyayirni",
+          "intensity": 2
+        },
+        {
+          "id": "2e",
+          "text": "Unbearable",
+          "text_wp": "Kuurrnyinamijuku",
+          "intensity": 2
+        }
+      ]
+    }
+  ],
+  "symptom_questions": {
+    "fever": [
+      {
+        "id": "10",
+        "text": "Is your body temperature very high?",
+        "text_wp": "Ngirlilpa wiri ka nyinami nyuntu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "11",
+        "text": "Do you have chills or shivering?",
+        "text_wp": "Mirrmirrkarrimi ka nyuntu?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "headache": [
+      {
+        "id": "12",
+        "text": "Is the headache sudden and very severe?",
+        "text_wp": "Walpawalpa ka wirinyayirni nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "13",
+        "text": "Do you have neck stiffness?",
+        "text_wp": "Nguku ka kantalkantal nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "chest pain": [
+      {
+        "id": "14",
+        "text": "Does the pain spread to your arm or jaw?",
+        "text_wp": "Purrkunypa ka kilpirlikirra manu wirlkikirra luwarni?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "15",
+        "text": "Is the pain sudden and severe?",
+        "text_wp": "Purrkunypa ka wirinyayirni nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "shortness breath": [
+      {
+        "id": "16",
+        "text": "Do you feel breathless at rest?",
+        "text_wp": "Nguurlnguurlpa ka nyinami nyuntu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "17",
+        "text": "Did it start suddenly?",
+        "text_wp": "Jalangu karna yirrarnu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "abdominal pain": [
+      {
+        "id": "18",
+        "text": "Is the pain severe and constant?",
+        "text_wp": "Miyalu purrkunypa ka wirinyayirni nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "19",
+        "text": "Do you have nausea or vomiting with it?",
+        "text_wp": "Ngarlungarlu manu yurlkulyu ka nyinami?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "cough": [
+      {
+        "id": "20",
+        "text": "Do you cough up blood?",
+        "text_wp": "Kuntulpinyi ka jaarlkurlu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "21",
+        "text": "Has the cough lasted more than a week?",
+        "text_wp": "Kuntulpinyi ka wiikipanukurra nyinami?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "dizziness": [
+      {
+        "id": "22",
+        "text": "Do you feel like you might faint?",
+        "text_wp": "Kurruru ka nyinami nyuntu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "loss of consciousness": [
+      {
+        "id": "23",
+        "text": "Did you lose consciousness recently?",
+        "text_wp": "Tiirnki karna nyinami pirrarni?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ],
+    "vomiting": [
+      {
+        "id": "24",
+        "text": "Have you vomited more than 5 times today?",
+        "text_wp": "Yurlkulyu ka panu nyinami jalangu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "25",
+        "text": "Can you keep fluids down?",
+        "text_wp": "Ngapa ka nyuntu mardarni?",
+        "type": "yes_no",
+        "critical_if": null
+      }
+    ],
+    "diarrhea": [
+      {
+        "id": "26",
+        "text": "Is there blood in your stool?",
+        "text_wp": "Jinirrpa ka jaarlkurlu nyinami?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      },
+      {
+        "id": "27",
+        "text": "Do you feel severely dehydrated?",
+        "text_wp": "Nantu ka wirinyayirni nyinami nyuntu?",
+        "type": "yes_no",
+        "critical_if": "yes"
+      }
+    ]
+  },
+  "critical_symptoms": [
+    "loss of consciousness",
+    "chest pain",
+    "difficulty breathing",
+    "shortness breath",
+    "coughing blood",
+    "vomiting blood",
+    "seizure",
+    "stroke",
+    "coma",
+    "paralysis",
+    "slurred speech",
+    "sudden numbness",
+    "uncontrolled bleeding",
+    "excessive bleeding",
+    "abnormal bleeding",
+    "heavy bleeding",
+    "bleeding from anus",
+    "rectal bleeding",
+    "bright red rectal bleeding",
+    "blood urine",
+    "blood stool",
+    "bloody diarrhea",
+    "passing out",
+    "decreased consciousness",
+    "alterations in levels of consciousness",
+    "brief lapses in consciousness",
+    "inability to speak",
+    "inability to swallow",
+    "fast weak pulse",
+    "weak pulse",
+    "low blood pressure",
+    "blue skin lips fingernails",
+    "bluish skin coloration",
+    "pale clammy skin",
+    "shock",
+    "delirium",
+    "confusion",
+    "hallucination",
+    "psychosis",
+    "suicide intensity",
+    "thoughts of harming oneself",
+    "life threatening condition",
+    "fetal distress",
+    "absence of fetal heart tone",
+    "stopping fetal movement",
+    "trouble breathing",
+    "rapid breathing",
+    "fast heart rate",
+    "irregular heartbeat",
+    "stabbing chest pain",
+    "chest pressure",
+    "chest tightness",
+    "severe pain",
+    "severe illness",
+    "abnormal breathing pattern",
+    "shallow breathing",
+    "fast breathing",
+    "increased breathing rate"
+  ]
+}

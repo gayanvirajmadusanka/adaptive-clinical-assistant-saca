@@ -1,0 +1,82 @@
+{
+  "ngaju": {
+    "meaning": "I/me",
+    "type": "pronoun"
+  },
+  "nyuntu": {
+    "meaning": "you",
+    "type": "pronoun"
+  },
+  "kurdu": {
+    "meaning": "child",
+    "type": "pronoun"
+  },
+  "yapa": {
+    "meaning": "person/body",
+    "type": "pronoun"
+  },
+  "ngarru": {
+    "meaning": "head",
+    "type": "body_part"
+  },
+  "mayi": {
+    "meaning": "stomach",
+    "type": "body_part"
+  },
+  "jaru": {
+    "meaning": "chest",
+    "type": "body_part"
+  },
+  "pirli": {
+    "meaning": "back",
+    "type": "body_part"
+  },
+  "maju": {
+    "meaning": "limb",
+    "type": "body_part"
+  },
+  "wiri": {
+    "meaning": "pain/sick",
+    "type": "symptom"
+  },
+  "wita": {
+    "meaning": "mild pain",
+    "type": "symptom"
+  },
+  "karlarra": {
+    "meaning": "cold/chills",
+    "type": "symptom"
+  },
+  "yarlkurra": {
+    "meaning": "dizzy",
+    "type": "symptom"
+  },
+  "pakarninja": {
+    "meaning": "vomiting",
+    "type": "symptom"
+  },
+  "karrinja": {
+    "meaning": "weakness",
+    "type": "symptom"
+  },
+  "wantimi": {
+    "meaning": "fainting",
+    "type": "symptom"
+  },
+  "nyinami": {
+    "meaning": "breathing difficulty",
+    "type": "symptom"
+  },
+  "wiya": {
+    "meaning": "not",
+    "type": "negation"
+  },
+  "lawa": {
+    "meaning": "none",
+    "type": "negation"
+  },
+  "kari": {
+    "meaning": "cannot",
+    "type": "negation"
+  }
+}
