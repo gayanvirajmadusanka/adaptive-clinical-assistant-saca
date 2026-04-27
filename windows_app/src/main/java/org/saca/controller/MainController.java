@@ -17,6 +17,7 @@ public class MainController {
         loadView("WelcomeView.fxml");
 
 //        loadView("DashboardView.fxml"); // TODO Remove after testing
+//        loadView("TextInputView.fxml"); // TODO Remove after testing
     }
 
     private void loadView(String fxml) {

@@ -6,15 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.saca.utility.constant.AppsConstants;
+import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
 
@@ -109,18 +108,14 @@ public class SidebarController implements Initializable {
                     .getLocale().getLanguage()
                     .equals(AppsConstants.AppLanguage.EN.getShortDescription());
 
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(LanguageManager.get("change_language"));
-            alert.setHeaderText(LanguageManager.get("change_language_to").concat(" ")
+            String title = LanguageManager.get("change_language");
+            String headerText = LanguageManager.get("change_language_to").concat(" ")
                     + (isEnglish
                     ? AppsConstants.AppLanguage.WP.getLongDescription()
-                    : AppsConstants.AppLanguage.EN.getLongDescription()) + "?");
-            alert.setContentText(LanguageManager.get("are_you_sure_want_to_change_language"));
-            alert.getDialogPane().getStylesheets().add(
-                    getClass().getResource("/styles/style.css").toExternalForm());
-            alert.getDialogPane().getStyleClass().add("exit-dialog");
+                    : AppsConstants.AppLanguage.EN.getLongDescription()) + "?";
+            String contentText = LanguageManager.get("are_you_sure_want_to_change_language");
 
-            if (alert.showAndWait().get().getText().equals("OK")) {
+            if (DialogManager.confirmDialog(title, headerText, contentText)) {
                 LanguageManager.setLanguage(isEnglish
                         ? AppsConstants.AppLanguage.WP.getShortDescription()
                         : AppsConstants.AppLanguage.EN.getShortDescription());
@@ -141,17 +136,9 @@ public class SidebarController implements Initializable {
 
     @FXML
     private void handleExit() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(LanguageManager.get("close_saca"));
-        alert.setHeaderText(LanguageManager.get("close_saca_q"));
-        alert.setContentText(LanguageManager.get("are_you_sure_want_to_exit"));
-        alert.getDialogPane().getStylesheets().add(
-                getClass().getResource("/styles/style.css").toExternalForm());
-        alert.getDialogPane().getStyleClass().add("exit-dialog");
-
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) System.exit(0);
-        });
+        if (DialogManager.confirmExit()) {
+            System.exit(0);
+        }
     }
 
     private Tooltip buildTooltip(String text) {
@@ -165,6 +152,8 @@ public class SidebarController implements Initializable {
     @FXML
     public void handleHomeClick(ActionEvent event) {
         try {
+            NavBarManager.setCurrentView("/view/DashboardView.fxml");
+
             Parent root = FXMLLoader.load(
                     getClass().getResource("/view/DashboardView.fxml"),
                     LanguageManager.getBundle()

@@ -28,7 +28,7 @@ public class DashboardController implements Initializable {
     @FXML
     private void handleTextCardClick(MouseEvent event) {
         try {
-            NavBarManager.setCurrentView("/view/TextInputView.fxml"); // ← add this
+            NavBarManager.setCurrentView("/view/TextInputView.fxml");
 
             Parent textInputView = FXMLLoader.load(
                     getClass().getResource("/view/TextInputView.fxml"),

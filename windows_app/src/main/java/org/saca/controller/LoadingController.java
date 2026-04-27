@@ -29,10 +29,13 @@ public class LoadingController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
+
     @FXML
     private Canvas progressCanvas;
+
     @FXML
     private Label percentLabel;
+
     @FXML
     private Label loadingTitle;
 
@@ -43,7 +46,6 @@ public class LoadingController implements Initializable {
     private Runnable onCompleteAction = null;
 
     private double progress = 0.0;
-
     private Timeline timeline;
 
     @Override
@@ -52,50 +54,101 @@ public class LoadingController implements Initializable {
         Platform.runLater(this::startAnimation);
     }
 
+    /**
+     * Set the header label text.
+     */
     public void setTitle(String title) {
         this.title = title;
         if (loadingTitle != null) loadingTitle.setText(title);
     }
 
+    /**
+     * Set animation duration in ms.
+     * Pass Integer.MAX_VALUE to run indefinitely until stop() is called.
+     */
     public void setDuration(int durationMs) {
         this.durationMs = durationMs;
     }
 
+    /**
+     * Callback fired when fixed-duration animation completes.
+     */
     public void setOnComplete(Runnable onCompleteAction) {
         this.onCompleteAction = onCompleteAction;
     }
 
+    /**
+     * Stop the animation — call this when API responds.
+     */
+    public void stop() {
+        if (timeline != null) {
+            timeline.stop();
+        }
+    }
+
+    /**
+     * Get the canvas to access the scene for navigation.
+     */
     public Canvas getCanvas() {
         return progressCanvas;
     }
 
     private void startAnimation() {
-        // Apply title now in case setTitle() was called before initialize()
         if (loadingTitle != null) loadingTitle.setText(title);
+        if (durationMs == Integer.MAX_VALUE) {
+            startIndefiniteAnimation();
+        } else {
+            startFixedAnimation();
+        }
+    }
 
+    /**
+     * Fixed duration — animates 0% → 100% then fires onComplete.
+     */
+    private void startFixedAnimation() {
         int steps = 100;
         double stepDuration = (double) durationMs / steps;
 
         timeline = new Timeline();
         for (int i = 1; i <= steps; i++) {
             final double p = i / (double) steps;
-            KeyFrame kf = new KeyFrame(
+            timeline.getKeyFrames().add(new KeyFrame(
                     Duration.millis(stepDuration * i),
                     e -> {
                         progress = p;
                         drawRing(progress);
                         percentLabel.setText((int) (progress * 100) + "%");
                     }
-            );
-            timeline.getKeyFrames().add(kf);
+            ));
         }
 
         timeline.setOnFinished(e -> Platform.runLater(() -> {
-            if (onCompleteAction != null) {
-                onCompleteAction.run();
-            }
+            if (onCompleteAction != null) onCompleteAction.run();
         }));
 
+        timeline.play();
+    }
+
+    /**
+     * Indefinite mode — pulses between 15% and 85% until stop() is called.
+     */
+    private void startIndefiniteAnimation() {
+        final double[] p = {0.15};
+        final double[] dir = {1};   // 1 = forward, -1 = backward
+        final double step = 0.005;
+        final double minProg = 0.15;
+        final double maxProg = 0.85;
+
+        timeline = new Timeline(new KeyFrame(Duration.millis(16), e -> {
+            p[0] += dir[0] * step;
+            if (p[0] >= maxProg) dir[0] = -1;
+            if (p[0] <= minProg) dir[0] = 1;
+
+            drawRing(p[0]);
+            percentLabel.setText((int) (p[0] * 100) + "%");
+        }));
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
     }
 
