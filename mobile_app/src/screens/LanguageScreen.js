@@ -8,19 +8,26 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
+import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/languageStyles';
 
 export default function LanguageScreen() {
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
   const router = useRouter();
+  const { setLang } = useLanguage();
+
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
 
   const handlePress = (language) => {
     setSelectedLanguage(language);
 
+    if (language === 'English') {
+      setLang('en');
+    } else if (language === 'Warlpiri') {
+      setLang('wp');
+    }
+
     setTimeout(() => {
-      if (language === 'English') {
-        router.push('/input');
-      }
+      router.replace('/input');
     }, 200);
   };
 
@@ -39,7 +46,6 @@ export default function LanguageScreen() {
               Select Language{'\n'}Wangka
             </Text>
 
-            {/* WARLPIRI */}
             <Pressable
               style={[
                 styles.button,
@@ -59,7 +65,6 @@ export default function LanguageScreen() {
               </Text>
             </Pressable>
 
-            {/* ENGLISH */}
             <Pressable
               style={[
                 styles.button,
@@ -78,7 +83,6 @@ export default function LanguageScreen() {
                 English
               </Text>
             </Pressable>
-
           </View>
         </ImageBackground>
       </View>
