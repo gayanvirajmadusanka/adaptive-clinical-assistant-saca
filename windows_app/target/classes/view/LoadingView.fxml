@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.saca.controller.LoadingController"
+            stylesheets="@/styles/style.css"
+            styleClass="root">
+
+    <center>
+        <StackPane styleClass="loading-bg">
+
+            <VBox alignment="CENTER"
+                  spacing="40"
+                  styleClass="loading-container">
+
+                <!-- Title -->
+                <Label fx:id="loadingTitle"
+                       text="Checking your Symptoms..."
+                       styleClass="loading-title"
+                       wrapText="true"
+                       maxWidth="500"
+                       textAlignment="CENTER"
+                       alignment="CENTER"/>
+
+                <!-- Circular progress canvas -->
+                <StackPane alignment="CENTER">
+                    <Canvas fx:id="progressCanvas"
+                            width="200"
+                            height="200"/>
+
+                    <!-- Percentage + LOADING text overlaid on canvas -->
+                    <VBox alignment="CENTER" spacing="4" mouseTransparent="true">
+                        <Label fx:id="percentLabel"
+                               text="0%"
+                               styleClass="loading-percent"/>
+                        <Label text="LOADING"
+                               styleClass="loading-sub"/>
+                    </VBox>
+                </StackPane>
+
+                <!-- Bottom hint -->
+                <Label text="%this_may_take_a_few_minutes_please_wait"
+                       styleClass="loading-hint"
+                       wrapText="true"
+                       maxWidth="500"
+                       textAlignment="CENTER"
+                       alignment="CENTER"/>
+
+            </VBox>
+
+        </StackPane>
+    </center>
+
+</BorderPane>

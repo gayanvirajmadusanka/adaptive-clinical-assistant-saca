@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.saca.controller.AboutController"
+            prefWidth="900"
+            prefHeight="650"
+            stylesheets="@/styles/style.css"
+            styleClass="root">
+
+    <children>
+
+        <HBox spacing="50"
+              alignment="CENTER"
+              AnchorPane.topAnchor="0"
+              AnchorPane.bottomAnchor="0"
+              AnchorPane.leftAnchor="0"
+              AnchorPane.rightAnchor="0">
+
+            <!-- Left Logo -->
+            <VBox alignment="CENTER">
+                <children>
+                    <ImageView fitWidth="250"
+                               fitHeight="250"
+                               preserveRatio="true">
+                        <image>
+                            <Image url="@/images/app-logo.png"/>
+                        </image>
+                    </ImageView>
+                </children>
+            </VBox>
+
+            <!-- Right Content -->
+            <VBox spacing="20" alignment="CENTER" prefWidth="450">
+
+                <children>
+
+                    <Label text="Welcome&#10;(Nyampu nyuntu) to SACA..."
+                           wrapText="true"
+                           textAlignment="CENTER"
+                           styleClass="about-title"/>
+
+                    <Label wrapText="true"
+                           textAlignment="CENTER"
+                           styleClass="about-description"
+                           text="SACA is a smart Windows app that helps you understand symptoms using AI. Describe issues via text, voice, or body map and get quick insights. It supports early health awareness and is not a replacement for medical advice."/>
+
+                    <Label wrapText="true"
+                           textAlignment="CENTER"
+                           styleClass="about-description"
+                           text="SACA ka nyuntu ngurrjumani purrkunypa manu yirriyirri nyanyi. Wangkaya, pantirniya, manu milkikarriya. Ngangkayiku wangu."/>
+
+                    <Button text="Back"
+                            onAction="#handleBackClick"
+                            styleClass="back-button">
+
+                        <graphic>
+                            <ImageView fitWidth="20"
+                                       fitHeight="20"
+                                       preserveRatio="true">
+
+                                <image>
+                                    <Image url="@/icons/left-arrow.png"/>
+                                </image>
+
+                            </ImageView>
+                        </graphic>
+
+                    </Button>
+
+                </children>
+
+            </VBox>
+
+        </HBox>
+
+    </children>
+</AnchorPane>

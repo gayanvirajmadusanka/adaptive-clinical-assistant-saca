@@ -1,0 +1,165 @@
+.result-bg {
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-min-height: 600px;
+}
+
+.result-container {
+    -fx-alignment: CENTER;
+}
+
+.result-header-bar {
+    -fx-background-color: #C47A3A;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 12 20 12 20;
+    -fx-min-height: 80px;
+    -fx-pref-height: 80px;
+}
+
+.result-back-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-text-fill: #2e3d35;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-max-width: 38px;
+    -fx-max-height: 38px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.result-back-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.10);
+}
+
+.result-back-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.18);
+}
+
+.result-header-title {
+    -fx-text-fill: #1a0e00;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-alignment: CENTER;
+}
+
+.result-symptoms-wrapper {
+    -fx-background-color: #f5ead4;
+    -fx-background-radius: 16;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-padding: 0;
+    -fx-min-height: 260px;
+}
+
+.result-symptoms-wrapper:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 10, 0, 0, 3);
+}
+
+.result-symptoms-box {
+    -fx-padding: 20 16 20 24;
+    -fx-background-color: transparent;
+}
+
+.result-symptom-item {
+    -fx-text-fill: #3a2e1e;
+    -fx-font-size: 14px;
+    -fx-font-family: "Kreon", "Georgia", serif;
+}
+
+.result-speaker-box {
+    -fx-padding: 12 16 12 8;
+    -fx-background-color: transparent;
+    -fx-border-color: #c8b99a;
+    -fx-border-width: 0 0 0 1.5;
+    -fx-min-width: 70px;
+    -fx-pref-width: 70px;
+}
+
+.result-speaker-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-padding: 6;
+    -fx-background-radius: 8;
+}
+
+.result-speaker-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.07);
+    -fx-background-radius: 8;
+}
+
+.result-speaker-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.14);
+}
+
+.result-match-label {
+    -fx-text-fill: #3a2a1a;
+    -fx-font-size: 20px;
+    -fx-font-family: "Kreon", "Georgia", serif;
+}
+
+.result-yes-btn,
+.result-no-btn {
+    -fx-pref-width: 140px;
+    -fx-pref-height: 50px;
+    -fx-background-radius: 30px;
+    -fx-border-radius: 30px;
+    -fx-font-family: "jsMath-cmbx10"; /* same as sidebar pills */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 6, 0, 0, 2);
+}
+
+.result-yes-btn {
+    -fx-background-color: #d4a84b;
+    -fx-text-fill: #1a0e00;
+    -fx-border-color: #1a1000;
+}
+
+.result-yes-btn:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-background-color: #e0b855;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.30), 10, 0, 0, 3);
+}
+
+.result-yes-btn:pressed {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-background-color: #b8902a;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 4, 0, 0, 1);
+}
+
+.result-no-btn {
+    -fx-background-color: #c8a060;
+    -fx-text-fill: #1a0e00;
+    -fx-border-color: #1a1000;
+}
+
+.result-no-btn:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-background-color: #d4aa6a;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.30), 10, 0, 0, 3);
+}
+
+.result-no-btn:pressed {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-background-color: #a88040;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 4, 0, 0, 1);
+}

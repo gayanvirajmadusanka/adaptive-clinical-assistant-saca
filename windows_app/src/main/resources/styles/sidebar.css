@@ -1,0 +1,100 @@
+#sidebarWrapper {
+    -fx-background-color: transparent;
+}
+
+.custom-sidebar {
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+.home-pill-btn,
+.language-pill-btn,
+.exit-pill-btn {
+    -fx-pref-width: 160px;
+    -fx-pref-height: 60px;
+    -fx-background-radius: 30px;
+    -fx-border-radius: 30px;
+    -fx-font-family: "jsMath-cmbx10";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.home-pill-btn {
+    -fx-background-color: #C47B37;
+    -fx-border-color: #7B3414;
+    -fx-border-width: 2;
+    -fx-text-fill: black;
+}
+
+.language-pill-btn {
+    -fx-background-color: #E2D19A;
+    -fx-border-color: #D0A85C;
+    -fx-border-width: 2;
+    -fx-text-fill: black;
+}
+
+.exit-pill-btn {
+    -fx-background-color: #8B3A1C;
+    -fx-border-color: #5C2E0A;
+    -fx-border-width: 2;
+    -fx-text-fill: #F5E6C8;
+}
+
+.home-pill-btn:hover,
+.language-pill-btn:hover,
+.exit-pill-btn:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.home-pill-btn:pressed,
+.language-pill-btn:pressed,
+.exit-pill-btn:pressed {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-opacity: 0.85;
+}
+
+.icon-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-padding: 6;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: null;
+}
+
+.icon-toggle-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-background-radius: 8;
+    -fx-background-insets: 0;
+}
+
+.icon-toggle-btn:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.22);
+    -fx-background-radius: 8;
+    -fx-background-insets: 0;
+}
+
+.tooltip {
+    -fx-background-color: #1b1f2a;
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12px;
+    -fx-background-radius: 6;
+    -fx-border-color: #3a3f52;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 5 10 5 10;
+    -fx-opacity: 1.0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 2);
+}
