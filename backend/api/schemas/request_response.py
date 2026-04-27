@@ -20,6 +20,11 @@ class ClassifyRequest(BaseModel):
     language: str = 'en'
 
 
+class ExtractTextRequest(BaseModel):
+    text: str
+    language: str = 'en'
+
+
 # response schemas
 class QuestionOption(BaseModel):
     id: str
@@ -48,3 +53,11 @@ class ClassifyResponse(BaseModel):
     intensity_signal: int
     age_group: Optional[str] = None
     gender: Optional[str] = None
+
+
+class ExtractResponse(BaseModel):
+    symptoms_en: list[str]
+    symptoms_wp: list[str]
+    confidence: float
+    input_type: str
+    language: str
