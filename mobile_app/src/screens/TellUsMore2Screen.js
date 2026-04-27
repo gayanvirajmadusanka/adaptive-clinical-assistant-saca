@@ -10,16 +10,16 @@ import {
 import { useRouter } from 'expo-router';
 import styles from '../styles/tellUsMoreStyles';
 
-export default function TellUsMoreScreen() {
+export default function TellUsMore2Screen() {
   const router = useRouter();
-  const [painLevel, setPainLevel] = useState(null);
+  const [duration, setDuration] = useState(null);
 
   const options = [
-    { label: 'None', style: 'noneButton', textStyle: 'noneText' },
-    { label: 'A little', style: 'littleButton', textStyle: 'littleText' },
-    { label: 'Moderate', style: 'moderateButton', textStyle: 'lightText' },
-    { label: 'Very bad', style: 'veryBadButton', textStyle: 'lightText' },
-    { label: 'Unbearable', style: 'unbearableButton', textStyle: 'lightText' },
+    { label: 'Today', style: 'noneButton', textStyle: 'noneText' },
+    { label: 'Yesterday', style: 'littleButton', textStyle: 'littleText' },
+    { label: '2–3 days', style: 'moderateButton', textStyle: 'lightText' },
+    { label: 'About a week', style: 'veryBadButton', textStyle: 'lightText' },
+    { label: 'More than a week', style: 'unbearableButton', textStyle: 'lightText' },
   ];
 
   return (
@@ -34,13 +34,17 @@ export default function TellUsMoreScreen() {
         >
           <View style={styles.container}>
 
+            {/* SAME HEADER */}
             <View style={styles.headerBar}>
-                <Text style={styles.headerText}>Tell Us More</Text>
-             </View>
+              <Text style={styles.headerText}>Tell Us More</Text>
+            </View>
 
+            {/* 🔥 REPLACED CONTENT */}
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>PAIN LEVEL</Text>
-              <Text style={styles.question}>How bad is your pain?</Text>
+              <Text style={styles.sectionTitle}>HOW LONG</Text>
+              <Text style={styles.question}>
+                How long have you felt this way?
+              </Text>
 
               {options.map((item) => (
                 <Pressable
@@ -48,18 +52,18 @@ export default function TellUsMoreScreen() {
                   style={({ pressed }) => [
                     styles.answerButton,
                     styles[item.style],
-                    painLevel === item.label && styles.selectedAnswer,
+                    duration === item.label && styles.selectedAnswer,
                     pressed && styles.pressedAnswer,
                   ]}
-                  onPress={() => setPainLevel(item.label)}
+                  onPress={() => setDuration(item.label)}
                 >
                   <View
                     style={[
                       styles.radioOuter,
-                      painLevel === item.label && styles.radioOuterSelected,
+                      duration === item.label && styles.radioOuterSelected,
                     ]}
                   >
-                    {painLevel === item.label && (
+                    {duration === item.label && (
                       <View style={styles.radioInner} />
                     )}
                   </View>
@@ -71,17 +75,20 @@ export default function TellUsMoreScreen() {
               ))}
             </View>
 
+            {/* Continue */}
             <Pressable
               style={({ pressed }) => [
                 styles.continueButton,
                 pressed && styles.continuePressed,
               ]}
-               onPress={() => router.push('/tellusmore2')}
+              onPress={() => router.push('/loadingseverity')}
             >
               <Text style={styles.continueText}>Continue</Text>
             </Pressable>
+
           </View>
 
+          {/* FOOTER */}
           <View style={styles.footer}>
             <Pressable
               style={styles.footerItem}
@@ -99,6 +106,7 @@ export default function TellUsMoreScreen() {
               <Text style={styles.footerText}>Language</Text>
             </Pressable>
           </View>
+
         </ImageBackground>
       </View>
     </SafeAreaView>

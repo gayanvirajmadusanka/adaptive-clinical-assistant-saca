@@ -19,24 +19,34 @@ export default StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 25,
+  },
+
+  topText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#111',
+    textAlign: 'center',
+    marginBottom: 60,
   },
 
   circle: {
-    width: 230,
-    height: 230,
-    borderRadius: 115,
-    borderWidth: 18,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    borderWidth: 15,
     borderColor: '#D6A24B',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
 
   progressArc: {
     position: 'absolute',
-    width: 230,
-    height: 230,
-    borderRadius: 115,
-    borderWidth: 18,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    borderWidth: 15,
     borderLeftColor: 'transparent',
     borderBottomColor: 'transparent',
     borderRightColor: '#B65A24',
@@ -45,15 +55,22 @@ export default StyleSheet.create({
   },
 
   percent: {
-    fontSize: 42,
+    fontSize: 34,
     fontWeight: 'bold',
     color: '#2B1B12',
   },
 
   loadingText: {
-    fontSize: 18,
-    letterSpacing: 3,
+    fontSize: 12,
+    letterSpacing: 2,
     color: '#8B5A2B',
-    marginTop: 8,
+    marginTop: 5,
+  },
+
+  bottomText: {
+    fontSize: 14,
+    color: '#5C4A3A',
+    textAlign: 'center',
+    marginTop: 55,
   },
 });

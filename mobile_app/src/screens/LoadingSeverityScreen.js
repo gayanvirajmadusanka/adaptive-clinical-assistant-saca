@@ -9,12 +9,12 @@ import {
 import { useRouter } from 'expo-router';
 import styles from '../styles/loadingStyles';
 
-export default function LoadingScreen() {
+export default function LoadingSeverityScreen() {
   const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/detectedsymptoms');
+      router.replace('/result');
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -31,7 +31,7 @@ export default function LoadingScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-            <Text style={styles.topText}>Checking your Symptoms...</Text>
+            <Text style={styles.topText}>Checking your Severity...</Text>
 
             <View style={styles.circle}>
               <View style={styles.progressArc} />

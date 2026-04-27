@@ -23,15 +23,17 @@ export default StyleSheet.create({
   },
 
   headerBar: {
-    width: '90%',
-    height: 55,
+    width: '92%',
+    height: 60,
     backgroundColor: '#6F8F83',
-    borderRadius: 30,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 25,
   },
+
+    
 
   headerText: {
     fontSize: 24,
