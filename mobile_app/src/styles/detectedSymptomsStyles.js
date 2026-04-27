@@ -158,4 +158,110 @@ export default StyleSheet.create({
     fontSize: 10,
     marginTop: 2,
   },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 25,
+  },
+
+  languageModal: {
+    width: '90%',
+    backgroundColor: '#F5E6C8',
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#8B3A1C',
+    padding: 22,
+    alignItems: 'center',
+    elevation: 8,
+  },
+
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2C1A0E',
+    marginBottom: 20,
+  },
+
+  languageOption: {
+    width: '100%',
+    height: 55,
+    backgroundColor: '#E8D5A0',
+    borderColor: '#D4A96A',
+    borderWidth: 2,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+
+  languageOptionSelected: {
+    backgroundColor: '#8B3A1C',
+    borderColor: '#5C2E0A',
+    transform: [{ scale: 0.97 }],
+  },
+
+  languageOptionText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#5C2E0A',
+  },
+
+  languageOptionTextSelected: {
+    color: '#F5E6C8',
+  },
+
+  confirmText: {
+    fontSize: 15,
+    color: '#2C1A0E',
+    marginTop: 8,
+    marginBottom: 18,
+    textAlign: 'center',
+  },
+
+  modalButtonRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  cancelButton: {
+    width: '45%',
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  cancelText: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  confirmButton: {
+    width: '45%',
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  confirmButtonText: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  disabledButton: {
+    opacity: 0.45,
+  },
 });

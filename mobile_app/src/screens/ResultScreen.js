@@ -1,30 +1,44 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
+  ImageBackground,
   Pressable,
   StatusBar,
   SafeAreaView,
-  ImageBackground,
   Image,
+  Modal,
+  Animated,
+  Linking,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
+import { useLanguage } from '../context/LanguageContext';
 import styles, { resultTheme } from '../styles/resultStyles';
 
 export default function ResultScreen() {
   const router = useRouter();
+  const { t, setLang } = useLanguage();
   const { painLevel, duration } = useLocalSearchParams();
 
-  const getSeverityLevel = () => {
-    if (painLevel === 'Unbearable' || painLevel === 'Very bad') {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(null);
+
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  const getSeverity = () => {
+    if (
+      painLevel === 'Unbearable' ||
+      painLevel === 'Very bad' ||
+      duration === 'More than a week'
+    ) {
       return 'severe';
     }
 
     if (
       painLevel === 'Moderate' ||
       duration === 'About a week' ||
-      duration === 'More than a week'
+      duration === '2–3 days'
     ) {
       return 'moderate';
     }
@@ -32,37 +46,45 @@ export default function ResultScreen() {
     return 'mild';
   };
 
-  const severityLevel = getSeverityLevel();
-  const theme = resultTheme[severityLevel];
+  const severity = getSeverity();
+  const theme = resultTheme[severity];
 
-  const recommendations = {
-    mild: [
-      'Rest and drink enough water.',
-      'Monitor your symptoms.',
-      'Use basic home care if needed.',
-    ],
-    moderate: [
-      'Monitor your symptoms closely.',
-      'Drink water and take rest.',
-      'Visit a clinic if symptoms get worse.',
-    ],
-    severe: [
-      'Seek medical help immediately.',
-      'Call for help if symptoms are serious.',
-      'Do not wait if pain becomes unbearable.',
-    ],
+  const speakResult = () => {
+    Speech.stop();
+    Speech.speak(t(`${severity}_speak`), {
+      language: 'en-AU',
+      rate: 0.9,
+    });
   };
 
-  const symptoms = ['Headache', 'Fever', 'Body pain', 'Tiredness'];
+  const openModal = () => {
+    setSelectedLang(null);
+    setModalVisible(true);
 
-  const speakContent = () => {
-    const text = `
-      Your severity level is ${severityLevel}.
-      Recommendations are ${recommendations[severityLevel].join(', ')}.
-      Symptoms include ${symptoms.join(', ')}.
-    `;
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
+  };
 
-    Speech.speak(text);
+  const closeModal = () => {
+    Animated.timing(scaleAnim, {
+      toValue: 0.8,
+      duration: 120,
+      useNativeDriver: true,
+    }).start(() => setModalVisible(false));
+  };
+
+  const confirmLanguage = () => {
+    if (selectedLang) {
+      setLang(selectedLang);
+      closeModal();
+    }
+  };
+
+  const callEmergency = () => {
+    Linking.openURL('tel:000');
   };
 
   return (
@@ -82,14 +104,9 @@ export default function ResultScreen() {
                 { backgroundColor: theme.cardBackground },
               ]}
             >
-              <View
-                style={[
-                  styles.headerBar,
-                  { backgroundColor: theme.header },
-                ]}
-              >
+              <View style={[styles.headerBar, { backgroundColor: theme.header }]}>
                 <Text style={[styles.headerText, { color: theme.headerText }]}>
-                  Final Results
+                  {t('result')}
                 </Text>
               </View>
 
@@ -99,7 +116,7 @@ export default function ResultScreen() {
                     styles.speakerButton,
                     pressed && styles.pressedButton,
                   ]}
-                  onPress={speakContent}
+                  onPress={speakResult}
                 >
                   <Image
                     source={require('../../assets/images/speaker.png')}
@@ -120,18 +137,21 @@ export default function ResultScreen() {
                       { color: theme.severityText },
                     ]}
                   >
-                    {theme.severityLabel}
+                    {t(`${severity}_label`)}
                   </Text>
                 </View>
 
-                {severityLevel === 'severe' && (
+                {severity === 'severe' && (
                   <Pressable
                     style={({ pressed }) => [
                       styles.callButton,
                       pressed && styles.pressedButton,
                     ]}
+                    onPress={callEmergency}
                   >
-                    <Text style={styles.callButtonText}>📞 Call for Help</Text>
+                    <Text style={styles.callButtonText}>
+                      {t('call_emergency')}
+                    </Text>
                   </Pressable>
                 )}
 
@@ -145,17 +165,21 @@ export default function ResultScreen() {
                   ]}
                 >
                   <Text style={[styles.infoTitle, { color: theme.boxText }]}>
-                    Recommendations
+                    {t('symptoms')}
                   </Text>
 
-                  {recommendations[severityLevel].map((item) => (
-                    <Text
-                      key={item}
-                      style={[styles.infoText, { color: theme.boxText }]}
-                    >
-                      • {item}
-                    </Text>
-                  ))}
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t('headache')}
+                  </Text>
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t('fever')}
+                  </Text>
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t('body_pain')}
+                  </Text>
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t('tiredness')}
+                  </Text>
                 </View>
 
                 <View
@@ -168,17 +192,18 @@ export default function ResultScreen() {
                   ]}
                 >
                   <Text style={[styles.infoTitle, { color: theme.boxText }]}>
-                    Symptoms
+                    {t('recommendations')}
                   </Text>
 
-                  {symptoms.map((item) => (
-                    <Text
-                      key={item}
-                      style={[styles.infoText, { color: theme.boxText }]}
-                    >
-                      • {item}
-                    </Text>
-                  ))}
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t(`${severity}_recommendation_1`)}
+                  </Text>
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t(`${severity}_recommendation_2`)}
+                  </Text>
+                  <Text style={[styles.infoText, { color: theme.boxText }]}>
+                    • {t(`${severity}_recommendation_3`)}
+                  </Text>
                 </View>
 
                 <Pressable
@@ -187,7 +212,7 @@ export default function ResultScreen() {
                     { borderColor: theme.startAgain },
                     pressed && styles.pressedButton,
                   ]}
-                  onPress={() => router.replace('/')}
+                  onPress={() => router.replace('/input')}
                 >
                   <Text
                     style={[
@@ -195,7 +220,7 @@ export default function ResultScreen() {
                       { color: theme.startAgain },
                     ]}
                   >
-                    Start again
+                    {t('start_again')}
                   </Text>
                 </Pressable>
               </View>
@@ -208,17 +233,82 @@ export default function ResultScreen() {
               onPress={() => router.replace('/input')}
             >
               <Text style={styles.footerIcon}>🏠</Text>
-              <Text style={styles.footerText}>Home</Text>
+              <Text style={styles.footerText}>{t('home')}</Text>
             </Pressable>
 
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/language')}
-            >
+            <Pressable style={styles.footerItem} onPress={openModal}>
               <Text style={styles.footerIcon}>🌐</Text>
-              <Text style={styles.footerText}>Language</Text>
+              <Text style={styles.footerText}>{t('language')}</Text>
             </Pressable>
           </View>
+
+          <Modal transparent visible={modalVisible} animationType="fade">
+            <View style={styles.modalOverlay}>
+              <Animated.View
+                style={[
+                  styles.languageModal,
+                  { transform: [{ scale: scaleAnim }] },
+                ]}
+              >
+                <Text style={styles.modalTitle}>{t('select_language')}</Text>
+
+                <Pressable
+                  style={[
+                    styles.languageOption,
+                    selectedLang === 'en' && styles.languageOptionSelected,
+                  ]}
+                  onPress={() => setSelectedLang('en')}
+                >
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLang === 'en' &&
+                        styles.languageOptionTextSelected,
+                    ]}
+                  >
+                    {t('english')}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.languageOption,
+                    selectedLang === 'wp' && styles.languageOptionSelected,
+                  ]}
+                  onPress={() => setSelectedLang('wp')}
+                >
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLang === 'wp' &&
+                        styles.languageOptionTextSelected,
+                    ]}
+                  >
+                    {t('warlpiri')}
+                  </Text>
+                </Pressable>
+
+                <Text style={styles.confirmText}>{t('change_language')}</Text>
+
+                <View style={styles.modalButtonRow}>
+                  <Pressable style={styles.cancelButton} onPress={closeModal}>
+                    <Text style={styles.cancelText}>{t('no')}</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[
+                      styles.confirmButton,
+                      !selectedLang && styles.disabledButton,
+                    ]}
+                    disabled={!selectedLang}
+                    onPress={confirmLanguage}
+                  >
+                    <Text style={styles.confirmButtonText}>{t('yes')}</Text>
+                  </Pressable>
+                </View>
+              </Animated.View>
+            </View>
+          </Modal>
         </ImageBackground>
       </View>
     </SafeAreaView>

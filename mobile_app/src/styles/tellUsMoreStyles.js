@@ -1,19 +1,14 @@
 import { StyleSheet, StatusBar } from 'react-native';
 
 export default StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
+  safeArea: { flex: 1, backgroundColor: '#F5EAD8' },
 
   wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
-    flex: 1,
-  },
+  background: { flex: 1 },
 
   container: {
     flex: 1,
@@ -38,7 +33,6 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-
   card: {
     width: '76%',
     backgroundColor: '#F5E6C8',
@@ -57,7 +51,6 @@ export default StyleSheet.create({
   question: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
     marginBottom: 14,
   },
 
@@ -77,10 +70,9 @@ export default StyleSheet.create({
     borderRadius: 9,
     borderWidth: 2,
     borderColor: '#5C2E0A',
+    marginRight: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-    backgroundColor: 'transparent',
   },
 
   radioOuterSelected: {
@@ -99,50 +91,18 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  noneButton: {
-    backgroundColor: '#E8D5A0',
-    borderColor: '#D4A96A',
-  },
+  noneButton: { backgroundColor: '#E8D5A0', borderColor: '#D4A96A' },
+  littleButton: { backgroundColor: '#D4A96A', borderColor: '#C47A3A' },
+  moderateButton: { backgroundColor: '#C47A3A', borderColor: '#8B3A1C' },
+  veryBadButton: { backgroundColor: '#8B3A1C', borderColor: '#5C2E0A' },
+  unbearableButton: { backgroundColor: '#4A0A04', borderColor: '#2C0400' },
 
-  littleButton: {
-    backgroundColor: '#D4A96A',
-    borderColor: '#C47A3A',
-  },
+  noneText: { color: '#5C2E0A' },
+  littleText: { color: '#3A1A00' },
+  lightText: { color: '#F5E6C8' },
 
-  moderateButton: {
-    backgroundColor: '#C47A3A',
-    borderColor: '#8B3A1C',
-  },
-
-  veryBadButton: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
-  },
-
-  unbearableButton: {
-    backgroundColor: '#4A0A04',
-    borderColor: '#2C0400',
-  },
-
-  noneText: {
-    color: '#5C2E0A',
-  },
-
-  littleText: {
-    color: '#3A1A00',
-  },
-
-  lightText: {
-    color: '#F5E6C8',
-  },
-
-  selectedAnswer: {
-    transform: [{ scale: 0.98 }],
-  },
-
-  pressedAnswer: {
-    opacity: 0.8,
-  },
+  selectedAnswer: { transform: [{ scale: 0.98 }] },
+  pressedAnswer: { opacity: 0.8 },
 
   continueButton: {
     width: 230,
@@ -153,8 +113,6 @@ export default StyleSheet.create({
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
-    marginTop: 10,
   },
 
   continuePressed: {
@@ -165,7 +123,6 @@ export default StyleSheet.create({
   continueText: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#000',
   },
 
   footer: {
@@ -176,18 +133,93 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
 
-  footerItem: {
-    alignItems: 'center',
-  },
+  footerItem: { alignItems: 'center' },
 
-  footerIcon: {
-    fontSize: 22,
-    color: '#fff',
-  },
+  footerIcon: { fontSize: 22, color: '#fff' },
 
   footerText: {
     color: '#fff',
     fontSize: 10,
     marginTop: 2,
+  },
+
+  // 🔥 Language Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 25,
+  },
+
+  languageModal: {
+    width: '90%',
+    backgroundColor: '#F5E6C8',
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#8B3A1C',
+    padding: 22,
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+
+  languageOption: {
+    width: '100%',
+    height: 55,
+    backgroundColor: '#E8D5A0',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+
+  languageOptionSelected: {
+    backgroundColor: '#8B3A1C',
+  },
+
+  languageOptionText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  languageOptionTextSelected: {
+    color: '#fff',
+  },
+
+  confirmText: {
+    marginBottom: 18,
+  },
+
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+
+  cancelButton: {
+    width: '45%',
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  confirmButton: {
+    width: '45%',
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E3AD35',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  disabledButton: {
+    opacity: 0.45,
   },
 });
