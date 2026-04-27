@@ -13,15 +13,13 @@ export default StyleSheet.create({
 
   background: {
     flex: 1,
-    width: '100%',
-    height: '100%',
   },
 
   container: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 25,
-    paddingTop: 90,
+    paddingTop: 120,
   },
 
   title: {
@@ -29,73 +27,42 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    lineHeight: 36,
-    marginBottom: 70,
+    marginBottom: 80,
   },
 
-  languageButton: {
+  button: {
     width: '78%',
     height: 75,
-    backgroundColor: '#D2B1B1',
-    borderWidth: 1.5,
-    borderColor: '#C94B4B',
     borderRadius: 28,
-    marginBottom: 45,
-    paddingHorizontal: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    elevation: 4,
-  },
-
-  languageText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#111',
-  },
-
-  radioCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#EEE',
-  },
-
-  radioSelected: {
-    backgroundColor: '#2ECC71', // green selected
-    borderWidth: 4,
-    borderColor: '#EEE',
-  },
-
-  continueButton: {
-    width: 250,
-    height: 75,
-    backgroundColor: '#E3AD35',
-    borderRadius: 30,
-    marginTop: 45,
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderWidth: 2,
     justifyContent: 'center',
-    elevation: 4,
+    alignItems: 'center',
+    marginBottom: 40,
   },
 
-  continuePressedGreen: {
-    backgroundColor: '#27AE60', // green flash on press
+  /* DEFAULT (ENGLISH STYLE FOR BOTH) */
+  defaultButton: {
+    backgroundColor: '#E8D5A0',
+    borderColor: '#D4A96A',
+  },
+
+  defaultText: {
+    color: '#5C2E0A',
+  },
+
+  /* SELECTED → WARLPIRI STYLE */
+  selectedButton: {
+    backgroundColor: '#8B3A1C',
+    borderColor: '#5C2E0A',
     transform: [{ scale: 0.96 }],
   },
 
-  continueText: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-    lineHeight: 27,
-    marginRight: 20,
+  selectedText: {
+    color: '#F5E6C8',
   },
 
-  arrow: {
-    fontSize: 44,
+  text: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#000',
   },
 });

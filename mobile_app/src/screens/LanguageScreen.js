@@ -4,7 +4,6 @@ import {
   View,
   Text,
   ImageBackground,
-  TouchableOpacity,
   Pressable,
   StatusBar,
   SafeAreaView,
@@ -14,6 +13,16 @@ import styles from '../styles/languageStyles';
 export default function LanguageScreen() {
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const router = useRouter();
+
+  const handlePress = (language) => {
+    setSelectedLanguage(language);
+
+    setTimeout(() => {
+      if (language === 'English') {
+        router.push('/input');
+      }
+    }, 200);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -30,48 +39,46 @@ export default function LanguageScreen() {
               Select Language{'\n'}Wangka
             </Text>
 
-            <TouchableOpacity
-              style={styles.languageButton}
-              onPress={() => setSelectedLanguage('Warlpiri')}
-            >
-              <Text style={styles.languageText}>Warlpiri</Text>
-              <View
-                style={[
-                  styles.radioCircle,
-                  selectedLanguage === 'Warlpiri' && styles.radioSelected,
-                ]}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.languageButton}
-              onPress={() => setSelectedLanguage('English')}
-            >
-              <Text style={styles.languageText}>English</Text>
-              <View
-                style={[
-                  styles.radioCircle,
-                  selectedLanguage === 'English' && styles.radioSelected,
-                ]}
-              />
-            </TouchableOpacity>
-
+            {/* WARLPIRI */}
             <Pressable
-              style={({ pressed }) => [
-                styles.continueButton,
-                pressed && styles.continuePressedGreen,
+              style={[
+                styles.button,
+                styles.defaultButton,
+                selectedLanguage === 'Warlpiri' && styles.selectedButton,
               ]}
-              onPress={() => {
-                if (selectedLanguage === 'English') {
-                  router.push('/input');
-                }
-              }}
+              onPress={() => handlePress('Warlpiri')}
             >
-              <Text style={styles.continueText}>
-                Continue{'\n'}Yangka
+              <Text
+                style={[
+                  styles.text,
+                  styles.defaultText,
+                  selectedLanguage === 'Warlpiri' && styles.selectedText,
+                ]}
+              >
+                Warlpiri
               </Text>
-              <Text style={styles.arrow}>→</Text>
             </Pressable>
+
+            {/* ENGLISH */}
+            <Pressable
+              style={[
+                styles.button,
+                styles.defaultButton,
+                selectedLanguage === 'English' && styles.selectedButton,
+              ]}
+              onPress={() => handlePress('English')}
+            >
+              <Text
+                style={[
+                  styles.text,
+                  styles.defaultText,
+                  selectedLanguage === 'English' && styles.selectedText,
+                ]}
+              >
+                English
+              </Text>
+            </Pressable>
+
           </View>
         </ImageBackground>
       </View>

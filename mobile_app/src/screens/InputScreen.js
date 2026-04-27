@@ -25,15 +25,22 @@ export default function InputScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-            <Text style={styles.title}>Hi, Tell us how you feel</Text>
 
+            {/* Title */}
+            <Text style={styles.title}>
+              Hi, Tell us how you feel
+            </Text>
+
+            {/* Subtitle */}
             <Text style={styles.subtitle}>
               You can speak, type or use the body map to describe your symptoms.
             </Text>
 
+            {/* TEXT BUTTON ✅ FIXED */}
             <Pressable
               style={({ pressed }) => [
                 styles.card,
+                styles.textCard, // ✅ IMPORTANT
                 pressed && styles.cardPressedGrey,
               ]}
               onPress={() => router.push('/textinput')}
@@ -46,6 +53,7 @@ export default function InputScreen() {
               <Text style={styles.cardText}>TEXT</Text>
             </Pressable>
 
+            {/* VOICE BUTTON */}
             <Pressable
               style={({ pressed }) => [
                 styles.card,
@@ -61,6 +69,7 @@ export default function InputScreen() {
               <Text style={styles.cardText}>VOICE</Text>
             </Pressable>
 
+            {/* BODY BUTTON */}
             <Pressable
               style={({ pressed }) => [
                 styles.card,
@@ -75,8 +84,10 @@ export default function InputScreen() {
               />
               <Text style={styles.cardText}>BODY</Text>
             </Pressable>
+
           </View>
 
+          {/* FOOTER */}
           <View style={styles.footer}>
             <Pressable
               style={styles.footerItem}
@@ -94,6 +105,7 @@ export default function InputScreen() {
               <Text style={styles.footerText}>Language</Text>
             </Pressable>
           </View>
+
         </ImageBackground>
       </View>
     </SafeAreaView>

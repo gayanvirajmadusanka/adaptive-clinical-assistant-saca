@@ -2,17 +2,16 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   ImageBackground,
   Pressable,
   StatusBar,
   SafeAreaView,
-  TextInput,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import styles from '../styles/textInputStyles';
+import styles from '../styles/detectedSymptomsStyles';
 
-export default function TextInputScreen() {
+export default function DetectedSymptomsScreen() {
   const router = useRouter();
 
   return (
@@ -27,35 +26,47 @@ export default function TextInputScreen() {
         >
           <View style={styles.container}>
             <View style={styles.headerBar}>
-              <Text style={styles.headerText}>Text</Text>
+              <Text style={styles.headerText}>Detected Symptoms</Text>
+            </View>
+
+            <View style={styles.symptomBox}>
+              <Text style={styles.symptomText}>
+                • headache{'\n'}
+                • fever{'\n'}
+                • body pain{'\n'}
+                • tiredness
+              </Text>
+
               <Image
-                source={require('../../assets/images/text.png')}
-                style={styles.headerIcon}
+                source={require('../../assets/images/speaker.png')}
+                style={styles.speakerIcon}
                 resizeMode="contain"
               />
             </View>
 
-            <View style={styles.inputBox}>
-              <Text style={styles.questionText}>What can I help with?</Text>
+            <Text style={styles.questionText}>Does this match you?</Text>
 
-              <TextInput
-                style={styles.textInput}
-                multiline
-                placeholder="Describe your Symptoms and press Continue"
-                placeholderTextColor="#555"
-              />
+            <View style={styles.buttonRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.choiceButton,
+                  pressed && styles.choicePressed,
+                ]}
+                onPress={() => router.push('/tellusmore')}
+              >
+                <Text style={styles.choiceText}>YES</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.choiceButton,
+                  pressed && styles.choicePressed,
+                ]}
+                onPress={() => router.replace('/textinput')}
+              >
+                <Text style={styles.choiceText}>NO</Text>
+              </Pressable>
             </View>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.continueButton,
-                pressed && styles.continuePressedGreen,
-              ]}
-              onPress={() => router.push('/loading')}
-            >
-              <Text style={styles.continueText}>Continue</Text>
-              <Text style={styles.arrow}>→</Text>
-            </Pressable>
 
             <Pressable
               style={({ pressed }) => [

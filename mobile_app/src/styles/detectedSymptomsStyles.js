@@ -23,91 +23,90 @@ export default StyleSheet.create({
   },
 
   headerBar: {
-    width: '90%',
-    height: 55,
-    backgroundColor: '#6F8F83',
-    borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: '92%',
+    height: 60,
+    backgroundColor: '#C87936',
+    borderRadius: 10,
     justifyContent: 'center',
-    marginBottom: 25,
+    alignItems: 'center',
+    marginBottom: 35,
   },
 
   headerText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  headerIcon: {
-    position: 'absolute',
-    right: 25,
-    width: 30,
-    height: 30,
+  symptomBox: {
+    width: '92%',
+    minHeight: 140,
+    backgroundColor: 'rgba(255,255,255,0.75)',
+    borderWidth: 1,
+    borderColor: '#B9A98E',
+    borderRadius: 8,
+    padding: 25,
+    marginBottom: 35,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 
-  inputBox: {
-    width: '88%',
-    height: 250,
-    backgroundColor: '#E6D7BF',
-    borderRadius: 25,
-    padding: 20,
-    marginBottom: 45,
+  symptomText: {
+    fontSize: 18,
+    color: '#000',
+    lineHeight: 30,
+    flex: 1,
+  },
+
+  speakerIcon: {
+    width: 35,
+    height: 35,
+    marginLeft: 10,
+    alignSelf: 'center',
   },
 
   questionText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 18,
+    color: '#111',
+    marginBottom: 12,
   },
 
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-    textAlignVertical: 'top',
-  },
-
-  continueButton: {
-    width: 230,
-    height: 65,
-    backgroundColor: '#E3AD35',
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#000',
+  buttonRow: {
     flexDirection: 'row',
+    gap: 25,
+    marginBottom: 30,
+  },
+
+  choiceButton: {
+    width: 100,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#E8D5A0',
+    borderWidth: 1.5,
+    borderColor: '#D4A96A',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    marginBottom: 25,
   },
 
-  continuePressedGreen: {
-    backgroundColor: '#27AE60',
+  choicePressed: {
+    backgroundColor: '#8B3A1C',
+    borderColor: '#5C2E0A',
     transform: [{ scale: 0.96 }],
   },
 
-  continueText: {
-    fontSize: 24,
+  choiceText: {
+    fontSize: 13,
     fontWeight: 'bold',
-    color: '#000',
-    marginRight: 12,
-  },
-
-  arrow: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#000',
+    color: '#5C2E0A',
   },
 
   backButton: {
-    width: 140,
+    width: 150,
     height: 55,
-    borderRadius: 28,
+    backgroundColor: '#F5EAD8',
+    borderRadius: 30,
     borderWidth: 2,
     borderColor: '#000',
-    backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,

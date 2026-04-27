@@ -8,7 +8,7 @@ export default StyleSheet.create({
 
   wrapper: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
+    paddingTop: StatusBar.currentHeight, // ✅ keep this since it fixed your safe area
   },
 
   background: {
@@ -37,25 +37,41 @@ export default StyleSheet.create({
     color: '#333',
   },
 
+  /* 🔥 CARD BASE */
   card: {
     width: 160,
     height: 130,
-    backgroundColor: '#2E8B7E',
     borderRadius: 20,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 25,
-    elevation: 4,
+
+    // Shadow for Android + iOS
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+
+  /* 🎨 COLORS (MATCH IMAGE) */
+  textCard: {
+    backgroundColor: '#6F8F83',   // green
+    borderColor: '#2E3D36',
   },
 
   voiceCard: {
-    backgroundColor: '#8E6C9A',
+    backgroundColor: '#D9C27A',   // yellow
+    borderColor: '#7A6420',
   },
 
   bodyCard: {
-    backgroundColor: '#D96C8C',
+    backgroundColor: '#C85B3A',   // orange/red
+    borderColor: '#6E1F12',
   },
 
+  /* 👆 PRESS EFFECT */
   cardPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
@@ -71,8 +87,10 @@ export default StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
+    letterSpacing: 1,
   },
 
+  /* 🔻 FOOTER */
   footer: {
     height: 55,
     backgroundColor: '#000',

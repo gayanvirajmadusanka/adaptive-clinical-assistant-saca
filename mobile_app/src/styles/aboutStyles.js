@@ -58,28 +58,27 @@ export default StyleSheet.create({
   },
 
   backButton: {
-    backgroundColor: '#E3AD35',
-    width: 220,
-    height: 70,
+    width: 170,
+    height: 58,
+    backgroundColor: '#F5EAD8',
     borderRadius: 30,
     borderWidth: 2,
     borderColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 5,
-    elevation: 4,
+    elevation: 3,
   },
 
-  backPressedGreen: {
-    backgroundColor: '#27AE60',
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
   backText: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
-    lineHeight: 26,
   },
 });

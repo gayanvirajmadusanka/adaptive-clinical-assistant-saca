@@ -1,0 +1,105 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ImageBackground,
+  Pressable,
+  StatusBar,
+  SafeAreaView,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import styles from '../styles/tellUsMoreStyles';
+
+export default function TellUsMoreScreen() {
+  const router = useRouter();
+  const [painLevel, setPainLevel] = useState(null);
+
+  const options = [
+    { label: 'None', style: 'noneButton', textStyle: 'noneText' },
+    { label: 'A little', style: 'littleButton', textStyle: 'littleText' },
+    { label: 'Moderate', style: 'moderateButton', textStyle: 'lightText' },
+    { label: 'Very bad', style: 'veryBadButton', textStyle: 'lightText' },
+    { label: 'Unbearable', style: 'unbearableButton', textStyle: 'lightText' },
+  ];
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+
+      <View style={styles.wrapper}>
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          <View style={styles.container}>
+            
+            <View style={styles.headerBar}>
+                <Text style={styles.headerText}>Tell Us More</Text>
+             </View>
+
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>PAIN LEVEL</Text>
+              <Text style={styles.question}>How bad is your pain?</Text>
+
+              {options.map((item) => (
+                <Pressable
+                  key={item.label}
+                  style={({ pressed }) => [
+                    styles.answerButton,
+                    styles[item.style],
+                    painLevel === item.label && styles.selectedAnswer,
+                    pressed && styles.pressedAnswer,
+                  ]}
+                  onPress={() => setPainLevel(item.label)}
+                >
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      painLevel === item.label && styles.radioOuterSelected,
+                    ]}
+                  >
+                    {painLevel === item.label && (
+                      <View style={styles.radioInner} />
+                    )}
+                  </View>
+
+                  <Text style={[styles.answerText, styles[item.textStyle]]}>
+                    {item.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.continueButton,
+                pressed && styles.continuePressed,
+              ]}
+            >
+              <Text style={styles.continueText}>Continue</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.footer}>
+            <Pressable
+              style={styles.footerItem}
+              onPress={() => router.replace('/input')}
+            >
+              <Text style={styles.footerIcon}>🏠</Text>
+              <Text style={styles.footerText}>Home</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.footerItem}
+              onPress={() => router.replace('/language')}
+            >
+              <Text style={styles.footerIcon}>🌐</Text>
+              <Text style={styles.footerText}>Language</Text>
+            </Pressable>
+          </View>
+        </ImageBackground>
+      </View>
+    </SafeAreaView>
+  );
+}

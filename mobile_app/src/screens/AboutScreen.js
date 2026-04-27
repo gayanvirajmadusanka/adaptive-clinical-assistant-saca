@@ -57,11 +57,11 @@ export default function AboutScreen() {
             <Pressable
               style={({ pressed }) => [
                 styles.backButton,
-                pressed && styles.backPressedGreen,
+                pressed && styles.backPressedGrey,
               ]}
               onPress={() => router.back()}
             >
-              <Text style={styles.backText}>← Back{'\n'}Yankirri</Text>
+              <Text style={styles.backText}>← Back</Text>
             </Pressable>
           </ScrollView>
         </ImageBackground>
