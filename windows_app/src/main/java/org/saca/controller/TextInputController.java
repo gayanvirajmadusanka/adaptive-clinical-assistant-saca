@@ -53,7 +53,8 @@ public class TextInputController implements Initializable {
             LoadingController loadingCtrl = loader.getController();
 
             loadingCtrl.setTitle(LanguageManager.get("loading_symptom_title"));
-            loadingCtrl.setDuration(3000);
+//            loadingCtrl.setDuration(3000); FIXME This should load with API call
+            loadingCtrl.setDuration(3);
 
             loadingCtrl.setOnComplete(() -> {
                 try {
@@ -65,8 +66,8 @@ public class TextInputController implements Initializable {
                     );
                     Parent resultView = resultLoader.load();
 
-//                    TextResultController resultCtrl = resultLoader.getController();
-//                    resultCtrl.setSymptoms(parseSymptoms(text));
+                    TextResultController resultCtrl = resultLoader.getController();
+                    resultCtrl.setSymptoms(parseSymptoms(text));
 
                     loadingCtrl.getCanvas().getScene().setRoot(resultView);
 
@@ -112,7 +113,6 @@ public class TextInputController implements Initializable {
                     .toList();
         }
 
-        // Single paragraph → split by ". "
         String[] sentences = raw.split("\\.\\s+");
         if (sentences.length > 1) {
             return Arrays.stream(sentences)
@@ -121,7 +121,6 @@ public class TextInputController implements Initializable {
                     .toList();
         }
 
-        // Fallback — single item
         return List.of(raw.trim());
     }
 }
