@@ -7,14 +7,49 @@ import {
   SafeAreaView,
   ImageBackground,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import styles, { resultTheme } from '../styles/resultStyles';
 
 export default function ResultScreen() {
   const router = useRouter();
+  const { painLevel, duration } = useLocalSearchParams();
 
-  const severityLevel = 'moderate';
+  const getSeverityLevel = () => {
+    if (painLevel === 'Unbearable' || painLevel === 'Very bad') {
+      return 'severe';
+    }
+
+    if (
+      painLevel === 'Moderate' ||
+      duration === 'About a week' ||
+      duration === 'More than a week'
+    ) {
+      return 'moderate';
+    }
+
+    return 'mild';
+  };
+
+  const severityLevel = getSeverityLevel();
   const theme = resultTheme[severityLevel];
+
+  const recommendations = {
+    mild: [
+      'Rest and drink enough water.',
+      'Monitor your symptoms.',
+      'Use basic home care if needed.',
+    ],
+    moderate: [
+      'Monitor your symptoms closely.',
+      'Drink water and take rest.',
+      'Visit a clinic if symptoms get worse.',
+    ],
+    severe: [
+      'Seek medical help immediately.',
+      'Call for help if symptoms are serious.',
+      'Do not wait if pain becomes unbearable.',
+    ],
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -27,10 +62,7 @@ export default function ResultScreen() {
           resizeMode="cover"
         >
           <View style={styles.contentWrapper}>
-
             <View style={[styles.resultCard, { backgroundColor: theme.cardBackground }]}>
-
-              {/* 🔥 CENTERED HEADER */}
               <View style={[styles.headerBar, { backgroundColor: theme.header }]}>
                 <Text style={[styles.headerText, { color: theme.headerText }]}>
                   Final Results
@@ -44,20 +76,30 @@ export default function ResultScreen() {
                   </Text>
                 </View>
 
-                {/* 🔥 BIGGER BOX */}
+                {severityLevel === 'severe' && (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.callButton,
+                      pressed && styles.pressedButton,
+                    ]}
+                  >
+                    <Text style={styles.callButtonText}>📞 Call for Help</Text>
+                  </Pressable>
+                )}
+
                 <View style={styles.infoBox}>
                   <Text style={styles.infoTitle}>Recommendations</Text>
-                  <Text style={[styles.fakeLine, { backgroundColor: theme.line }]} />
-                  <Text style={[styles.fakeLineSmall, { backgroundColor: theme.line }]} />
-                  <Text style={[styles.fakeLineTiny, { backgroundColor: theme.line }]} />
+                  {recommendations[severityLevel].map((item) => (
+                    <Text key={item} style={styles.infoText}>• {item}</Text>
+                  ))}
                 </View>
 
-                {/* 🔥 BIGGER BOX */}
                 <View style={styles.infoBox}>
                   <Text style={styles.infoTitle}>Symptoms</Text>
-                  <Text style={[styles.fakeLine, { backgroundColor: theme.line }]} />
-                  <Text style={[styles.fakeLineSmall, { backgroundColor: theme.line }]} />
-                  <Text style={[styles.fakeLineTiny, { backgroundColor: theme.line }]} />
+                  <Text style={styles.infoText}>• Headache</Text>
+                  <Text style={styles.infoText}>• Fever</Text>
+                  <Text style={styles.infoText}>• Body pain</Text>
+                  <Text style={styles.infoText}>• Tiredness</Text>
                 </View>
 
                 <Pressable
@@ -72,13 +114,10 @@ export default function ResultScreen() {
                     Start again
                   </Text>
                 </Pressable>
-
               </View>
             </View>
-
           </View>
 
-          {/* FOOTER */}
           <View style={styles.footer}>
             <Pressable style={styles.footerItem} onPress={() => router.replace('/input')}>
               <Text style={styles.footerIcon}>🏠</Text>
@@ -90,7 +129,6 @@ export default function ResultScreen() {
               <Text style={styles.footerText}>Language</Text>
             </Pressable>
           </View>
-
         </ImageBackground>
       </View>
     </SafeAreaView>

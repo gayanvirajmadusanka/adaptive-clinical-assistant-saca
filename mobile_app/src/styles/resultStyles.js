@@ -1,6 +1,16 @@
 import { StyleSheet, StatusBar } from 'react-native';
 
 export const resultTheme = {
+  severe: {
+    cardBackground: '#8B3A1C',
+    header: '#4A0A04',
+    headerText: '#F5E6C8',
+    severityFill: '#4A0A04',
+    severityText: '#F5E6C8',
+    severityLabel: '⚠ SEVERE — Seek help now',
+    startAgain: '#F5E6C8',
+  },
+
   moderate: {
     cardBackground: '#F5E6C8',
     header: '#8B3A1C',
@@ -8,8 +18,17 @@ export const resultTheme = {
     severityFill: '#C47A3A',
     severityText: '#F5E6C8',
     severityLabel: 'Severity: Moderate',
-    line: '#C47A3A',
     startAgain: '#8B3A1C',
+  },
+
+  mild: {
+    cardBackground: '#F5E6C8',
+    header: '#C47A3A',
+    headerText: '#2C1A0E',
+    severityFill: '#5C8A3C',
+    severityText: '#F5E6C8',
+    severityLabel: 'Severity: Mild',
+    startAgain: '#C47A3A',
   },
 };
 
@@ -33,7 +52,7 @@ export default StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 120,
+    paddingTop: 95,
   },
 
   resultCard: {
@@ -43,11 +62,10 @@ export default StyleSheet.create({
     elevation: 6,
   },
 
-  /* 🔥 CENTER HEADER */
   headerBar: {
     height: 75,
     justifyContent: 'center',
-    alignItems: 'center', // ✅ THIS CENTERS TEXT
+    alignItems: 'center',
   },
 
   headerText: {
@@ -73,7 +91,22 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  /* 🔥 BIGGER BOXES */
+  callButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#F5E6C8',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
+  },
+
+  callButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4A0A04',
+  },
+
   infoBox: {
     width: '100%',
     borderRadius: 10,
@@ -81,7 +114,7 @@ export default StyleSheet.create({
     borderColor: '#D4A96A',
     padding: 18,
     marginBottom: 18,
-    minHeight: 110, // 🔥 ADDED HEIGHT
+    minHeight: 125,
   },
 
   infoTitle: {
@@ -90,27 +123,11 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
-  fakeLine: {
-    width: '80%',
-    height: 7,
-    borderRadius: 3,
-    opacity: 0.35,
-    marginBottom: 10,
-  },
-
-  fakeLineSmall: {
-    width: '65%',
-    height: 7,
-    borderRadius: 3,
-    opacity: 0.35,
-    marginBottom: 10,
-  },
-
-  fakeLineTiny: {
-    width: '50%',
-    height: 7,
-    borderRadius: 3,
-    opacity: 0.35,
+  infoText: {
+    fontSize: 15,
+    color: '#2C1A0E',
+    marginBottom: 7,
+    lineHeight: 20,
   },
 
   startAgainButton: {

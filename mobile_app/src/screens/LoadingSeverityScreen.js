@@ -6,15 +6,19 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import styles from '../styles/loadingStyles';
 
 export default function LoadingSeverityScreen() {
   const router = useRouter();
+  const { painLevel, duration } = useLocalSearchParams();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/result');
+      router.replace({
+        pathname: '/result',
+        params: { painLevel, duration },
+      });
     }, 3000);
 
     return () => clearTimeout(timer);

@@ -33,10 +33,9 @@ export default function TellUsMoreScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-
             <View style={styles.headerBar}>
-                <Text style={styles.headerText}>Tell Us More</Text>
-             </View>
+              <Text style={styles.headerText}>Tell Us More</Text>
+            </View>
 
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>PAIN LEVEL</Text>
@@ -76,25 +75,26 @@ export default function TellUsMoreScreen() {
                 styles.continueButton,
                 pressed && styles.continuePressed,
               ]}
-               onPress={() => router.push('/tellusmore2')}
+              onPress={() => {
+                if (painLevel) {
+                  router.push({
+                    pathname: '/tellusmore2',
+                    params: { painLevel },
+                  });
+                }
+              }}
             >
               <Text style={styles.continueText}>Continue</Text>
             </Pressable>
           </View>
 
           <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/input')}
-            >
+            <Pressable style={styles.footerItem} onPress={() => router.replace('/input')}>
               <Text style={styles.footerIcon}>🏠</Text>
               <Text style={styles.footerText}>Home</Text>
             </Pressable>
 
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/language')}
-            >
+            <Pressable style={styles.footerItem} onPress={() => router.replace('/language')}>
               <Text style={styles.footerIcon}>🌐</Text>
               <Text style={styles.footerText}>Language</Text>
             </Pressable>

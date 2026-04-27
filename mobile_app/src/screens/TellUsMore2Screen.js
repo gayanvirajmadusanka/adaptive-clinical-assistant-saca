@@ -7,11 +7,12 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import styles from '../styles/tellUsMoreStyles';
 
 export default function TellUsMore2Screen() {
   const router = useRouter();
+  const { painLevel } = useLocalSearchParams();
   const [duration, setDuration] = useState(null);
 
   const options = [
@@ -33,18 +34,13 @@ export default function TellUsMore2Screen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-
-            {/* SAME HEADER */}
             <View style={styles.headerBar}>
               <Text style={styles.headerText}>Tell Us More</Text>
             </View>
 
-            {/* 🔥 REPLACED CONTENT */}
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>HOW LONG</Text>
-              <Text style={styles.question}>
-                How long have you felt this way?
-              </Text>
+              <Text style={styles.question}>How long have you felt this way?</Text>
 
               {options.map((item) => (
                 <Pressable
@@ -75,38 +71,35 @@ export default function TellUsMore2Screen() {
               ))}
             </View>
 
-            {/* Continue */}
             <Pressable
               style={({ pressed }) => [
                 styles.continueButton,
                 pressed && styles.continuePressed,
               ]}
-              onPress={() => router.push('/loadingseverity')}
+              onPress={() => {
+                if (duration) {
+                  router.push({
+                    pathname: '/loadingseverity',
+                    params: { painLevel, duration },
+                  });
+                }
+              }}
             >
               <Text style={styles.continueText}>Continue</Text>
             </Pressable>
-
           </View>
 
-          {/* FOOTER */}
           <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/input')}
-            >
+            <Pressable style={styles.footerItem} onPress={() => router.replace('/input')}>
               <Text style={styles.footerIcon}>🏠</Text>
               <Text style={styles.footerText}>Home</Text>
             </Pressable>
 
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/language')}
-            >
+            <Pressable style={styles.footerItem} onPress={() => router.replace('/language')}>
               <Text style={styles.footerIcon}>🌐</Text>
               <Text style={styles.footerText}>Language</Text>
             </Pressable>
           </View>
-
         </ImageBackground>
       </View>
     </SafeAreaView>
