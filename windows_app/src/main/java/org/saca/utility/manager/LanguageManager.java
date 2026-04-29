@@ -1,5 +1,7 @@
 package org.saca.utility.manager;
 
+import org.saca.utility.constant.AppsConstants;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -22,5 +24,22 @@ public class LanguageManager {
 
     public static String get(String key, Object... args) {
         return MessageFormat.format(getBundle().getString(key), args);
+    }
+
+    /**
+     * @return True if the current app language is English
+     */
+    public static boolean isLanguageEnglish() {
+
+        boolean isEnglish = getBundle()
+                .getLocale().getLanguage()
+                .equals(AppsConstants.AppLanguage.EN.getShortDescription());
+
+        return isEnglish;
+    }
+
+    public static AppsConstants.AppLanguage getCurrentLangauge() {
+        return isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN : AppsConstants.AppLanguage.WP;
     }
 }

@@ -93,7 +93,6 @@ public class SidebarController implements Initializable {
     private void toggleSidebar() {
         boolean isVisible = sidebarRoot.isVisible();
 
-        // Persist new state globally so other screens pick it up on load
         NavBarManager.setIsNavBarVisible(!isVisible
                 ? AppsConstants.YesNo.Y
                 : AppsConstants.YesNo.N);
