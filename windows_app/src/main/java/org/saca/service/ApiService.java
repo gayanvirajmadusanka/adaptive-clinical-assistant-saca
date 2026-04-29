@@ -1,32 +1,22 @@
 package org.saca.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import org.saca.model.request.TextInputRQ;
+import org.saca.model.response.TextResultRS;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * ApiService — communicates with the Python Flask symptom detection API.
- * <p>
- * Usage:
- * ApiService.detectSymptoms("I have a headache and fever",
- * symptoms -> { // success — called on background thread
- * Platform.runLater(() -> showResults(symptoms));
- * },
- * error -> { // failure
- * Platform.runLater(() -> showError(error));
- * }
- * );
- */
 public class ApiService {
 
-    private static final String BASE_URL = "http://localhost:5000";
+    private static final String BASE_URL = "http://127.0.0.1:8000";
 
-    private static final String ENDPOINT = "/api/symptoms";
+    private static final String EXTRACT_TEXT_ENDPOINT = "/extract/text";
 
     private static final int TIMEOUT_S = 30;
 
@@ -34,64 +24,32 @@ public class ApiService {
             .connectTimeout(Duration.ofSeconds(TIMEOUT_S))
             .build();
 
-    /**
-     * Send symptom text to the Python API asynchronously.
-     * Callbacks are invoked on a background thread —
-     * wrap UI updates in Platform.runLater().
-     *
-     * @param text      raw symptom text from the user
-     * @param onSuccess called with the list of detected symptoms
-     * @param onError   called with an error message if something goes wrong
-     */
-    public static void detectSymptoms(String text,
-                                      SuccessCallback onSuccess,
-                                      ErrorCallback onError) {
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
+    public static void detectSymptomsText(TextInputRQ textInputRQ,
+                                          SuccessCallback onSuccess,
+                                          ErrorCallback onError) {
         Thread thread = new Thread(() -> {
             try {
-                // ── Build JSON body ──
-                String json = String.format("{\"text\": \"%s\"}",
-                        text.replace("\"", "'").replace("\n", " "));
-
-                // ── Build HTTP request ──
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(BASE_URL + ENDPOINT))
-                        .timeout(Duration.ofSeconds(TIMEOUT_S))
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(json))
-                        .build();
-
-                // ── Send request ──
-                HttpResponse<String> response = client.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofString()
-                );
+                String json = textInputRQ.toJSON();
+                HttpRequest request = buildHttpPostRequest(json, EXTRACT_TEXT_ENDPOINT);
+                HttpResponse<String> response = getHttpResponse(request);
 
                 if (response.statusCode() == 200) {
-                    List<String> symptoms = parseSymptoms(response.body());
-                    onSuccess.onSuccess(symptoms);
+                    TextResultRS result = mapper.readValue(response.body(), TextResultRS.class);
+                    onSuccess.onSuccess(result);
                 } else {
-/*                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }*/
-
-//                    List<String> symptoms = parseSymptoms("{\"symptoms\": [\"Headache\", \"Fever\", \"Sore throat\", \"Fatigue\"]}");
-//                    List<String> symptoms = new ArrayList<>();
-//                    onSuccess.onSuccess(symptoms);
-
-                    onError.onError("API error: HTTP " + response.statusCode()
-                            + "\n" + response.body());
+                    onError.onError(getAPIErrorMsg(response));
                 }
 
             } catch (IOException e) {
-                onError.onError("Cannot connect to API. Is the Python server running?\n"
-                        + e.getMessage());
+                onError.onError(getIOExceptionErrorMsg(e));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                onError.onError("Request interrupted");
+                onError.onError(getInterruptedExceptionErrorMsg());
             } catch (Exception e) {
-                onError.onError("Unexpected error: " + e.getMessage());
+                onError.onError(getUnexpectedErrorMsg(e));
             }
         });
 
@@ -99,40 +57,50 @@ public class ApiService {
         thread.start();
     }
 
-    /**
-     * Parse the JSON response body into a List of symptom strings.
-     * Response format: {"symptoms": ["Headache", "Fever"]}
-     * <p>
-     * Uses manual parsing to avoid adding a JSON library dependency.
-     * Replace with Gson/Jackson if you already have one in your project.
-     */
-    private static List<String> parseSymptoms(String json) {
-        List<String> symptoms = new ArrayList<>();
+    private static HttpRequest buildHttpPostRequest(String json, String endPoint) {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + endPoint))
+                .timeout(Duration.ofSeconds(TIMEOUT_S))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
 
-        // Find the array between [ and ]
-        int start = json.indexOf('[');
-        int end = json.lastIndexOf(']');
+        return httpRequest;
+    }
 
-        if (start == -1 || end == -1) return symptoms;
+    private static HttpResponse<String> getHttpResponse(HttpRequest request) throws IOException, InterruptedException {
+        HttpResponse<String> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
 
-        String array = json.substring(start + 1, end);
+        return response;
+    }
 
-        // Split by "," and clean up quotes
-        String[] items = array.split(",");
-        for (String item : items) {
-            String cleaned = item.trim()
-                    .replaceAll("^\"|\"$", "") // remove surrounding quotes
-                    .trim();
-            if (!cleaned.isEmpty()) {
-                symptoms.add(cleaned);
-            }
-        }
+    private static String getAPIErrorMsg(HttpResponse<String> response) {
+        String errorMsg = "API error: HTTP " + response.statusCode()
+                + "\n" + response.body();
+        return errorMsg;
+    }
 
-        return symptoms;
+    private static String getIOExceptionErrorMsg(IOException e) {
+        String errorMsg = "Cannot connect to API. Is the Python server running?\n"
+                + e.getMessage();
+        return errorMsg;
+    }
+
+    private static String getInterruptedExceptionErrorMsg() {
+        String errorMsg = "Request interrupted";
+        return errorMsg;
+    }
+
+    private static String getUnexpectedErrorMsg(Exception e) {
+        String errorMsg = "Unexpected error: " + e.getMessage();
+        return errorMsg;
     }
 
     public interface SuccessCallback {
-        void onSuccess(List<String> symptoms);
+        void onSuccess(TextResultRS result);
     }
 
     public interface ErrorCallback {

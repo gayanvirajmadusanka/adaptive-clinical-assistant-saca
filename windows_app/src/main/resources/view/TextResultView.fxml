@@ -73,7 +73,6 @@
                                   spacing="10"
                                   HBox.hgrow="ALWAYS"
                                   styleClass="result-symptoms-box">
-                                <!-- Populated by controller -->
                             </VBox>
 
                             <VBox alignment="CENTER" styleClass="result-speaker-box">
