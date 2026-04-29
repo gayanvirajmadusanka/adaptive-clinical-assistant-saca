@@ -1,6 +1,8 @@
 import json
 import os
 
+from backend.api.services.audio_service import get_question_audio, QUESTION_AUDIO_KEY_MAP
+
 _questions_path = os.path.join(os.path.dirname(__file__), '../../data/questions.json')
 with open(_questions_path) as file:
     QUESTIONS_DATA = json.load(file)
@@ -16,6 +18,7 @@ LANG_EN = "en"
 LANG_WP = "wp"
 OPTIONS = "options"
 TYPE = "type"
+VOICE_B64 = "voice_b64"
 
 _QUESTION_LOOKUP = {
     question[ID]: question
@@ -76,14 +79,9 @@ def _format_question(question: dict, language: str) -> dict:
     """
     text = question.get(TEXT_WP) if language == LANG_WP else question.get(TEXT)
 
-    formatted = {
-        ID: question[ID],
-        TEXT: text or question[TEXT],
-    }
-
     if OPTIONS in question:
-        formatted[TYPE] = 'multiple_choice'
-        formatted[OPTIONS] = [
+        q_type = 'multiple_choice'
+        options = [
             {
                 ID: option[ID],
                 TEXT: option.get(TEXT_WP) if language == LANG_WP else option.get(TEXT)
@@ -91,13 +89,22 @@ def _format_question(question: dict, language: str) -> dict:
             for option in question[OPTIONS]
         ]
     else:
-        formatted[TYPE] = 'yes_no'
-        formatted[OPTIONS] = [
+        q_type = 'yes_no'
+        options = [
             {ID: question[ID] + 'y', TEXT: "Yes" if language == LANG_EN else "Yuwayi"},
             {ID: question[ID] + 'n', TEXT: "No" if language == LANG_EN else "Lawa"}
         ]
 
-    return formatted
+    audio_key = QUESTION_AUDIO_KEY_MAP.get(question[ID], question[ID])
+    voice_b64 = get_question_audio(audio_key, options, language)
+
+    return {
+        ID: question[ID],
+        TEXT: text or question[TEXT],
+        TYPE: q_type,
+        OPTIONS: options,
+        VOICE_B64: voice_b64,
+    }
 
 
 def resolve_answers(answers: list, symptoms: list) -> dict:
