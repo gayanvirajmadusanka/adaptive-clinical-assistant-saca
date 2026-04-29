@@ -8,9 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.saca.model.response.TextResultRS;
-import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
 import org.saca.utility.manager.TTSManager;
@@ -21,23 +19,22 @@ import java.util.ResourceBundle;
 
 public class TextResultController implements Initializable {
 
-    @FXML private SidebarController sidebarController;
-    @FXML private VBox              symptomsBox;
+    @FXML
+    private SidebarController sidebarController;
+
+    @FXML
+    private VBox symptomsBox;
 
     private TextResultRS symptomResult;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        TextResultRS saved = NavBarManager.getTextResultRS();
-        if (saved != null) {
-            setSymptomResult(saved);
+        TextResultRS textResultRS = NavBarManager.getTextResultRS();
+        if (textResultRS != null) {
+            setSymptomResult(textResultRS);
         }
     }
 
-    /**
-     * Called by TextInputController after loader.load().
-     * Also saves to NavBarManager so language reloads can restore it.
-     */
     public void setSymptomResult(TextResultRS result) {
         this.symptomResult = result;
         NavBarManager.setTextResultRS(result);
@@ -57,7 +54,6 @@ public class TextResultController implements Initializable {
         }
     }
 
-    /* ── Speaker ── */
     @FXML
     private void handleSpeak() {
         if (symptomResult == null) return;
@@ -74,20 +70,16 @@ public class TextResultController implements Initializable {
         }
     }
 
-    /* ── YES ── */
     @FXML
     private void handleYes() {
         System.out.println("User confirmed symptoms");
-        // Navigate to next screen
     }
 
-    /* ── NO → back to TextInput ── */
     @FXML
     private void handleNo() {
         navigateToTextInput(sidebarController.getRoot().getScene());
     }
 
-    /* ── Back ── */
     @FXML
     private void handleBack(ActionEvent event) {
         navigateToTextInput(((Node) event.getSource()).getScene());
@@ -105,11 +97,5 @@ public class TextResultController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /* ── Exit ── */
-    @FXML
-    private void handleExit() {
-        if (DialogManager.confirmExit()) System.exit(0);
     }
 }

@@ -26,27 +26,24 @@ public class TextInputController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
+
     @FXML
     private Button expandBtn;
+
     @FXML
     private TextArea symptomInput;
 
     private Node sceneNode;
+
     private Stage stage;
+
     private String lastTypedText = "";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         sceneNode = sidebarController.getRoot();
-        // Note: restoreText() sets symptomInput directly after load()
-        // so no need to check lastTypedText here
     }
 
-    /**
-     * Called by showErrorAndReturn() on the newly loaded controller
-     * to restore the user's typed text after navigating back.
-     * Works because it runs AFTER initialize() and BEFORE setRoot().
-     */
     public void restoreText(String text) {
         this.lastTypedText = text;
         if (symptomInput != null) {
@@ -55,7 +52,6 @@ public class TextInputController implements Initializable {
         }
     }
 
-    /* ── Continue → Loading → API → Result ── */
     @FXML
     private void handleContinue() {
         String text = symptomInput.getText().trim();
