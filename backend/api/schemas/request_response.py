@@ -30,6 +30,11 @@ class ExtractAudioRequest(BaseModel):
     language: str = 'en'
 
 
+class ExtractImageRequest(BaseModel):
+    symptoms: list[str]
+    language: str = 'en'
+
+
 # response schemas
 class QuestionOption(BaseModel):
     id: str
@@ -68,4 +73,4 @@ class ExtractResponse(BaseModel):
     confidence: float
     input_type: str
     language: str
-    voice_b64: str # base64 encoded voice file
+    voice_b64: str  # base64 encoded voice file
