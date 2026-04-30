@@ -5,19 +5,59 @@ import {
   ImageBackground,
   StatusBar,
   SafeAreaView,
+  Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from '../styles/loadingStyles';
+
+const API_URL = 'http://10.227.128.20:8000'; 
+// Replace with your own laptop IPv4 address.
+// Example: http://192.168.0.12:8000
 
 export default function LoadingScreen() {
   const router = useRouter();
+  const { text, language } = useLocalSearchParams();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/detectedsymptoms');
-    }, 3000);
+    const sendSymptomsToApi = async () => {
+      try {
+        const response = await fetch(`${API_URL}/extract/text`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: text,
+            language: language || 'en',
+          }),
+        });
 
-    return () => clearTimeout(timer);
+        if (!response.ok) {
+          throw new Error('Failed to connect to FastAPI');
+        }
+
+        const data = await response.json();
+
+        router.replace({
+          pathname: '/detectedsymptoms',
+          params: {
+            symptoms_en: JSON.stringify(data.symptoms_en || []),
+            symptoms_wp: JSON.stringify(data.symptoms_wp || []),
+            confidence: String(data.confidence || ''),
+            language: data.language || language || 'en',
+          },
+        });
+      } catch (error) {
+        Alert.alert(
+          'Connection Error',
+          'Could not connect to FastAPI. Check your backend server and IP address.'
+        );
+
+        router.replace('/textinput');
+      }
+    };
+
+    sendSymptomsToApi();
   }, []);
 
   return (
@@ -40,7 +80,7 @@ export default function LoadingScreen() {
             </View>
 
             <Text style={styles.bottomText}>
-              This may take a few minutes please wait...
+              Please wait while we detect your symptoms...
             </Text>
           </View>
         </ImageBackground>

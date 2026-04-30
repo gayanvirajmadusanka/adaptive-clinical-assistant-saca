@@ -10,7 +10,7 @@ import {
   Modal,
   Animated,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
@@ -18,6 +18,27 @@ import styles from '../styles/detectedSymptomsStyles';
 export default function DetectedSymptomsScreen() {
   const router = useRouter();
   const { t, setLang } = useLanguage();
+  const params = useLocalSearchParams();
+
+  const symptomsEn = params.symptoms_en
+    ? JSON.parse(params.symptoms_en)
+    : [];
+
+  const symptomsWp = params.symptoms_wp
+    ? JSON.parse(params.symptoms_wp)
+    : [];
+
+  const responseLanguage = params.language || 'en';
+
+  const symptomsToShow =
+    responseLanguage === 'wp' && symptomsWp.length > 0
+      ? symptomsWp
+      : symptomsEn;
+
+  const symptomText =
+    symptomsToShow.length > 0
+      ? symptomsToShow.map((item) => `• ${item}`).join('\n')
+      : 'No symptoms detected';
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
@@ -28,8 +49,9 @@ export default function DetectedSymptomsScreen() {
     Speech.stop();
 
     Speech.speak(
-      t('detected_speak') ||
-        'Detected symptoms are headache, fever, body pain, and tiredness.',
+      symptomsToShow.length > 0
+        ? `Detected symptoms are ${symptomsToShow.join(', ')}`
+        : 'No symptoms detected',
       {
         language: 'en-AU',
         rate: 0.9,
@@ -79,13 +101,7 @@ export default function DetectedSymptomsScreen() {
             </View>
 
             <View style={styles.symptomBox}>
-              <Text style={styles.symptomText}>
-                • {t('headache')}{'\n'}
-                • {t('fever')}{'\n'}
-                • {t('body_pain')}{'\n'}
-                • {t('tiredness')}
-              </Text>
-     
+              <Text style={styles.symptomText}>{symptomText}</Text>
 
               <Pressable
                 style={({ pressed }) => [
@@ -110,7 +126,15 @@ export default function DetectedSymptomsScreen() {
                   styles.choiceButton,
                   pressed && styles.choicePressed,
                 ]}
-                onPress={() => router.push('/tellusmore')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/tellusmore',
+                    params: {
+                      symptoms_en: JSON.stringify(symptomsEn),
+                      symptoms_wp: JSON.stringify(symptomsWp),
+                    },
+                  })
+                }
               >
                 <Text style={styles.choiceText}>{t('yes')}</Text>
               </Pressable>

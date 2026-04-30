@@ -10,6 +10,7 @@ import {
   TextInput,
   Modal,
   Animated,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useLanguage } from '../context/LanguageContext';
@@ -17,8 +18,9 @@ import styles from '../styles/textInputStyles';
 
 export default function TextInputScreen() {
   const router = useRouter();
-  const { t, setLang } = useLanguage();
+  const { t, setLang, lang } = useLanguage();
 
+  const [description, setDescription] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
 
@@ -50,6 +52,21 @@ export default function TextInputScreen() {
     }
   };
 
+  const handleContinue = () => {
+    if (!description.trim()) {
+      Alert.alert('Missing information', 'Please describe your symptoms first.');
+      return;
+    }
+
+    router.push({
+      pathname: '/loading',
+      params: {
+        text: description,
+        language: lang || 'en',
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
@@ -78,6 +95,8 @@ export default function TextInputScreen() {
               <TextInput
                 style={styles.textInput}
                 multiline
+                value={description}
+                onChangeText={setDescription}
                 placeholder={t('text_placeholder')}
                 placeholderTextColor="#555"
               />
@@ -88,7 +107,7 @@ export default function TextInputScreen() {
                 styles.continueButton,
                 pressed && styles.continuePressedGreen,
               ]}
-              onPress={() => router.push('/loading')}
+              onPress={handleContinue}
             >
               <Text style={styles.continueText}>{t('continue')}</Text>
               <Text style={styles.arrow}>→</Text>
@@ -166,9 +185,7 @@ export default function TextInputScreen() {
                   </Text>
                 </Pressable>
 
-                <Text style={styles.confirmText}>
-                  {t('change_language')}
-                </Text>
+                <Text style={styles.confirmText}>{t('change_language')}</Text>
 
                 <View style={styles.modalButtonRow}>
                   <Pressable style={styles.cancelButton} onPress={closeModal}>
