@@ -1,8 +1,16 @@
 {
-  "ngarru": "headache",
-  "mayi": "stomach pain",
-  "jaru": "chest pain",
-  "pirli": "back pain",
-  "maju": "limb pain",
-  "yapa": "body pain"
+  "jurru": "headache",
+  "kata": "headache",
+  "walu": "headache",
+  "nguku": "neck stiffness",
+  "mangarli": "chest pain",
+  "miyalu": "stomach pain",
+  "kilpirli": "arm pain",
+  "wirlki": "jaw pain",
+  "mulyu": "runny nose",
+  "langa": "ear pain",
+  "milpa": "eye pain",
+  "waninja": "sore throat",
+  "pawiyi": "back pain",
+  "palka": "body pain"
 }

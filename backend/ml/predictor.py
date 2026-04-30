@@ -3,6 +3,8 @@ import pickle
 import numpy as np
 import scipy.sparse
 
+from backend.api.services.audio_service import get_severity_audio
+
 DOCTOR_CONSULTATION = "Doctor Consultation"
 OTC_DRUG = "OTC Drug"
 MILD = "Mild"
@@ -117,13 +119,17 @@ class TriagePredictor:
             MODERATE  # safe default - always escalate if unknown
         )
 
+        # get severity audio for the result screen
+        voice_b64 = get_severity_audio(severity, language)
+
         return {
             'recommendation': RECOMMENDATION_TRANSLATIONS[recommendation][language],
             'severity': SEVERITY_TRANSLATIONS[severity][language],
             'confidence': float(f"{confidence:.4f}"),
             'recommended_action': RECOMMENDED_ACTIONS[severity][language],
             'has_critical': bool(has_critical),
-            'intensity_signal': intensity_signal
+            'intensity_signal': intensity_signal,
+            'voice_b64': voice_b64,
         }
 
     @staticmethod

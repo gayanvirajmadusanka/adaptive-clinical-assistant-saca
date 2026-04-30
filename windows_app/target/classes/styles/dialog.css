@@ -1,0 +1,54 @@
+/* Main dialog background */
+.exit-dialog {
+    -fx-background-color: #F5E6C8;
+}
+
+/* Header section background */
+.exit-dialog .header-panel {
+    -fx-background-color: #8B3A1C;
+    -fx-padding: 15;
+}
+
+/* Header text */
+.exit-dialog .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+/* Content area */
+.exit-dialog .content.label {
+    -fx-text-fill: #5C2E0A;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+
+    /* top right bottom left */
+    -fx-padding: 20 20 5 20;
+}
+
+/* Button container spacing */
+.exit-dialog .button-bar {
+    /* reduced bottom spacing */
+    -fx-padding: 0 0 10 0;
+}
+
+/* Buttons */
+.exit-dialog .button {
+    -fx-background-color: #8B3A1C;
+    -fx-text-fill: white;
+
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+
+    -fx-padding: 8 20 8 20;
+
+    -fx-cursor: hand;
+}
+
+/* Button hover */
+.exit-dialog .button:hover {
+    -fx-background-color: #A64B22;
+}

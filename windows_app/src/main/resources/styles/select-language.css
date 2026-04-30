@@ -1,0 +1,73 @@
+.language-title {
+    -fx-font-family: "Kreon";
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
+}
+
+.warlpiri-button {
+    -fx-background-color: #8B3A1C;
+    -fx-font-family: "jsMath-cmbx10";
+    -fx-text-fill: #F5E6C8;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 35;
+    -fx-border-radius: 35;
+    -fx-border-color: #5C2E0A;
+    -fx-border-width: 2px;
+    -fx-border-style: solid;
+    -fx-padding: 15 40 15 40;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 6, 0, 0, 2);
+}
+
+.warlpiri-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-background-color: #a04520;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.30), 10, 0, 0, 3);
+}
+
+.warlpiri-button:pressed {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-background-color: #722e14;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 4, 0, 0, 1);
+}
+
+/* ── English button — warm cream ── */
+.english-button {
+    -fx-background-color: #E8D5A0;
+    -fx-font-family: "jsMath-cmbx10";
+    -fx-text-fill: #5C2E0A;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 35;
+    -fx-border-radius: 35;
+    -fx-border-color: #D4A96A;
+    -fx-border-width: 2px;
+    -fx-border-style: solid;
+    -fx-padding: 15 40 15 40;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 6, 0, 0, 2);
+}
+
+.english-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-background-color: #f0dfaa;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.30), 10, 0, 0, 3);
+}
+
+.english-button:pressed {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-background-color: #d4c080;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 4, 0, 0, 1);
+}
