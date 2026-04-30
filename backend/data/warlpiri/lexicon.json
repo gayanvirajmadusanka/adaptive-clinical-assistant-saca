@@ -12,71 +12,175 @@
     "type": "pronoun"
   },
   "yapa": {
-    "meaning": "person/body",
+    "meaning": "person",
     "type": "pronoun"
   },
-  "ngarru": {
+  "jurru": {
     "meaning": "head",
     "type": "body_part"
   },
-  "mayi": {
-    "meaning": "stomach",
+  "kata": {
+    "meaning": "head",
     "type": "body_part"
   },
-  "jaru": {
+  "walu": {
+    "meaning": "head",
+    "type": "body_part"
+  },
+  "nguku": {
+    "meaning": "neck",
+    "type": "body_part"
+  },
+  "mangarli": {
     "meaning": "chest",
     "type": "body_part"
   },
-  "pirli": {
+  "miyalu": {
+    "meaning": "stomach",
+    "type": "body_part"
+  },
+  "kilpirli": {
+    "meaning": "arm",
+    "type": "body_part"
+  },
+  "wirlki": {
+    "meaning": "jaw",
+    "type": "body_part"
+  },
+  "mulyu": {
+    "meaning": "nose",
+    "type": "body_part"
+  },
+  "langa": {
+    "meaning": "ear",
+    "type": "body_part"
+  },
+  "milpa": {
+    "meaning": "eye",
+    "type": "body_part"
+  },
+  "waninja": {
+    "meaning": "throat",
+    "type": "body_part"
+  },
+  "pawiyi": {
     "meaning": "back",
     "type": "body_part"
   },
-  "maju": {
-    "meaning": "limb",
+  "palka": {
+    "meaning": "body",
     "type": "body_part"
   },
-  "wiri": {
-    "meaning": "pain/sick",
+  "purrkunypa": {
+    "meaning": "pain",
     "type": "symptom"
   },
-  "wita": {
-    "meaning": "mild pain",
+  "rdurrurlpu": {
+    "meaning": "fever",
     "type": "symptom"
   },
-  "karlarra": {
-    "meaning": "cold/chills",
+  "walpawalpa": {
+    "meaning": "headache",
     "type": "symptom"
   },
-  "yarlkurra": {
-    "meaning": "dizzy",
+  "kurruru": {
+    "meaning": "dizziness",
     "type": "symptom"
   },
-  "pakarninja": {
+  "tiirnki": {
+    "meaning": "unconscious",
+    "type": "symptom"
+  },
+  "kantalkantal": {
+    "meaning": "stiff",
+    "type": "symptom"
+  },
+  "nguurlnguurlpa": {
+    "meaning": "breathless",
+    "type": "symptom"
+  },
+  "kuntulpinyi": {
+    "meaning": "cough",
+    "type": "symptom"
+  },
+  "ngarlungarlu": {
+    "meaning": "nausea",
+    "type": "symptom"
+  },
+  "yurlkulyu": {
     "meaning": "vomiting",
     "type": "symptom"
   },
-  "karrinja": {
-    "meaning": "weakness",
+  "jinirrpa": {
+    "meaning": "diarrhoea",
     "type": "symptom"
   },
-  "wantimi": {
-    "meaning": "fainting",
+  "mirrmirr": {
+    "meaning": "shivering/chills",
     "type": "symptom"
   },
-  "nyinami": {
-    "meaning": "breathing difficulty",
+  "nantu": {
+    "meaning": "thirsty/dehydrated",
+    "type": "symptom"
+  },
+  "mata": {
+    "meaning": "tired/weak",
+    "type": "symptom"
+  },
+  "rampaku": {
+    "meaning": "weak",
+    "type": "symptom"
+  },
+  "kirakarrimi": {
+    "meaning": "swelling",
+    "type": "symptom"
+  },
+  "mardalmardal": {
+    "meaning": "rash",
+    "type": "symptom"
+  },
+  "yayirri": {
+    "meaning": "itchy",
+    "type": "symptom"
+  },
+  "ngamanjimanji": {
+    "meaning": "bleeding",
+    "type": "symptom"
+  },
+  "jaarl": {
+    "meaning": "blood",
+    "type": "symptom"
+  },
+  "jaarlkurlu": {
+    "meaning": "with blood",
+    "type": "symptom"
+  },
+  "jirrjinti": {
+    "meaning": "sneezing",
+    "type": "symptom"
+  },
+  "rdulpu": {
+    "meaning": "runny",
+    "type": "symptom"
+  },
+  "kiri": {
+    "meaning": "sore/painful",
+    "type": "symptom"
+  },
+  "minjinpa": {
+    "meaning": "urine",
     "type": "symptom"
   },
   "wiya": {
-    "meaning": "not",
+    "meaning": "not/no",
     "type": "negation"
   },
   "lawa": {
-    "meaning": "none",
+    "meaning": "none/no",
     "type": "negation"
   },
-  "kari": {
-    "meaning": "cannot",
+  "kula": {
+    "meaning": "not/no",
     "type": "negation"
   }
 }
