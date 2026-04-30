@@ -80,11 +80,12 @@ export default function DetectedSymptomsScreen() {
 
             <View style={styles.symptomBox}>
               <Text style={styles.symptomText}>
-                • headache{'\n'}
-                • fever{'\n'}
-                • body pain{'\n'}
-                • tiredness
+                • {t('headache')}{'\n'}
+                • {t('fever')}{'\n'}
+                • {t('body_pain')}{'\n'}
+                • {t('tiredness')}
               </Text>
+     
 
               <Pressable
                 style={({ pressed }) => [
