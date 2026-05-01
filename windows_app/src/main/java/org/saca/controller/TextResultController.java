@@ -12,9 +12,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.request.QuestionFetchRQ;
+import org.saca.model.request.TextInputRQ;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
+import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
@@ -27,6 +29,7 @@ public class TextResultController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
+
     @FXML
     private AudioOverlayController audioOverlayController;
 
@@ -40,7 +43,18 @@ public class TextResultController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         TextResultRS saved = NavBarManager.getTextResultRS();
-        if (saved != null) setSymptomResult(saved);
+        if (saved == null) return;
+
+        String savedLang = saved.getLanguage();
+        String currentLang = LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription();
+
+        if (savedLang != null && !savedLang.equals(currentLang)) {
+            reFetchSymptoms();
+        } else {
+            setSymptomResult(saved);
+        }
     }
 
     public void setSymptomResult(TextResultRS result) {
@@ -61,9 +75,39 @@ public class TextResultController implements Initializable {
         }
     }
 
+    private void reFetchSymptoms() {
+        String savedText = NavBarManager.getLastSymptomText();
+
+        if (savedText == null || savedText.isBlank()) {
+            TextResultRS cached = NavBarManager.getTextResultRS();
+            if (cached != null) setSymptomResult(cached);
+            return;
+        }
+
+        Label loading = new Label(LanguageManager.get("loading_symptom_title"));
+        loading.getStyleClass().add("result-symptom-item");
+        symptomsBox.getChildren().setAll(loading);
+
+        TextInputRQ rq = new TextInputRQ();
+        rq.setText(savedText);
+
+        ApiService.detectSymptomsText(
+                rq,
+                result -> Platform.runLater(() -> setSymptomResult(result)),
+                errorMsg -> Platform.runLater(() -> {
+                    TextResultRS cached = NavBarManager.getTextResultRS();
+                    if (cached != null) setSymptomResult(cached);
+                    else DialogManager.errorDialog("Connection Error",
+                            "Could not reload symptoms", errorMsg);
+                })
+        );
+    }
+
     @FXML
     private void handleSpeak() {
-        if (symptomResult == null) return;
+        if (symptomResult == null) {
+            return;
+        }
 
         if (audioOverlayController.isPlaying()) {
             audioOverlayController.stopAndHide();
@@ -81,7 +125,9 @@ public class TextResultController implements Initializable {
 
     @FXML
     private void handleYes() {
-        if (symptomResult == null) return;
+        if (symptomResult == null) {
+            return;
+        }
 
         stage = (Stage) sidebarController.getRoot().getScene().getWindow();
 
@@ -110,11 +156,8 @@ public class TextResultController implements Initializable {
 
                     errorMsg -> Platform.runLater(() -> {
                         loadingCtrl.stop();
-                        DialogManager.errorDialog(
-                                "Connection Error",
-                                "Could not load questions",
-                                errorMsg
-                        );
+                        DialogManager.errorDialog("Connection Error",
+                                "Could not load questions", errorMsg);
                         try {
                             FXMLLoader rl = new FXMLLoader(
                                     getClass().getResource("/view/TextResultView.fxml"),
@@ -185,11 +228,7 @@ public class TextResultController implements Initializable {
 
     private QuestionFetchRQ buildQuestionFetchRQ() {
         QuestionFetchRQ questionFetchRQ = new QuestionFetchRQ();
-        if (LanguageManager.isLanguageEnglish()) {
-            questionFetchRQ.setSymptoms(symptomResult.getSymptomsEn());
-        } else {
-            questionFetchRQ.setSymptoms(symptomResult.getSymptomsWp());
-        }
+        questionFetchRQ.setSymptoms(symptomResult.getSymptomsEn());
         return questionFetchRQ;
     }
 }

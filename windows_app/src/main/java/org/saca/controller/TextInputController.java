@@ -63,6 +63,7 @@ public class TextInputController implements Initializable {
 
         stage = (Stage) sceneNode.getScene().getWindow();
         lastTypedText = text;
+        NavBarManager.setLastSymptomText(text);
 
         try {
             NavBarManager.setCurrentView("/view/LoadingView.fxml");
@@ -106,7 +107,6 @@ public class TextInputController implements Initializable {
     }
 
     private void navigateToResult(TextResultRS result) {
-
         if (result == null
                 || (CommonUtil.isListEmpty(result.getSymptomsEn())
                 && CommonUtil.isListEmpty(result.getSymptomsWp()))) {

@@ -14,6 +14,8 @@ public class NavBarManager {
 
     private static QuestionsRS questionsRS;
 
+    private static String lastSymptomText = "";
+
     public static AppsConstants.YesNo getIsNavBarVisible() {
         return isNavBarVisible;
     }
@@ -48,5 +50,13 @@ public class NavBarManager {
 
     public static void setQuestionsRS(QuestionsRS questionsRS) {
         NavBarManager.questionsRS = questionsRS;
+    }
+
+    public static String getLastSymptomText() {
+        return lastSymptomText;
+    }
+
+    public static void setLastSymptomText(String text) {
+        lastSymptomText = text;
     }
 }
