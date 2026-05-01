@@ -17,7 +17,7 @@ import styles from '../styles/detectedSymptomsStyles';
 
 export default function DetectedSymptomsScreen() {
   const router = useRouter();
-  const { t, setLang } = useLanguage();
+  const { t, lang, setLang } = useLanguage();
   const params = useLocalSearchParams();
 
   const symptomsEn = params.symptoms_en
@@ -28,12 +28,17 @@ export default function DetectedSymptomsScreen() {
     ? JSON.parse(params.symptoms_wp)
     : [];
 
-  const responseLanguage = params.language || 'en';
+  console.log('Current language:', lang);
+  console.log('English symptoms:', symptomsEn);
+  console.log('Warlpiri symptoms:', symptomsWp);
 
   const symptomsToShow =
-    responseLanguage === 'wp' && symptomsWp.length > 0
+    lang === 'wp'
       ? symptomsWp
-      : symptomsEn;
+      : symptomsEn.map((item) => {
+          const key = item.toLowerCase().replaceAll(' ', '_');
+          return t(key);
+        });
 
   const symptomText =
     symptomsToShow.length > 0
@@ -50,7 +55,7 @@ export default function DetectedSymptomsScreen() {
 
     Speech.speak(
       symptomsToShow.length > 0
-        ? `Detected symptoms are ${symptomsToShow.join(', ')}`
+        ? `${t('detected_title')} ${symptomsToShow.join(', ')}`
         : 'No symptoms detected',
       {
         language: 'en-AU',
@@ -132,6 +137,7 @@ export default function DetectedSymptomsScreen() {
                     params: {
                       symptoms_en: JSON.stringify(symptomsEn),
                       symptoms_wp: JSON.stringify(symptomsWp),
+                      language: lang,
                     },
                   })
                 }
