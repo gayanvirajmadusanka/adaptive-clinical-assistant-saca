@@ -262,6 +262,7 @@ public class TellUsMoreTextController implements Initializable {
 
     private String getLevelStyle(int index, int total) {
         if (total <= 1) return "option-level-0";
+        if (total == 2) return index == 0 ? "option-level-0" : "option-level-1";
         int level = Math.round((float) index / (total - 1) * 4);
         return "option-level-" + level;
     }
