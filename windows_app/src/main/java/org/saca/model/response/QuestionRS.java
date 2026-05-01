@@ -13,10 +13,13 @@ public class QuestionRS {
     private String text;
 
     @JsonProperty("type")
-    private String type; // "multiple_choice" or "yes_no"
+    private String type;
 
     @JsonProperty("options")
     private List<OptionRS> options;
+
+    @JsonProperty("voice_b64")
+    private String voiceB64;
 
     public String getId() {
         return id;
@@ -48,5 +51,13 @@ public class QuestionRS {
 
     public void setOptions(List<OptionRS> o) {
         this.options = o;
+    }
+
+    public String getVoiceB64() {
+        return voiceB64;
+    }
+
+    public void setVoiceB64(String voiceB64) {
+        this.voiceB64 = voiceB64;
     }
 }

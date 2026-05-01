@@ -15,10 +15,10 @@ import org.saca.model.request.QuestionFetchRQ;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
+import org.saca.service.AudioService;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
-import org.saca.utility.manager.TTSManager;
 
 import java.net.URL;
 import java.util.List;
@@ -28,7 +28,6 @@ public class TextResultController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
-
     @FXML
     private VBox symptomsBox;
 
@@ -38,10 +37,8 @@ public class TextResultController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        TextResultRS textResultRS = NavBarManager.getTextResultRS();
-        if (textResultRS != null) {
-            setSymptomResult(textResultRS);
-        }
+        TextResultRS saved = NavBarManager.getTextResultRS();
+        if (saved != null) setSymptomResult(saved);
     }
 
     public void setSymptomResult(TextResultRS result) {
@@ -52,7 +49,6 @@ public class TextResultController implements Initializable {
 
     private void displaySymptoms(List<String> symptoms) {
         symptomsBox.getChildren().clear();
-
         if (symptoms == null || symptoms.isEmpty()) return;
 
         for (String symptom : symptoms) {
@@ -67,16 +63,22 @@ public class TextResultController implements Initializable {
     private void handleSpeak() {
         if (symptomResult == null) return;
 
-        List<String> symptoms = symptomResult.getSymptomsForCurrentLanguage();
-        if (symptoms == null || symptoms.isEmpty()) return;
-
-        String text = String.join(". ", symptoms);
-
-        if (TTSManager.isSpeaking()) {
-            TTSManager.stop();
-        } else {
-            TTSManager.speak(text);
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            return;
         }
+
+        String voiceB64 = symptomResult.getVoiceB64();
+
+        if (voiceB64 == null || voiceB64.isBlank()) {
+            System.out.println("No voice_b64 in response");
+            return;
+        }
+
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> System.err.println("Audio error: " + err)
+        );
     }
 
     @FXML
@@ -115,7 +117,6 @@ public class TextResultController implements Initializable {
                                 "Could not load questions",
                                 errorMsg
                         );
-
                         try {
                             FXMLLoader rl = new FXMLLoader(
                                     getClass().getResource("/view/TextResultView.fxml"),
@@ -149,6 +150,7 @@ public class TextResultController implements Initializable {
     }
 
     private void navigateToTextInput(Scene scene) {
+        AudioService.stop();
         try {
             NavBarManager.setCurrentView("/view/TextInputView.fxml");
             NavBarManager.clearTextResultRS();
@@ -185,13 +187,11 @@ public class TextResultController implements Initializable {
 
     private QuestionFetchRQ buildQuestionFetchRQ() {
         QuestionFetchRQ questionFetchRQ = new QuestionFetchRQ();
-
         if (LanguageManager.isLanguageEnglish()) {
             questionFetchRQ.setSymptoms(symptomResult.getSymptomsEn());
         } else {
             questionFetchRQ.setSymptoms(symptomResult.getSymptomsWp());
         }
-
         return questionFetchRQ;
     }
 }
