@@ -15,7 +15,6 @@ import org.saca.model.request.QuestionFetchRQ;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
-import org.saca.service.AudioService;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
@@ -28,6 +27,9 @@ public class TextResultController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
+    @FXML
+    private AudioOverlayController audioOverlayController;
+
     @FXML
     private VBox symptomsBox;
 
@@ -63,22 +65,18 @@ public class TextResultController implements Initializable {
     private void handleSpeak() {
         if (symptomResult == null) return;
 
-        if (AudioService.isPlaying()) {
-            AudioService.stop();
+        if (audioOverlayController.isPlaying()) {
+            audioOverlayController.stopAndHide();
             return;
         }
 
         String voiceB64 = symptomResult.getVoiceB64();
-
         if (voiceB64 == null || voiceB64.isBlank()) {
-            System.out.println("No voice_b64 in response");
+            System.out.println("No voice_b64 available");
             return;
         }
 
-        AudioService.playBase64Wav(
-                voiceB64,
-                err -> System.err.println("Audio error: " + err)
-        );
+        audioOverlayController.play(voiceB64);
     }
 
     @FXML
@@ -150,7 +148,7 @@ public class TextResultController implements Initializable {
     }
 
     private void navigateToTextInput(Scene scene) {
-        AudioService.stop();
+        audioOverlayController.stopAndHide();
         try {
             NavBarManager.setCurrentView("/view/TextInputView.fxml");
             NavBarManager.clearTextResultRS();
