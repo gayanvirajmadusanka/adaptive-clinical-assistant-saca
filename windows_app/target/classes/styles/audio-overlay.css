@@ -1,34 +1,22 @@
-/* ============================================================
-   audio-overlay.css — Reusable audio playing overlay styles
-   ============================================================ */
-
-/* ── Full screen dark backdrop ── */
 .audio-overlay {
     -fx-background-color: rgba(0, 0, 0, 0.55);
 }
 
-/* ── Compact card ── */
 .audio-overlay-card {
     -fx-background-color: #f5ead4;
     -fx-background-radius: 14;
     -fx-border-color: #c8b99a;
     -fx-border-radius: 14;
     -fx-border-width: 2;
-    -fx-padding: 14 36 14 36;   /* top/bottom padding reduced */
+    -fx-padding: 14 36 14 36;
     -fx-pref-width: 420px;
     -fx-max-width: 420px;
-    -fx-pref-height: 220px;     /* fixed height */
+    -fx-pref-height: 220px;
     -fx-max-height: 220px;
-    -fx-spacing: 8;             /* tighter spacing between children */
+    -fx-spacing: 8;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 16, 0, 0, 3);
 }
 
-/* ── Speaker emoji ── */
-.audio-overlay-icon {
-    -fx-font-size: 26px;
-}
-
-/* ── "Playing audio..." label ── */
 .audio-overlay-text {
     -fx-font-family: "Kreon", "Georgia", serif;
     -fx-font-size: 18px;
@@ -36,7 +24,6 @@
     -fx-text-fill: #3a2a1a;
 }
 
-/* ── Stop button ── */
 .audio-cancel-btn {
     -fx-background-color: #8B3A1C;
     -fx-text-fill: #F5E6C8;
