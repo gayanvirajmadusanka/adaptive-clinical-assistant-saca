@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,10 @@ import {
   Image,
   Modal,
   Animated,
+  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
@@ -28,9 +29,7 @@ export default function DetectedSymptomsScreen() {
     ? JSON.parse(params.symptoms_wp)
     : [];
 
-  console.log('Current language:', lang);
-  console.log('English symptoms:', symptomsEn);
-  console.log('Warlpiri symptoms:', symptomsWp);
+  const voiceFileUri = params.voice_file_uri || null;
 
   const symptomsToShow =
     lang === 'wp'
@@ -47,22 +46,73 @@ export default function DetectedSymptomsScreen() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
+  const [sound, setSound] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
-  const speakSymptoms = () => {
-    Speech.stop();
-
-    Speech.speak(
-      symptomsToShow.length > 0
-        ? `${t('detected_title')} ${symptomsToShow.join(', ')}`
-        : 'No symptoms detected',
-      {
-        language: 'en-AU',
-        rate: 0.9,
+  // 🔊 PLAY AUDIO
+  const playVoiceAudio = async () => {
+    try {
+      if (!voiceFileUri) {
+        Alert.alert('Audio Error', 'Audio file not found.');
+        return;
       }
-    );
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+      });
+
+      if (sound) {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+      }
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: voiceFileUri },
+        {
+          shouldPlay: true,
+          volume: 1.0,
+        }
+      );
+
+      setSound(newSound);
+
+      newSound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.didJustFinish) {
+          await newSound.unloadAsync();
+          setSound(null);
+        }
+      });
+    } catch (error) {
+      console.log('Audio play error:', error);
+      Alert.alert('Audio Error', 'Unable to play the voice audio.');
+    }
   };
+
+  // 🛑 STOP AUDIO
+  const stopCurrentAudio = async () => {
+    try {
+      if (sound) {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+      }
+    } catch (error) {
+      console.log('Stop audio error:', error);
+    }
+  };
+
+  // 🔥 AUTO STOP when screen unmounts (back, swipe, etc.)
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        sound.stopAsync();
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
 
   const openModal = () => {
     setSelectedLang(null);
@@ -113,7 +163,7 @@ export default function DetectedSymptomsScreen() {
                   styles.speakerButton,
                   pressed && styles.speakerPressed,
                 ]}
-                onPress={speakSymptoms}
+                onPress={playVoiceAudio}
               >
                 <Image
                   source={require('../../assets/images/speaker.png')}
@@ -131,7 +181,12 @@ export default function DetectedSymptomsScreen() {
                   styles.choiceButton,
                   pressed && styles.choicePressed,
                 ]}
-                onPress={() =>
+                onPress={async () => {
+                  if (loading) return;
+                  setLoading(true);
+
+                  await stopCurrentAudio();
+
                   router.push({
                     pathname: '/tellusmore',
                     params: {
@@ -139,8 +194,8 @@ export default function DetectedSymptomsScreen() {
                       symptoms_wp: JSON.stringify(symptomsWp),
                       language: lang,
                     },
-                  })
-                }
+                  });
+                }}
               >
                 <Text style={styles.choiceText}>{t('yes')}</Text>
               </Pressable>
@@ -150,7 +205,10 @@ export default function DetectedSymptomsScreen() {
                   styles.choiceButton,
                   pressed && styles.choicePressed,
                 ]}
-                onPress={() => router.replace('/textinput')}
+                onPress={async () => {
+                  await stopCurrentAudio();
+                  router.replace('/textinput');
+                }}
               >
                 <Text style={styles.choiceText}>{t('no')}</Text>
               </Pressable>
@@ -161,7 +219,10 @@ export default function DetectedSymptomsScreen() {
                 styles.backButton,
                 pressed && styles.backPressedGrey,
               ]}
-              onPress={() => router.back()}
+              onPress={async () => {
+                await stopCurrentAudio();
+                router.back();
+              }}
             >
               <Text style={styles.backText}>{t('back')}</Text>
             </Pressable>
@@ -170,7 +231,10 @@ export default function DetectedSymptomsScreen() {
           <View style={styles.footer}>
             <Pressable
               style={styles.footerItem}
-              onPress={() => router.replace('/input')}
+              onPress={async () => {
+                await stopCurrentAudio();
+                router.replace('/input');
+              }}
             >
               <Text style={styles.footerIcon}>🏠</Text>
               <Text style={styles.footerText}>{t('home')}</Text>
@@ -199,13 +263,7 @@ export default function DetectedSymptomsScreen() {
                   ]}
                   onPress={() => setSelectedLang('en')}
                 >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'en' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
+                  <Text style={styles.languageOptionText}>
                     {t('english')}
                   </Text>
                 </Pressable>
@@ -217,18 +275,14 @@ export default function DetectedSymptomsScreen() {
                   ]}
                   onPress={() => setSelectedLang('wp')}
                 >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'wp' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
+                  <Text style={styles.languageOptionText}>
                     {t('warlpiri')}
                   </Text>
                 </Pressable>
 
-                <Text style={styles.confirmText}>{t('change_language')}</Text>
+                <Text style={styles.confirmText}>
+                  {t('change_language')}
+                </Text>
 
                 <View style={styles.modalButtonRow}>
                   <Pressable style={styles.cancelButton} onPress={closeModal}>

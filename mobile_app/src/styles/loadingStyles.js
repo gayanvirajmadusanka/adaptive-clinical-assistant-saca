@@ -30,28 +30,20 @@ export default StyleSheet.create({
     marginBottom: 60,
   },
 
-  circle: {
+  circleWrapper: {
     width: 190,
     height: 190,
-    borderRadius: 95,
-    borderWidth: 15,
-    borderColor: '#D6A24B',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
   },
 
-  progressArc: {
+  circleContent: {
     position: 'absolute',
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    borderWidth: 15,
-    borderLeftColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderRightColor: '#B65A24',
-    borderTopColor: '#B65A24',
-    transform: [{ rotate: '35deg' }],
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   percent: {
@@ -62,9 +54,9 @@ export default StyleSheet.create({
 
   loadingText: {
     fontSize: 12,
-    letterSpacing: 2,
+    letterSpacing: 3,
     color: '#8B5A2B',
-    marginTop: 5,
+    marginTop: 6,
   },
 
   bottomText: {
