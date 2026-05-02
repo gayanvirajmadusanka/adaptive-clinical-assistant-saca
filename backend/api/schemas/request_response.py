@@ -18,6 +18,12 @@ class Answer(BaseModel):
     answer_id: str
 
 
+class AnswerAudioRequest(BaseModel):
+    audio_b64: str
+    question_id: str
+    language: str = 'en'
+
+
 class ClassifyRequest(BaseModel):
     symptoms: list[str]
     answers: list[Answer]
@@ -56,6 +62,14 @@ class Question(BaseModel):
 class QuestionsResponse(BaseModel):
     language: str
     questions: list[Question]
+
+
+class AnswerAudioResponse(BaseModel):
+    question_id: str
+    answer_id: str | None = None
+    confidence: float
+    recognized: bool
+    message: str | None = None
 
 
 class ClassifyResponse(BaseModel):

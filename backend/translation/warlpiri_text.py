@@ -1,8 +1,8 @@
 """
-Module for translating Warlpiri text to English translation
-Uses a hybrid pipeline comprising 4 levels.
+Module for translating Warlpiri text to English.
+Uses a hybrid pipeline comprising 4 levels:
   Level 1 - exact phrase match (phrase_map.json)
-  Level 2 - word-level lexicon rules (lexicon.json + maps)
+  Level 2 - word-level lexicon rules (lexicon.json + symptom_map.json)
   Level 3 - fuzzy full phrase match (handles typos in full phrases)
   Level 4 - fuzzy token match (handles typos at word level)
 """
@@ -12,41 +12,48 @@ import os
 
 from rapidfuzz import process
 
-# define language directory path
-_DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'warlpiri')
+_DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "warlpiri")
 
 
 def _load(filename: str) -> dict:
     path = os.path.join(_DATA_DIR, filename)
-    with open(path, 'r', encoding='utf-8') as file:
+    with open(path, encoding="utf-8") as file:
         return json.load(file)
 
 
-# load data files
-PHRASE_MAP = _load('phrase_map.json')
-LEXICON = _load('lexicon.json')
-BODY_PART_MAP = _load('body_part_map.json')
-SYMPTOM_MAP = _load('symptom_map.json')
+PHRASE_MAP = _load("phrase_map.json")
+LEXICON = _load("lexicon.json")
+SYMPTOM_MAP = _load("symptom_map.json")
 
 # derived sets
 NEGATION_WORDS = {
     word for word, data in LEXICON.items()
-    if data['type'] == 'negation'
+    if data["type"] == "negation"
 }
 SUBJECT_WORDS = {
-    word: data['meaning'].split('/')[0]
+    word: data["meaning"].split("/")[0]
     for word, data in LEXICON.items()
-    if data['type'] == 'pronoun'
+    if data["type"] == "pronoun"
 }
 
-# define thresholds
-THRESHOLD_LEXICON = 0.50  # min token coverage for lexicon match
-THRESHOLD_FUZZY_PHRASE = 0.68  # min score for fuzzy phrase match
-THRESHOLD_FUZZY_TOKEN = 0.80  # min score per token for fuzzy token match
+# build wp label -> english string lookup for token matching
+_WP_TO_EN = {
+    value["wp"].lower(): value["en"]
+    for value in SYMPTOM_MAP.values()
+}
+
+# body part words from lexicon - used to infer conditions
+_BODY_PART_WORDS = {
+    word for word, data in LEXICON.items()
+    if data["type"] == "body_part"
+}
+
+THRESHOLD_LEXICON = 0.50
+THRESHOLD_FUZZY_PHRASE = 0.68
+THRESHOLD_FUZZY_TOKEN = 0.80
 
 
-#  Level 1 - Exact phrase match
-def _level1_exact(query: str) -> dict or None:
+def _level1_exact(query: str) -> dict | None:
     """
     Match exact phrases.
     :param query: Input text query.
@@ -54,15 +61,14 @@ def _level1_exact(query: str) -> dict or None:
     """
     if query in PHRASE_MAP:
         return {
-            'translated_text': PHRASE_MAP[query],
-            'confidence': 1.0,
-            'match_type': 'exact_phrase'
+            "translated_text": PHRASE_MAP[query],
+            "confidence": 1.0,
+            "match_type": "exact_phrase"
         }
     return None
 
 
-#  Level 2 - Word-level lexicon + rule engine
-def _build_translation(tokens: list) -> dict or None:
+def _build_translation(tokens: list) -> dict | None:
     """
     Core rule engine. Builds an English sentence from
     a list of known Warlpiri tokens.
@@ -77,64 +83,56 @@ def _build_translation(tokens: list) -> dict or None:
 
     has_negation = any(token in NEGATION_WORDS for token in tokens)
 
-    # body parts -> conditions
-    body_conditions = [
-        BODY_PART_MAP[token] for token in tokens
-        if token in BODY_PART_MAP
-    ]
+    conditions = []
 
-    # symptoms not already covered by body part
-    symptom_conditions = [
-        SYMPTOM_MAP[token] for token in tokens
-        if token in SYMPTOM_MAP and token not in BODY_PART_MAP
-    ]
-
-    conditions = body_conditions + symptom_conditions
+    for token in tokens:
+        if token in _BODY_PART_WORDS:
+            # body part word - look up meaning from lexicon
+            body_meaning = LEXICON[token]["meaning"]
+            conditions.append(f"{body_meaning} pain")
+        elif token in _WP_TO_EN:
+            # symptom word - look up english from symptom_map
+            conditions.append(_WP_TO_EN[token])
 
     if not conditions:
         return None
 
-    # determine subject - use first pronoun found
-    subject = 'I'
+    subject = "I"
     for token in tokens:
         if token in SUBJECT_WORDS:
             subject = SUBJECT_WORDS[token]
             break
 
-    condition_str = ' and '.join(conditions)
-
-    if has_negation:
-        translation = f'{subject} do not have {condition_str}'
-    else:
-        translation = f'{subject} have {condition_str}'
+    condition_str = " and ".join(conditions)
+    translation = (
+        f"{subject} do not have {condition_str}"
+        if has_negation
+        else f"{subject} have {condition_str}"
+    )
 
     return {
-        'translated_text': translation,
-        'confidence': round(coverage, 3),
-        'match_type': 'lexicon',
-        'has_negation': has_negation,
-        'subject': subject,
-        'conditions': conditions,
-        'tokens_matched': known_tokens
+        "translated_text": translation,
+        "confidence": round(coverage, 3),
+        "match_type": "lexicon",
+        "has_negation": has_negation,
+        "subject": subject,
+        "conditions": conditions,
+        "tokens_matched": known_tokens
     }
 
 
-def _level2_lexicon(tokens: list) -> dict or None:
+def _level2_lexicon(tokens: list) -> dict | None:
     """
     Apply rule-based translation using lexicon coverage.
-    Uses known tokens to construct an English sentence via rule engine.
     :param tokens: list of tokenized Warlpiri words.
     :return: translated dictionary or None if insufficient coverage.
     """
-    result = _build_translation(tokens)
-    return result
+    return _build_translation(tokens)
 
 
-#  Level 3 - Fuzzy full phrase match
-def _level3_fuzzy_phrase(query: str) -> dict or None:
+def _level3_fuzzy_phrase(query: str) -> dict | None:
     """
     Perform fuzzy matching against known full phrases.
-    Helps handle minor spelling errors or variations in input.
     :param query: Input text query.
     :return: translated dictionary or None if confidence below threshold.
     """
@@ -143,19 +141,17 @@ def _level3_fuzzy_phrase(query: str) -> dict or None:
 
     if confidence >= THRESHOLD_FUZZY_PHRASE:
         return {
-            'translated_text': PHRASE_MAP[match],
-            'matched_phrase': match,
-            'confidence': round(confidence, 3),
-            'match_type': 'fuzzy_phrase'
+            "translated_text": PHRASE_MAP[match],
+            "matched_phrase": match,
+            "confidence": round(confidence, 3),
+            "match_type": "fuzzy_phrase"
         }
     return None
 
 
-#  Level 4 - Fuzzy token match
-def _level4_fuzzy_tokens(tokens: list) -> dict or None:
+def _level4_fuzzy_tokens(tokens: list) -> dict | None:
     """
-    Perform fuzzy matching against known full phrases.
-    Helps handle minor spelling errors or variations in input.
+    Perform fuzzy token matching against lexicon keys.
     :param tokens: list of tokenized Warlpiri words.
     :return: translated dictionary or None if confidence below threshold.
     """
@@ -184,9 +180,9 @@ def _level4_fuzzy_tokens(tokens: list) -> dict or None:
     if result:
         # adjust confidence by average token match score
         avg_token_score = sum(token_scores) / len(token_scores)
-        result['confidence'] = round(result['confidence'] * avg_token_score, 3)
-        result['match_type'] = 'fuzzy_token'
-        result['token_scores'] = {
+        result["confidence"] = round(result["confidence"] * avg_token_score, 3)
+        result["match_type"] = "fuzzy_token"
+        result["token_scores"] = {
             original: score
             for original, score in zip(tokens, token_scores)
         }
@@ -195,19 +191,18 @@ def _level4_fuzzy_tokens(tokens: list) -> dict or None:
     return None
 
 
-#  Main entry point
 def translate(warlpiri_input: str) -> dict:
     """
-    Translate Warlpiri text input to English using a 4-level pipeline rule.
+    Translate Warlpiri text input to English using a 4-level pipeline.
     :param warlpiri_input: Raw Warlpiri text string from user
-    :return: Dict with translated_text (or None if no match)
+    :return: Dict with translated_text and match metadata
     """
     query = warlpiri_input.lower().strip()
     tokens = query.split()
 
     base = {
-        'input_type': 'text',
-        'original': warlpiri_input,
+        "input_type": "text",
+        "original": warlpiri_input,
     }
 
     # Level 1 - exact phrase
@@ -233,8 +228,8 @@ def translate(warlpiri_input: str) -> dict:
     # no match at any level
     return {
         **base,
-        'translated_text': None,
-        'confidence': 0.0,
-        'match_type': 'no_match',
-        'message': 'Phrase not recognised. Please use the body map or voice input.'
+        "translated_text": None,
+        "confidence": 0.0,
+        "match_type": "no_match",
+        "message": "Phrase not recognised. Please use the body map or voice input."
     }

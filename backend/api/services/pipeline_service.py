@@ -13,7 +13,7 @@ with open(_symptom_map_path, encoding='utf-8') as f:
 _ID_TO_WP = {key: value['wp'] for key, value in _SYMPTOM_MAP.items()}
 
 predictor = TriagePredictor(
-    model_path=os.path.join(_BASE_DIR, '../models', 'stacking_mlp_xgb.pkl'),
+    model_path=os.path.join(_BASE_DIR, '../models', 'stacking_mlp_et_xgb.pkl'),
     tfidf_path=os.path.join(_BASE_DIR, '../models', 'tfidf_vectorizer.pkl'),
     le_path=os.path.join(_BASE_DIR, '../models', 'label_encoder.pkl')
 )
