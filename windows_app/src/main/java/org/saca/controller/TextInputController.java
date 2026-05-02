@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import org.saca.model.request.TextInputRQ;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
+import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
@@ -63,7 +64,7 @@ public class TextInputController implements Initializable {
 
         stage = (Stage) sceneNode.getScene().getWindow();
         lastTypedText = text;
-        NavBarManager.setLastSymptomText(text);
+        CacheManager.setLastSymptomText(text);
 
         try {
             NavBarManager.setCurrentView("/view/LoadingView.fxml");
@@ -120,7 +121,7 @@ public class TextInputController implements Initializable {
 
         try {
             NavBarManager.setCurrentView("/view/TextResultView.fxml");
-            NavBarManager.setTextResultRS(result);
+            CacheManager.setTextResultRS(result);
 
             FXMLLoader resultLoader = new FXMLLoader(
                     getClass().getResource("/view/TextResultView.fxml"),

@@ -12,13 +12,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.saca.model.request.AnswerRQ;
+import org.saca.model.request.ClassifyRQ;
 import org.saca.model.request.QuestionFetchRQ;
-import org.saca.model.response.OptionRS;
-import org.saca.model.response.QuestionRS;
-import org.saca.model.response.QuestionsRS;
-import org.saca.model.response.TextResultRS;
+import org.saca.model.response.*;
 import org.saca.service.ApiService;
 import org.saca.utility.constant.AppsConstants;
+import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
@@ -29,52 +29,37 @@ import java.util.*;
 public class TellUsMoreTextController implements Initializable {
 
     private final Map<String, String> selectedAnswers = new HashMap<>();
-
     private final List<Button> currentOptionButtons = new ArrayList<>();
 
     @FXML
     private SidebarController sidebarController;
-
     @FXML
     private AudioOverlayController audioOverlayController;
-
     @FXML
     private Label progressLabel;
-
     @FXML
     private ProgressBar progressBar;
-
     @FXML
     private VBox questionCard;
-
     @FXML
     private Label questionText;
-
     @FXML
     private VBox optionsBox;
-
     @FXML
     private Button continueBtn;
-
     @FXML
     private Button questionSpeakerBtn;
 
     private QuestionsRS questionsRS;
-
     private List<QuestionRS> questions = new ArrayList<>();
-
     private int currentIndex = 0;
-
     private String currentSelectedId = null;
-
     private Stage stage;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        stage = null;
-
-        QuestionsRS saved = NavBarManager.getQuestionsRS();
-        TextResultRS result = NavBarManager.getTextResultRS();
+        QuestionsRS saved = CacheManager.getQuestionsRS();
+        TextResultRS result = CacheManager.getTextResultRS();
 
         if (saved != null) {
             String savedLang = saved.getLanguage();
@@ -96,36 +81,29 @@ public class TellUsMoreTextController implements Initializable {
     public void setQuestions(QuestionsRS questionsRS) {
         this.questionsRS = questionsRS;
         this.questions = questionsRS.getQuestions();
-        NavBarManager.setQuestionsRS(questionsRS);
+        CacheManager.setQuestionsRS(questionsRS);
         currentIndex = 0;
         selectedAnswers.clear();
         showQuestion(currentIndex);
     }
 
     private void showQuestion(int index) {
-        if (questions == null || questions.isEmpty()) {
-            return;
-        }
+        if (questions == null || questions.isEmpty()) return;
 
         audioOverlayController.stopAndHide();
 
         QuestionRS question = questions.get(index);
         int total = questions.size();
 
-        // Question progress
         progressLabel.setText("Question " + (index + 1) + " of " + total);
         progressBar.setProgress((double) (index + 1) / total);
 
-        // Question text
         questionText.setText(question.getText());
 
-        // Show/hide speaker button based on whether voice_b64 exists
-        boolean hasAudio = question.getVoiceB64() != null
-                && !question.getVoiceB64().isBlank();
+        boolean hasAudio = question.getVoiceB64() != null && !question.getVoiceB64().isBlank();
         questionSpeakerBtn.setVisible(hasAudio);
         questionSpeakerBtn.setManaged(hasAudio);
 
-        // Build options
         optionsBox.getChildren().clear();
         currentOptionButtons.clear();
         currentSelectedId = selectedAnswers.get(question.getId());
@@ -149,36 +127,23 @@ public class TellUsMoreTextController implements Initializable {
 
     @FXML
     private void handleQuestionSpeak() {
-        if (questions == null || questions.isEmpty()) {
-            return;
-        }
-
+        if (questions == null || questions.isEmpty()) return;
         QuestionRS current = questions.get(currentIndex);
         String voiceB64 = current.getVoiceB64();
+        if (voiceB64 == null || voiceB64.isBlank()) return;
 
-        if (voiceB64 == null || voiceB64.isBlank()) {
-            return;
-        }
-
-        if (audioOverlayController.isPlaying()) {
-            audioOverlayController.stopAndHide();
-        } else {
-            audioOverlayController.play(voiceB64);
-        }
+        if (audioOverlayController.isPlaying()) audioOverlayController.stopAndHide();
+        else audioOverlayController.play(voiceB64);
     }
 
-    private Button buildOptionButton(OptionRS option,
-                                     int index,
-                                     int total,
-                                     String questionId) {
+    private Button buildOptionButton(OptionRS option, int index, int total, String questionId) {
         Button btn = new Button("  ●  " + option.getText());
         btn.getStyleClass().addAll("option-btn", getLevelStyle(index, total));
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setUserData(option.getId());
 
         btn.setOnAction(e -> {
-            currentOptionButtons.forEach(b ->
-                    b.getStyleClass().remove("option-btn-selected"));
+            currentOptionButtons.forEach(b -> b.getStyleClass().remove("option-btn-selected"));
             btn.getStyleClass().add("option-btn-selected");
             currentSelectedId = option.getId();
             selectedAnswers.put(questionId, option.getId());
@@ -193,9 +158,9 @@ public class TellUsMoreTextController implements Initializable {
 
         if (!selectedAnswers.containsKey(current.getId())) {
             DialogManager.warningDialog(
-                    "No Answer",
-                    "Please select an answer",
-                    "Choose one of the options before continuing."
+                    LanguageManager.get("no_answer"),
+                    LanguageManager.get("please_select_an_answer"),
+                    LanguageManager.get("choose_one_of_the_options_before_continuing")
             );
             return;
         }
@@ -204,8 +169,87 @@ public class TellUsMoreTextController implements Initializable {
             currentIndex++;
             showQuestion(currentIndex);
         } else {
-            System.out.println("All answers: " + selectedAnswers);
-            // TODO: navigate to next screen or call submit API
+            submitAnswers();
+        }
+    }
+
+    private void submitAnswers() {
+        TextResultRS textResult = CacheManager.getTextResultRS();
+        if (textResult == null) return;
+
+        stage = (Stage) questionCard.getScene().getWindow();
+
+        List<AnswerRQ> answerList = selectedAnswers.entrySet().stream()
+                .map(e -> new AnswerRQ(e.getKey(), e.getValue()))
+                .collect(java.util.stream.Collectors.toList());
+
+        CacheManager.setSavedAnswers(answerList);
+
+        ClassifyRQ classifyRQ = new ClassifyRQ();
+        classifyRQ.setSymptoms(textResult.getSymptomsEn());
+        classifyRQ.setAnswers(answerList);
+        classifyRQ.setLanguage(LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription());
+
+        try {
+            NavBarManager.setCurrentView("/view/LoadingView.fxml");
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/view/LoadingView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            Parent loadingView = loader.load();
+            LoadingController loadingCtrl = loader.getController();
+            loadingCtrl.setTitle(LanguageManager.get("loading_symptom_title"));
+            loadingCtrl.setDuration(Integer.MAX_VALUE);
+
+            ApiService.classify(
+                    classifyRQ,
+                    classifyRS -> Platform.runLater(() -> {
+                        loadingCtrl.stop();
+                        navigateToFinalResult(classifyRS);
+                    }),
+                    errorMsg -> Platform.runLater(() -> {
+                        loadingCtrl.stop();
+                        DialogManager.errorDialog("Connection Error",
+                                "Could not submit answers", errorMsg);
+                        try {
+                            FXMLLoader rl = new FXMLLoader(
+                                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                                    LanguageManager.getBundle()
+                            );
+                            stage.getScene().setRoot(rl.load());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    })
+            );
+
+            stage.getScene().setRoot(loadingView);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateToFinalResult(ClassifyRS classifyRS) {
+        try {
+            NavBarManager.setCurrentView("/view/FinalResultView.fxml");
+            CacheManager.setClassifyRS(classifyRS);
+
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/view/FinalResultView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            Parent view = loader.load();
+
+            FinalResultController ctrl = loader.getController();
+            ctrl.setResult(classifyRS);
+
+            stage.getScene().setRoot(view);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -232,32 +276,26 @@ public class TellUsMoreTextController implements Initializable {
 
     private void fetchQuestions(TextResultRS symptomResult) {
         if (symptomResult == null) return;
-
         questionText.setText("Loading questions...");
         optionsBox.getChildren().clear();
 
-        ApiService.fetchQuestions(
-                buildQuestionFetchRQ(symptomResult),
+        QuestionFetchRQ rq = new QuestionFetchRQ();
+        rq.setSymptoms(symptomResult.getSymptomsEn());
+
+        ApiService.fetchQuestions(rq,
                 questionsRS -> Platform.runLater(() -> {
                     selectedAnswers.clear();
                     setQuestions(questionsRS);
                 }),
                 errorMsg -> Platform.runLater(() -> {
-                    DialogManager.errorDialog("Connection Error",
-                            "Could not load questions", errorMsg);
-                    QuestionsRS prev = NavBarManager.getQuestionsRS();
+                    DialogManager.errorDialog("Connection Error", "Could not load questions", errorMsg);
+                    QuestionsRS prev = CacheManager.getQuestionsRS();
                     if (prev != null) {
                         selectedAnswers.clear();
                         setQuestions(prev);
                     }
                 })
         );
-    }
-
-    private QuestionFetchRQ buildQuestionFetchRQ(TextResultRS textResultRS) {
-        QuestionFetchRQ rq = new QuestionFetchRQ();
-        rq.setSymptoms(textResultRS.getSymptomsEn());
-        return rq;
     }
 
     private String getLevelStyle(int index, int total) {

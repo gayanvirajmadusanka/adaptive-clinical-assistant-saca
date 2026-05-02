@@ -1,0 +1,241 @@
+package org.saca.controller;
+
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.saca.model.request.ClassifyRQ;
+import org.saca.model.response.ClassifyRS;
+import org.saca.model.response.TextResultRS;
+import org.saca.service.ApiService;
+import org.saca.utility.constant.AppsConstants;
+import org.saca.utility.manager.CacheManager;
+import org.saca.utility.manager.DialogManager;
+import org.saca.utility.manager.LanguageManager;
+import org.saca.utility.manager.NavBarManager;
+
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
+public class FinalResultController implements Initializable {
+
+    @FXML
+    private SidebarController sidebarController;
+
+    @FXML
+    private AudioOverlayController audioOverlayController;
+
+    @FXML
+    private StackPane bgPane;
+
+    @FXML
+    private Label severityLabel;
+
+    @FXML
+    private Button callBtn;
+
+    @FXML
+    private Label recommendationLabel;
+
+    @FXML
+    private Label recommendedActionLabel;
+
+    @FXML
+    private VBox symptomsBox;
+
+    @FXML
+    private Button recSpeakerBtn;
+
+    private ClassifyRS result;
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        ClassifyRS cached = CacheManager.getClassifyRS();
+        if (cached == null) return;
+
+        String savedLang = cached.getLanguage() != null ? cached.getLanguage() : "";
+        String currentLang = LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription();
+
+        if (!savedLang.isEmpty() && !savedLang.equalsIgnoreCase(currentLang)) {
+            reFetchClassify(cached);
+        } else {
+            setResult(cached);
+        }
+    }
+
+    public void setResult(ClassifyRS result) {
+        this.result = result;
+        CacheManager.setClassifyRS(result);
+        renderResult(result);
+    }
+
+    private void reFetchClassify(ClassifyRS cached) {
+        symptomsBox.getChildren().clear();
+        Label loading = new Label(LanguageManager.get("loading_symptom_title"));
+        loading.getStyleClass().add("symptom-item");
+        symptomsBox.getChildren().add(loading);
+
+        TextResultRS textResult = CacheManager.getTextResultRS();
+        ClassifyRQ rq = new ClassifyRQ();
+        rq.setSymptoms(textResult.getSymptomsEn());
+        rq.setAnswers(CacheManager.getSavedAnswers());
+        rq.setLanguage(LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription());
+
+        ApiService.classify(
+                rq,
+                classifyRS -> Platform.runLater(() -> setResult(classifyRS)),
+                errorMsg -> Platform.runLater(() -> {
+                    setResult(cached);
+                    DialogManager.errorDialog("Connection Error", "Could not reload results", errorMsg);
+                })
+        );
+    }
+
+    private void renderResult(ClassifyRS rs) {
+        AppsConstants.SeverityMode severityMode = AppsConstants.SeverityMode.resolveSeverityMode(rs.getSeverityMode());
+
+        applyTheme();
+
+        switch (severityMode) {
+            case SEVERE -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append("⚠  ");
+                sb.append(LanguageManager.get("severe"));
+                sb.append(" - ");
+                sb.append(LanguageManager.get("seek_help_now"));
+                severityLabel.setText(sb.toString());
+                severityLabel.getStyleClass().setAll("severity-banner", "severity-severe");
+            }
+            case MODERATE -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append(LanguageManager.get("severity"));
+                sb.append(" : ");
+                sb.append(LanguageManager.get("moderate"));
+                severityLabel.setText(sb.toString());
+                severityLabel.getStyleClass().setAll("severity-banner", "severity-moderate");
+            }
+            default -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append(LanguageManager.get("severity"));
+                sb.append(" : ");
+                sb.append(LanguageManager.get("mild"));
+                severityLabel.setText(sb.toString());
+                severityLabel.getStyleClass().setAll("severity-banner", "severity-mild");
+            }
+        }
+
+        boolean showCall = severityMode == AppsConstants.SeverityMode.SEVERE && rs.isHasCritical();
+        callBtn.setVisible(showCall);
+        callBtn.setManaged(showCall);
+
+        recommendationLabel.setText(rs.getRecommendation() != null ? rs.getRecommendation() : "");
+        recommendedActionLabel.setText(rs.getRecommendedAction() != null ? rs.getRecommendedAction() : "");
+
+        boolean hasAudio = rs.getVoiceB64() != null && !rs.getVoiceB64().isBlank();
+        recSpeakerBtn.setVisible(hasAudio);
+        recSpeakerBtn.setManaged(hasAudio);
+
+        symptomsBox.getChildren().clear();
+        List<String> symptoms = rs.getSymptoms();
+        if (symptoms != null) {
+            for (String s : symptoms) {
+                Label lbl = new Label("•  " + s);
+                lbl.getStyleClass().add("symptom-item");
+                lbl.setWrapText(true);
+                lbl.setMaxWidth(Double.MAX_VALUE);
+                symptomsBox.getChildren().add(lbl);
+            }
+        }
+    }
+
+    private void applyTheme() {
+        StackPane root = getRootPane();
+        if (root == null) {
+            return;
+        }
+
+        root.getStyleClass().add("root");
+    }
+
+    private StackPane getRootPane() {
+        try {
+            return (StackPane) bgPane.getScene().getRoot();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @FXML
+    private void handleSpeak() {
+        if (result == null) return;
+
+        if (audioOverlayController.isPlaying()) {
+            audioOverlayController.stopAndHide();
+            return;
+        }
+
+        String voiceB64 = result.getVoiceB64();
+        if (voiceB64 == null || voiceB64.isBlank()) return;
+
+        audioOverlayController.play(voiceB64);
+    }
+
+    @FXML
+    private void handleCallForHelp() {
+        DialogManager.warningDialog(
+                LanguageManager.get("call_for_help"),
+                LanguageManager.get("call_000"),
+                LanguageManager.get("seek_emergency_medical_attention_immediately_or_call_000")
+        );
+    }
+
+    @FXML
+    private void handleStartAgain() {
+        audioOverlayController.stopAndHide();
+        CacheManager.clearClassifyRS();
+        CacheManager.clearTextResultRS();
+        CacheManager.clearQuestionsRS();
+        CacheManager.clearSavedAnswers();
+
+        try {
+            NavBarManager.setCurrentView("/view/DashboardView.fxml");
+            Parent root = FXMLLoader.load(
+                    getClass().getResource("/view/DashboardView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            Stage stage = (Stage) bgPane.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        audioOverlayController.stopAndHide();
+        try {
+            NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
+            Parent root = FXMLLoader.load(
+                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                    LanguageManager.getBundle()
+            );
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

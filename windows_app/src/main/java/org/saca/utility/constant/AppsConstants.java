@@ -52,4 +52,28 @@ public class AppsConstants {
             return description;
         }
     }
+
+    public enum SeverityMode {
+        SEVERE("Severe"),
+        MODERATE("Moderate"),
+        MILD("Mild");
+
+        private final String description;
+
+        SeverityMode(String description) {
+            this.description = description;
+        }
+
+        public static SeverityMode resolveSeverityMode(String str) {
+            SeverityMode matchingStr = null;
+            if (str != null && !str.isEmpty()) {
+                matchingStr = SeverityMode.valueOf(str.trim());
+            }
+            return matchingStr;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 }

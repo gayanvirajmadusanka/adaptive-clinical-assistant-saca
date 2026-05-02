@@ -17,6 +17,7 @@ import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
 import org.saca.utility.constant.AppsConstants;
+import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
@@ -42,7 +43,7 @@ public class TextResultController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        TextResultRS saved = NavBarManager.getTextResultRS();
+        TextResultRS saved = CacheManager.getTextResultRS();
         if (saved == null) return;
 
         String savedLang = saved.getLanguage();
@@ -59,7 +60,7 @@ public class TextResultController implements Initializable {
 
     public void setSymptomResult(TextResultRS result) {
         this.symptomResult = result;
-        NavBarManager.setTextResultRS(result);
+        CacheManager.setTextResultRS(result);
         displaySymptoms(result.getSymptomsForCurrentLanguage());
     }
 
@@ -76,10 +77,10 @@ public class TextResultController implements Initializable {
     }
 
     private void reFetchSymptoms() {
-        String savedText = NavBarManager.getLastSymptomText();
+        String savedText = CacheManager.getLastSymptomText();
 
         if (savedText == null || savedText.isBlank()) {
-            TextResultRS cached = NavBarManager.getTextResultRS();
+            TextResultRS cached = CacheManager.getTextResultRS();
             if (cached != null) setSymptomResult(cached);
             return;
         }
@@ -95,7 +96,7 @@ public class TextResultController implements Initializable {
                 rq,
                 result -> Platform.runLater(() -> setSymptomResult(result)),
                 errorMsg -> Platform.runLater(() -> {
-                    TextResultRS cached = NavBarManager.getTextResultRS();
+                    TextResultRS cached = CacheManager.getTextResultRS();
                     if (cached != null) setSymptomResult(cached);
                     else DialogManager.errorDialog("Connection Error",
                             "Could not reload symptoms", errorMsg);
@@ -194,7 +195,7 @@ public class TextResultController implements Initializable {
         audioOverlayController.stopAndHide();
         try {
             NavBarManager.setCurrentView("/view/TextInputView.fxml");
-            NavBarManager.clearTextResultRS();
+            CacheManager.clearTextResultRS();
             Parent root = FXMLLoader.load(
                     getClass().getResource("/view/TextInputView.fxml"),
                     LanguageManager.getBundle()
@@ -208,7 +209,7 @@ public class TextResultController implements Initializable {
     private void navigateToTellUsMore(QuestionsRS questionsRS) {
         try {
             NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
-            NavBarManager.setQuestionsRS(questionsRS);
+            CacheManager.setQuestionsRS(questionsRS);
 
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/view/TellUsMoreText.fxml"),
