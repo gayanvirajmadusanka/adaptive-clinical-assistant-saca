@@ -2,6 +2,7 @@ package org.saca.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import org.saca.model.request.VoiceInputRQ;
 import org.saca.model.request.ClassifyRQ;
 import org.saca.model.request.QuestionFetchRQ;
 import org.saca.model.request.TextInputRQ;
@@ -21,6 +22,8 @@ public class ApiService {
     private static final String BASE_URL = "http://127.0.0.1:8000";
 
     private static final String EXTRACT_TEXT_ENDPOINT = "/extract/text";
+
+    private static final String EXTRACT_AUDIO_ENDPOINT = "/extract/audio";
 
     private static final String QUESTIONS_ENDPOINT = "/questions";
 
@@ -111,6 +114,35 @@ public class ApiService {
                 if (response.statusCode() == 200) {
                     ClassifyRS result = mapper.readValue(response.body(), ClassifyRS.class);
                     result.setLanguage(classifyRQ.getLanguage());
+                    onSuccess.onSuccess(result);
+                } else {
+                    onError.onError(getAPIErrorMsg(response));
+                }
+            } catch (IOException e) {
+                onError.onError(getIOExceptionErrorMsg(e));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                onError.onError(getInterruptedExceptionErrorMsg());
+            } catch (Exception e) {
+                onError.onError(getUnexpectedErrorMsg(e));
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public static void extractAudio(VoiceInputRQ voiceInputRQ,
+                                    SuccessCallback onSuccess,
+                                    ErrorCallback onError) {
+        Thread thread = new Thread(() -> {
+            try {
+                String json = mapper.writeValueAsString(voiceInputRQ);
+
+                HttpRequest request = buildHttpPostRequest(json, EXTRACT_AUDIO_ENDPOINT);
+                HttpResponse<String> response = getHttpResponse(request);
+
+                if (response.statusCode() == 200) {
+                    TextResultRS result = mapper.readValue(response.body(), TextResultRS.class);
                     onSuccess.onSuccess(result);
                 } else {
                     onError.onError(getAPIErrorMsg(response));

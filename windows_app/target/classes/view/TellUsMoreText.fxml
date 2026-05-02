@@ -34,12 +34,12 @@
                     <StackPane styleClass="tell-bg">
 
                         <VBox alignment="CENTER"
-                              spacing="28"
-                              maxWidth="600"
+                              spacing="20"
+                              maxWidth="680"
                               styleClass="tell-container">
 
                             <padding>
-                                <Insets top="40" right="40" bottom="60" left="40"/>
+                                <Insets top="60" right="40" bottom="60" left="40"/>
                             </padding>
 
                             <HBox alignment="CENTER_LEFT" styleClass="tell-header-bar">
