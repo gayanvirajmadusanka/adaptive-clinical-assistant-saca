@@ -1,30 +1,27 @@
 package org.saca.controller;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+import org.saca.model.request.AnswerRQ;
+import org.saca.model.request.ClassifyRQ;
 import org.saca.model.request.QuestionFetchRQ;
-import org.saca.model.response.OptionRS;
-import org.saca.model.response.QuestionRS;
-import org.saca.model.response.QuestionsRS;
-import org.saca.model.response.TextResultRS;
+import org.saca.model.response.*;
 import org.saca.service.ApiService;
+import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
+import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
@@ -36,34 +33,55 @@ public class TellUsMoreTextController implements Initializable {
 
     private final Map<String, String> selectedAnswers = new HashMap<>();
 
-    private final Map<String, List<Button>> optionButtonsMap = new HashMap<>();
-
-    private final Map<String, Label> selectedLabelMap = new HashMap<>();
-
-    private final Map<String, Boolean> expandedMap = new HashMap<>();
+    private final List<Button> currentOptionButtons = new ArrayList<>();
 
     @FXML
     private SidebarController sidebarController;
 
     @FXML
-    private GridPane questionsGrid;
+    private Label progressLabel;
+
+    @FXML
+    private ProgressBar progressBar;
+
+    @FXML
+    private VBox questionCard;
+
+    @FXML
+    private Label questionText;
+
+    @FXML
+    private VBox optionsBox;
+
+    @FXML
+    private Button continueBtn;
+
+    @FXML
+    private Button questionSpeakerBtn;
+
+    @FXML
+    private ImageView questionSpeakerIcon;
 
     private QuestionsRS questionsRS;
+
+    private List<QuestionRS> questions = new ArrayList<>();
+
+    private int currentIndex = 0;
+
+    private String currentSelectedId = null;
 
     private Stage stage;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        stage = null;
-
-        QuestionsRS saved = NavBarManager.getQuestionsRS();
-        TextResultRS result = NavBarManager.getTextResultRS();
+        QuestionsRS saved = CacheManager.getQuestionsRS();
+        TextResultRS result = CacheManager.getTextResultRS();
 
         if (saved != null) {
             String savedLang = saved.getLanguage();
-            String currentLang = LanguageManager.isLanguageEnglish() ?
-                    AppsConstants.AppLanguage.EN.getShortDescription() :
-                    AppsConstants.AppLanguage.WP.getShortDescription();
+            String currentLang = LanguageManager.isLanguageEnglish()
+                    ? AppsConstants.AppLanguage.EN.getShortDescription()
+                    : AppsConstants.AppLanguage.WP.getShortDescription();
 
             if (savedLang != null && !savedLang.equals(currentLang)) {
                 fetchQuestions(result);
@@ -78,138 +96,84 @@ public class TellUsMoreTextController implements Initializable {
 
     public void setQuestions(QuestionsRS questionsRS) {
         this.questionsRS = questionsRS;
-        NavBarManager.setQuestionsRS(questionsRS);
-        buildQuestionCards(questionsRS.getQuestions());
+        this.questions = questionsRS.getQuestions();
+        CacheManager.setQuestionsRS(questionsRS);
+        currentIndex = 0;
+        selectedAnswers.clear();
+        showQuestion(currentIndex);
     }
 
-    private void fetchQuestions(TextResultRS symptomResult) {
-        if (symptomResult == null) return;
+    private void showQuestion(int index) {
+        if (questions == null || questions.isEmpty()) return;
 
-        questionsGrid.getChildren().clear();
+        AudioService.stop();
+        resetSpeakerIcon();
 
-        Label loading = new Label("Loading questions...");
-        loading.getStyleClass().add("question-text");
+        QuestionRS question = questions.get(index);
+        int total = questions.size();
 
-        GridPane.setColumnIndex(loading, 0);
-        GridPane.setRowIndex(loading, 0);
-        GridPane.setColumnSpan(loading, 2);
+        StringBuilder titleBuilder = new StringBuilder();
+        titleBuilder.append(LanguageManager.get("question"));
+        titleBuilder.append(" ");
+        titleBuilder.append((index + 1));
+        titleBuilder.append(" of ");
+        titleBuilder.append(total);
 
-        questionsGrid.getChildren().add(loading);
+        progressLabel.setText(titleBuilder.toString());
+        progressBar.setProgress((double) (index + 1) / total);
 
-        QuestionFetchRQ questionFetchRQ = buildQuestionFetchRQ(symptomResult);
+        questionText.setText(question.getText());
 
-        ApiService.fetchQuestions(questionFetchRQ,
+        boolean hasAudio = question.getVoiceB64() != null && !question.getVoiceB64().isBlank();
+        questionSpeakerBtn.setVisible(hasAudio);
+        questionSpeakerBtn.setManaged(hasAudio);
 
-                questionsRS -> Platform.runLater(() -> {
-                    selectedAnswers.clear();
-                    setQuestions(questionsRS);
-                }),
+        optionsBox.getChildren().clear();
+        currentOptionButtons.clear();
+        currentSelectedId = selectedAnswers.get(question.getId());
 
-                errorMsg -> Platform.runLater(() -> {
-                    DialogManager.errorDialog("Connection Error", "Could not load questions", errorMsg);
-                    QuestionsRS prev = NavBarManager.getQuestionsRS();
-                    if (prev != null) {
-                        selectedAnswers.clear();
-                        buildQuestionCards(prev.getQuestions());
-                    }
-                }));
-    }
-
-    private void buildQuestionCards(List<QuestionRS> questions) {
-        questionsGrid.getChildren().clear();
-        optionButtonsMap.clear();
-        selectedLabelMap.clear();
-        expandedMap.clear();
-
-        for (int i = 0; i < questions.size(); i++) {
-            VBox card = buildCard(questions.get(i));
-            GridPane.setColumnIndex(card, i % 2);
-            GridPane.setRowIndex(card, i / 2);
-            questionsGrid.getChildren().add(card);
-        }
-    }
-
-    private VBox buildCard(QuestionRS question) {
-        String qId = question.getId();
-
-        VBox card = new VBox(8);
-        card.getStyleClass().add("question-card");
-
-        Button toggleBtn = new Button("▲");
-        toggleBtn.getStyleClass().add("card-toggle-btn");
-
-        Label questionText = new Label(question.getText());
-        questionText.getStyleClass().add("question-text");
-        questionText.setWrapText(true);
-        questionText.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(questionText, Priority.ALWAYS);
-
-        HBox headerRow = new HBox(8);
-        headerRow.setAlignment(Pos.TOP_LEFT);
-        headerRow.getChildren().addAll(questionText, toggleBtn);
-
-        Label selectedLabel = new Label("");
-        selectedLabel.getStyleClass().add("card-selected-label");
-        selectedLabel.setWrapText(true);
-        selectedLabel.setMaxWidth(Double.MAX_VALUE);
-        selectedLabel.setVisible(false);
-        selectedLabel.setManaged(false);
-        selectedLabelMap.put(qId, selectedLabel);
-
-        List<Button> optionButtons = new ArrayList<>();
         List<OptionRS> options = question.getOptions();
         for (int i = 0; i < options.size(); i++) {
-            Button btn = buildOptionButton(options.get(i), i, options.size(), qId);
-            optionButtons.add(btn);
+            Button btn = buildOptionButton(options.get(i), i, options.size(), question.getId());
+            currentOptionButtons.add(btn);
+            optionsBox.getChildren().add(btn);
+
+            if (options.get(i).getId().equals(currentSelectedId)) {
+                btn.getStyleClass().add("option-btn-selected");
+            }
         }
-        optionButtonsMap.put(qId, optionButtons);
-        expandedMap.put(qId, true);
 
-        toggleBtn.setOnAction(e -> toggleCard(qId, toggleBtn));
-
-        card.getChildren().add(headerRow);
-        card.getChildren().add(selectedLabel);
-        card.getChildren().addAll(optionButtons);
-
-        return card;
+        boolean isLast = (index == total - 1);
+        continueBtn.setText(isLast
+                ? LanguageManager.get("submit")
+                : LanguageManager.get("continue"));
     }
 
-    private void toggleCard(String questionId, Button toggleBtn) {
-        boolean isExpanded = expandedMap.getOrDefault(questionId, true);
-        List<Button> buttons = optionButtonsMap.get(questionId);
-        Label selectedLabel = selectedLabelMap.get(questionId);
-
-        if (isExpanded) {
-            buttons.forEach(b -> {
-                b.setVisible(false);
-                b.setManaged(false);
-            });
-
-            String selectedId = selectedAnswers.get(questionId);
-            if (selectedId != null && selectedLabel != null) {
-                String selectedText = buttons.stream().filter(b -> selectedId.equals(b.getUserData())).map(b -> b.getText().replace("  ●  ", "").trim()).findFirst().orElse("");
-                selectedLabel.setText("✔  " + selectedText);
-                selectedLabel.setVisible(true);
-                selectedLabel.setManaged(true);
-            }
-
-            toggleBtn.setText("▼");
-            expandedMap.put(questionId, false);
-
-        } else {
-            buttons.forEach(b -> {
-                b.setVisible(true);
-                b.setManaged(true);
-            });
-
-            if (selectedLabel != null) {
-                selectedLabel.setVisible(false);
-                selectedLabel.setManaged(false);
-            }
-
-            toggleBtn.setText("▲");
-            expandedMap.put(questionId, true);
+    @FXML
+    private void handleQuestionSpeak() {
+        if (questions == null || questions.isEmpty()) {
+            return;
         }
+
+        QuestionRS current = questions.get(currentIndex);
+        String voiceB64 = current.getVoiceB64();
+        if (voiceB64 == null || voiceB64.isBlank()) {
+            return;
+        }
+
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetSpeakerIcon();
+            return;
+        }
+
+        setMuteIcon();
+
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> Platform.runLater(this::resetSpeakerIcon),
+                () -> Platform.runLater(this::resetSpeakerIcon)
+        );
     }
 
     private Button buildOptionButton(OptionRS option, int index, int total, String questionId) {
@@ -219,74 +183,191 @@ public class TellUsMoreTextController implements Initializable {
         btn.setUserData(option.getId());
 
         btn.setOnAction(e -> {
-            selectOption(questionId, option.getId(), btn);
-            Button toggleBtn = findToggleBtn(btn);
-            if (toggleBtn != null) {
-                new Timeline(new KeyFrame(Duration.millis(400), ev -> toggleCard(questionId, toggleBtn))).play();
-            }
+            currentOptionButtons.forEach(b -> b.getStyleClass().remove("option-btn-selected"));
+            btn.getStyleClass().add("option-btn-selected");
+            currentSelectedId = option.getId();
+            selectedAnswers.put(questionId, option.getId());
         });
 
         return btn;
     }
 
-    private void selectOption(String questionId, String optionId, Button clicked) {
-        List<Button> buttons = optionButtonsMap.get(questionId);
-        if (buttons != null) {
-            buttons.forEach(b -> b.getStyleClass().remove("option-btn-selected"));
-        }
-        clicked.getStyleClass().add("option-btn-selected");
-        selectedAnswers.put(questionId, optionId);
-    }
-
-    private Button findToggleBtn(Button optionBtn) {
-        try {
-            VBox card = (VBox) optionBtn.getParent();
-            HBox header = (HBox) card.getChildren().get(0);
-            return header.getChildren().stream().filter(n -> n instanceof Button).map(n -> (Button) n).findFirst().orElse(null);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     @FXML
     private void handleContinue() {
-        if (questionsRS != null) {
-            long unanswered = questionsRS.getQuestions().stream().filter(q -> !selectedAnswers.containsKey(q.getId())).count();
-            if (unanswered > 0) {
-                DialogManager.warningDialog("Incomplete", "Please answer all questions", unanswered + " question(s) still need an answer.");
-                return;
-            }
+        AudioService.stop();
+        resetSpeakerIcon();
+
+        QuestionRS current = questions.get(currentIndex);
+
+        if (!selectedAnswers.containsKey(current.getId())) {
+            DialogManager.warningDialog(
+                    LanguageManager.get("no_answer"),
+                    LanguageManager.get("please_select_an_answer"),
+                    LanguageManager.get("choose_one_of_the_options_before_continuing")
+            );
+            return;
         }
-        System.out.println("Answers: " + selectedAnswers);
+
+        if (currentIndex < questions.size() - 1) {
+            currentIndex++;
+            showQuestion(currentIndex);
+        } else {
+            submitAnswers();
+        }
     }
 
-    @FXML
-    private void handleBack(ActionEvent event) {
+    private void submitAnswers() {
+        TextResultRS textResult = CacheManager.getTextResultRS();
+        if (textResult == null) return;
+
+        stage = (Stage) questionCard.getScene().getWindow();
+
+        List<AnswerRQ> answerList = selectedAnswers.entrySet().stream()
+                .map(e -> new AnswerRQ(e.getKey(), e.getValue()))
+                .collect(java.util.stream.Collectors.toList());
+
+        CacheManager.setSavedAnswers(answerList);
+
+        ClassifyRQ classifyRQ = new ClassifyRQ();
+        classifyRQ.setSymptoms(textResult.getSymptomsEn());
+        classifyRQ.setAnswers(answerList);
+        classifyRQ.setLanguage(LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription());
+
         try {
-            NavBarManager.setCurrentView("/view/TextResultView.fxml");
-            Parent root = FXMLLoader.load(getClass().getResource("/view/TextResultView.fxml"), LanguageManager.getBundle());
-            Stage s = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            s.getScene().setRoot(root);
+            NavBarManager.setCurrentView("/view/LoadingView.fxml");
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/view/LoadingView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            Parent loadingView = loader.load();
+            LoadingController loadingCtrl = loader.getController();
+            loadingCtrl.setTitle(LanguageManager.get("loading_symptom_title"));
+            loadingCtrl.setDuration(Integer.MAX_VALUE);
+
+            ApiService.classify(
+                    classifyRQ,
+                    classifyRS -> Platform.runLater(() -> {
+                        loadingCtrl.stop();
+                        navigateToFinalResult(classifyRS);
+                    }),
+                    errorMsg -> Platform.runLater(() -> {
+                        loadingCtrl.stop();
+                        DialogManager.errorDialog("Connection Error",
+                                "Could not submit answers", errorMsg);
+                        try {
+                            FXMLLoader rl = new FXMLLoader(
+                                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                                    LanguageManager.getBundle()
+                            );
+                            stage.getScene().setRoot(rl.load());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    })
+            );
+
+            stage.getScene().setRoot(loadingView);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private void navigateToFinalResult(ClassifyRS classifyRS) {
+        try {
+            NavBarManager.setCurrentView("/view/FinalResultView.fxml");
+            CacheManager.setClassifyRS(classifyRS);
+
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/view/FinalResultView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            Parent view = loader.load();
+
+            FinalResultController ctrl = loader.getController();
+            ctrl.setResult(classifyRS);
+
+            stage.getScene().setRoot(view);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        AudioService.stop();
+        resetSpeakerIcon();
+
+        if (currentIndex > 0) {
+            currentIndex--;
+            showQuestion(currentIndex);
+        } else {
+            try {
+                NavBarManager.setCurrentView("/view/TextResultView.fxml");
+                Parent root = FXMLLoader.load(
+                        getClass().getResource("/view/TextResultView.fxml"),
+                        LanguageManager.getBundle()
+                );
+                Stage s = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                s.getScene().setRoot(root);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void fetchQuestions(TextResultRS symptomResult) {
+        if (symptomResult == null) return;
+        questionText.setText(LanguageManager.get("loading_questions"));
+        optionsBox.getChildren().clear();
+
+        QuestionFetchRQ rq = new QuestionFetchRQ();
+        rq.setSymptoms(symptomResult.getSymptomsEn());
+
+        ApiService.fetchQuestions(rq,
+                questionsRS -> Platform.runLater(() -> {
+                    selectedAnswers.clear();
+                    setQuestions(questionsRS);
+                }),
+                errorMsg -> Platform.runLater(() -> {
+                    DialogManager.errorDialog(
+                            LanguageManager.get("connection_error"),
+                            LanguageManager.get("could_not_load_questions"),
+                            errorMsg);
+                    QuestionsRS prev = CacheManager.getQuestionsRS();
+                    if (prev != null) {
+                        selectedAnswers.clear();
+                        setQuestions(prev);
+                    }
+                })
+        );
+    }
+
     private String getLevelStyle(int index, int total) {
-        if (total <= 1) return "option-level-0";
+        if (total <= 1) {
+            return "option-level-0";
+        }
+
+        if (total == 2) {
+            return index == 0 ? "option-level-0" : "option-level-1";
+        }
+
         int level = Math.round((float) index / (total - 1) * 4);
         return "option-level-" + level;
     }
 
-    private QuestionFetchRQ buildQuestionFetchRQ(TextResultRS textResultRS) {
-        QuestionFetchRQ questionFetchRQ = new QuestionFetchRQ();
+    private void setMuteIcon() {
+        questionSpeakerIcon.setImage(new Image(
+                getClass().getResource("/icons/mute.png").toExternalForm()
+        ));
+    }
 
-        if (LanguageManager.isLanguageEnglish()) {
-            questionFetchRQ.setSymptoms(textResultRS.getSymptomsEn());
-        } else {
-            questionFetchRQ.setSymptoms(textResultRS.getSymptomsWp());
-        }
-
-        return questionFetchRQ;
+    private void resetSpeakerIcon() {
+        questionSpeakerIcon.setImage(new Image(
+                getClass().getResource("/icons/speaker.png").toExternalForm()
+        ));
     }
 }
