@@ -1,8 +1,8 @@
 """
 Audio integration tests for API endpoints.
 
-Usage:
-    python -m pytest backend/tests/test_audio_output.py -v -s
+Usage (requires a running server at localhost:8000):
+    python -m pytest backend/tests/test_audio_output.py -v -s -m live_server
 """
 
 import base64
@@ -12,7 +12,7 @@ import time
 import requests
 
 BASE_URL = 'http://localhost:8000'
-PLAY_AUDIO = True
+PLAY_AUDIO = False
 
 
 def _save_and_play(b64_audio: str, label: str) -> int:

@@ -1,3 +1,6 @@
+"""
+API routes module. Defines all API endpoints supported.
+"""
 import base64
 import io
 import os
@@ -7,7 +10,9 @@ from fastapi import APIRouter
 
 from backend.api.questions.questions_module import get_questions
 from backend.api.schemas.request_response import QuestionsRequest, QuestionsResponse, ClassifyRequest, ClassifyResponse, \
-    ExtractResponse, ExtractTextRequest, ExtractAudioRequest, ExtractImageRequest
+    ExtractResponse, ExtractTextRequest, ExtractAudioRequest, ExtractImageRequest, AnswerAudioResponse, \
+    AnswerAudioRequest
+from backend.api.services.answer_audio_service import resolve_answer_audio
 from backend.api.services.audio_service import get_detected_symptoms_audio
 from backend.api.services.pipeline_service import classify as run_classify
 
@@ -143,7 +148,7 @@ def extract_image(req: ExtractImageRequest) -> dict:
     return {
         'symptoms_en': req.symptoms,
         'symptoms_wp': req.symptoms,
-        'confidence': 1.0,  # 1.0 since user explicitly selected these
+        'confidence': 1.0,  # 1.0 since user explicitly selected
         'input_type': 'image',
         'language': req.language,
         'voice_b64': voice_b64,
@@ -157,6 +162,20 @@ def questions_endpoint(req: QuestionsRequest) -> dict:
     :param req: QuestionsRequest
     """
     return get_questions(req.symptoms, req.language)
+
+
+@router.post('/answer/audio', response_model=AnswerAudioResponse)
+def resolve_answer_audio_endpoint(req: AnswerAudioRequest) -> dict:
+    """
+    Resolve a spoken audio answer to an answer_id.
+    Returns answer_id if recognised, None if not.
+    Frontend re-prompts the same question if None returned.
+    """
+    return resolve_answer_audio(
+        audio_b64=req.audio_b64,
+        question_id=req.question_id,
+        language=req.language
+    )
 
 
 @router.post('/classify', response_model=ClassifyResponse)
