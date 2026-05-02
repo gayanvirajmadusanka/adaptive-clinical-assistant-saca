@@ -1,10 +1,138 @@
 {
-  "wiri": "pain",
-  "wita": "mild pain",
-  "karlarra": "chills",
-  "yarlkurra": "dizziness",
-  "pakarninja": "vomiting",
-  "karrinja": "weakness",
-  "wantimi": "fainting",
-  "nyinami": "breathing difficulty"
+  "headache": {
+    "en": "headache",
+    "wp": "Walpawalpa"
+  },
+  "dizziness": {
+    "en": "dizziness",
+    "wp": "Kurruru"
+  },
+  "loss_of_consciousness": {
+    "en": "loss of consciousness",
+    "wp": "Tiirnki"
+  },
+  "stiff_neck": {
+    "en": "stiff neck",
+    "wp": "Nguku kantalkantal"
+  },
+  "chest_pain": {
+    "en": "chest pain",
+    "wp": "Mangarli purrkunypa"
+  },
+  "shortness_breath": {
+    "en": "shortness breath",
+    "wp": "Nguurlnguurlpa"
+  },
+  "cough": {
+    "en": "cough",
+    "wp": "Kuntulpinyi"
+  },
+  "abdominal_pain": {
+    "en": "abdominal pain",
+    "wp": "Miyalu purrkunypa"
+  },
+  "nausea": {
+    "en": "nausea",
+    "wp": "Ngarlungarlu"
+  },
+  "vomiting": {
+    "en": "vomiting",
+    "wp": "Yurlkulyu"
+  },
+  "diarrhea": {
+    "en": "diarrhea",
+    "wp": "Jinirrpa"
+  },
+  "blood_stool": {
+    "en": "blood stool",
+    "wp": "Jinirrpa jaarlkurlu"
+  },
+  "arm_pain": {
+    "en": "arm pain",
+    "wp": "Kilpirli purrkunypa"
+  },
+  "arm_weakness": {
+    "en": "arm weakness",
+    "wp": "Kilpirli rampaku"
+  },
+  "swelling_arms": {
+    "en": "swelling arms",
+    "wp": "Kilpirli kirakarrimi"
+  },
+  "jaw_pain": {
+    "en": "jaw pain",
+    "wp": "Wirlki purrkunypa"
+  },
+  "runny_nose": {
+    "en": "runny nose",
+    "wp": "Mulyu rdulpu"
+  },
+  "sneezing": {
+    "en": "sneezing",
+    "wp": "Jirrjinti"
+  },
+  "ear_pain": {
+    "en": "ear pain",
+    "wp": "Langa purrkunypa"
+  },
+  "eye_pain": {
+    "en": "eye pain",
+    "wp": "Milpa purrkunypa"
+  },
+  "eye_itching": {
+    "en": "eye itching",
+    "wp": "Milpa yayirri"
+  },
+  "sore_throat": {
+    "en": "sore throat",
+    "wp": "Waninja kiri"
+  },
+  "back_pain": {
+    "en": "back pain",
+    "wp": "Pawiyi purrkunypa"
+  },
+  "fever": {
+    "en": "fever",
+    "wp": "Rdurrurlpu"
+  },
+  "chills": {
+    "en": "chills",
+    "wp": "Mirrmirr"
+  },
+  "fatigue": {
+    "en": "fatigue",
+    "wp": "Mata"
+  },
+  "weakness": {
+    "en": "weakness",
+    "wp": "Rampaku"
+  },
+  "body_pain": {
+    "en": "body pain",
+    "wp": "Palka purrkunypa"
+  },
+  "swelling_parts_of_body": {
+    "en": "swelling parts of body",
+    "wp": "Kirakarrimi"
+  },
+  "rash": {
+    "en": "rash",
+    "wp": "Mardalmardal"
+  },
+  "itchy": {
+    "en": "itchy",
+    "wp": "Yayirri"
+  },
+  "bleeding": {
+    "en": "bleeding",
+    "wp": "Ngamanjimanji"
+  },
+  "dehydration": {
+    "en": "dehydration",
+    "wp": "Nantu"
+  },
+  "blood_urine": {
+    "en": "blood urine",
+    "wp": "Minjinpa jaarlkurlu"
+  }
 }

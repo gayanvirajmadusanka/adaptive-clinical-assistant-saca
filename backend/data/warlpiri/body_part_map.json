@@ -1,8 +1,50 @@
 {
-  "ngarru": "headache",
-  "mayi": "stomach pain",
-  "jaru": "chest pain",
-  "pirli": "back pain",
-  "maju": "limb pain",
-  "yapa": "body pain"
+  "head": {
+    "en": "Head",
+    "wp": "Jurru"
+  },
+  "neck": {
+    "en": "Neck",
+    "wp": "Nguku"
+  },
+  "chest": {
+    "en": "Chest",
+    "wp": "Mangarli"
+  },
+  "stomach": {
+    "en": "Stomach",
+    "wp": "Miyalu"
+  },
+  "arm": {
+    "en": "Arm",
+    "wp": "Kilpirli"
+  },
+  "jaw": {
+    "en": "Jaw",
+    "wp": "Wirlki"
+  },
+  "nose": {
+    "en": "Nose",
+    "wp": "Mulyu"
+  },
+  "ear": {
+    "en": "Ear",
+    "wp": "Langa"
+  },
+  "eye": {
+    "en": "Eye",
+    "wp": "Milpa"
+  },
+  "throat": {
+    "en": "Throat",
+    "wp": "Waninja"
+  },
+  "back": {
+    "en": "Back",
+    "wp": "Pawiyi"
+  },
+  "whole_body": {
+    "en": "Whole Body",
+    "wp": "Palka"
+  }
 }

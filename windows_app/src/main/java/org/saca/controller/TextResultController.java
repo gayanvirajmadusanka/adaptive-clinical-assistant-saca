@@ -8,17 +8,23 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.request.QuestionFetchRQ;
+import org.saca.model.request.TextInputRQ;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
+import org.saca.service.AudioService;
+import org.saca.utility.constant.AppsConstants;
+import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
-import org.saca.utility.manager.TTSManager;
 
 import java.net.URL;
 import java.util.List;
@@ -32,27 +38,41 @@ public class TextResultController implements Initializable {
     @FXML
     private VBox symptomsBox;
 
+    @FXML
+    private Button speakerBtn;
+
+    @FXML
+    private ImageView speakerIcon;
+
     private TextResultRS symptomResult;
 
     private Stage stage;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        TextResultRS textResultRS = NavBarManager.getTextResultRS();
-        if (textResultRS != null) {
-            setSymptomResult(textResultRS);
+        TextResultRS saved = CacheManager.getTextResultRS();
+        if (saved == null) return;
+
+        String savedLang = saved.getLanguage();
+        String currentLang = LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription();
+
+        if (savedLang != null && !savedLang.equals(currentLang)) {
+            reFetchSymptoms();
+        } else {
+            setSymptomResult(saved);
         }
     }
 
     public void setSymptomResult(TextResultRS result) {
         this.symptomResult = result;
-        NavBarManager.setTextResultRS(result);
+        CacheManager.setTextResultRS(result);
         displaySymptoms(result.getSymptomsForCurrentLanguage());
     }
 
     private void displaySymptoms(List<String> symptoms) {
         symptomsBox.getChildren().clear();
-
         if (symptoms == null || symptoms.isEmpty()) return;
 
         for (String symptom : symptoms) {
@@ -63,25 +83,64 @@ public class TextResultController implements Initializable {
         }
     }
 
+    private void reFetchSymptoms() {
+        String savedText = CacheManager.getLastSymptomText();
+
+        if (savedText == null || savedText.isBlank()) {
+            TextResultRS cached = CacheManager.getTextResultRS();
+            if (cached != null) setSymptomResult(cached);
+            return;
+        }
+
+        Label loading = new Label(LanguageManager.get("loading_symptom_title"));
+        loading.getStyleClass().add("result-symptom-item");
+        symptomsBox.getChildren().setAll(loading);
+
+        TextInputRQ textInputRQ = new TextInputRQ();
+        textInputRQ.setText(savedText);
+
+        ApiService.detectSymptomsText(
+                textInputRQ,
+                result -> Platform.runLater(() -> setSymptomResult(result)),
+                errorMsg -> Platform.runLater(() -> {
+                    TextResultRS cached = CacheManager.getTextResultRS();
+                    if (cached != null) setSymptomResult(cached);
+                    else DialogManager.errorDialog("Connection Error",
+                            "Could not reload symptoms", errorMsg);
+                })
+        );
+    }
+
     @FXML
     private void handleSpeak() {
         if (symptomResult == null) return;
 
-        List<String> symptoms = symptomResult.getSymptomsForCurrentLanguage();
-        if (symptoms == null || symptoms.isEmpty()) return;
-
-        String text = String.join(". ", symptoms);
-
-        if (TTSManager.isSpeaking()) {
-            TTSManager.stop();
-        } else {
-            TTSManager.speak(text);
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetSpeakerIcon();
+            return;
         }
+
+        String voiceB64 = symptomResult.getVoiceB64();
+        if (voiceB64 == null || voiceB64.isBlank()) return;
+
+        setSpeakerStopIcon();
+
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> Platform.runLater(this::resetSpeakerIcon),
+                () -> Platform.runLater(this::resetSpeakerIcon)
+        );
     }
 
     @FXML
     private void handleYes() {
-        if (symptomResult == null) return;
+        AudioService.stop();
+        resetSpeakerIcon();
+
+        if (symptomResult == null) {
+            return;
+        }
 
         stage = (Stage) sidebarController.getRoot().getScene().getWindow();
 
@@ -102,20 +161,16 @@ public class TextResultController implements Initializable {
 
             ApiService.fetchQuestions(
                     questionFetchRQ,
-
                     questionsRS -> Platform.runLater(() -> {
                         loadingCtrl.stop();
                         navigateToTellUsMore(questionsRS);
                     }),
-
                     errorMsg -> Platform.runLater(() -> {
                         loadingCtrl.stop();
                         DialogManager.errorDialog(
-                                "Connection Error",
-                                "Could not load questions",
-                                errorMsg
-                        );
-
+                                LanguageManager.get("connection_error"),
+                                LanguageManager.get("could_not_load_questions"),
+                                errorMsg);
                         try {
                             FXMLLoader rl = new FXMLLoader(
                                     getClass().getResource("/view/TextResultView.fxml"),
@@ -140,18 +195,20 @@ public class TextResultController implements Initializable {
 
     @FXML
     private void handleNo() {
+        AudioService.stop();
         navigateToTextInput(sidebarController.getRoot().getScene());
     }
 
     @FXML
     private void handleBack(ActionEvent event) {
+        AudioService.stop();
         navigateToTextInput(((Node) event.getSource()).getScene());
     }
 
     private void navigateToTextInput(Scene scene) {
         try {
             NavBarManager.setCurrentView("/view/TextInputView.fxml");
-            NavBarManager.clearTextResultRS();
+            CacheManager.clearTextResultRS();
             Parent root = FXMLLoader.load(
                     getClass().getResource("/view/TextInputView.fxml"),
                     LanguageManager.getBundle()
@@ -165,7 +222,7 @@ public class TextResultController implements Initializable {
     private void navigateToTellUsMore(QuestionsRS questionsRS) {
         try {
             NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
-            NavBarManager.setQuestionsRS(questionsRS);
+            CacheManager.setQuestionsRS(questionsRS);
 
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/view/TellUsMoreText.fxml"),
@@ -185,13 +242,19 @@ public class TextResultController implements Initializable {
 
     private QuestionFetchRQ buildQuestionFetchRQ() {
         QuestionFetchRQ questionFetchRQ = new QuestionFetchRQ();
-
-        if (LanguageManager.isLanguageEnglish()) {
-            questionFetchRQ.setSymptoms(symptomResult.getSymptomsEn());
-        } else {
-            questionFetchRQ.setSymptoms(symptomResult.getSymptomsWp());
-        }
-
+        questionFetchRQ.setSymptoms(symptomResult.getSymptomsEn());
         return questionFetchRQ;
+    }
+
+    private void setSpeakerStopIcon() {
+        speakerIcon.setImage(new Image(
+                getClass().getResource("/icons/mute.png").toExternalForm()
+        ));
+    }
+
+    private void resetSpeakerIcon() {
+        speakerIcon.setImage(new Image(
+                getClass().getResource("/icons/speaker.png").toExternalForm()
+        ));
     }
 }

@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 import javafx.util.Duration;
+import org.saca.utility.manager.LanguageManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -39,13 +40,14 @@ public class LoadingController implements Initializable {
     @FXML
     private Label loadingTitle;
 
-    private String title = "Loading...";
+    private String title = LanguageManager.get("loading");
 
     private int durationMs = 3000;
 
     private Runnable onCompleteAction = null;
 
     private double progress = 0.0;
+
     private Timeline timeline;
 
     @Override

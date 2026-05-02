@@ -10,7 +10,6 @@
             stylesheets="@/styles/style.css"
             styleClass="root">
 
-    <!-- TOP BAR -->
     <top>
         <HBox alignment="CENTER_LEFT" styleClass="top-bar">
             <padding>
@@ -20,12 +19,10 @@
         </HBox>
     </top>
 
-    <!-- SIDEBAR — same shared component, expand button lives inside -->
     <left>
         <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
     </left>
 
-    <!-- CENTER -->
     <center>
         <ScrollPane fitToWidth="true"
                     fitToHeight="true"
@@ -43,7 +40,6 @@
                             <Insets top="10" right="20" bottom="10" left="20"/>
                         </padding>
 
-                        <!-- HEADER BAR -->
                         <HBox alignment="CENTER" styleClass="write-header-bar">
 
                             <Button onAction="#handleBack" styleClass="write-back-btn">
@@ -74,7 +70,6 @@
 
                         </HBox>
 
-                        <!-- TEXTAREA -->
                         <VBox styleClass="write-textarea-box" spacing="0">
                             <Label text="%what_can_i_help_with"
                                    styleClass="write-textarea-label-top"/>
@@ -87,7 +82,6 @@
                                       promptText="%type_here"/>
                         </VBox>
 
-                        <!-- CONTINUE BUTTON -->
                         <Button text="%continue"
                                 styleClass="write-continue-btn"
                                 maxWidth="Infinity"
