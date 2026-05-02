@@ -37,20 +37,17 @@ MODEL_PATH   = os.path.join(MODEL_DIR, "nlp_symptom_classifier.pkl")
 TFIDF_PATH   = os.path.join(MODEL_DIR, "nlp_tfidf_vectorizer.pkl")
 ENCODER_PATH = os.path.join(MODEL_DIR, "nlp_label_encoder.pkl")
 
-# confidence thresholds
 EXACT_CONF   = 0.99
 PHRASE_CONF  = 0.95
 PARTIAL_CONF = 0.85
 MIN_CONF     = 0.80
 
-# intensity signal keywords
 HIGH_INTENSITY = [
     "unbearable", "severe", "extreme", "worst", "terrible",
     "cannot", "whole body", "all over", "really bad", "very bad"
 ]
 LOW_INTENSITY = ["mild", "slight", "little", "minor", "bit", "small"]
 
-# critical symptoms - trigger has_critical = 1
 CRITICAL_SYMPTOMS = [
     "chest pain", "difficulty breathing", "shortness of breath",
     "loss of consciousness", "seizure", "stroke", "heart attack",
@@ -58,10 +55,9 @@ CRITICAL_SYMPTOMS = [
     "coughing blood", "vomiting blood", "fast weak pulse"
 ]
 
-# cache vocabulary and model in memory after first load
-_vocabulary   = None
-_model        = None
-_tfidf        = None
+_vocabulary    = None
+_model         = None
+_tfidf         = None
 _label_encoder = None
 
 
@@ -73,7 +69,6 @@ def _load_vocabulary() -> list:
         with open(VOCAB_PATH, "r") as f:
             _vocabulary = json.load(f)
     else:
-        # fallback basic list if vocabulary not built yet
         _vocabulary = [
             "fever", "headache", "cough", "nausea", "vomiting",
             "diarrhoea", "fatigue", "chest pain", "shortness of breath",
@@ -125,6 +120,20 @@ def get_has_critical(symptoms: list) -> int:
     return 0
 
 
+def _deduplicate_symptoms(symptoms: list) -> list:
+    """
+    Removes duplicate symptom variations keeping only the shortest
+    base term. For example headache, headaches, morning headache
+    all reduce to headache.
+    Sorts by length so shorter base terms are kept first.
+    """
+    seen = []
+    for symptom in sorted(symptoms, key=len):
+        if not any(symptom in existing or existing in symptom for existing in seen):
+            seen.append(symptom)
+    return seen
+
+
 def _stage1_keyword_match(tokens: list, vocabulary: list) -> dict:
     """
     Stage 1: Rule-based keyword matching against Synapse vocabulary.
@@ -132,29 +141,26 @@ def _stage1_keyword_match(tokens: list, vocabulary: list) -> dict:
     Three matching levels:
         Exact  - token == symptom word          -> 0.99
         Phrase - all words of symptom in tokens -> 0.95
-        Partial - fuzzy ratio > 85             -> 0.85
+        Partial - fuzzy ratio > 85              -> 0.85
     """
-    matched      = {}
-    tokens_set   = set(tokens)
-    tokens_str   = " ".join(tokens)
+    matched    = {}
+    tokens_set = set(tokens)
+    tokens_str = " ".join(tokens)
 
     for symptom in vocabulary:
         symptom_lower = symptom.lower()
         symptom_words = symptom_lower.split()
 
-        # exact single token
         if symptom_lower in tokens_set:
             matched[symptom] = EXACT_CONF
             continue
 
-        # multi-word phrase - all words present
         if len(symptom_words) > 1 and all(
             w in tokens_set for w in symptom_words
         ):
             matched[symptom] = PHRASE_CONF
             continue
 
-        # partial fuzzy match
         ratio = fuzz.partial_ratio(symptom_lower, tokens_str)
         if ratio >= 85:
             matched[symptom] = PARTIAL_CONF
@@ -165,9 +171,6 @@ def _stage1_keyword_match(tokens: list, vocabulary: list) -> dict:
 def _stage2_tfidf_fallback(clean_text: str) -> dict:
     """
     Stage 2: TF-IDF + Random Forest classifier fallback.
-
-    Uses model trained on Synapse symptom data to map informal
-    phrasing to standardised symptom vocabulary terms.
     Only activates when Stage 1 finds nothing useful.
     """
     if not _load_model():
@@ -203,11 +206,11 @@ def extract_symptoms(text: str, raw_text: str = None) -> dict:
 
     Returns:
         dict:
-            symptoms          - list of extracted symptom strings
+            symptoms           - list of extracted symptom strings
             symptom_confidence - dict of {symptom: score}
-            intensity_signal  - 0 / 1 / 2
-            has_critical      - 0 or 1
-            clean_text        - preprocessed text string
+            intensity_signal   - 0 / 1 / 2
+            has_critical       - 0 or 1
+            clean_text         - preprocessed text string
     """
     preprocessed = preprocess_text(text)
     tokens       = preprocessed["tokens"]
@@ -217,18 +220,20 @@ def extract_symptoms(text: str, raw_text: str = None) -> dict:
     vocabulary   = _load_vocabulary()
 
     # Stage 1
-    stage1 = _stage1_keyword_match(tokens, vocabulary)
+    stage1    = _stage1_keyword_match(tokens, vocabulary)
     high_conf = {k: v for k, v in stage1.items() if v >= MIN_CONF}
 
     if high_conf:
-        symptoms           = list(high_conf.keys())
-        symptom_confidence = high_conf
+        deduped            = _deduplicate_symptoms(list(high_conf.keys()))
+        symptoms           = deduped
+        symptom_confidence = {s: high_conf[s] for s in deduped if s in high_conf}
     else:
         # Stage 2 fallback
         stage2   = _stage2_tfidf_fallback(clean_text)
         combined = {**stage1, **stage2}
-        symptoms           = list(combined.keys())
-        symptom_confidence = combined
+        deduped            = _deduplicate_symptoms(list(combined.keys()))
+        symptoms           = deduped
+        symptom_confidence = {s: combined[s] for s in deduped if s in combined}
 
     has_critical = get_has_critical(symptoms)
 
