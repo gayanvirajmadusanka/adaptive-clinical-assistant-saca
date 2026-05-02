@@ -2,8 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <StackPane xmlns:fx="http://javafx.com/fxml"
            fx:controller="org.saca.controller.FinalResultController"
@@ -73,8 +72,17 @@
                                     styleClass="call-help-btn"
                                     maxWidth="Infinity"
                                     onAction="#handleCallForHelp"
+                                    graphicTextGap="10"
                                     visible="false"
-                                    managed="false"/>
+                                    managed="false">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image>
+                                            <Image url="@/icons/telephone-call.png"/>
+                                        </image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
 
                             <VBox styleClass="result-card" spacing="10">
 

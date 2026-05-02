@@ -1,5 +1,8 @@
 package org.saca.controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.saca.model.request.ClassifyRQ;
 import org.saca.model.response.ClassifyRS;
 import org.saca.model.response.TextResultRS;
@@ -140,6 +144,9 @@ public class FinalResultController implements Initializable {
         boolean showCall = severityMode == AppsConstants.SeverityMode.SEVERE && rs.isHasCritical();
         callBtn.setVisible(showCall);
         callBtn.setManaged(showCall);
+        if (showCall) {
+            bounceCallButton();
+        }
 
         recommendationLabel.setText(rs.getRecommendation() != null ? rs.getRecommendation() : "");
         recommendedActionLabel.setText(rs.getRecommendedAction() != null ? rs.getRecommendedAction() : "");
@@ -237,5 +244,24 @@ public class FinalResultController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void bounceCallButton() {
+        Timeline bounce = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(callBtn.scaleYProperty(), 1.0),
+                        new KeyValue(callBtn.scaleXProperty(), 1.0)),
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(callBtn.scaleYProperty(), 1.07),
+                        new KeyValue(callBtn.scaleXProperty(), 1.07)),
+                new KeyFrame(Duration.millis(600),
+                        new KeyValue(callBtn.scaleYProperty(), 1.0),
+                        new KeyValue(callBtn.scaleXProperty(), 1.0)),
+                new KeyFrame(Duration.millis(800),
+                        new KeyValue(callBtn.scaleYProperty(), 1.0),
+                        new KeyValue(callBtn.scaleXProperty(), 1.0))
+        );
+        bounce.setCycleCount(Timeline.INDEFINITE);
+        bounce.play();
     }
 }
