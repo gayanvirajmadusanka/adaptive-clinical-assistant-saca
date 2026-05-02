@@ -10,6 +10,8 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.request.AnswerRQ;
@@ -17,6 +19,7 @@ import org.saca.model.request.ClassifyRQ;
 import org.saca.model.request.QuestionFetchRQ;
 import org.saca.model.response.*;
 import org.saca.service.ApiService;
+import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
@@ -29,31 +32,44 @@ import java.util.*;
 public class TellUsMoreTextController implements Initializable {
 
     private final Map<String, String> selectedAnswers = new HashMap<>();
+
     private final List<Button> currentOptionButtons = new ArrayList<>();
 
     @FXML
     private SidebarController sidebarController;
-    @FXML
-    private AudioOverlayController audioOverlayController;
+
     @FXML
     private Label progressLabel;
+
     @FXML
     private ProgressBar progressBar;
+
     @FXML
     private VBox questionCard;
+
     @FXML
     private Label questionText;
+
     @FXML
     private VBox optionsBox;
+
     @FXML
     private Button continueBtn;
+
     @FXML
     private Button questionSpeakerBtn;
 
+    @FXML
+    private ImageView questionSpeakerIcon;
+
     private QuestionsRS questionsRS;
+
     private List<QuestionRS> questions = new ArrayList<>();
+
     private int currentIndex = 0;
+
     private String currentSelectedId = null;
+
     private Stage stage;
 
     @Override
@@ -90,12 +106,20 @@ public class TellUsMoreTextController implements Initializable {
     private void showQuestion(int index) {
         if (questions == null || questions.isEmpty()) return;
 
-        audioOverlayController.stopAndHide();
+        AudioService.stop();
+        resetSpeakerIcon();
 
         QuestionRS question = questions.get(index);
         int total = questions.size();
 
-        progressLabel.setText("Question " + (index + 1) + " of " + total);
+        StringBuilder titleBuilder = new StringBuilder();
+        titleBuilder.append(LanguageManager.get("question"));
+        titleBuilder.append(" ");
+        titleBuilder.append((index + 1));
+        titleBuilder.append(" of ");
+        titleBuilder.append(total);
+
+        progressLabel.setText(titleBuilder.toString());
         progressBar.setProgress((double) (index + 1) / total);
 
         questionText.setText(question.getText());
@@ -127,13 +151,29 @@ public class TellUsMoreTextController implements Initializable {
 
     @FXML
     private void handleQuestionSpeak() {
-        if (questions == null || questions.isEmpty()) return;
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
+
         QuestionRS current = questions.get(currentIndex);
         String voiceB64 = current.getVoiceB64();
-        if (voiceB64 == null || voiceB64.isBlank()) return;
+        if (voiceB64 == null || voiceB64.isBlank()) {
+            return;
+        }
 
-        if (audioOverlayController.isPlaying()) audioOverlayController.stopAndHide();
-        else audioOverlayController.play(voiceB64);
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetSpeakerIcon();
+            return;
+        }
+
+        setMuteIcon();
+
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> Platform.runLater(this::resetSpeakerIcon),
+                () -> Platform.runLater(this::resetSpeakerIcon)
+        );
     }
 
     private Button buildOptionButton(OptionRS option, int index, int total, String questionId) {
@@ -154,6 +194,9 @@ public class TellUsMoreTextController implements Initializable {
 
     @FXML
     private void handleContinue() {
+        AudioService.stop();
+        resetSpeakerIcon();
+
         QuestionRS current = questions.get(currentIndex);
 
         if (!selectedAnswers.containsKey(current.getId())) {
@@ -255,11 +298,13 @@ public class TellUsMoreTextController implements Initializable {
 
     @FXML
     private void handleBack(ActionEvent event) {
+        AudioService.stop();
+        resetSpeakerIcon();
+
         if (currentIndex > 0) {
             currentIndex--;
             showQuestion(currentIndex);
         } else {
-            audioOverlayController.stopAndHide();
             try {
                 NavBarManager.setCurrentView("/view/TextResultView.fxml");
                 Parent root = FXMLLoader.load(
@@ -276,7 +321,7 @@ public class TellUsMoreTextController implements Initializable {
 
     private void fetchQuestions(TextResultRS symptomResult) {
         if (symptomResult == null) return;
-        questionText.setText("Loading questions...");
+        questionText.setText(LanguageManager.get("loading_questions"));
         optionsBox.getChildren().clear();
 
         QuestionFetchRQ rq = new QuestionFetchRQ();
@@ -288,7 +333,10 @@ public class TellUsMoreTextController implements Initializable {
                     setQuestions(questionsRS);
                 }),
                 errorMsg -> Platform.runLater(() -> {
-                    DialogManager.errorDialog("Connection Error", "Could not load questions", errorMsg);
+                    DialogManager.errorDialog(
+                            LanguageManager.get("connection_error"),
+                            LanguageManager.get("could_not_load_questions"),
+                            errorMsg);
                     QuestionsRS prev = CacheManager.getQuestionsRS();
                     if (prev != null) {
                         selectedAnswers.clear();
@@ -299,9 +347,27 @@ public class TellUsMoreTextController implements Initializable {
     }
 
     private String getLevelStyle(int index, int total) {
-        if (total <= 1) return "option-level-0";
-        if (total == 2) return index == 0 ? "option-level-0" : "option-level-1";
+        if (total <= 1) {
+            return "option-level-0";
+        }
+
+        if (total == 2) {
+            return index == 0 ? "option-level-0" : "option-level-1";
+        }
+
         int level = Math.round((float) index / (total - 1) * 4);
         return "option-level-" + level;
+    }
+
+    private void setMuteIcon() {
+        questionSpeakerIcon.setImage(new Image(
+                getClass().getResource("/icons/mute.png").toExternalForm()
+        ));
+    }
+
+    private void resetSpeakerIcon() {
+        questionSpeakerIcon.setImage(new Image(
+                getClass().getResource("/icons/speaker.png").toExternalForm()
+        ));
     }
 }

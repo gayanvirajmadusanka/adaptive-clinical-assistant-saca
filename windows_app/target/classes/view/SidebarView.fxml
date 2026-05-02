@@ -59,7 +59,7 @@
             </ImageView>
         </graphic>
         <tooltip>
-            <Tooltip text="Show sidebar"/>
+            <Tooltip text="%show_sidebar"/>
         </tooltip>
         <StackPane.margin>
             <Insets top="80" left="12"/>

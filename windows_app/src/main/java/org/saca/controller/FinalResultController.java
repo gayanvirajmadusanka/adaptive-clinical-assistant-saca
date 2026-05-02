@@ -12,6 +12,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -20,6 +22,7 @@ import org.saca.model.request.ClassifyRQ;
 import org.saca.model.response.ClassifyRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
+import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
@@ -34,9 +37,6 @@ public class FinalResultController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
-
-    @FXML
-    private AudioOverlayController audioOverlayController;
 
     @FXML
     private StackPane bgPane;
@@ -58,6 +58,9 @@ public class FinalResultController implements Initializable {
 
     @FXML
     private Button recSpeakerBtn;
+
+    @FXML
+    private ImageView recSpeakerIcon;
 
     private ClassifyRS result;
 
@@ -91,15 +94,15 @@ public class FinalResultController implements Initializable {
         symptomsBox.getChildren().add(loading);
 
         TextResultRS textResult = CacheManager.getTextResultRS();
-        ClassifyRQ rq = new ClassifyRQ();
-        rq.setSymptoms(textResult.getSymptomsEn());
-        rq.setAnswers(CacheManager.getSavedAnswers());
-        rq.setLanguage(LanguageManager.isLanguageEnglish()
+        ClassifyRQ classifyRQ = new ClassifyRQ();
+        classifyRQ.setSymptoms(textResult.getSymptomsEn());
+        classifyRQ.setAnswers(CacheManager.getSavedAnswers());
+        classifyRQ.setLanguage(LanguageManager.isLanguageEnglish()
                 ? AppsConstants.AppLanguage.EN.getShortDescription()
                 : AppsConstants.AppLanguage.WP.getShortDescription());
 
         ApiService.classify(
-                rq,
+                classifyRQ,
                 classifyRS -> Platform.runLater(() -> setResult(classifyRS)),
                 errorMsg -> Platform.runLater(() -> {
                     setResult(cached);
@@ -144,6 +147,7 @@ public class FinalResultController implements Initializable {
         boolean showCall = severityMode == AppsConstants.SeverityMode.SEVERE && rs.isHasCritical();
         callBtn.setVisible(showCall);
         callBtn.setManaged(showCall);
+
         if (showCall) {
             bounceCallButton();
         }
@@ -170,10 +174,7 @@ public class FinalResultController implements Initializable {
 
     private void applyTheme() {
         StackPane root = getRootPane();
-        if (root == null) {
-            return;
-        }
-
+        if (root == null) return;
         root.getStyleClass().add("root");
     }
 
@@ -187,21 +188,34 @@ public class FinalResultController implements Initializable {
 
     @FXML
     private void handleSpeak() {
-        if (result == null) return;
+        if (result == null) {
+            return;
+        }
 
-        if (audioOverlayController.isPlaying()) {
-            audioOverlayController.stopAndHide();
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetSpeakerIcon();
             return;
         }
 
         String voiceB64 = result.getVoiceB64();
-        if (voiceB64 == null || voiceB64.isBlank()) return;
+        if (voiceB64 == null || voiceB64.isBlank()) {
+            return;
+        }
 
-        audioOverlayController.play(voiceB64);
+        setMuteIcon();
+
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> Platform.runLater(this::resetSpeakerIcon),
+                () -> Platform.runLater(this::resetSpeakerIcon)
+        );
     }
 
     @FXML
     private void handleCallForHelp() {
+        AudioService.stop();
+        resetSpeakerIcon();
         DialogManager.warningDialog(
                 LanguageManager.get("call_for_help"),
                 LanguageManager.get("call_000"),
@@ -211,7 +225,7 @@ public class FinalResultController implements Initializable {
 
     @FXML
     private void handleStartAgain() {
-        audioOverlayController.stopAndHide();
+        AudioService.stop();
         CacheManager.clearClassifyRS();
         CacheManager.clearTextResultRS();
         CacheManager.clearQuestionsRS();
@@ -232,7 +246,7 @@ public class FinalResultController implements Initializable {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        audioOverlayController.stopAndHide();
+        AudioService.stop();
         try {
             NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
             Parent root = FXMLLoader.load(
@@ -263,5 +277,17 @@ public class FinalResultController implements Initializable {
         );
         bounce.setCycleCount(Timeline.INDEFINITE);
         bounce.play();
+    }
+
+    private void setMuteIcon() {
+        recSpeakerIcon.setImage(new Image(
+                getClass().getResource("/icons/mute.png").toExternalForm()
+        ));
+    }
+
+    private void resetSpeakerIcon() {
+        recSpeakerIcon.setImage(new Image(
+                getClass().getResource("/icons/speaker.png").toExternalForm()
+        ));
     }
 }

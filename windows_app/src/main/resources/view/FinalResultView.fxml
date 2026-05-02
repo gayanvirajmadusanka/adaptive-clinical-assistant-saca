@@ -94,7 +94,9 @@
                                             styleClass="question-speaker-btn"
                                             onAction="#handleSpeak">
                                         <graphic>
-                                            <ImageView fitWidth="22" fitHeight="22" preserveRatio="true">
+                                            <ImageView fx:id="recSpeakerIcon"
+                                                       fitWidth="22" fitHeight="22"
+                                                       preserveRatio="true">
                                                 <image>
                                                     <Image url="@/icons/speaker.png"/>
                                                 </image>
@@ -136,8 +138,5 @@
         </center>
 
     </BorderPane>
-
-    <!-- Audio overlay — full screen -->
-    <fx:include fx:id="audioOverlay" source="AudioOverlayView.fxml"/>
 
 </StackPane>

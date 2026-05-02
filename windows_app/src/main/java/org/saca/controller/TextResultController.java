@@ -8,7 +8,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.request.QuestionFetchRQ;
@@ -16,6 +19,7 @@ import org.saca.model.request.TextInputRQ;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
 import org.saca.service.ApiService;
+import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
@@ -32,10 +36,13 @@ public class TextResultController implements Initializable {
     private SidebarController sidebarController;
 
     @FXML
-    private AudioOverlayController audioOverlayController;
+    private VBox symptomsBox;
 
     @FXML
-    private VBox symptomsBox;
+    private Button speakerBtn;
+
+    @FXML
+    private ImageView speakerIcon;
 
     private TextResultRS symptomResult;
 
@@ -89,11 +96,11 @@ public class TextResultController implements Initializable {
         loading.getStyleClass().add("result-symptom-item");
         symptomsBox.getChildren().setAll(loading);
 
-        TextInputRQ rq = new TextInputRQ();
-        rq.setText(savedText);
+        TextInputRQ textInputRQ = new TextInputRQ();
+        textInputRQ.setText(savedText);
 
         ApiService.detectSymptomsText(
-                rq,
+                textInputRQ,
                 result -> Platform.runLater(() -> setSymptomResult(result)),
                 errorMsg -> Platform.runLater(() -> {
                     TextResultRS cached = CacheManager.getTextResultRS();
@@ -106,26 +113,31 @@ public class TextResultController implements Initializable {
 
     @FXML
     private void handleSpeak() {
-        if (symptomResult == null) {
-            return;
-        }
+        if (symptomResult == null) return;
 
-        if (audioOverlayController.isPlaying()) {
-            audioOverlayController.stopAndHide();
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetSpeakerIcon();
             return;
         }
 
         String voiceB64 = symptomResult.getVoiceB64();
-        if (voiceB64 == null || voiceB64.isBlank()) {
-            System.out.println("No voice_b64 available");
-            return;
-        }
+        if (voiceB64 == null || voiceB64.isBlank()) return;
 
-        audioOverlayController.play(voiceB64);
+        setSpeakerStopIcon();
+
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> Platform.runLater(this::resetSpeakerIcon),
+                () -> Platform.runLater(this::resetSpeakerIcon)
+        );
     }
 
     @FXML
     private void handleYes() {
+        AudioService.stop();
+        resetSpeakerIcon();
+
         if (symptomResult == null) {
             return;
         }
@@ -149,16 +161,16 @@ public class TextResultController implements Initializable {
 
             ApiService.fetchQuestions(
                     questionFetchRQ,
-
                     questionsRS -> Platform.runLater(() -> {
                         loadingCtrl.stop();
                         navigateToTellUsMore(questionsRS);
                     }),
-
                     errorMsg -> Platform.runLater(() -> {
                         loadingCtrl.stop();
-                        DialogManager.errorDialog("Connection Error",
-                                "Could not load questions", errorMsg);
+                        DialogManager.errorDialog(
+                                LanguageManager.get("connection_error"),
+                                LanguageManager.get("could_not_load_questions"),
+                                errorMsg);
                         try {
                             FXMLLoader rl = new FXMLLoader(
                                     getClass().getResource("/view/TextResultView.fxml"),
@@ -183,16 +195,17 @@ public class TextResultController implements Initializable {
 
     @FXML
     private void handleNo() {
+        AudioService.stop();
         navigateToTextInput(sidebarController.getRoot().getScene());
     }
 
     @FXML
     private void handleBack(ActionEvent event) {
+        AudioService.stop();
         navigateToTextInput(((Node) event.getSource()).getScene());
     }
 
     private void navigateToTextInput(Scene scene) {
-        audioOverlayController.stopAndHide();
         try {
             NavBarManager.setCurrentView("/view/TextInputView.fxml");
             CacheManager.clearTextResultRS();
@@ -231,5 +244,17 @@ public class TextResultController implements Initializable {
         QuestionFetchRQ questionFetchRQ = new QuestionFetchRQ();
         questionFetchRQ.setSymptoms(symptomResult.getSymptomsEn());
         return questionFetchRQ;
+    }
+
+    private void setSpeakerStopIcon() {
+        speakerIcon.setImage(new Image(
+                getClass().getResource("/icons/mute.png").toExternalForm()
+        ));
+    }
+
+    private void resetSpeakerIcon() {
+        speakerIcon.setImage(new Image(
+                getClass().getResource("/icons/speaker.png").toExternalForm()
+        ));
     }
 }

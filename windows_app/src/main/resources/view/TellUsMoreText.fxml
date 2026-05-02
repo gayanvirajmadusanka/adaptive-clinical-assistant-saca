@@ -42,7 +42,6 @@
                                 <Insets top="40" right="40" bottom="60" left="40"/>
                             </padding>
 
-                            <!-- HEADER BAR -->
                             <HBox alignment="CENTER_LEFT" styleClass="tell-header-bar">
 
                                 <Button onAction="#handleBack" styleClass="tell-back-btn">
@@ -65,13 +64,11 @@
 
                             </HBox>
 
-                            <!-- PROGRESS LABEL -->
                             <Label fx:id="progressLabel"
                                    styleClass="question-progress-label"
                                    alignment="CENTER"
                                    maxWidth="Infinity"/>
 
-                            <!-- PROGRESS BAR -->
                             <ProgressBar fx:id="progressBar"
                                          styleClass="question-progress-bar"
                                          progress="0"
@@ -96,7 +93,9 @@
                                             styleClass="question-speaker-btn"
                                             onAction="#handleQuestionSpeak">
                                         <graphic>
-                                            <ImageView fitWidth="24" fitHeight="24" preserveRatio="true">
+                                            <ImageView fx:id="questionSpeakerIcon"
+                                                       fitWidth="24" fitHeight="24"
+                                                       preserveRatio="true">
                                                 <image>
                                                     <Image url="@/icons/speaker.png"/>
                                                 </image>
@@ -124,7 +123,5 @@
         </center>
 
     </BorderPane>
-
-    <fx:include fx:id="audioOverlay" source="AudioOverlayView.fxml"/>
 
 </StackPane>
