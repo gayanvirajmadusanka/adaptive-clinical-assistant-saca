@@ -48,7 +48,7 @@ def extract_text(req: ExtractTextRequest) -> dict:
         }
 
     preprocessed = preprocess_text(english_text)
-    result       = extract_symptoms(preprocessed["clean_text"], is_warlpiri=is_warlpiri)
+    result       = extract_symptoms(preprocessed["clean_text"], is_warlpiri=is_warlpiri, raw_text=english_text)
     voice_b64    = get_detected_symptoms_audio(result["symptoms_en"], req.language)
 
     return {
@@ -89,7 +89,7 @@ def extract_audio(req: ExtractAudioRequest) -> dict:
                 }
 
             preprocessed = preprocess_text(english_text)
-            result       = extract_symptoms(preprocessed["clean_text"], is_warlpiri=False)
+            result = extract_symptoms(preprocessed["clean_text"], is_warlpiri=False, raw_text=english_text)
 
         elif req.language == LANG_WP:
             wp_result = recognize_warlpiri(tmp_path)

@@ -1,7 +1,7 @@
 import os
 import json
 import pickle
-from rapidfuzz import fuzz, process
+from rapidfuzz import fuzz
 
 _BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA_DIR  = os.path.join(_BASE_DIR, "data", "warlpiri")
@@ -12,19 +12,16 @@ _MODEL_PATH       = os.path.join(_MODEL_DIR, "nlp_symptom_classifier.pkl")
 _TFIDF_PATH       = os.path.join(_MODEL_DIR, "nlp_tfidf_vectorizer.pkl")
 _ENCODER_PATH     = os.path.join(_MODEL_DIR, "nlp_label_encoder.pkl")
 
-# confidence thresholds
 _EXACT_CONF  = 0.99
 _FUZZY_CONF  = 0.85
-_MIN_CONF    = 0.75   # below this triggers stage 2
-_FUZZY_CUT   = 70     # rapidfuzz score cutoff 0-100
+_MIN_CONF    = 0.75
+_FUZZY_CUT   = 70
 
-# symptoms that always set has_critical = 1
 _CRITICAL = {
     "chest pain", "shortness breath", "loss of consciousness",
     "bleeding", "blood stool", "blood urine"
 }
 
-# module-level cache
 _symptom_map = None
 _en_vocab    = None
 _model       = None
@@ -88,7 +85,6 @@ def _stage1_match(text: str) -> dict:
     """
     Stage 1: fuzzy match input text against 33 symptom_map vocabulary terms.
     Uses token_sort_ratio to handle word order variation.
-    Returns matched symptoms with confidence scores.
     :param text: preprocessed English text
     :return: dict of {symptom_en: confidence}
     """
@@ -101,7 +97,6 @@ def _stage1_match(text: str) -> dict:
     for sym in vocab:
         ratio = fuzz.token_sort_ratio(sym.lower(), text.lower())
         if ratio >= _FUZZY_CUT:
-            # exact match scores 0.99, others scale from FUZZY_CONF
             conf = _EXACT_CONF if ratio == 100 else round(ratio / 100 * _FUZZY_CONF, 2)
             matched[sym] = conf
 
@@ -111,10 +106,9 @@ def _stage1_match(text: str) -> dict:
 def _stage2_tfidf(text: str) -> dict:
     """
     Stage 2: TF-IDF + Random Forest fallback.
-    Only called when stage 1 finds results but all below MIN_CONF.
-    Maps informal phrasing to symptom_map vocabulary.
-    NOT called when stage 1 returns empty (confidence = 0).
-    :param text: preprocessed English text
+    Uses raw or lightly processed text for better informal phrasing coverage.
+    Maps input to symptom_map vocabulary terms.
+    :param text: raw or preprocessed English text
     :return: dict of {symptom_en: confidence} or empty dict
     """
     if not _load_model():
@@ -125,7 +119,6 @@ def _stage2_tfidf(text: str) -> dict:
         top_idx  = proba.argmax()
         label    = _label_enc.inverse_transform([top_idx])[0]
         conf     = float(proba[top_idx])
-        # only return if label is in our 33-symptom vocabulary
         if label in _get_en_vocab() and conf >= 0.45:
             return {label: round(conf, 2)}
         return {}
@@ -134,18 +127,19 @@ def _stage2_tfidf(text: str) -> dict:
         return {}
 
 
-def extract_symptoms(text: str, is_warlpiri: bool = False) -> dict:
+def extract_symptoms(text: str, is_warlpiri: bool = False, raw_text: str = None) -> dict:
     """
     Extract symptoms from English text and map to symptom_map vocabulary.
     Symptoms returned are always exact strings from symptom_map.json
     so the ML classifier receives vocabulary-aligned input.
 
-    Stage 1 fuzzy matches against 33 symptom terms.
-    Stage 2 TF-IDF activates only when stage 1 finds results below threshold.
-    Confidence 0 returns immediately without calling stage 2.
+    Stage 1 fuzzy matches against 33 symptom terms using preprocessed text.
+    Stage 2 TF-IDF uses raw_text for better informal phrasing coverage.
+    Stage 2 activates when stage 1 finds nothing OR all results below threshold.
 
-    :param text: English text (already translated if Warlpiri input)
+    :param text: preprocessed English text
     :param is_warlpiri: True if original input was Warlpiri language
+    :param raw_text: original unprocessed text - used for stage 2 if provided
     :return: dict with symptoms_en, symptoms_wp, confidence, has_critical
     """
     if not text or not text.strip():
@@ -156,15 +150,31 @@ def extract_symptoms(text: str, is_warlpiri: bool = False) -> dict:
             "has_critical": 0
         }
 
+    # stage 2 uses raw text when available for better informal phrasing coverage
+    stage2_input = raw_text if raw_text else text
+
     stage1 = _stage1_match(text)
 
-    # nothing found at all - return empty immediately, do not call stage 2
+    # stage 1 found nothing - try stage 2 with raw text before giving up
     if not stage1:
+        stage2 = _stage2_tfidf(stage2_input)
+        if not stage2:
+            return {
+                "symptoms_en":  [],
+                "symptoms_wp":  [],
+                "confidence":   0.0,
+                "has_critical": 0
+            }
+        symptoms_en = list(stage2.keys())
+        symptoms_wp = []
+        if is_warlpiri:
+            wp_lookup   = {v["en"].lower(): v["wp"] for v in _load_symptom_map().values()}
+            symptoms_wp = [wp_lookup[s.lower()] for s in symptoms_en if s.lower() in wp_lookup]
         return {
-            "symptoms_en":  [],
-            "symptoms_wp":  [],
-            "confidence":   0.0,
-            "has_critical": 0
+            "symptoms_en":  symptoms_en,
+            "symptoms_wp":  symptoms_wp,
+            "confidence":   round(max(stage2.values()), 2),
+            "has_critical": get_has_critical(symptoms_en)
         }
 
     high_conf = {k: v for k, v in stage1.items() if v >= _MIN_CONF}
@@ -173,12 +183,11 @@ def extract_symptoms(text: str, is_warlpiri: bool = False) -> dict:
         final = high_conf
     else:
         # stage 1 found candidates but all low confidence - try stage 2
-        stage2 = _stage2_tfidf(text)
+        stage2 = _stage2_tfidf(stage2_input)
         final  = {**stage1, **stage2} if stage2 else stage1
 
     symptoms_en = list(final.keys())
 
-    # build Warlpiri terms from symptom_map for Warlpiri input
     if is_warlpiri:
         wp_lookup   = {v["en"].lower(): v["wp"] for v in _load_symptom_map().values()}
         symptoms_wp = [wp_lookup[s.lower()] for s in symptoms_en if s.lower() in wp_lookup]
