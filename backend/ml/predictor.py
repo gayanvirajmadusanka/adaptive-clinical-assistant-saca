@@ -98,8 +98,8 @@ class TriagePredictor:
         gender_enc = 1 if gender.lower() == 'female' else 0
         age_enc = self._encode_age(age)
 
-        symptom_str = ' '.join(symptoms).lower()
-        X_tfidf = self.tfidf.transform([symptom_str])
+        symptom_str = ' '.join([symptom.lower().replace('_', ' ') for symptom in symptoms])
+        x_tfidf = self.tfidf.transform([symptom_str])
 
         demo = scipy.sparse.csr_matrix(
             np.array([[gender_enc, duration_value, age_enc]])
@@ -107,10 +107,10 @@ class TriagePredictor:
         sev_feat = scipy.sparse.csr_matrix(
             np.array([[severity_context]])
         )
-        X = scipy.sparse.hstack([X_tfidf, demo, sev_feat])
+        x = scipy.sparse.hstack([x_tfidf, demo, sev_feat])
 
-        prediction = self.model.predict(X)[0]
-        proba = self.model.predict_proba(X)[0]
+        prediction = self.model.predict(x)[0]
+        proba = self.model.predict_proba(x)[0]
         confidence = float(max(proba))
         recommendation = self.le.inverse_transform([prediction])[0]
 
@@ -124,6 +124,7 @@ class TriagePredictor:
 
         return {
             'recommendation': RECOMMENDATION_TRANSLATIONS[recommendation][language],
+            'severity_mode': severity.upper(),
             'severity': SEVERITY_TRANSLATIONS[severity][language],
             'confidence': float(f"{confidence:.4f}"),
             'recommended_action': RECOMMENDED_ACTIONS[severity][language],
