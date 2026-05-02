@@ -1,3 +1,7 @@
+"""
+Request response model schemas for the API routes.
+Defines the expected structure of request bodies and response data for each endpoint.
+"""
 from typing import Optional
 
 from pydantic import BaseModel
@@ -57,6 +61,7 @@ class QuestionsResponse(BaseModel):
 class ClassifyResponse(BaseModel):
     symptoms: list[str]
     severity: str
+    severity_mode: str
     recommendation: str
     confidence: float
     recommended_action: str

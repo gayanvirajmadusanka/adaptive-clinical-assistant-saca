@@ -1,16 +1,50 @@
 {
-  "jurru": "headache",
-  "kata": "headache",
-  "walu": "headache",
-  "nguku": "neck stiffness",
-  "mangarli": "chest pain",
-  "miyalu": "stomach pain",
-  "kilpirli": "arm pain",
-  "wirlki": "jaw pain",
-  "mulyu": "runny nose",
-  "langa": "ear pain",
-  "milpa": "eye pain",
-  "waninja": "sore throat",
-  "pawiyi": "back pain",
-  "palka": "body pain"
+  "head": {
+    "en": "Head",
+    "wp": "Jurru"
+  },
+  "neck": {
+    "en": "Neck",
+    "wp": "Nguku"
+  },
+  "chest": {
+    "en": "Chest",
+    "wp": "Mangarli"
+  },
+  "stomach": {
+    "en": "Stomach",
+    "wp": "Miyalu"
+  },
+  "arm": {
+    "en": "Arm",
+    "wp": "Kilpirli"
+  },
+  "jaw": {
+    "en": "Jaw",
+    "wp": "Wirlki"
+  },
+  "nose": {
+    "en": "Nose",
+    "wp": "Mulyu"
+  },
+  "ear": {
+    "en": "Ear",
+    "wp": "Langa"
+  },
+  "eye": {
+    "en": "Eye",
+    "wp": "Milpa"
+  },
+  "throat": {
+    "en": "Throat",
+    "wp": "Waninja"
+  },
+  "back": {
+    "en": "Back",
+    "wp": "Pawiyi"
+  },
+  "whole_body": {
+    "en": "Whole Body",
+    "wp": "Palka"
+  }
 }
