@@ -17,19 +17,143 @@ export default function TellUsMoreScreen() {
   const router = useRouter();
   const { t, setLang } = useLanguage();
 
-  const [painLevel, setPainLevel] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
-  const options = [
-    { label: t('none'), value: 'None', style: 'noneButton', textStyle: 'noneText' },
-    { label: t('little'), value: 'A little', style: 'littleButton', textStyle: 'littleText' },
-    { label: t('moderate'), value: 'Moderate', style: 'moderateButton', textStyle: 'lightText' },
-    { label: t('very_bad'), value: 'Very bad', style: 'veryBadButton', textStyle: 'lightText' },
-    { label: t('unbearable'), value: 'Unbearable', style: 'unbearableButton', textStyle: 'lightText' },
+  const questions = [
+    {
+      id: 'pain_level',
+      title: t('pain_level'),
+      question: t('pain_question'),
+      options: [
+        {
+          label: t('none'),
+          value: 'None',
+          style: 'noneButton',
+          textStyle: 'noneText',
+        },
+        {
+          label: t('little'),
+          value: 'A little',
+          style: 'littleButton',
+          textStyle: 'littleText',
+        },
+        {
+          label: t('moderate'),
+          value: 'Moderate',
+          style: 'moderateButton',
+          textStyle: 'lightText',
+        },
+        {
+          label: t('very_bad'),
+          value: 'Very bad',
+          style: 'veryBadButton',
+          textStyle: 'lightText',
+        },
+        {
+          label: t('unbearable'),
+          value: 'Unbearable',
+          style: 'unbearableButton',
+          textStyle: 'lightText',
+        },
+      ],
+    },
+    {
+      id: 'duration',
+      title: t('duration'),
+      question: t('duration_question'),
+      options: [
+        {
+          label: t('today'),
+          value: 'Today',
+          style: 'noneButton',
+          textStyle: 'noneText',
+        },
+        {
+          label: t('few_days'),
+          value: 'Few days',
+          style: 'littleButton',
+          textStyle: 'littleText',
+        },
+        {
+          label: t('one_week'),
+          value: 'One week',
+          style: 'moderateButton',
+          textStyle: 'lightText',
+        },
+        {
+          label: t('more_than_week'),
+          value: 'More than one week',
+          style: 'veryBadButton',
+          textStyle: 'lightText',
+        },
+      ],
+    },
+    {
+      id: 'fever',
+      title: t('fever'),
+      question: t('fever_question'),
+      options: [
+        {
+          label: t('yes'),
+          value: 'Yes',
+          style: 'veryBadButton',
+          textStyle: 'lightText',
+        },
+        {
+          label: t('no'),
+          value: 'No',
+          style: 'noneButton',
+          textStyle: 'noneText',
+        },
+      ],
+    },
+    {
+      id: 'breathing',
+      title: t('breathing'),
+      question: t('breathing_question'),
+      options: [
+        {
+          label: t('yes'),
+          value: 'Yes',
+          style: 'veryBadButton',
+          textStyle: 'lightText',
+        },
+        {
+          label: t('no'),
+          value: 'No',
+          style: 'noneButton',
+          textStyle: 'noneText',
+        },
+      ],
+    },
+    {
+      id: 'getting_worse',
+      title: t('getting_worse'),
+      question: t('getting_worse_question'),
+      options: [
+        {
+          label: t('yes'),
+          value: 'Yes',
+          style: 'veryBadButton',
+          textStyle: 'lightText',
+        },
+        {
+          label: t('no'),
+          value: 'No',
+          style: 'noneButton',
+          textStyle: 'noneText',
+        },
+      ],
+    },
   ];
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const selectedAnswer = answers[currentQuestion.id];
 
   const openModal = () => {
     setSelectedLang(null);
@@ -57,6 +181,40 @@ export default function TellUsMoreScreen() {
     }
   };
 
+  const selectAnswer = (value) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: value,
+    }));
+  };
+
+  const handleContinue = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    } else {
+      router.push({
+        pathname: '/result',
+        params: {
+          answers: JSON.stringify({
+            ...answers,
+            [currentQuestion.id]: selectedAnswer,
+          }),
+        },
+      });
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentQuestionIndex((prevIndex) => {
+      if (prevIndex > 0) {
+        return prevIndex - 1;
+      }
+
+      router.back();
+      return prevIndex;
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
@@ -73,27 +231,33 @@ export default function TellUsMoreScreen() {
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>{t('pain_level')}</Text>
-              <Text style={styles.question}>{t('pain_question')}</Text>
+              <Text style={styles.question}>
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </Text>
 
-              {options.map((item) => (
+              <Text style={styles.sectionTitle}>{currentQuestion.title}</Text>
+
+              <Text style={styles.question}>{currentQuestion.question}</Text>
+
+              {currentQuestion.options.map((item) => (
                 <Pressable
                   key={item.value}
                   style={({ pressed }) => [
                     styles.answerButton,
                     styles[item.style],
-                    painLevel === item.value && styles.selectedAnswer,
+                    selectedAnswer === item.value && styles.selectedAnswer,
                     pressed && styles.pressedAnswer,
                   ]}
-                  onPress={() => setPainLevel(item.value)}
+                  onPress={() => selectAnswer(item.value)}
                 >
                   <View
                     style={[
                       styles.radioOuter,
-                      painLevel === item.value && styles.radioOuterSelected,
+                      selectedAnswer === item.value &&
+                        styles.radioOuterSelected,
                     ]}
                   >
-                    {painLevel === item.value && (
+                    {selectedAnswer === item.value && (
                       <View style={styles.radioInner} />
                     )}
                   </View>
@@ -108,19 +272,35 @@ export default function TellUsMoreScreen() {
             <Pressable
               style={({ pressed }) => [
                 styles.continueButton,
-                !painLevel && styles.disabledButton,
+                !selectedAnswer && styles.disabledButton,
                 pressed && styles.continuePressed,
               ]}
-              disabled={!painLevel}
-              onPress={() => router.push('/tellusmore2')}
+              disabled={!selectedAnswer}
+              onPress={handleContinue}
             >
-              <Text style={styles.continueText}>{t('continue')}</Text>
+              <Text style={styles.continueText}>
+                {currentQuestionIndex === questions.length - 1
+                  ? t('submit')
+                  : t('continue')}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backPressedGrey,
+              ]}
+              onPress={handleBack}
+            >
+              <Text style={styles.backText}>{t('back')}</Text>
             </Pressable>
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
-            <Pressable style={styles.footerItem} onPress={() => router.replace('/input')}>
+            <Pressable
+              style={styles.footerItem}
+              onPress={() => router.replace('/input')}
+            >
               <Text style={styles.footerIcon}>🏠</Text>
               <Text style={styles.footerText}>{t('home')}</Text>
             </Pressable>
@@ -131,7 +311,6 @@ export default function TellUsMoreScreen() {
             </Pressable>
           </View>
 
-          {/* Language Modal */}
           <Modal transparent visible={modalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <Animated.View
@@ -152,7 +331,8 @@ export default function TellUsMoreScreen() {
                   <Text
                     style={[
                       styles.languageOptionText,
-                      selectedLang === 'en' && styles.languageOptionTextSelected,
+                      selectedLang === 'en' &&
+                        styles.languageOptionTextSelected,
                     ]}
                   >
                     {t('english')}
@@ -169,7 +349,8 @@ export default function TellUsMoreScreen() {
                   <Text
                     style={[
                       styles.languageOptionText,
-                      selectedLang === 'wp' && styles.languageOptionTextSelected,
+                      selectedLang === 'wp' &&
+                        styles.languageOptionTextSelected,
                     ]}
                   >
                     {t('warlpiri')}

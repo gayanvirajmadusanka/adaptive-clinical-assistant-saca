@@ -10,6 +10,7 @@ import {
   Modal,
   Animated,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
@@ -44,6 +45,54 @@ export default function TellUsMoreScreen() {
   const totalQuestions = questions.length || 6;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
+  const stopCurrentAudio = async () => {
+    try {
+      if (soundRef.current) {
+        const currentSound = soundRef.current;
+        soundRef.current = null;
+
+        const status = await currentSound.getStatusAsync();
+
+        if (status.isLoaded) {
+          await currentSound.stopAsync();
+          await currentSound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop audio error:', error);
+    }
+  };
+
+  const goBackQuestion = async () => {
+    await stopCurrentAudio();
+
+    if (currentIndex > 0) {
+      const previousIndex = currentIndex - 1;
+      const previousQuestion = questions[previousIndex];
+      const previousAnswer = answers[previousQuestion?.id];
+
+      setCurrentIndex(previousIndex);
+      setSelectedOption(previousAnswer?.option_id || null);
+      return;
+    }
+
+    router.back();
+  };
+
+  useEffect(() => {
+    const backAction = () => {
+      goBackQuestion();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [currentIndex, questions, answers]);
+
   const fetchQuestions = async (languageCode) => {
     try {
       setLoadingQuestions(true);
@@ -53,10 +102,6 @@ export default function TellUsMoreScreen() {
         headers: {
           'Content-Type': 'application/json',
         },
-
-        // ✅ IMPORTANT FIX:
-        // Always send English symptoms for backend matching.
-        // Only change language to get English/Warlpiri question text + audio.
         body: JSON.stringify({
           symptoms: symptomsEn,
           language: languageCode,
@@ -87,24 +132,6 @@ export default function TellUsMoreScreen() {
   useEffect(() => {
     fetchQuestions(lang || 'en');
   }, []);
-
-  const stopCurrentAudio = async () => {
-    try {
-      if (soundRef.current) {
-        const currentSound = soundRef.current;
-        soundRef.current = null;
-
-        const status = await currentSound.getStatusAsync();
-
-        if (status.isLoaded) {
-          await currentSound.stopAsync();
-          await currentSound.unloadAsync();
-        }
-      }
-    } catch (error) {
-      console.log('Stop audio error:', error);
-    }
-  };
 
   const playQuestionAudio = async () => {
     try {
@@ -213,27 +240,21 @@ export default function TellUsMoreScreen() {
     await stopCurrentAudio();
 
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setSelectedOption(null);
-    } else {
-      console.log('FINAL ANSWERS:', updatedAnswers);
-      Alert.alert('Submitted', 'Your answers have been submitted.');
+      const nextIndex = currentIndex + 1;
+      const nextQuestion = questions[nextIndex];
+      const nextAnswer = updatedAnswers[nextQuestion?.id];
+
+      setCurrentIndex(nextIndex);
+      setSelectedOption(nextAnswer?.option_id || null);
+      return;
     }
+
+    console.log('FINAL ANSWERS:', updatedAnswers);
+    Alert.alert('Submitted', 'Your answers have been submitted.');
   };
 
   const handleBack = async () => {
-    await stopCurrentAudio();
-
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-
-      const previousQuestion = questions[currentIndex - 1];
-      const previousAnswer = answers[previousQuestion.id];
-
-      setSelectedOption(previousAnswer?.option_id || null);
-    } else {
-      router.back();
-    }
+    await goBackQuestion();
   };
 
   const openModal = () => {

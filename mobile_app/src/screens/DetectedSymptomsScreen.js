@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
@@ -37,6 +38,12 @@ export default function DetectedSymptomsScreen() {
 
   const soundRef = useRef(null);
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(false);
+    }, [])
+  );
 
   const symptomsToShow =
     lang === 'wp'
@@ -213,6 +220,22 @@ export default function DetectedSymptomsScreen() {
     await fetchAudioForLanguage(selectedLang);
   };
 
+  const handleYesPress = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    await stopCurrentAudio();
+
+    router.push({
+      pathname: '/tellusmore',
+      params: {
+        symptoms_en: JSON.stringify(symptomsEn),
+        symptoms_wp: JSON.stringify(symptomsWp),
+        language: lang,
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
@@ -254,21 +277,7 @@ export default function DetectedSymptomsScreen() {
                   styles.choiceButton,
                   pressed && styles.choicePressed,
                 ]}
-                onPress={async () => {
-                  if (loading) return;
-                  setLoading(true);
-
-                  await stopCurrentAudio();
-
-                  router.push({
-                    pathname: '/tellusmore',
-                    params: {
-                      symptoms_en: JSON.stringify(symptomsEn),
-                      symptoms_wp: JSON.stringify(symptomsWp),
-                      language: lang,
-                    },
-                  });
-                }}
+                onPress={handleYesPress}
               >
                 <Text style={styles.choiceText}>{t('yes')}</Text>
               </Pressable>
