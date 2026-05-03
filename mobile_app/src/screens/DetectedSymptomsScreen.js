@@ -13,23 +13,30 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
+
+const API_URL = 'http://192.168.1.106:8000';
 
 export default function DetectedSymptomsScreen() {
   const router = useRouter();
   const { t, lang, setLang } = useLanguage();
   const params = useLocalSearchParams();
 
-  const symptomsEn = params.symptoms_en
-    ? JSON.parse(params.symptoms_en)
-    : [];
+  const symptomsEn = params.symptoms_en ? JSON.parse(params.symptoms_en) : [];
+  const symptomsWp = params.symptoms_wp ? JSON.parse(params.symptoms_wp) : [];
 
-  const symptomsWp = params.symptoms_wp
-    ? JSON.parse(params.symptoms_wp)
-    : [];
+  const initialVoiceFileUri = params.voice_file_uri || null;
 
-  const voiceFileUri = params.voice_file_uri || null;
+  const [voiceFileUri, setVoiceFileUri] = useState(initialVoiceFileUri);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  const soundRef = useRef(null);
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   const symptomsToShow =
     lang === 'wp'
@@ -44,18 +51,80 @@ export default function DetectedSymptomsScreen() {
       ? symptomsToShow.map((item) => `• ${item}`).join('\n')
       : 'No symptoms detected';
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(null);
-  const [sound, setSound] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const stopCurrentAudio = async () => {
+    try {
+      if (soundRef.current) {
+        const currentSound = soundRef.current;
+        soundRef.current = null;
 
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+        const status = await currentSound.getStatusAsync();
 
-  // 🔊 PLAY AUDIO
+        if (status.isLoaded) {
+          await currentSound.stopAsync();
+          await currentSound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop audio error:', error);
+    }
+  };
+
+  const saveBase64Audio = async (voiceB64, langCode) => {
+    if (!voiceB64) return null;
+
+    const cleaned = voiceB64.replace(/^data:audio\/\w+;base64,/, '');
+    const fileUri = FileSystem.cacheDirectory + `voice_${langCode}.wav`;
+
+    await FileSystem.writeAsStringAsync(fileUri, cleaned, {
+      encoding: 'base64',
+    });
+
+    return fileUri;
+  };
+
+  const fetchAudioForLanguage = async (languageCode) => {
+    try {
+      setAudioLoading(true);
+
+      const textToSend =
+        languageCode === 'wp' ? symptomsWp.join(' ') : symptomsEn.join(' ');
+
+      const response = await fetch(`${API_URL}/extract/text`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: textToSend,
+          language: languageCode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update audio');
+      }
+
+      const data = await response.json();
+      const newFile = await saveBase64Audio(data.voice_b64, languageCode);
+
+      if (newFile) {
+        setVoiceFileUri(newFile);
+      }
+    } catch (error) {
+      console.log('Audio update error:', error);
+      Alert.alert('Audio Error', 'Could not update audio.');
+    } finally {
+      setAudioLoading(false);
+    }
+  };
+
   const playVoiceAudio = async () => {
     try {
       if (!voiceFileUri) {
-        Alert.alert('Audio Error', 'Audio file not found.');
+        Alert.alert('Audio Error', 'No audio file found.');
+        return;
+      }
+
+      if (audioLoading) {
+        Alert.alert('Please wait', 'Updating audio...');
         return;
       }
 
@@ -63,13 +132,9 @@ export default function DetectedSymptomsScreen() {
         playsInSilentModeIOS: true,
       });
 
-      if (sound) {
-        await sound.stopAsync();
-        await sound.unloadAsync();
-        setSound(null);
-      }
+      await stopCurrentAudio();
 
-      const { sound: newSound } = await Audio.Sound.createAsync(
+      const { sound } = await Audio.Sound.createAsync(
         { uri: voiceFileUri },
         {
           shouldPlay: true,
@@ -77,42 +142,47 @@ export default function DetectedSymptomsScreen() {
         }
       );
 
-      setSound(newSound);
+      soundRef.current = sound;
 
-      newSound.setOnPlaybackStatusUpdate(async (status) => {
-        if (status.didJustFinish) {
-          await newSound.unloadAsync();
-          setSound(null);
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          try {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
+            }
+
+            await sound.unloadAsync();
+          } catch (error) {
+            console.log('Finished audio unload error:', error);
+          }
         }
       });
     } catch (error) {
-      console.log('Audio play error:', error);
-      Alert.alert('Audio Error', 'Unable to play the voice audio.');
+      console.log('Play error:', error);
+      Alert.alert('Audio Error', 'Unable to play audio.');
     }
   };
 
-  // 🛑 STOP AUDIO
-  const stopCurrentAudio = async () => {
-    try {
-      if (sound) {
-        await sound.stopAsync();
-        await sound.unloadAsync();
-        setSound(null);
-      }
-    } catch (error) {
-      console.log('Stop audio error:', error);
-    }
-  };
-
-  // 🔥 AUTO STOP when screen unmounts (back, swipe, etc.)
   useEffect(() => {
     return () => {
-      if (sound) {
-        sound.stopAsync();
-        sound.unloadAsync();
+      if (soundRef.current) {
+        const currentSound = soundRef.current;
+        soundRef.current = null;
+
+        currentSound
+          .getStatusAsync()
+          .then((status) => {
+            if (status.isLoaded) {
+              currentSound.stopAsync();
+              currentSound.unloadAsync();
+            }
+          })
+          .catch((error) => {
+            console.log('Cleanup audio error:', error);
+          });
       }
     };
-  }, [sound]);
+  }, []);
 
   const openModal = () => {
     setSelectedLang(null);
@@ -133,11 +203,14 @@ export default function DetectedSymptomsScreen() {
     }).start(() => setModalVisible(false));
   };
 
-  const confirmLanguage = () => {
-    if (selectedLang) {
-      setLang(selectedLang);
-      closeModal();
-    }
+  const confirmLanguage = async () => {
+    if (!selectedLang) return;
+
+    await stopCurrentAudio();
+    setLang(selectedLang);
+    closeModal();
+
+    await fetchAudioForLanguage(selectedLang);
   };
 
   return (
@@ -242,7 +315,9 @@ export default function DetectedSymptomsScreen() {
 
             <Pressable style={styles.footerItem} onPress={openModal}>
               <Text style={styles.footerIcon}>🌐</Text>
-              <Text style={styles.footerText}>{t('language')}</Text>
+              <Text style={styles.footerText}>
+                {audioLoading ? 'Updating...' : t('language')}
+              </Text>
             </Pressable>
           </View>
 
@@ -263,7 +338,13 @@ export default function DetectedSymptomsScreen() {
                   ]}
                   onPress={() => setSelectedLang('en')}
                 >
-                  <Text style={styles.languageOptionText}>
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLang === 'en' &&
+                        styles.languageOptionTextSelected,
+                    ]}
+                  >
                     {t('english')}
                   </Text>
                 </Pressable>
@@ -275,14 +356,18 @@ export default function DetectedSymptomsScreen() {
                   ]}
                   onPress={() => setSelectedLang('wp')}
                 >
-                  <Text style={styles.languageOptionText}>
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLang === 'wp' &&
+                        styles.languageOptionTextSelected,
+                    ]}
+                  >
                     {t('warlpiri')}
                   </Text>
                 </Pressable>
 
-                <Text style={styles.confirmText}>
-                  {t('change_language')}
-                </Text>
+                <Text style={styles.confirmText}>{t('change_language')}</Text>
 
                 <View style={styles.modalButtonRow}>
                   <Pressable style={styles.cancelButton} onPress={closeModal}>
@@ -294,10 +379,12 @@ export default function DetectedSymptomsScreen() {
                       styles.confirmButton,
                       !selectedLang && styles.disabledButton,
                     ]}
-                    disabled={!selectedLang}
+                    disabled={!selectedLang || audioLoading}
                     onPress={confirmLanguage}
                   >
-                    <Text style={styles.confirmButtonText}>{t('yes')}</Text>
+                    <Text style={styles.confirmButtonText}>
+                      {audioLoading ? '...' : t('yes')}
+                    </Text>
                   </Pressable>
                 </View>
               </Animated.View>
