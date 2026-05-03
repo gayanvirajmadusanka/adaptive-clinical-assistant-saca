@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.saca.controller.TextInputController"
+            stylesheets="@/styles/style.css"
+            styleClass="root">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <!-- SIDEBAR — same shared component, expand button lives inside -->
+    <left>
+        <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+    </left>
+
+    <!-- CENTER -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="true"
+                    pannable="false"
+                    styleClass="center-scroll">
+            <content>
+                <StackPane>
+
+                    <VBox alignment="CENTER"
+                          spacing="20"
+                          maxWidth="680"
+                          styleClass="write-card-container">
+
+                        <padding>
+                            <Insets top="10" right="20" bottom="10" left="20"/>
+                        </padding>
+
+                        <!-- HEADER BAR -->
+                        <HBox alignment="CENTER" styleClass="write-header-bar">
+
+                            <Button onAction="#handleBack" styleClass="write-back-btn">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image>
+                                            <Image url="@/icons/back-arrow.png"/>
+                                        </image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
+
+                            <Label text="%write_option"
+                                   styleClass="write-title"
+                                   HBox.hgrow="ALWAYS"
+                                   maxWidth="Infinity"
+                                   alignment="CENTER"/>
+
+                            <Button styleClass="write-pen-icon">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image>
+                                            <Image url="@/icons/text.png"/>
+                                        </image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
+
+                        </HBox>
+
+                        <!-- TEXTAREA -->
+                        <VBox styleClass="write-textarea-box" spacing="0">
+                            <Label text="%what_can_i_help_with"
+                                   styleClass="write-textarea-label-top"/>
+                            <Label text="%describe_your_symptoms"
+                                   styleClass="write-textarea-label-sub"/>
+                            <TextArea fx:id="symptomInput"
+                                      styleClass="write-textarea"
+                                      wrapText="true"
+                                      prefRowCount="8"
+                                      promptText="%type_here"/>
+                        </VBox>
+
+                        <!-- CONTINUE BUTTON -->
+                        <Button text="%continue"
+                                styleClass="write-continue-btn"
+                                maxWidth="Infinity"
+                                onAction="#handleContinue"/>
+
+                    </VBox>
+
+                </StackPane>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

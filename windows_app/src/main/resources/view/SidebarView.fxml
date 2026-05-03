@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.saca.controller.SidebarController"
+           fx:id="sidebarWrapper"
+           minWidth="60"
+           prefWidth="280"
+           maxWidth="280">
+
+    <!-- SIDEBAR VBox — Hidden when collapsed -->
+    <VBox fx:id="sidebarRoot"
+          alignment="TOP_CENTER"
+          spacing="45"
+          prefWidth="280"
+          styleClass="custom-sidebar"
+          StackPane.alignment="TOP_LEFT">
+
+        <padding>
+            <Insets top="80" right="20" bottom="40" left="20"/>
+        </padding>
+
+        <!-- Layout icon click to HIDE sidebar -->
+        <Button onAction="#toggleSidebar"
+                styleClass="icon-toggle-btn">
+            <graphic>
+                <ImageView fitWidth="35" fitHeight="35" preserveRatio="true">
+                    <image>
+                        <Image url="@/icons/layouting.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <tooltip>
+                <Tooltip fx:id="sidebarTooltip" text="Hide sidebar"/>
+            </tooltip>
+        </Button>
+
+        <Button text="%home" styleClass="home-pill-btn" onAction="#handleHomeClick"/>
+        <Button text="%language" styleClass="language-pill-btn" onAction="#handleLanguageClick"/>
+        <Button text="%exit" styleClass="exit-pill-btn" onAction="#handleExit"/>
+
+    </VBox>
+
+    <Button fx:id="expandBtn"
+            onAction="#toggleSidebar"
+            styleClass="icon-toggle-btn"
+            visible="false"
+            managed="false"
+            StackPane.alignment="TOP_LEFT">
+        <graphic>
+            <ImageView fitWidth="35" fitHeight="35" preserveRatio="true">
+                <image>
+                    <Image url="@/icons/layouting.png"/>
+                </image>
+            </ImageView>
+        </graphic>
+        <tooltip>
+            <Tooltip text="Show sidebar"/>
+        </tooltip>
+        <StackPane.margin>
+            <Insets top="80" left="12"/>
+        </StackPane.margin>
+    </Button>
+
+</StackPane>

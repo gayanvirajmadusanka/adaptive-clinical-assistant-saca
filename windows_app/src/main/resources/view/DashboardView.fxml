@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.saca.controller.DashboardController"
+            stylesheets="@/styles/style.css"
+            styleClass="root">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <left>
+        <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+    </left>
+
+    <!-- CENTER -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="true"
+                    pannable="true"
+                    styleClass="center-scroll">
+            <content>
+                <VBox alignment="CENTER"
+                      spacing="30"
+                      styleClass="main-area">
+
+                    <padding>
+                        <Insets top="40" right="40" bottom="40" left="40"/>
+                    </padding>
+
+                    <Label text="%dashboard_title"
+                           wrapText="true" maxWidth="500"
+                           styleClass="dashboard-title"
+                           textAlignment="CENTER" alignment="CENTER"/>
+
+                    <Label text="%dashboard_subtitle"
+                           wrapText="true" maxWidth="500"
+                           styleClass="subtitle"
+                           textAlignment="CENTER" alignment="CENTER"/>
+
+                    <FlowPane hgap="30" vgap="20" alignment="CENTER">
+
+                        <!-- TEXT CARD -->
+                        <VBox alignment="CENTER" spacing="10"
+                              styleClass="card-text"
+                              onMouseClicked="#handleTextCardClick">
+                            <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+                                <image>
+                                    <Image url="@/icons/text.png"/>
+                                </image>
+                            </ImageView>
+                            <Label text="%write_option" styleClass="main-input-label"
+                                   mouseTransparent="true"/>
+                        </VBox>
+
+                        <!-- VOICE CARD -->
+                        <VBox alignment="CENTER" spacing="10" styleClass="card-voice"
+                              onMouseClicked="#handleVoiceCardClick">
+                            <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+                                <image>
+                                    <Image url="@/icons/voice.png"/>
+                                </image>
+                            </ImageView>
+                            <Label text="%speak_option" styleClass="main-input-label"/>
+                        </VBox>
+
+                        <!-- BODY CARD -->
+                        <VBox alignment="CENTER" spacing="10" styleClass="card-body"
+                              onMouseClicked="#handleBodyCardClick">
+                            <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
+                                <image>
+                                    <Image url="@/icons/body.png"/>
+                                </image>
+                            </ImageView>
+                            <Label text="%show_option" styleClass="main-input-label"/>
+                        </VBox>
+
+                    </FlowPane>
+
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

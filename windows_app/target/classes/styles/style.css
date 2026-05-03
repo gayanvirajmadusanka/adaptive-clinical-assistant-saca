@@ -1,0 +1,18 @@
+@import "about.css";
+@import "dashboard.css";
+@import "dialog.css";
+@import "loading.css";
+@import "select-language.css";
+@import "sidebar.css";
+@import "tell-us-more-text.css";
+@import "text-input.css";
+@import "text-result.css";
+@import "welcome.css";
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-image: url("../icons/background.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
