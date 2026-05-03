@@ -1,14 +1,14 @@
 .final-container {
-    -fx-alignment: TOP_CENTER;
+    -fx-alignment: CENTER;
 }
 
 .final-header-bar {
     -fx-background-color: #C47A3A;
-    -fx-background-radius: 14;
-    -fx-border-radius: 14;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
     -fx-padding: 12 20 12 20;
-    -fx-min-height: 72px;
-    -fx-pref-height: 72px;
+    -fx-min-height: 80px;
+    -fx-pref-height: 80px;
 }
 
 .final-back-btn {
@@ -33,9 +33,10 @@
 
 .final-header-title {
     -fx-text-fill: #1a0e00;
-    -fx-font-size: 26px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-alignment: CENTER;
 }
 
 .severity-banner {

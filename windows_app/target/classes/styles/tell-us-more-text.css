@@ -1,5 +1,12 @@
 .tell-container {
-    -fx-alignment: TOP_CENTER;
+    -fx-alignment: CENTER;
+}
+
+.tell-bg {
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-min-height: 600px;
 }
 
 .tell-header-bar {
@@ -52,35 +59,6 @@
     -fx-padding: 18 20 18 20;
     -fx-max-width: Infinity;
     -fx-spacing: 10;
-}
-
-.card-toggle-btn {
-    -fx-background-color: transparent;
-    -fx-border-color: #c8b99a;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: #8B3A1C;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-min-width: 28px;
-    -fx-pref-width: 28px;
-    -fx-max-width: 28px;
-    -fx-min-height: 24px;
-    -fx-pref-height: 24px;
-    -fx-max-height: 24px;
-    -fx-padding: 2 4 2 4;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.card-toggle-btn:hover {
-    -fx-background-color: rgba(139, 58, 28, 0.10);
-}
-
-.card-toggle-btn:pressed {
-    -fx-background-color: rgba(139, 58, 28, 0.20);
 }
 
 .card-selected-label {

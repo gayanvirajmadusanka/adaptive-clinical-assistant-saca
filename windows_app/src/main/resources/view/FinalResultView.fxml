@@ -31,8 +31,8 @@
                     <StackPane fx:id="bgPane" styleClass="final-bg">
 
                         <VBox alignment="TOP_CENTER"
-                              spacing="18"
-                              maxWidth="560"
+                              spacing="20"
+                              maxWidth="680"
                               styleClass="final-container">
 
                             <padding>

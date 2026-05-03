@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.saca.controller.VoiceInputController"
+           stylesheets="@/styles/style.css"
+           styleClass="root">
+
+    <BorderPane>
+
+        <top>
+            <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+                <padding>
+                    <Insets top="10" right="20" bottom="10" left="20"/>
+                </padding>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </top>
+
+        <left>
+            <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+        </left>
+
+        <center>
+            <ScrollPane fitToWidth="true" fitToHeight="true"
+                        pannable="false" styleClass="center-scroll">
+                <content>
+                    <StackPane styleClass="speak-bg">
+
+                        <VBox alignment="TOP_CENTER"
+                              spacing="20"
+                              maxWidth="680"
+                              styleClass="speak-container">
+
+                            <padding>
+                                <Insets top="40" right="36" bottom="60" left="36"/>
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT" styleClass="speak-header-bar">
+
+                                <Button onAction="#handleBack" styleClass="speak-back-btn">
+                                    <graphic>
+                                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/back-arrow.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Label text="%speak_title"
+                                       styleClass="speak-header-title"
+                                       HBox.hgrow="ALWAYS"
+                                       maxWidth="Infinity"
+                                       alignment="CENTER"/>
+
+                                <Button styleClass="speak-back-btn">
+                                    <graphic>
+                                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/voice.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                            </HBox>
+
+                            <VBox fx:id="micCard"
+                                  alignment="CENTER"
+                                  spacing="14"
+                                  styleClass="speak-mic-card">
+
+                                <padding>
+                                    <Insets top="40" right="20" bottom="40" left="20"/>
+                                </padding>
+
+                                <Button fx:id="micBtn"
+                                        styleClass="speak-mic-btn"
+                                        onAction="#handleMic">
+                                    <graphic>
+                                        <ImageView fx:id="micIcon"
+                                                   fitWidth="56" fitHeight="56"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/microphone.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Label fx:id="micHintLabel"
+                                       text="%speak_hint"
+                                       styleClass="speak-hint-label"
+                                       wrapText="true"
+                                       alignment="CENTER"
+                                       maxWidth="Infinity"/>
+
+                            </VBox>
+
+                            <HBox fx:id="playbackBar"
+                                  alignment="CENTER_LEFT"
+                                  spacing="20"
+                                  styleClass="speak-playback-bar"
+                                  visible="false"
+                                  managed="false">
+
+                                <padding>
+                                    <Insets top="10" right="12" bottom="10" left="12"/>
+                                </padding>
+
+                                <Button fx:id="deleteBtn"
+                                        styleClass="trash-icon-btn"
+                                        onAction="#handleDelete">
+                                    <tooltip>
+                                        <Tooltip text="%tooltip_delete"/>
+                                    </tooltip>
+                                    <graphic>
+                                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/trash.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Button fx:id="playBtn"
+                                        styleClass="speak-icon-btn"
+                                        onAction="#handlePlay">
+                                    <tooltip>
+                                        <Tooltip text="%tooltip_play"/>
+                                    </tooltip>
+                                    <graphic>
+                                        <ImageView fx:id="playIcon"
+                                                   fitWidth="20" fitHeight="20"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/play.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Label fx:id="durationLabel"
+                                       text="0.00"
+                                       styleClass="speak-duration-label"/>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Button text="%continue"
+                                        styleClass="speak-continue-btn"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSubmit"/>
+
+                            </HBox>
+
+                        </VBox>
+
+                    </StackPane>
+                </content>
+            </ScrollPane>
+        </center>
+
+    </BorderPane>
+
+</StackPane>
