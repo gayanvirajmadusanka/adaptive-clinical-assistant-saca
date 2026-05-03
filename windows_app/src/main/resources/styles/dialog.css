@@ -21,14 +21,11 @@
     -fx-text-fill: #5C2E0A;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-
-    /* top right bottom left */
     -fx-padding: 20 20 5 20;
 }
 
 /* Button container spacing */
 .exit-dialog .button-bar {
-    /* reduced bottom spacing */
     -fx-padding: 0 0 10 0;
 }
 

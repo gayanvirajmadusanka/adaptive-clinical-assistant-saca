@@ -19,6 +19,9 @@ public class TextResultRS extends CommonRS {
     @JsonProperty("input_type")
     private String inputType;
 
+    @JsonProperty("voice_b64")
+    private String voiceB64;
+
     public List<String> getSymptomsEn() {
         return symptomsEn;
     }
@@ -49,6 +52,14 @@ public class TextResultRS extends CommonRS {
 
     public void setInputType(String inputType) {
         this.inputType = inputType;
+    }
+
+    public String getVoiceB64() {
+        return voiceB64;
+    }
+
+    public void setVoiceB64(String voiceB64) {
+        this.voiceB64 = voiceB64;
     }
 
     /**

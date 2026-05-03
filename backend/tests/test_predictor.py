@@ -5,6 +5,15 @@ import pytest
 from backend.ml.predictor import SEVERITY_MAP, RECOMMENDED_ACTIONS, TriagePredictor
 
 
+@pytest.fixture
+def predictor():
+    return TriagePredictor(
+        model_path='backend/models/stacking_mlp_et_xgb.pkl',
+        tfidf_path='backend/models/tfidf_vectorizer.pkl',
+        le_path='backend/models/label_encoder.pkl'
+    )
+
+
 class TestSeverityMap:
 
     def test_doctor_high_intensity_critical_is_severe(self):
@@ -73,3 +82,65 @@ class TestEncodeAge:
 
     def test_unknown_string_defaults_to_2(self, predictor):
         assert predictor._encode_age('unknown') == 2
+
+
+class TestTriagePredictorPredict:
+
+    def test_predict_returns_required_keys(self, predictor):
+        result = predictor.predict(
+            symptoms=['headache', 'fever'],
+            age='adult',
+            gender='male',
+            duration_value=0,
+            intensity_signal=1,
+            has_critical=0
+        )
+        expected = {'recommendation', 'severity', 'severity_mode',
+                    'confidence', 'recommended_action', 'has_critical',
+                    'intensity_signal', 'voice_b64'}
+        assert expected.issubset(result.keys())
+
+    def test_predict_severity_mode_uppercase(self, predictor):
+        result = predictor.predict(
+            symptoms=['fever'],
+            age='adult',
+            gender='female',
+            duration_value=0,
+            intensity_signal=0,
+            has_critical=0
+        )
+        assert result['severity_mode'] in {'MILD', 'MODERATE', 'SEVERE'}
+
+    def test_predict_confidence_between_0_and_1(self, predictor):
+        result = predictor.predict(
+            symptoms=['chest pain'],
+            age='elder',
+            gender='male',
+            duration_value=1,
+            intensity_signal=2,
+            has_critical=1
+        )
+        assert 0.0 <= result['confidence'] <= 1.0
+
+    def test_predict_warlpiri_language(self, predictor):
+        result = predictor.predict(
+            symptoms=['fever'],
+            age='adult',
+            gender='female',
+            duration_value=0,
+            intensity_signal=0,
+            has_critical=0,
+            language='wp'
+        )
+        assert result['severity'] in {'Witapardu', 'Wiriwiri', 'Wirinyayirni'}
+
+    def test_predict_has_critical_returns_bool(self, predictor):
+        result = predictor.predict(
+            symptoms=['headache'],
+            age='child',
+            gender='male',
+            duration_value=0,
+            intensity_signal=0,
+            has_critical=0
+        )
+        assert isinstance(result['has_critical'], bool)

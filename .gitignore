@@ -1,6 +1,4 @@
 # Backend generated artifacts
-backend/data_processed/
-backend/models/
 backend/build/
 backend/dist/
 

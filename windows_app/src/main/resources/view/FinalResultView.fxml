@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.saca.controller.FinalResultController"
+           stylesheets="@/styles/style.css"
+           styleClass="root">
+
+    <BorderPane>
+
+        <top>
+            <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+                <padding>
+                    <Insets top="10" right="20" bottom="10" left="20"/>
+                </padding>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </top>
+
+        <left>
+            <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+        </left>
+
+        <center>
+            <ScrollPane fitToWidth="true" fitToHeight="true"
+                        pannable="false" styleClass="center-scroll">
+                <content>
+                    <StackPane fx:id="bgPane" styleClass="final-bg">
+
+                        <VBox alignment="TOP_CENTER"
+                              spacing="20"
+                              maxWidth="680"
+                              styleClass="final-container">
+
+                            <padding>
+                                <Insets top="40" right="36" bottom="60" left="36"/>
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT" styleClass="final-header-bar">
+
+                                <Button onAction="#handleBack" styleClass="final-back-btn">
+                                    <graphic>
+                                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/back-arrow.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Label text="%final_results_title"
+                                       styleClass="final-header-title"
+                                       HBox.hgrow="ALWAYS"
+                                       maxWidth="Infinity"
+                                       alignment="CENTER"/>
+
+                                <Region minWidth="38" maxWidth="38"/>
+
+                            </HBox>
+
+                            <Label fx:id="severityLabel"
+                                   styleClass="severity-banner"
+                                   maxWidth="Infinity"
+                                   alignment="CENTER"
+                                   wrapText="true"/>
+
+                            <Button fx:id="callBtn"
+                                    text="%call_for_help"
+                                    styleClass="call-help-btn"
+                                    maxWidth="Infinity"
+                                    onAction="#handleCallForHelp"
+                                    graphicTextGap="10"
+                                    visible="false"
+                                    managed="false">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image>
+                                            <Image url="@/icons/telephone-call.png"/>
+                                        </image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
+
+                            <VBox styleClass="result-card" spacing="10">
+
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label text="%recommendations_label"
+                                           styleClass="result-card-title"
+                                           HBox.hgrow="ALWAYS"/>
+                                    <Button fx:id="recSpeakerBtn"
+                                            styleClass="question-speaker-btn"
+                                            onAction="#handleSpeak">
+                                        <graphic>
+                                            <ImageView fx:id="recSpeakerIcon"
+                                                       fitWidth="22" fitHeight="22"
+                                                       preserveRatio="true">
+                                                <image>
+                                                    <Image url="@/icons/speaker.png"/>
+                                                </image>
+                                            </ImageView>
+                                        </graphic>
+                                    </Button>
+                                </HBox>
+
+                                <Label fx:id="recommendationLabel"
+                                       styleClass="result-card-body"
+                                       wrapText="true"
+                                       maxWidth="Infinity"/>
+
+                                <Label fx:id="recommendedActionLabel"
+                                       styleClass="result-card-action"
+                                       wrapText="true"
+                                       maxWidth="Infinity"/>
+
+                            </VBox>
+
+                            <VBox fx:id="symptomsCard" styleClass="result-card" spacing="8">
+                                <Label text="%symptoms_label"
+                                       styleClass="result-card-title"/>
+
+                                <VBox fx:id="symptomsBox" spacing="6"/>
+
+                            </VBox>
+
+                            <Button text="%start_again"
+                                    styleClass="start-again-btn"
+                                    maxWidth="Infinity"
+                                    onAction="#handleStartAgain"/>
+
+                        </VBox>
+
+                    </StackPane>
+                </content>
+            </ScrollPane>
+        </center>
+
+    </BorderPane>
+
+</StackPane>

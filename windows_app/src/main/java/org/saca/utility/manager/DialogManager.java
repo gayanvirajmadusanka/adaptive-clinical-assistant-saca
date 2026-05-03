@@ -1,6 +1,7 @@
 package org.saca.utility.manager;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 
 import java.util.Optional;
@@ -12,24 +13,24 @@ public class DialogManager {
     private static final String CSS_CLASS = "exit-dialog";
 
     public static boolean confirmDialog(String title, String header, String content) {
-        Alert alert = build(Alert.AlertType.CONFIRMATION, title, header, content);
+        Alert alert = build(Alert.AlertType.CONFIRMATION, title, header, content, true);
         Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
+        return result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE;
     }
 
     public static boolean errorDialog(String title, String header, String content) {
-        Alert alert = build(Alert.AlertType.ERROR, title, header, content);
+        Alert alert = build(Alert.AlertType.ERROR, title, header, content, false);
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
     public static void infoDialog(String title, String header, String content) {
-        Alert alert = build(Alert.AlertType.INFORMATION, title, header, content);
+        Alert alert = build(Alert.AlertType.INFORMATION, title, header, content, false);
         alert.showAndWait();
     }
 
     public static void warningDialog(String title, String header, String content) {
-        Alert alert = build(Alert.AlertType.WARNING, title, header, content);
+        Alert alert = build(Alert.AlertType.WARNING, title, header, content, false);
         alert.showAndWait();
     }
 
@@ -85,7 +86,7 @@ public class DialogManager {
     private static Alert build(Alert.AlertType type,
                                String title,
                                String header,
-                               String content) {
+                               String content, boolean needCancel) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(header);
@@ -98,6 +99,15 @@ public class DialogManager {
                         .toExternalForm()
         );
         alert.getDialogPane().getStyleClass().add(CSS_CLASS);
+
+        ButtonType okBtn = new ButtonType(LanguageManager.get("ok"), ButtonBar.ButtonData.OK_DONE);
+
+        if (needCancel) {
+            ButtonType cancelBtn = new ButtonType(LanguageManager.get("cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(okBtn, cancelBtn);
+        } else {
+            alert.getButtonTypes().setAll(okBtn);
+        }
 
         return alert;
     }

@@ -43,7 +43,18 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void handleVoiceCardClick(MouseEvent mouseEvent) {
-        System.out.println("Voice card clicked");
+        try {
+            NavBarManager.setCurrentView("/view/VoiceInputView.fxml");
+
+            Parent speakView = FXMLLoader.load(
+                    getClass().getResource("/view/VoiceInputView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            sceneNode.getScene().setRoot(speakView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

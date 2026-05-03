@@ -226,3 +226,39 @@ def get_symptom_audio(symptom_id: str, language: str) -> str | None:
     if clip is None:
         return None
     return _to_b64(clip)
+
+
+def get_answer_selected_audio(answer_id: str, language: str) -> str:
+    """
+    Stitch 'You selected' + answer label audio.
+    Used in answer audio resolution response.
+
+    :param answer_id: resolved answer id e.g. '0a1', '10y'
+    :param language: 'en' or 'wp'
+    :return: base64 encoded WAV string
+    """
+    clips = [_get_clip('ui', 'you_selected', language)]
+
+    if answer_id.endswith('y'):
+        clips.append(_get_clip('answers', 'answer_yes', language))
+    elif answer_id.endswith('n'):
+        clips.append(_get_clip('answers', 'answer_no', language))
+    else:
+        audio_key = _OPTION_ANSWER_KEY_MAP.get(answer_id)
+        if audio_key:
+            clips.append(_get_clip('answers', audio_key, language))
+
+    return _to_b64(_stitch(clips))
+
+
+def get_unrecognized_audio(language: str) -> str:
+    """
+    Get 'could not understand' audio for unrecognized spoken answers.
+
+    :param language: 'en' or 'wp'
+    :return: base64 encoded WAV string
+    """
+    clip = _get_clip('ui', 'could_not_catch', language)
+    if clip is None:
+        return _to_b64(AudioSegment.silent(duration=100))
+    return _to_b64(clip)
