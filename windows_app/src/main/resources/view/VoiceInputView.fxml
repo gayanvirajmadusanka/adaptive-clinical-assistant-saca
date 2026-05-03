@@ -51,7 +51,7 @@
                                     </graphic>
                                 </Button>
 
-                                <Label text="%speak_title"
+                                <Label text="%speak_option"
                                        styleClass="speak-header-title"
                                        HBox.hgrow="ALWAYS"
                                        maxWidth="Infinity"
