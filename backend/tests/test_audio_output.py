@@ -6,6 +6,7 @@ Usage (requires a running server at localhost:8000):
 """
 
 import base64
+import os
 import subprocess
 import time
 
@@ -216,3 +217,86 @@ class TestExtractEndpointAudio:
         data = response.json()
         assert 'voice_b64' in data
         _assert_valid_audio(data['voice_b64'], 'extract_audio_en')
+
+
+class TestAnswerAudioEndpointOutput:
+
+    def test_recognized_answer_plays_you_selected_english(self):
+        """Send real 'About a week' audio - should recognize and play 'You selected About a week'."""
+        audio_path = os.path.join(
+            os.path.dirname(__file__),
+            '../data/audio/output/answers/answer_about_a_week_en.wav'
+        )
+        with open(audio_path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+
+        response = requests.post(f'{BASE_URL}/answer/audio', json={
+            'audio_b64': b64,
+            'question_id': '1',
+            'language': 'en'
+        })
+        assert response.status_code == 200
+        data = response.json()
+        print(f'\n  Recognized: {data["recognized"]}, Answer: {data["answer_id"]}')
+        assert 'voice_b64' in data
+        _assert_valid_audio(data['voice_b64'], 'answer_recognized_en')
+
+    def test_recognized_answer_plays_you_selected_warlpiri(self):
+        """Send real Warlpiri 'Wiikikurra' audio - should recognize and play confirmation."""
+        audio_path = os.path.join(
+            os.path.dirname(__file__),
+            '../data/audio/output/answers/answer_about_a_week_wp.wav'
+        )
+        with open(audio_path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+
+        response = requests.post(f'{BASE_URL}/answer/audio', json={
+            'audio_b64': b64,
+            'question_id': '1',
+            'language': 'wp'
+        })
+        assert response.status_code == 200
+        data = response.json()
+        print(f'\n  Recognized: {data["recognized"]}, Answer: {data["answer_id"]}')
+        assert 'voice_b64' in data
+        _assert_valid_audio(data['voice_b64'], 'answer_recognized_wp')
+
+    def test_unrecognized_answer_plays_could_not_catch_english(self):
+        """Silent audio should return unrecognized and play 'could not catch' audio."""
+        silent_wav = (
+            b'RIFF$\x00\x00\x00WAVEfmt \x10\x00\x00\x00'
+            b'\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00'
+            b'\x02\x00\x10\x00data\x00\x00\x00\x00'
+        )
+        response = requests.post(f'{BASE_URL}/answer/audio', json={
+            'audio_b64': base64.b64encode(silent_wav).decode(),
+            'question_id': '10',
+            'language': 'en'
+        })
+        assert response.status_code == 200
+        data = response.json()
+        print(f'\n  Recognized: {data["recognized"]}, Answer: {data["answer_id"]}')
+        assert not data['recognized']
+        assert data['answer_id'] is None
+        assert 'voice_b64' in data
+        _assert_valid_audio(data['voice_b64'], 'answer_unrecognized_en')
+
+    def test_unrecognized_answer_plays_could_not_catch_warlpiri(self):
+        """Silent audio in Warlpiri mode should return unrecognized and play 'could not catch' audio."""
+        silent_wav = (
+            b'RIFF$\x00\x00\x00WAVEfmt \x10\x00\x00\x00'
+            b'\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00'
+            b'\x02\x00\x10\x00data\x00\x00\x00\x00'
+        )
+        response = requests.post(f'{BASE_URL}/answer/audio', json={
+            'audio_b64': base64.b64encode(silent_wav).decode(),
+            'question_id': '10',
+            'language': 'wp'
+        })
+        assert response.status_code == 200
+        data = response.json()
+        print(f'\n  Recognized: {data["recognized"]}, Answer: {data["answer_id"]}')
+        assert not data['recognized']
+        assert data['answer_id'] is None
+        assert 'voice_b64' in data
+        _assert_valid_audio(data['voice_b64'], 'answer_unrecognized_wp')

@@ -82,7 +82,9 @@
   "ui": {
     "detected_symptoms": { "en": "detected_symptoms_en.wav", "wp": "detected_symptoms_wp.wav" },
     "does_this_match": { "en": "does_this_match_en.wav", "wp": "does_this_match_wp.wav" },
-    "tap_yes_or_no": { "en": "tap_yes_or_no_en.wav", "wp": "tap_yes_or_no_wp.wav" }
+    "tap_yes_or_no": { "en": "tap_yes_or_no_en.wav", "wp": "tap_yes_or_no_wp.wav" },
+    "you_selected": {"en": "you_selected_en.wav", "wp": "you_selected_wp.wav"},
+    "could_not_catch": {"en": "could_not_catch_en.wav", "wp": "could_not_catch_wp.wav"}
   },
   "severity": {
     "severity_severe": { "en": "severity_severe_en.wav", "wp": "severity_severe_wp.wav" },
