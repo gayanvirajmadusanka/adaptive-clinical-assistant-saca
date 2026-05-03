@@ -7,6 +7,7 @@ import json
 import os
 import tempfile
 
+from backend.api.services.audio_service import get_unrecognized_audio, get_answer_selected_audio
 from backend.speech.audio_english import transcribe as transcribe_english
 
 # from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
@@ -175,14 +176,23 @@ def resolve_answer_audio(
             'recognized': False,
             'answer_id': None,
             'confidence': 0.0,
-            'message': 'Invalid audio encoding.'
+            'message': 'Invalid audio encoding.',
+            'voice_b64': get_unrecognized_audio(language)
         }
 
     try:
         if language == 'wp':
-            return _resolve_warlpiri(tmp_path, question_id, base)
+            result = _resolve_warlpiri(tmp_path, question_id, base)
         else:
-            return _resolve_english(tmp_path, question_id, base)
+            result = _resolve_english(tmp_path, question_id, base)
+        # add confirmation or error audio
+        if result['recognized'] and result['answer_id']:
+            result['voice_b64'] = get_answer_selected_audio(
+                result['answer_id'], language
+            )
+        else:
+            result['voice_b64'] = get_unrecognized_audio(language)
+        return result
     finally:
         _cleanup(tmp_path)
 

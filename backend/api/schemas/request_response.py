@@ -70,6 +70,7 @@ class AnswerAudioResponse(BaseModel):
     confidence: float
     recognized: bool
     message: str | None = None
+    voice_b64: str
 
 
 class ClassifyResponse(BaseModel):

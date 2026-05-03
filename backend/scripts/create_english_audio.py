@@ -64,6 +64,8 @@ PHRASES = {
     "detected_symptoms_en": "Detected Symptoms",
     "does_this_match_en": "Does this match you?",
     "tap_yes_or_no_en": "Tap yes or no",
+    "you_selected_en": "You selected",
+    "could_not_catch_en": "Sorry, I could not understand. Please re-record or tap your answer.",
 
     # symptoms
     "headache_en": "Headache",
