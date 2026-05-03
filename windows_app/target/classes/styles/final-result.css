@@ -1,0 +1,196 @@
+.final-container {
+    -fx-alignment: CENTER;
+}
+
+.final-header-bar {
+    -fx-background-color: #C47A3A;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 12 20 12 20;
+    -fx-min-height: 80px;
+    -fx-pref-height: 80px;
+}
+
+.final-back-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.final-back-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+.final-back-btn:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+}
+
+.final-header-title {
+    -fx-text-fill: #1a0e00;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-alignment: CENTER;
+}
+
+.severity-banner {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 14 20 14 20;
+}
+
+.severity-severe .severity-banner,
+.severity-banner.severity-severe {
+    -fx-background-color: #4A0A04;
+    -fx-text-fill: #F5E6C8;
+}
+
+.severity-moderate .severity-banner,
+.severity-banner.severity-moderate {
+    -fx-background-color: #C47A3A;
+    -fx-text-fill: #1a0e00;
+}
+
+.severity-mild .severity-banner,
+.severity-banner.severity-mild {
+    -fx-background-color: #5C8A3C;
+    -fx-text-fill: #F5E6C8;
+}
+
+.call-help-btn {
+    -fx-background-color: #f5ead4;
+    -fx-text-fill: #4A0A04;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-border-color: #4A0A04;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-padding: 14 20 14 20;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 6, 0, 0, 2);
+}
+
+.call-help-btn:hover {
+    -fx-background-color: #ede0ce;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.30), 10, 0, 0, 3);
+}
+
+.call-help-btn:pressed {
+    -fx-background-color: #e8d5b0;
+}
+
+/* ── Result cards ── */
+.result-card {
+    -fx-background-color: #f5ead4;
+    -fx-background-radius: 14;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 14;
+    -fx-border-width: 1.5;
+    -fx-padding: 16 18 16 18;
+    -fx-max-width: Infinity;
+}
+
+.result-card-title {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a2a1a;
+}
+
+.result-card-body {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 18px;
+    -fx-text-fill: #5a3a1a;
+    -fx-font-weight: bold;
+}
+
+.result-card-action {
+    -fx-font-family: "Georgia", serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #6a4a2a;
+    -fx-wrap-text: true;
+}
+
+.symptom-item {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #3a2a1a;
+    -fx-wrap-text: true;
+}
+
+.question-speaker-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #c8b99a;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-min-width: 34px;
+    -fx-min-height: 34px;
+    -fx-max-width: 34px;
+    -fx-max-height: 34px;
+}
+
+.question-speaker-btn:hover {
+    -fx-background-color: rgba(196, 122, 58, 0.12);
+}
+
+.question-speaker-btn:pressed {
+    -fx-background-color: rgba(196, 122, 58, 0.24);
+}
+
+.start-again-btn {
+    -fx-background-color: #c8902a;
+    -fx-text-fill: #3a2a1a;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-border-color: #3a2a1a;
+    -fx-border-width: 2;
+    -fx-padding: 14 40 14 40;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.start-again-btn:hover {
+    -fx-background-color: #d9a030;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 10, 0, 0, 3);
+}
+
+.start-again-btn:pressed {
+    -fx-background-color: #b07820;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 4, 0, 0, 1);
+}
+
+.root-severe {
+}
+
+.root-severe .final-bg {
+    -fx-background-color: #B3A19C;
+}
+
+.root-moderate .final-bg {
+    -fx-background-color: #F5E6C8;
+}
+
+.root-mild .final-header-bar {
+    -fx-background-color: #C47A3A;
+}

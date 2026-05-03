@@ -3,6 +3,8 @@ API routes module. Defines all API endpoints supported.
 """
 import base64
 import io
+import os
+import tempfile
 
 from fastapi import APIRouter
 
@@ -14,6 +16,15 @@ from backend.api.services.answer_audio_service import resolve_answer_audio
 from backend.api.services.audio_service import get_detected_symptoms_audio
 from backend.api.services.pipeline_service import classify as run_classify
 
+from backend.nlp.preprocessor import preprocess_text
+from backend.nlp.symptom_extractor import extract_symptoms
+from backend.translation.warlpiri_text import translate as translate_warlpiri
+from backend.speech.audio_english import transcribe
+from backend.nlp.audio_warlpiri import recognize as recognize_warlpiri
+
+LANG_WP = "wp"
+LANG_EN = "en"
+
 router = APIRouter()
 
 
@@ -21,24 +32,37 @@ router = APIRouter()
 def extract_text(req: ExtractTextRequest) -> dict:
     """
     Extract symptoms from typed text input.
-    Dummy implementation - real NLP pipeline to be integrated.
+    Warlpiri text is translated before extraction.
+    English text is processed directly through NLP pipeline.
     :param req: ExtractTextRequest
     """
-    # TODO: continue NLP processing
-    # dummy symptoms for now
-    symptoms_en = ['headache', 'fever']
-    symptoms_wp = ['walpawalpa', 'rdurrurlpu']
+    if req.language == LANG_WP:
+        translation  = translate_warlpiri(req.text)
+        english_text = translation.get("translated_text") or ""
+        is_warlpiri  = True
+    else:
+        english_text = req.text
+        is_warlpiri  = False
 
-    # stitch detected symptoms audio in requested language
-    voice_b64 = get_detected_symptoms_audio(symptoms_en, req.language)
+    if not english_text.strip():
+        voice_b64 = get_detected_symptoms_audio([], req.language)
+        return {
+            'symptoms_en': [], 'symptoms_wp': [],
+            'confidence': 0.0, 'input_type': 'text',
+            'language': req.language, 'voice_b64': voice_b64
+        }
+
+    preprocessed = preprocess_text(english_text)
+    result       = extract_symptoms(preprocessed["clean_text"], is_warlpiri=is_warlpiri, raw_text=english_text)
+    voice_b64    = get_detected_symptoms_audio(result["symptoms_en"], req.language)
 
     return {
-        'symptoms_en': symptoms_en,
-        'symptoms_wp': symptoms_wp,
-        'confidence': 0.97,
-        'input_type': 'text',
-        'language': req.language,
-        'voice_b64': voice_b64,
+        'symptoms_en': result["symptoms_en"],
+        'symptoms_wp': result["symptoms_wp"],
+        'confidence':  result["confidence"],
+        'input_type':  'text',
+        'language':    req.language,
+        'voice_b64':   voice_b64
     }
 
 
@@ -46,26 +70,71 @@ def extract_text(req: ExtractTextRequest) -> dict:
 def extract_audio(req: ExtractAudioRequest) -> dict:
     """
     Extract symptoms from audio input.
-    Dummy implementation - real NLP pipeline to be integrated.
+    English audio uses Whisper offline ASR.
+    Warlpiri audio uses VAD segmentation and CNN-DTW keyword spotting.
     :param req: ExtractAudioRequest
     """
-    # decode base64 back to audio bytes
     audio_bytes = base64.b64decode(req.audio_b64)
-    audio_file = io.BytesIO(audio_bytes)
-    # TODO: send audio_file to Whisper or CNN-DTW, continue NLP processing
 
-    symptoms_en = ['headache', 'fever']
-    symptoms_wp = ['walpawalpa', 'rdurrurlpu']
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(audio_bytes)
+        tmp_path = tmp.name
 
-    voice_b64 = get_detected_symptoms_audio(symptoms_en, req.language)
+    try:
+        if req.language == LANG_EN:
+            asr          = transcribe(tmp_path)
+            english_text = asr.get("text", "") or ""
+
+            if not english_text.strip():
+                voice_b64 = get_detected_symptoms_audio([], req.language)
+                return {
+                    'symptoms_en': [], 'symptoms_wp': [],
+                    'confidence': 0.0, 'input_type': 'audio',
+                    'language': req.language, 'voice_b64': voice_b64
+                }
+
+            preprocessed = preprocess_text(english_text)
+            result = extract_symptoms(preprocessed["clean_text"], is_warlpiri=False, raw_text=english_text)
+
+        elif req.language == LANG_WP:
+            wp_result = recognize_warlpiri(tmp_path)
+
+            if not wp_result.get("recognized") or not wp_result.get("symptoms"):
+                voice_b64 = get_detected_symptoms_audio([], req.language)
+                return {
+                    'symptoms_en': [], 'symptoms_wp': [],
+                    'confidence': 0.0, 'input_type': 'audio',
+                    'language': req.language, 'voice_b64': voice_b64
+                }
+
+            from backend.nlp.symptom_extractor import _load_symptom_map, get_has_critical
+            symptoms_en = wp_result["symptoms"]
+            sym_map     = _load_symptom_map()
+            wp_lookup   = {v["en"].lower(): v["wp"] for v in sym_map.values()}
+            symptoms_wp = [wp_lookup[s.lower()] for s in symptoms_en if s.lower() in wp_lookup]
+
+            result = {
+                "symptoms_en":  symptoms_en,
+                "symptoms_wp":  symptoms_wp,
+                "confidence":   wp_result.get("confidence", 0.0),
+                "has_critical": get_has_critical(symptoms_en)
+            }
+        else:
+            result = {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}
+
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+    voice_b64 = get_detected_symptoms_audio(result["symptoms_en"], req.language)
 
     return {
-        'symptoms_en': symptoms_en,
-        'symptoms_wp': symptoms_wp,
-        'confidence': 0.85,
-        'input_type': 'audio',
-        'language': req.language,
-        'voice_b64': voice_b64,
+        'symptoms_en': result["symptoms_en"],
+        'symptoms_wp': result["symptoms_wp"],
+        'confidence':  result["confidence"],
+        'input_type':  'audio',
+        'language':    req.language,
+        'voice_b64':   voice_b64
     }
 
 

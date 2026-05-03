@@ -2,10 +2,14 @@ package org.saca.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import org.saca.model.request.ClassifyRQ;
 import org.saca.model.request.QuestionFetchRQ;
 import org.saca.model.request.TextInputRQ;
+import org.saca.model.request.VoiceInputRQ;
+import org.saca.model.response.ClassifyRS;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
+import org.saca.model.response.VoiceResultRS;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,7 +24,11 @@ public class ApiService {
 
     private static final String EXTRACT_TEXT_ENDPOINT = "/extract/text";
 
+    private static final String EXTRACT_AUDIO_ENDPOINT = "/extract/audio";
+
     private static final String QUESTIONS_ENDPOINT = "/questions";
+
+    private static final String CLASSIFY_ENDPOINT = "/classify";
 
     private static final int TIMEOUT_S = 30;
 
@@ -32,7 +40,7 @@ public class ApiService {
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     public static void detectSymptomsText(TextInputRQ textInputRQ,
-                                          SuccessCallback onSuccess,
+                                          SuccessCallbackText onSuccess,
                                           ErrorCallback onError) {
         Thread thread = new Thread(() -> {
             try {
@@ -42,7 +50,7 @@ public class ApiService {
 
                 if (response.statusCode() == 200) {
                     TextResultRS result = mapper.readValue(response.body(), TextResultRS.class);
-                    onSuccess.onSuccess(result);
+                    onSuccess.onSuccessDetectSymptomsText(result);
                 } else {
                     onError.onError(getAPIErrorMsg(response));
                 }
@@ -81,6 +89,65 @@ public class ApiService {
 
                 }
 
+            } catch (IOException e) {
+                onError.onError(getIOExceptionErrorMsg(e));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                onError.onError(getInterruptedExceptionErrorMsg());
+            } catch (Exception e) {
+                onError.onError(getUnexpectedErrorMsg(e));
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public static void classify(ClassifyRQ classifyRQ,
+                                ClassifyCallback onSuccess,
+                                ErrorCallback onError) {
+        Thread thread = new Thread(() -> {
+            try {
+                String json = mapper.writeValueAsString(classifyRQ);
+
+                HttpRequest request = buildHttpPostRequest(json, CLASSIFY_ENDPOINT);
+                HttpResponse<String> response = getHttpResponse(request);
+
+                if (response.statusCode() == 200) {
+                    ClassifyRS result = mapper.readValue(response.body(), ClassifyRS.class);
+                    result.setLanguage(classifyRQ.getLanguage());
+                    onSuccess.onSuccess(result);
+                } else {
+                    onError.onError(getAPIErrorMsg(response));
+                }
+            } catch (IOException e) {
+                onError.onError(getIOExceptionErrorMsg(e));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                onError.onError(getInterruptedExceptionErrorMsg());
+            } catch (Exception e) {
+                onError.onError(getUnexpectedErrorMsg(e));
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public static void detectSymptomsAudio(VoiceInputRQ voiceInputRQ,
+                                    SuccessCallbackAudio onSuccess,
+                                    ErrorCallback onError) {
+        Thread thread = new Thread(() -> {
+            try {
+                String json = mapper.writeValueAsString(voiceInputRQ);
+
+                HttpRequest request = buildHttpPostRequest(json, EXTRACT_AUDIO_ENDPOINT);
+                HttpResponse<String> response = getHttpResponse(request);
+
+                if (response.statusCode() == 200) {
+                    VoiceResultRS result = mapper.readValue(response.body(), VoiceResultRS.class);
+                    onSuccess.onSuccessDetectSymptomsAudio(result);
+                } else {
+                    onError.onError(getAPIErrorMsg(response));
+                }
             } catch (IOException e) {
                 onError.onError(getIOExceptionErrorMsg(e));
             } catch (InterruptedException e) {
@@ -140,11 +207,19 @@ public class ApiService {
         void onSuccess(QuestionsRS result);
     }
 
-    public interface SuccessCallback {
-        void onSuccess(TextResultRS result);
+    public interface SuccessCallbackText {
+        void onSuccessDetectSymptomsText(TextResultRS result);
+    }
+
+    public interface SuccessCallbackAudio {
+        void onSuccessDetectSymptomsAudio(VoiceResultRS result);
     }
 
     public interface ErrorCallback {
         void onError(String errorMessage);
+    }
+
+    public interface ClassifyCallback {
+        void onSuccess(ClassifyRS result);
     }
 }

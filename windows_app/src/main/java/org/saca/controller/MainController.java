@@ -14,10 +14,11 @@ public class MainController {
     @FXML
     public void initialize() {
         // Load Dashboard first when app starts
-        loadView("WelcomeView.fxml");
+//        loadView("WelcomeView.fxml");
 
-//        loadView("DashboardView.fxml"); // TODO Remove after testing
+        loadView("DashboardView.fxml"); // TODO Remove after testing
 //        loadView("TextInputView.fxml"); // TODO Remove after testing
+//        loadView("FinalResultView.fxml"); // TODO Remove after testing
     }
 
     private void loadView(String fxml) {

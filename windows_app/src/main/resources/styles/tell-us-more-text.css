@@ -1,5 +1,12 @@
 .tell-container {
-    -fx-alignment: TOP_CENTER;
+    -fx-alignment: CENTER;
+}
+
+.tell-bg {
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-min-height: 600px;
 }
 
 .tell-header-bar {
@@ -54,38 +61,9 @@
     -fx-spacing: 10;
 }
 
-.card-toggle-btn {
-    -fx-background-color: transparent;
-    -fx-border-color: #c8b99a;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: #8B3A1C;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-min-width: 28px;
-    -fx-pref-width: 28px;
-    -fx-max-width: 28px;
-    -fx-min-height: 24px;
-    -fx-pref-height: 24px;
-    -fx-max-height: 24px;
-    -fx-padding: 2 4 2 4;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.card-toggle-btn:hover {
-    -fx-background-color: rgba(139, 58, 28, 0.10);
-}
-
-.card-toggle-btn:pressed {
-    -fx-background-color: rgba(139, 58, 28, 0.20);
-}
-
 .card-selected-label {
     -fx-text-fill: #5a2a0a;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-font-family: "Kreon", "Georgia", serif;
     -fx-background-color: #e8c896;
@@ -180,4 +158,64 @@
 .tell-continue-btn:pressed {
     -fx-background-color: #b07820;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 4, 0, 0, 1);
+}
+
+.question-progress-label {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #8B3A1C;
+    -fx-alignment: CENTER;
+}
+
+.question-progress-bar {
+    -fx-pref-height: 12px;
+    -fx-min-height: 12px;
+    -fx-max-height: 12px;
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-border-color: transparent;
+    -fx-accent: #C47A3A;
+}
+
+.question-progress-bar .track {
+    -fx-background-color: #e8d5b0;
+    -fx-background-radius: 6;
+    -fx-background-insets: 0;
+}
+
+.question-progress-bar .bar {
+    -fx-background-color: #C47A3A;
+    -fx-background-radius: 6;
+    -fx-background-insets: 0;
+}
+
+.question-progress-bar > .percentage {
+    -fx-fill: transparent;
+    -fx-font-size: 0;
+}
+
+.question-speaker-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #c8b99a;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+}
+
+.question-speaker-btn:hover {
+    -fx-background-color: rgba(196, 122, 58, 0.12);
+    -fx-border-color: #C47A3A;
+}
+
+.question-speaker-btn:pressed {
+    -fx-background-color: rgba(196, 122, 58, 0.24);
 }

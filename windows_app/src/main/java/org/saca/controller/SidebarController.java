@@ -12,6 +12,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
@@ -28,18 +29,22 @@ public class SidebarController implements Initializable {
     private static final double COLLAPSED_WIDTH = 60;
 
     @FXML
-    private StackPane sidebarWrapper;   // the root StackPane
+    private StackPane sidebarWrapper;
+
     @FXML
-    private VBox sidebarRoot;      // the actual sidebar panel
+    private VBox sidebarRoot;
+
     @FXML
-    private Button expandBtn;        // floating expand icon
+    private Button expandBtn;
+
     @FXML
-    private Tooltip sidebarTooltip;  // tooltip on the hide button
+    private Tooltip sidebarTooltip;
+
     private Tooltip expandTooltip;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        expandTooltip = buildTooltip("Show sidebar");
+        expandTooltip = buildTooltip(LanguageManager.get("show_sidebar"));
         Tooltip.install(expandBtn, expandTooltip);
 
         // Restore sidebar state from NavBarManager on every screen load
@@ -68,7 +73,6 @@ public class SidebarController implements Initializable {
         applyState(visible);
     }
 
-    /* ── Internal apply ── */
     private void applyState(boolean visible) {
         // Show/hide the sidebar VBox
         sidebarRoot.setVisible(visible);
@@ -79,10 +83,10 @@ public class SidebarController implements Initializable {
         expandBtn.setManaged(!visible);
 
         // Update tooltip text
-        sidebarTooltip.setText(visible ? "Hide sidebar" : "Show sidebar");
+        sidebarTooltip.setText(visible ?
+                LanguageManager.get("hide_sidebar") :
+                LanguageManager.get("show_sidebar"));
 
-        // KEY FIX: when hidden, shrink to COLLAPSED_WIDTH (not 0)
-        // so the expand button still has space to render inside the StackPane
         double width = visible ? SIDEBAR_WIDTH : COLLAPSED_WIDTH;
         sidebarWrapper.setMinWidth(width);
         sidebarWrapper.setPrefWidth(width);
@@ -103,6 +107,8 @@ public class SidebarController implements Initializable {
     @FXML
     public void handleLanguageClick(ActionEvent event) {
         try {
+            AudioService.stop();
+
             boolean isEnglish = LanguageManager.getBundle()
                     .getLocale().getLanguage()
                     .equals(AppsConstants.AppLanguage.EN.getShortDescription());
@@ -135,6 +141,8 @@ public class SidebarController implements Initializable {
 
     @FXML
     private void handleExit() {
+        AudioService.stop();
+
         if (DialogManager.confirmExit()) {
             System.exit(0);
         }
@@ -150,6 +158,8 @@ public class SidebarController implements Initializable {
 
     @FXML
     public void handleHomeClick(ActionEvent event) {
+        AudioService.stop();
+
         try {
             NavBarManager.setCurrentView("/view/DashboardView.fxml");
 

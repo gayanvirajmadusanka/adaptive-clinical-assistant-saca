@@ -1,0 +1,185 @@
+.speak-container {
+    -fx-alignment: TOP_CENTER;
+}
+
+.speak-header-bar {
+    -fx-background-color: #D2B767;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 12 20 12 20;
+    -fx-min-height: 80px;
+    -fx-pref-height: 80px;
+}
+
+.speak-back-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-max-width: 38px;
+    -fx-max-height: 38px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.speak-back-btn:hover   { -fx-background-color: rgba(0,0,0,0.10); }
+.speak-back-btn:pressed { -fx-background-color: rgba(0,0,0,0.18); }
+
+.speak-header-title {
+    -fx-text-fill: #1a0e00;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-alignment: CENTER;
+}
+
+.speak-playback-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-max-width: 38px;
+    -fx-max-height: 38px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.speak-playback-btn:hover   { -fx-background-color: rgba(0,0,0,0.10); }
+.speak-playback-btn:pressed { -fx-background-color: rgba(0,0,0,0.18); }
+
+.speak-mic-card {
+    -fx-background-color: #f5ead4;
+    -fx-background-radius: 16;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-min-height: 200px;
+    -fx-max-width: Infinity;
+}
+
+.speak-mic-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #c8b99a;
+    -fx-border-width: 2;
+    -fx-border-radius: 50;
+    -fx-background-radius: 50;
+    -fx-min-width: 100px;
+    -fx-min-height: 100px;
+    -fx-max-width: 100px;
+    -fx-max-height: 100px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.speak-mic-btn:hover {
+    -fx-background-color: rgba(196,122,58,0.10);
+    -fx-effect: dropshadow(gaussian, rgba(196,122,58,0.30), 12, 0, 0, 0);
+}
+
+.speak-mic-btn-recording {
+    -fx-border-color: #c0392b;
+    -fx-background-color: rgba(192,57,43,0.08);
+    -fx-effect: dropshadow(gaussian, rgba(192,57,43,0.40), 16, 0, 0, 0);
+}
+
+.speak-hint-label {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 18px;
+    -fx-text-fill: #7a6a52;
+    -fx-alignment: CENTER;
+}
+
+.speak-playback-bar {
+    -fx-background-color: #f5ead4;
+    -fx-background-radius: 50;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 50;
+    -fx-border-width: 1.5;
+    -fx-max-width: Infinity;
+    -fx-min-height: 100px;
+    -fx-pref-height: 100px;
+    -fx-padding: 16 20 16 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 6, 0, 0, 2);
+}
+
+.trash-icon-btn {
+    -fx-background-color: #8B3A1C;
+    -fx-background-radius: 50;
+    -fx-min-width: 46px;
+    -fx-min-height: 46px;
+    -fx-max-width: 46px;
+    -fx-max-height: 46px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(139,58,28,0.35), 6, 0, 0, 2);
+}
+
+.trash-icon-btn:hover   { -fx-background-color: #a84520; }
+.trash-icon-btn:pressed { -fx-background-color: #6e2e14; }
+
+.speak-icon-btn {
+    -fx-background-color: #3a7a3a;
+    -fx-background-radius: 50;
+    -fx-min-width: 46px;
+    -fx-min-height: 46px;
+    -fx-max-width: 46px;
+    -fx-max-height: 46px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(58,122,58,0.35), 6, 0, 0, 2);
+}
+
+.speak-icon-btn:hover   { -fx-background-color: #4a8f4a; }
+.speak-icon-btn:pressed { -fx-background-color: #2d602d; }
+
+.speak-duration-label {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 15px;
+    -fx-text-fill: #3a2a1a;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 0 8;
+}
+
+.speak-submit-btn {
+    -fx-background-color: #C47A3A;
+    -fx-background-radius: 50;
+}
+
+.speak-submit-btn:hover {
+    -fx-background-color: #d4894a;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 6, 0, 0, 2);
+}
+
+.speak-submit-btn:pressed {
+    -fx-background-color: #a86030;
+}
+
+.speak-continue-btn {
+    -fx-background-color: #c8902a;
+    -fx-text-fill: #1a1000;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-padding: 16 40 16 40;
+    -fx-cursor: hand;
+    -fx-border-color: #1a1000;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 6, 0, 0, 2);
+}
+
+.speak-continue-btn:hover {
+    -fx-background-color: #d9a030;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 10, 0, 0, 3);
+}
+
+.speak-playback-bar .button:disabled {
+    -fx-opacity: 0.35;
+}
