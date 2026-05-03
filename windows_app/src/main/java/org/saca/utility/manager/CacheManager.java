@@ -4,6 +4,7 @@ import org.saca.model.request.AnswerRQ;
 import org.saca.model.response.ClassifyRS;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
+import org.saca.model.response.VoiceResultRS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +13,16 @@ public class CacheManager {
 
     private static TextResultRS textResultRS = null;
 
+
+    private static VoiceResultRS voiceResultRS = null;
+
     private static QuestionsRS questionsRS = null;
 
     private static ClassifyRS classifyRS = null;
 
     private static String lastSymptomText = "";
+
+    private static String lastRecordedAudio = "";
 
     private static List<AnswerRQ> savedAnswers = new ArrayList<>();
 
@@ -30,6 +36,18 @@ public class CacheManager {
 
     public static void clearTextResultRS() {
         textResultRS = null;
+    }
+
+    public static VoiceResultRS getVoiceResultRS() {
+        return voiceResultRS;
+    }
+
+    public static void setVoiceResultRS(VoiceResultRS voiceResultRS) {
+        CacheManager.voiceResultRS = voiceResultRS;
+    }
+
+    public static void clearVoiceResultRS() {
+        CacheManager.voiceResultRS = null;
     }
 
     public static QuestionsRS getQuestionsRS() {
@@ -62,6 +80,14 @@ public class CacheManager {
 
     public static void setLastSymptomText(String lastSymptomText) {
         CacheManager.lastSymptomText = lastSymptomText;
+    }
+
+    public static String getLastRecordedAudio() {
+        return lastRecordedAudio;
+    }
+
+    public static void setLastRecordedAudio(String lastRecordedAudio) {
+        CacheManager.lastRecordedAudio = lastRecordedAudio;
     }
 
     public static List<AnswerRQ> getSavedAnswers() {

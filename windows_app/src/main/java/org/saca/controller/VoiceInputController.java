@@ -18,7 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.saca.model.request.VoiceInputRQ;
-import org.saca.model.response.TextResultRS;
+import org.saca.model.response.VoiceResultRS;
 import org.saca.service.ApiService;
 import org.saca.service.AudioRecorderService;
 import org.saca.utility.constant.AppsConstants;
@@ -68,8 +68,8 @@ public class VoiceInputController implements Initializable {
     private Timeline durationTimer;
 
     private long recordingStartMillis;
-
     private Stage stage;
+    private Parent voiceInputView;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -88,7 +88,7 @@ public class VoiceInputController implements Initializable {
     private void startRecording() {
         AudioRecorderService.clearRecording();
         setPlaybackBarEnabled(false);
-        durationLabel.setText(String.format("0.00"));
+        durationLabel.setText("0.00");
 
         AudioRecorderService.startRecording(
                 () -> Platform.runLater(() -> {
@@ -150,9 +150,10 @@ public class VoiceInputController implements Initializable {
     private void handleDelete() {
         AudioRecorderService.stopPlayback();
         AudioRecorderService.clearRecording();
+        CacheManager.setLastRecordedAudio(null);
         resetPlayIcon();
         setPlaybackBarEnabled(false);
-        durationLabel.setText(String.format("0.00"));
+        durationLabel.setText("0.00");
         micHintLabel.setText(LanguageManager.get("speak_hint"));
     }
 
@@ -171,7 +172,11 @@ public class VoiceInputController implements Initializable {
         resetPlayIcon();
 
         String audioB64 = AudioRecorderService.getBase64Wav();
-        if (audioB64 == null) return;
+        if (audioB64 == null) {
+            return;
+        }
+
+        CacheManager.setLastRecordedAudio(audioB64);
 
         stage = (Stage) micBtn.getScene().getWindow();
 
@@ -192,7 +197,9 @@ public class VoiceInputController implements Initializable {
             loadingCtrl.setTitle(LanguageManager.get("loading_symptom_title"));
             loadingCtrl.setDuration(Integer.MAX_VALUE);
 
-            ApiService.extractAudio(
+            voiceInputView = stage.getScene().getRoot();
+
+            ApiService.detectSymptomsAudio(
                     rq,
                     result -> Platform.runLater(() -> {
                         loadingCtrl.stop();
@@ -202,15 +209,7 @@ public class VoiceInputController implements Initializable {
                         loadingCtrl.stop();
                         DialogManager.errorDialog("Connection Error",
                                 "Could not process audio", errorMsg);
-                        try {
-                            FXMLLoader rl = new FXMLLoader(
-                                    getClass().getResource("/view/VoiceInputView.fxml"),
-                                    LanguageManager.getBundle()
-                            );
-                            stage.getScene().setRoot(rl.load());
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
+                        stage.getScene().setRoot(voiceInputView);
                     })
             );
 
@@ -221,7 +220,7 @@ public class VoiceInputController implements Initializable {
         }
     }
 
-    private void navigateToResult(TextResultRS result) {
+    private void navigateToResult(VoiceResultRS result) {
         if (result == null
                 || (CommonUtil.isListEmpty(result.getSymptomsEn())
                 && CommonUtil.isListEmpty(result.getSymptomsWp()))) {
@@ -230,30 +229,21 @@ public class VoiceInputController implements Initializable {
                     "We could not detect any symptoms from your recording",
                     "Please try recording again more clearly."
             );
-            try {
-                NavBarManager.setCurrentView("/view/VoiceInputView.fxml");
-                FXMLLoader rl = new FXMLLoader(
-                        getClass().getResource("/view/VoiceInputView.fxml"),
-                        LanguageManager.getBundle()
-                );
-                stage.getScene().setRoot(rl.load());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            stage.getScene().setRoot(voiceInputView);
             return;
         }
 
         try {
-            NavBarManager.setCurrentView("/view/TextResultView.fxml");
-            CacheManager.setTextResultRS(result);
+            NavBarManager.setCurrentView("/view/VoiceResultView.fxml");
+            CacheManager.setVoiceResultRS(result);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/view/TextResultView.fxml"),
+                    getClass().getResource("/view/VoiceResultView.fxml"),
                     LanguageManager.getBundle()
             );
             Parent view = loader.load();
 
-            TextResultController ctrl = loader.getController();
+            VoiceResultController ctrl = loader.getController();
             ctrl.setSymptomResult(result);
 
             stage.getScene().setRoot(view);

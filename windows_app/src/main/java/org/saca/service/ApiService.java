@@ -2,13 +2,14 @@ package org.saca.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import org.saca.model.request.VoiceInputRQ;
 import org.saca.model.request.ClassifyRQ;
 import org.saca.model.request.QuestionFetchRQ;
 import org.saca.model.request.TextInputRQ;
+import org.saca.model.request.VoiceInputRQ;
 import org.saca.model.response.ClassifyRS;
 import org.saca.model.response.QuestionsRS;
 import org.saca.model.response.TextResultRS;
+import org.saca.model.response.VoiceResultRS;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,7 +40,7 @@ public class ApiService {
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     public static void detectSymptomsText(TextInputRQ textInputRQ,
-                                          SuccessCallback onSuccess,
+                                          SuccessCallbackText onSuccess,
                                           ErrorCallback onError) {
         Thread thread = new Thread(() -> {
             try {
@@ -49,7 +50,7 @@ public class ApiService {
 
                 if (response.statusCode() == 200) {
                     TextResultRS result = mapper.readValue(response.body(), TextResultRS.class);
-                    onSuccess.onSuccess(result);
+                    onSuccess.onSuccessDetectSymptomsText(result);
                 } else {
                     onError.onError(getAPIErrorMsg(response));
                 }
@@ -131,8 +132,8 @@ public class ApiService {
         thread.start();
     }
 
-    public static void extractAudio(VoiceInputRQ voiceInputRQ,
-                                    SuccessCallback onSuccess,
+    public static void detectSymptomsAudio(VoiceInputRQ voiceInputRQ,
+                                    SuccessCallbackAudio onSuccess,
                                     ErrorCallback onError) {
         Thread thread = new Thread(() -> {
             try {
@@ -142,8 +143,8 @@ public class ApiService {
                 HttpResponse<String> response = getHttpResponse(request);
 
                 if (response.statusCode() == 200) {
-                    TextResultRS result = mapper.readValue(response.body(), TextResultRS.class);
-                    onSuccess.onSuccess(result);
+                    VoiceResultRS result = mapper.readValue(response.body(), VoiceResultRS.class);
+                    onSuccess.onSuccessDetectSymptomsAudio(result);
                 } else {
                     onError.onError(getAPIErrorMsg(response));
                 }
@@ -206,8 +207,12 @@ public class ApiService {
         void onSuccess(QuestionsRS result);
     }
 
-    public interface SuccessCallback {
-        void onSuccess(TextResultRS result);
+    public interface SuccessCallbackText {
+        void onSuccessDetectSymptomsText(TextResultRS result);
+    }
+
+    public interface SuccessCallbackAudio {
+        void onSuccessDetectSymptomsAudio(VoiceResultRS result);
     }
 
     public interface ErrorCallback {
