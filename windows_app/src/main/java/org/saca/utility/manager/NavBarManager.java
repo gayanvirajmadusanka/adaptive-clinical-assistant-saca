@@ -8,6 +8,8 @@ public class NavBarManager {
 
     private static String currentView = "/view/DashboardView.fxml";
 
+    private static String previousView = "";
+
     public static AppsConstants.YesNo getIsNavBarVisible() {
         return isNavBarVisible;
     }
@@ -22,5 +24,13 @@ public class NavBarManager {
 
     public static void setCurrentView(String fxmlPath) {
         currentView = fxmlPath;
+    }
+
+    public static String getPreviousView() {
+        return previousView;
+    }
+
+    public static void setPreviousView(String previousView) {
+        NavBarManager.previousView = previousView;
     }
 }

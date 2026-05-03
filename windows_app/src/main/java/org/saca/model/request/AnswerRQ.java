@@ -1,7 +1,9 @@
 package org.saca.model.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnswerRQ {
 
     @JsonProperty("question_id")
@@ -9,6 +11,9 @@ public class AnswerRQ {
 
     @JsonProperty("answer_id")
     private String answerId;
+
+    @JsonProperty("audio_b64")
+    private String audioB64;
 
     public AnswerRQ(String questionId, String answerId) {
         this.questionId = questionId;
@@ -29,5 +34,13 @@ public class AnswerRQ {
 
     public void setAnswerId(String answerId) {
         this.answerId = answerId;
+    }
+
+    public String getAudioB64() {
+        return audioB64;
+    }
+
+    public void setAudioB64(String audioB64) {
+        this.audioB64 = audioB64;
     }
 }

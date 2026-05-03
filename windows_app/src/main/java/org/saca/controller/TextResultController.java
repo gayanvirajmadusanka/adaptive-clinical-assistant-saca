@@ -68,6 +68,9 @@ public class TextResultController implements Initializable {
     public void setSymptomResult(TextResultRS result) {
         this.symptomResult = result;
         CacheManager.setTextResultRS(result);
+        if (result.getSymptomsEn() != null && !result.getSymptomsEn().isEmpty()) {
+            CacheManager.setCachedSymptomsEn(result.getSymptomsEn());
+        }
         displaySymptoms(result.getSymptomsForCurrentLanguage());
     }
 
@@ -96,11 +99,11 @@ public class TextResultController implements Initializable {
         loading.getStyleClass().add("result-symptom-item");
         symptomsBox.getChildren().setAll(loading);
 
-        TextInputRQ textInputRQ = new TextInputRQ();
-        textInputRQ.setText(savedText);
+        TextInputRQ rq = new TextInputRQ();
+        rq.setText(savedText);
 
         ApiService.detectSymptomsText(
-                textInputRQ,
+                rq,
                 result -> Platform.runLater(() -> setSymptomResult(result)),
                 errorMsg -> Platform.runLater(() -> {
                     TextResultRS cached = CacheManager.getTextResultRS();
@@ -138,9 +141,7 @@ public class TextResultController implements Initializable {
         AudioService.stop();
         resetSpeakerIcon();
 
-        if (symptomResult == null) {
-            return;
-        }
+        if (symptomResult == null) return;
 
         stage = (Stage) sidebarController.getRoot().getScene().getWindow();
 
@@ -167,10 +168,8 @@ public class TextResultController implements Initializable {
                     }),
                     errorMsg -> Platform.runLater(() -> {
                         loadingCtrl.stop();
-                        DialogManager.errorDialog(
-                                LanguageManager.get("connection_error"),
-                                LanguageManager.get("could_not_load_questions"),
-                                errorMsg);
+                        DialogManager.errorDialog("Connection Error",
+                                "Could not load questions", errorMsg);
                         try {
                             FXMLLoader rl = new FXMLLoader(
                                     getClass().getResource("/view/TextResultView.fxml"),
@@ -221,11 +220,11 @@ public class TextResultController implements Initializable {
 
     private void navigateToTellUsMore(QuestionsRS questionsRS) {
         try {
-            NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
+            NavBarManager.setCurrentView("/view/TellUsMoreTextView.fxml");
             CacheManager.setQuestionsRS(questionsRS);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                    getClass().getResource("/view/TellUsMoreTextView.fxml"),
                     LanguageManager.getBundle()
             );
             Parent view = loader.load();
@@ -248,7 +247,7 @@ public class TextResultController implements Initializable {
 
     private void setSpeakerStopIcon() {
         speakerIcon.setImage(new Image(
-                getClass().getResource("/icons/mute.png").toExternalForm()
+                getClass().getResource("/icons/stop.png").toExternalForm()
         ));
     }
 

@@ -1,0 +1,79 @@
+.voice-mic-panel {
+    -fx-background-color: #f5ead4;
+    -fx-background-radius: 16;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-padding: 20 14 20 14;
+    -fx-alignment: TOP_CENTER;
+}
+
+.voice-panel-title {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a2a1a;
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+}
+
+.voice-answer-label {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #3a7a3a;
+    -fx-font-weight: bold;
+    -fx-padding: 6 10 6 10;
+    -fx-background-color: rgba(58,122,58,0.10);
+    -fx-background-radius: 8;
+    -fx-wrap-text: true;
+}
+
+.mini-playback-bar {
+    -fx-background-color: #ede0ce;
+    -fx-background-radius: 50;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 50;
+    -fx-border-width: 1;
+    -fx-padding: 5 8 5 8;
+    -fx-max-width: Infinity;
+}
+
+.voice-mic-panel .speak-mic-btn {
+    -fx-min-width: 100px;
+    -fx-min-height: 100px;
+    -fx-max-width: 100px;
+    -fx-max-height: 100px;
+}
+
+.voice-mic-panel .speak-hint-label {
+    -fx-font-size: 14px;
+}
+
+.voice-mic-panel .speak-duration-label {
+    -fx-font-size: 13px;
+}
+
+.voice-mic-panel .speak-icon-btn {
+    -fx-min-width: 34px;
+    -fx-min-height: 34px;
+    -fx-max-width: 34px;
+    -fx-max-height: 34px;
+}
+
+.voice-mic-panel .trash-icon-btn {
+    -fx-min-width: 34px;
+    -fx-min-height: 34px;
+    -fx-max-width: 34px;
+    -fx-max-height: 34px;
+}
+
+.tell-bg .question-card {
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+    -fx-pref-width: 10000;
+}
+
+.tell-bg .question-card .option-btn {
+    -fx-max-width: Infinity;
+    -fx-pref-width: 10000;
+}
