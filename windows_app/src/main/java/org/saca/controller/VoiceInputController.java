@@ -17,8 +17,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.saca.model.request.VoiceInputRQ;
 import org.saca.model.response.TextResultRS;
+import org.saca.service.ApiService;
 import org.saca.service.AudioRecorderService;
+import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
@@ -57,6 +60,9 @@ public class VoiceInputController implements Initializable {
     @FXML
     private Button deleteBtn;
 
+    @FXML
+    private Button submitBtn;
+
     private Timeline recordingPulse;
 
     private Timeline durationTimer;
@@ -81,7 +87,8 @@ public class VoiceInputController implements Initializable {
 
     private void startRecording() {
         AudioRecorderService.clearRecording();
-        showPlaybackBar(false);
+        setPlaybackBarEnabled(false);
+        durationLabel.setText(String.format("0.00"));
 
         AudioRecorderService.startRecording(
                 () -> Platform.runLater(() -> {
@@ -118,7 +125,7 @@ public class VoiceInputController implements Initializable {
             if (AudioRecorderService.hasRecording()) {
                 double secs = AudioRecorderService.getDurationSeconds();
                 durationLabel.setText(String.format("%.2f", secs));
-                showPlaybackBar(true);
+                setPlaybackBarEnabled(true);
             }
         });
     }
@@ -144,14 +151,14 @@ public class VoiceInputController implements Initializable {
         AudioRecorderService.stopPlayback();
         AudioRecorderService.clearRecording();
         resetPlayIcon();
-        showPlaybackBar(false);
+        setPlaybackBarEnabled(false);
+        durationLabel.setText(String.format("0.00"));
         micHintLabel.setText(LanguageManager.get("speak_hint"));
     }
 
     @FXML
     private void handleSubmit() {
-        System.out.println("Auido Submit");
-/*        if (!AudioRecorderService.hasRecording()) {
+        if (!AudioRecorderService.hasRecording()) {
             DialogManager.warningDialog(
                     LanguageManager.get("no_recording"),
                     LanguageManager.get("please_record_audio"),
@@ -211,7 +218,7 @@ public class VoiceInputController implements Initializable {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
     private void navigateToResult(TextResultRS result) {
@@ -279,9 +286,10 @@ public class VoiceInputController implements Initializable {
         }
     }
 
-    private void showPlaybackBar(boolean show) {
-        playbackBar.setVisible(show);
-        playbackBar.setManaged(show);
+    private void setPlaybackBarEnabled(boolean enabled) {
+        deleteBtn.setDisable(!enabled);
+        playBtn.setDisable(!enabled);
+        submitBtn.setDisable(!enabled);
     }
 
     private void setPlayingIcon() {
