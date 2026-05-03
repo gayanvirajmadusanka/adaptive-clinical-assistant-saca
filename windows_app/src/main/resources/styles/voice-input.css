@@ -179,3 +179,7 @@
     -fx-background-color: #d9a030;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 10, 0, 0, 3);
 }
+
+.speak-playback-bar .button:disabled {
+    -fx-opacity: 0.35;
+}
