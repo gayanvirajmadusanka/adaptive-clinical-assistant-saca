@@ -1,225 +1,298 @@
 import { StyleSheet, StatusBar } from 'react-native';
 
 export default StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F5EAD8' },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F5EAD8',
+  },
 
   wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: { flex: 1 },
+  background: {
+    flex: 1,
+  },
 
   container: {
     flex: 1,
+    paddingHorizontal: 22,
+    paddingTop: 45,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 25,
-    paddingTop: 80,
+  },
+
+  loadingText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2B1B12',
   },
 
   headerBar: {
-    width: '92%',
-    height: 60,
-    backgroundColor: '#C87936',
-    borderRadius: 10,
+    height: 88,
+    borderRadius: 12,
+    backgroundColor: '#C8661F',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 35,
+    position: 'relative',
+    marginBottom: 32,
+  },
+
+  backCircle: {
+    position: 'absolute',
+    left: 22,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  backArrow: {
+    fontSize: 28,
+    color: '#1E160F',
+    fontWeight: 'bold',
   },
 
   headerText: {
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#111',
   },
 
-  card: {
-    width: '76%',
-    backgroundColor: '#F5E6C8',
-    padding: 18,
-    borderRadius: 8,
-    marginBottom: 60,
-  },
-
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#5C2E0A',
-    marginBottom: 6,
-  },
-
-  question: {
+  questionNumber: {
+    textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 14,
+    color: '#7A180E',
+    marginBottom: 32,
   },
 
-  answerButton: {
-    height: 42,
-    borderRadius: 7,
+  progressTrack: {
+    width: '100%',
+    height: 9,
+    borderRadius: 8,
+    backgroundColor: '#E8D5A8',
+    overflow: 'hidden',
+    marginBottom: 34,
+  },
+
+  progressFill: {
+    height: '100%',
+    borderRadius: 8,
+    backgroundColor: '#C8661F',
+  },
+
+  questionBox: {
     borderWidth: 1.5,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
+    borderColor: '#B8A37D',
+    backgroundColor: 'rgba(246, 232, 203, 0.88)',
+    borderRadius: 14,
+    padding: 20,
+    minHeight: 210,
   },
 
-  radioOuter: {
-    width: 17,
-    height: 17,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: '#5C2E0A',
-    marginRight: 12,
+  questionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+  },
+
+  questionText: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111',
+    paddingRight: 12,
+  },
+
+  speakerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#B8A37D',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#F7E9C8',
   },
 
-  radioOuterSelected: {
-    borderColor: '#27AE60',
+  speakerIcon: {
+    width: 30,
+    height: 30,
   },
 
-  radioInner: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: '#27AE60',
+  optionsWrapper: {
+    gap: 10,
   },
 
-  answerText: {
+  optionItem: {
+    minHeight: 42,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 250, 238, 0.75)',
+  },
+
+  optionLight: {
+    backgroundColor: '#F2C483',
+  },
+
+  optionMedium: {
+    backgroundColor: '#E59A3D',
+  },
+
+  optionDark: {
+    backgroundColor: '#C8661F',
+  },
+
+  optionSelected: {
+    backgroundColor: '#8F1E0C',
+  },
+
+  optionText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#111',
   },
 
-  noneButton: { backgroundColor: '#E8D5A0', borderColor: '#D4A96A' },
-  littleButton: { backgroundColor: '#D4A96A', borderColor: '#C47A3A' },
-  moderateButton: { backgroundColor: '#C47A3A', borderColor: '#8B3A1C' },
-  veryBadButton: { backgroundColor: '#8B3A1C', borderColor: '#5C2E0A' },
-  unbearableButton: { backgroundColor: '#4A0A04', borderColor: '#2C0400' },
-
-  noneText: { color: '#5C2E0A' },
-  littleText: { color: '#3A1A00' },
-  lightText: { color: '#F5E6C8' },
-
-  selectedAnswer: { transform: [{ scale: 0.98 }] },
-  pressedAnswer: { opacity: 0.8 },
+  optionTextSelected: {
+    color: '#FFF',
+  },
 
   continueButton: {
-    width: 230,
-    height: 60,
-    backgroundColor: '#E3AD35',
-    borderRadius: 30,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#D99000',
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: '#111',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 34,
   },
 
   continuePressed: {
-    backgroundColor: '#A9A9A9',
-    transform: [{ scale: 0.96 }],
+    opacity: 0.8,
   },
 
   continueText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#111',
   },
 
   footer: {
-    height: 55,
+    height: 75,
     backgroundColor: '#000',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
 
-  footerItem: { alignItems: 'center' },
-
-  footerIcon: { fontSize: 22, color: '#fff' },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    marginTop: 2,
+  footerItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  // 🔥 Language Modal
+  footerIcon: {
+    fontSize: 24,
+  },
+
+  footerText: {
+    color: '#777',
+    fontSize: 13,
+    marginTop: 3,
+  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 25,
+    alignItems: 'center',
   },
 
   languageModal: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
+    width: '82%',
+    backgroundColor: '#FFF7E8',
+    borderRadius: 18,
     padding: 22,
-    alignItems: 'center',
   },
 
   modalTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    textAlign: 'center',
+    marginBottom: 18,
+    color: '#2B1B12',
   },
 
   languageOption: {
-    width: '100%',
-    height: 55,
-    backgroundColor: '#E8D5A0',
-    borderRadius: 18,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#F3E0BF',
+    marginBottom: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
   },
 
   languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
+    backgroundColor: '#C8661F',
   },
 
   languageOptionText: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: 'bold',
+    color: '#111',
   },
 
   languageOptionTextSelected: {
-    color: '#fff',
+    color: '#FFF',
   },
 
   confirmText: {
-    marginBottom: 18,
+    textAlign: 'center',
+    color: '#5C4A3A',
+    marginVertical: 10,
   },
 
   modalButtonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    gap: 12,
   },
 
   cancelButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    backgroundColor: '#DDD',
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+
+  cancelText: {
+    fontWeight: 'bold',
+    color: '#111',
   },
 
   confirmButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3AD35',
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    backgroundColor: '#C8661F',
     alignItems: 'center',
-    justifyContent: 'center',
   },
 
   disabledButton: {
-    opacity: 0.45,
+    opacity: 0.5,
+  },
+
+  confirmButtonText: {
+    fontWeight: 'bold',
+    color: '#FFF',
   },
 });
