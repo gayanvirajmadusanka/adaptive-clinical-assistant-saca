@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.api.main import app
+from backend.ml.predictor import PredictorResult
 
 client = TestClient(app)
 
@@ -53,16 +54,16 @@ class TestClassifyEndpoint:
     @pytest.fixture(autouse=True)
     def mock_predictor(self):
         with patch('backend.api.services.pipeline_service.predictor') as mock:
-            mock.predict.return_value = {
-                'recommendation': 'Doctor Consultation',
-                'severity': 'Moderate',
-                'severity_mode': 'MODERATE',
-                'confidence': 0.91,
-                'recommended_action': 'Please visit the clinic today.',
-                'has_critical': False,
-                'intensity_signal': 1,
-                'voice_b64': ''
-            }
+            mock.predict.return_value = PredictorResult(
+                recommendation='Doctor Consultation',
+                severity='Moderate',
+                severity_mode='MODERATE',
+                confidence=0.91,
+                recommended_action='Please visit the clinic today.',
+                has_critical=False,
+                intensity_signal=1,
+                voice_b64=''
+            )
             yield mock
 
     def test_classify_returns_200(self):
@@ -119,6 +120,7 @@ def test_extract_text_coverage():
     })
     assert response.status_code == 200
 
+
 def test_extract_audio_coverage():
     import base64
     silent_wav = b'RIFF$\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x80>\x00\x00\x00}\x00\x00\x02\x00\x10\x00data\x00\x00\x00\x00'
@@ -128,12 +130,14 @@ def test_extract_audio_coverage():
     })
     assert response.status_code == 200
 
+
 def test_extract_image_coverage():
     response = client.post('/extract/image', json={
         'symptoms': ['headache', 'fever'],
         'language': 'en'
     })
     assert response.status_code == 200
+
 
 def test_answer_audio_coverage():
     import base64

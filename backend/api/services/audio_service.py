@@ -6,10 +6,15 @@ Loads audio files from data/audio/output/ subfolders and returns base64 encoded 
 import base64
 import io
 import json
+import logging
 import os
 
 from pydub import AudioSegment
 from pydub.effects import normalize
+
+from backend.constants import Language
+
+logger = logging.getLogger(__name__)
 
 _BASE_DIR = os.path.dirname(__file__)
 _AUDIO_DIR = os.path.join(_BASE_DIR, '../../data/audio/output')
@@ -32,7 +37,13 @@ _SUBFOLDER_MAP = {
 
 
 def _get_filename(section: str, key: str, language: str) -> str | None:
-    """Look up filename from audio_map.json."""
+    """
+    Look up a filename from audio_map.json by section, key, and language.
+    :param section: Top-level section in audio_map.json (e.g. 'questions', 'symptoms')
+    :param key: Key within the section (e.g. 'q_gender', 'fever')
+    :param language: Language code - 'en' or 'wp'
+    :return: Filename string or None if not found
+    """
     try:
         return _AUDIO_MAP[section][key][language]
     except KeyError:
@@ -40,19 +51,22 @@ def _get_filename(section: str, key: str, language: str) -> str | None:
 
 
 def _load_clip(filename: str, section: str) -> AudioSegment | None:
-    """Load a WAV file from the correct subfolder."""
+    """
+    Load and normalise a WAV file from the correct audio subfolder.
+    :param filename: Filename from audio_map.json
+    :param section: Section name used to resolve the subfolder path
+    :return: Normalised AudioSegment or None if file is missing or unreadable
+    """
     if not filename:
         return None
-    subfolder = _SUBFOLDER_MAP.get(section, '')
-    path = os.path.join(_AUDIO_DIR, subfolder, filename)
+    path = os.path.join(_AUDIO_DIR, section, filename)
     if not os.path.exists(path):
-        print(f'Audio file not found: {path}')
+        logger.warning(f'Audio file not found: {path}')
         return None
     try:
-        clip = AudioSegment.from_wav(path)
-        return normalize(clip)
+        return normalize(AudioSegment.from_wav(path))
     except Exception as e:
-        print(f'Audio load failed for {path}: {e}')
+        logger.error(f'Audio load failed for {path}: {e}')
         return None
 
 
@@ -60,15 +74,24 @@ def _get_clip(section: str, key: str, language: str) -> AudioSegment | None:
     """
     Get a clip by section/key/language with English fallback.
     Returns None if file not found in either language.
+    :param section: Top-level section in audio_map.json (e.g. 'questions', 'symptoms')
+    :param key: Key within the section (e.g. 'q_gender', 'fever')
+    :param language: Language code - 'en' or 'wp'
+    :return: Normalised AudioSegment or None if not found in either language
     """
     filename = _get_filename(section, key, language)
-    if not filename and language == 'wp':
-        filename = _get_filename(section, key, 'en')
+    if not filename and language == Language.WP:
+        filename = _get_filename(section, key, Language.EN)
     return _load_clip(filename, section)
 
 
 def _stitch(clips: list) -> AudioSegment:
-    """Concatenate audio clips with silence between each."""
+    """
+    Concatenate audio clips with a silence gap between each.
+    None entries in the list are skipped.
+    :param clips: List of AudioSegment objects or None values
+    :return: Single concatenated AudioSegment
+    """
     silence = AudioSegment.silent(duration=SILENCE_MS)
     result = AudioSegment.empty()
     valid = [clip for clip in clips if clip is not None]
@@ -80,14 +103,22 @@ def _stitch(clips: list) -> AudioSegment:
 
 
 def _to_b64(audio: AudioSegment) -> str:
-    """Export AudioSegment to base64 encoded WAV string."""
+    """
+    Export an AudioSegment to a base64-encoded WAV string.
+    :param audio: AudioSegment to encode
+    :return: Base64-encoded WAV string
+    """
     buffer = io.BytesIO()
     audio.export(buffer, format='wav')
     return base64.b64encode(buffer.getvalue()).decode()
 
 
 def _normalize_clip(clip: AudioSegment) -> AudioSegment:
-    """Normalize clip to consistent volume level."""
+    """
+    Normalise a clip to a consistent target loudness level.
+    :param clip: AudioSegment to normalise
+    :return: Gain-adjusted AudioSegment at TARGET_DBFS
+    """
     return normalize(clip).apply_gain(TARGET_DBFS - normalize(clip).dBFS)
 
 
@@ -148,50 +179,48 @@ def get_question_audio(question_id: str, options: list, language: str) -> str:
     :param language: 'en' or 'wp'
     :return: base64 encoded WAV string
     """
-    clips = []
+    audio_key = QUESTION_AUDIO_KEY_MAP.get(question_id)
+    if not audio_key:
+        logger.error(f'No audio key mapping for question {question_id}')
+        return _to_b64(AudioSegment.silent(duration=100))
 
-    # question audio
-    audio_key = QUESTION_AUDIO_KEY_MAP.get(question_id, question_id)
-    clips.append(_get_clip('questions', audio_key, language))
-
-    # answer option audios
+    clips = [_get_clip('questions', audio_key, language)]
     for option in options:
         option_id = option.get('id', '')
-
-        # yes/no questions use dynamic ids like '10y', '10n'
         if option_id.endswith('y'):
             answer_key = 'answer_yes'
         elif option_id.endswith('n'):
             answer_key = 'answer_no'
         else:
             answer_key = _OPTION_ANSWER_KEY_MAP.get(option_id)
+            if not answer_key:
+                logger.warning(f'No answer audio key for option {option_id}')
+                continue
+        clips.append(_get_clip('answers', answer_key, language))
 
-        if answer_key:
-            clips.append(_get_clip('answers', answer_key, language))
-
-    stitched = _stitch(clips)
-    return _to_b64(stitched)
+    return _to_b64(_stitch(clips))
 
 
 def get_detected_symptoms_audio(symptoms: list, language: str) -> str:
     """
     Stitch: 'Detected Symptoms' + each symptom name + 'Tap yes or no'.
-    Used in /extract response.
 
     :param symptoms: list of symptom id strings e.g. ['fever', 'chest_pain']
     :param language: 'en' or 'wp'
     :return: base64 encoded WAV string
     """
+    if not symptoms:
+        logger.warning('get_detected_symptoms_audio called with empty symptoms list')
+
     clips = [_get_clip('ui', 'detected_symptoms', language)]
-
     for symptom_id in symptoms:
-        clips.append(_get_clip('symptoms', symptom_id, language))
-
-    # 'Tap yes or no' prompt
+        clip = _get_clip('symptoms', symptom_id, language)
+        if clip is None:
+            logger.warning(f'No audio found for symptom: {symptom_id}')
+        clips.append(clip)
     clips.append(_get_clip('ui', 'tap_yes_or_no', language))
 
-    stitched = _stitch(clips)
-    return _to_b64(stitched)
+    return _to_b64(_stitch(clips))
 
 
 def get_severity_audio(severity: str, language: str) -> str:
@@ -207,24 +236,9 @@ def get_severity_audio(severity: str, language: str) -> str:
 
     # fallback to silence if file missing
     if clip is None:
-        print(f'Severity audio not found for: {key} ({language})')
+        logger.error(f'Severity audio not found: {key} ({language}) - returning silence')
         return _to_b64(AudioSegment.silent(duration=100))
 
-    return _to_b64(clip)
-
-
-def get_symptom_audio(symptom_id: str, language: str) -> str | None:
-    """
-    Get audio for a single symptom word.
-    Used individually if needed.
-
-    :param symptom_id: symptom key e.g. 'fever', 'chest_pain'
-    :param language: 'en' or 'wp'
-    :return: base64 encoded WAV string or None if not found
-    """
-    clip = _get_clip('symptoms', symptom_id, language)
-    if clip is None:
-        return None
     return _to_b64(clip)
 
 
@@ -238,16 +252,16 @@ def get_answer_selected_audio(answer_id: str, language: str) -> str:
     :return: base64 encoded WAV string
     """
     clips = [_get_clip('ui', 'you_selected', language)]
-
     if answer_id.endswith('y'):
         clips.append(_get_clip('answers', 'answer_yes', language))
     elif answer_id.endswith('n'):
         clips.append(_get_clip('answers', 'answer_no', language))
     else:
         audio_key = _OPTION_ANSWER_KEY_MAP.get(answer_id)
-        if audio_key:
+        if not audio_key:
+            logger.error(f'No audio key for answer_id: {answer_id}')
+        else:
             clips.append(_get_clip('answers', audio_key, language))
-
     return _to_b64(_stitch(clips))
 
 
@@ -260,5 +274,6 @@ def get_unrecognized_audio(language: str) -> str:
     """
     clip = _get_clip('ui', 'could_not_catch', language)
     if clip is None:
+        logger.error(f'could_not_catch audio missing for language: {language}')
         return _to_b64(AudioSegment.silent(duration=100))
     return _to_b64(clip)

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.ml.predictor import SEVERITY_MAP, RECOMMENDED_ACTIONS, TriagePredictor
+from backend.ml.predictor import SEVERITY_MAP, RECOMMENDED_ACTIONS, TriagePredictor, PredictorResult
 
 
 @pytest.fixture
@@ -86,7 +86,7 @@ class TestEncodeAge:
 
 class TestTriagePredictorPredict:
 
-    def test_predict_returns_required_keys(self, predictor):
+    def test_predict_returns_predictor_result(self, predictor):
         result = predictor.predict(
             symptoms=['headache', 'fever'],
             age='adult',
@@ -95,10 +95,7 @@ class TestTriagePredictorPredict:
             intensity_signal=1,
             has_critical=0
         )
-        expected = {'recommendation', 'severity', 'severity_mode',
-                    'confidence', 'recommended_action', 'has_critical',
-                    'intensity_signal', 'voice_b64'}
-        assert expected.issubset(result.keys())
+        assert isinstance(result, PredictorResult)
 
     def test_predict_severity_mode_uppercase(self, predictor):
         result = predictor.predict(
@@ -109,7 +106,7 @@ class TestTriagePredictorPredict:
             intensity_signal=0,
             has_critical=0
         )
-        assert result['severity_mode'] in {'MILD', 'MODERATE', 'SEVERE'}
+        assert result.severity_mode in {'MILD', 'MODERATE', 'SEVERE'}
 
     def test_predict_confidence_between_0_and_1(self, predictor):
         result = predictor.predict(
@@ -120,7 +117,7 @@ class TestTriagePredictorPredict:
             intensity_signal=2,
             has_critical=1
         )
-        assert 0.0 <= result['confidence'] <= 1.0
+        assert 0.0 <= result.confidence <= 1.0
 
     def test_predict_warlpiri_language(self, predictor):
         result = predictor.predict(
@@ -132,7 +129,7 @@ class TestTriagePredictorPredict:
             has_critical=0,
             language='wp'
         )
-        assert result['severity'] in {'Witapardu', 'Wiriwiri', 'Wirinyayirni'}
+        assert result.severity in {'Witapardu', 'Wiriwiri', 'Wirinyayirni'}
 
     def test_predict_has_critical_returns_bool(self, predictor):
         result = predictor.predict(
@@ -143,4 +140,4 @@ class TestTriagePredictorPredict:
             intensity_signal=0,
             has_critical=0
         )
-        assert isinstance(result['has_critical'], bool)
+        assert isinstance(result.has_critical, bool)
