@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.saca.controller.TellUsMoreVoiceController"
+           stylesheets="@/styles/style.css"
+           styleClass="root">
+
+    <BorderPane>
+
+        <top>
+            <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+                <padding>
+                    <Insets top="10" right="20" bottom="10" left="20"/>
+                </padding>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </top>
+
+        <left>
+            <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+        </left>
+
+        <center>
+            <ScrollPane fitToWidth="true" fitToHeight="true"
+                        pannable="false" styleClass="center-scroll">
+                <content>
+                    <StackPane styleClass="tell-bg">
+
+                        <VBox alignment="TOP_CENTER"
+                              spacing="20"
+                              maxWidth="680"
+                              styleClass="tell-container">
+
+                            <padding>
+                                <Insets top="40" right="36" bottom="60" left="36"/>
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT" styleClass="tell-header-bar" maxWidth="680">
+
+                                <Button onAction="#handleBack" styleClass="tell-back-btn">
+                                    <graphic>
+                                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/back-arrow.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Label text="%tell_us_more"
+                                       styleClass="tell-header-title"
+                                       HBox.hgrow="ALWAYS"
+                                       maxWidth="Infinity"
+                                       alignment="CENTER"/>
+
+                                <Region minWidth="38" maxWidth="38"/>
+
+                            </HBox>
+
+                            <Label fx:id="progressLabel"
+                                   styleClass="question-progress-label"
+                                   alignment="CENTER"
+                                   maxWidth="680"/>
+
+                            <ProgressBar fx:id="progressBar"
+                                         styleClass="question-progress-bar"
+                                         progress="0"
+                                         minHeight="12"
+                                         prefHeight="12"
+                                         maxWidth="680"/>
+
+                            <HBox spacing="20" maxWidth="680" alignment="CENTER_LEFT">
+
+                                <VBox fx:id="questionCard"
+                                      spacing="12"
+                                      styleClass="question-card"
+                                      HBox.hgrow="ALWAYS"
+                                      minWidth="0"
+                                      minHeight="200"
+                                      maxWidth="Infinity">
+
+                                    <HBox alignment="TOP_LEFT" spacing="8" maxWidth="Infinity">
+
+                                        <Label fx:id="questionText"
+                                               styleClass="question-text"
+                                               wrapText="true"
+                                               maxWidth="Infinity"
+                                               HBox.hgrow="ALWAYS"/>
+
+                                        <Button fx:id="questionSpeakerBtn"
+                                                styleClass="question-speaker-btn"
+                                                onAction="#handleQuestionSpeak">
+                                            <graphic>
+                                                <ImageView fx:id="questionSpeakerIcon"
+                                                           fitWidth="24" fitHeight="24"
+                                                           preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@/icons/speaker.png"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+
+                                    </HBox>
+
+                                    <VBox fx:id="optionsBox" spacing="10" maxWidth="Infinity" minWidth="0"/>
+
+                                    <Label fx:id="voiceAnswerLabel"
+                                           styleClass="voice-answer-label"
+                                           wrapText="true"
+                                           maxWidth="Infinity"
+                                           visible="false"
+                                           managed="false"/>
+
+                                </VBox>
+
+                                <VBox alignment="TOP_CENTER"
+                                      spacing="14"
+                                      styleClass="voice-mic-panel"
+                                      prefWidth="260"
+                                      minWidth="240"
+                                      maxWidth="260">
+
+                                    <Label text="%speak_your_answer"
+                                           styleClass="voice-panel-title"
+                                           wrapText="true"
+                                           alignment="CENTER"
+                                           maxWidth="Infinity"/>
+
+                                    <Button fx:id="micBtn"
+                                            styleClass="speak-mic-btn"
+                                            onAction="#handleMic">
+                                        <graphic>
+                                            <ImageView fx:id="micIcon"
+                                                       fitWidth="48" fitHeight="48"
+                                                       preserveRatio="true">
+                                                <image>
+                                                    <Image url="@/icons/microphone.png"/>
+                                                </image>
+                                            </ImageView>
+                                        </graphic>
+                                    </Button>
+
+                                    <Label fx:id="micHintLabel"
+                                           text="%speak_hint"
+                                           styleClass="speak-hint-label"
+                                           wrapText="true"
+                                           alignment="CENTER"
+                                           maxWidth="Infinity"/>
+
+                                    <HBox fx:id="miniPlaybackBar"
+                                          alignment="CENTER"
+                                          spacing="8"
+                                          styleClass="mini-playback-bar"
+                                          visible="false"
+                                          managed="false">
+
+                                        <Button fx:id="miniPlayBtn"
+                                                styleClass="speak-icon-btn"
+                                                onAction="#handleMiniPlay">
+                                            <graphic>
+                                                <ImageView fx:id="miniPlayIcon"
+                                                           fitWidth="18" fitHeight="18"
+                                                           preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@/icons/play.png"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+
+                                        <Label fx:id="miniDurationLabel"
+                                               text="0.00"
+                                               styleClass="speak-duration-label"/>
+
+                                        <Button fx:id="miniDeleteBtn"
+                                                styleClass="trash-icon-btn"
+                                                onAction="#handleMiniDelete">
+                                            <graphic>
+                                                <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@/icons/trash.png"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </Button>
+
+                                    </HBox>
+
+                                </VBox>
+
+                            </HBox>
+
+                            <Button fx:id="continueBtn"
+                                    text="%continue"
+                                    styleClass="tell-continue-btn"
+                                    maxWidth="680"
+                                    onAction="#handleContinue"/>
+
+                        </VBox>
+
+                    </StackPane>
+                </content>
+            </ScrollPane>
+        </center>
+
+    </BorderPane>
+
+</StackPane>

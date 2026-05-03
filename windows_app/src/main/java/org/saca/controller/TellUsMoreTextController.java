@@ -243,7 +243,7 @@ public class TellUsMoreTextController implements Initializable {
             );
             Parent loadingView = loader.load();
             LoadingController loadingCtrl = loader.getController();
-            loadingCtrl.setTitle(LanguageManager.get("loading_symptom_title"));
+            loadingCtrl.setTitle(LanguageManager.get("loading_severity_title"));
             loadingCtrl.setDuration(Integer.MAX_VALUE);
 
             ApiService.classify(
@@ -258,7 +258,7 @@ public class TellUsMoreTextController implements Initializable {
                                 "Could not submit answers", errorMsg);
                         try {
                             FXMLLoader rl = new FXMLLoader(
-                                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                                    getClass().getResource("/view/TellUsMoreTextView.fxml"),
                                     LanguageManager.getBundle()
                             );
                             stage.getScene().setRoot(rl.load());
@@ -277,6 +277,7 @@ public class TellUsMoreTextController implements Initializable {
 
     private void navigateToFinalResult(ClassifyRS classifyRS) {
         try {
+            NavBarManager.setPreviousView("/view/TellUsMoreTextView.fxml");
             NavBarManager.setCurrentView("/view/FinalResultView.fxml");
             CacheManager.setClassifyRS(classifyRS);
 

@@ -68,6 +68,9 @@ public class VoiceResultController implements Initializable {
     public void setSymptomResult(VoiceResultRS result) {
         this.symptomResult = result;
         CacheManager.setVoiceResultRS(result);
+        if (result.getSymptomsEn() != null && !result.getSymptomsEn().isEmpty()) {
+            CacheManager.setCachedSymptomsEn(result.getSymptomsEn());
+        }
         displaySymptoms(result.getSymptomsForCurrentLanguage());
     }
 
@@ -222,16 +225,16 @@ public class VoiceResultController implements Initializable {
 
     private void navigateToTellUsMore(QuestionsRS questionsRS) {
         try {
-            NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
+            NavBarManager.setCurrentView("/view/TellUsMoreVoiceView.fxml");
             CacheManager.setQuestionsRS(questionsRS);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                    getClass().getResource("/view/TellUsMoreVoiceView.fxml"),
                     LanguageManager.getBundle()
             );
             Parent view = loader.load();
 
-            TellUsMoreTextController ctrl = loader.getController();
+            TellUsMoreVoiceController ctrl = loader.getController();
             ctrl.setQuestions(questionsRS);
 
             stage.getScene().setRoot(view);
