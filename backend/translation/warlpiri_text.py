@@ -12,10 +12,17 @@ import os
 
 from rapidfuzz import process
 
+from backend.constants import Language
+
 _DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "warlpiri")
 
 
 def _load(filename: str) -> dict:
+    """
+    Load a JSON data file from the Warlpiri data directory.
+    :param filename: Name of the JSON file to load
+    :return: Parsed JSON content as a dict
+    """
     path = os.path.join(_DATA_DIR, filename)
     with open(path, encoding="utf-8") as file:
         return json.load(file)
@@ -38,7 +45,7 @@ SUBJECT_WORDS = {
 
 # build wp label -> english string lookup for token matching
 _WP_TO_EN = {
-    value["wp"].lower(): value["en"]
+    value[Language.WP].lower(): value[Language.EN]
     for value in SYMPTOM_MAP.values()
 }
 

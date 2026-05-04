@@ -15,7 +15,7 @@ from backend.api.schemas.request_response import QuestionsRequest, QuestionsResp
 from backend.api.services.answer_audio_service import resolve_answer_audio
 from backend.api.services.audio_service import get_detected_symptoms_audio
 from backend.api.services.pipeline_service import classify as run_classify
-
+from backend.constants import InputType, Language
 from backend.nlp.preprocessor import preprocess_text
 from backend.nlp.symptom_extractor import extract_symptoms
 from backend.translation.warlpiri_text import translate as translate_warlpiri
@@ -139,37 +139,36 @@ def extract_audio(req: ExtractAudioRequest) -> dict:
 
 
 @router.post('/extract/image', response_model=ExtractResponse)
-def extract_image(req: ExtractImageRequest) -> dict:
+def extract_image(req: ExtractImageRequest) -> ExtractResponse:
     """
-    Receive already-resolved symptoms from body map selection and send the audio.
+    Receive already-resolved symptoms from body map selection and return audio.
+    Confidence is 1.0 since symptoms are explicitly selected by the user.
+    :param req: ExtractImageRequest
+    :return: ExtractResponse dict with the provided symptoms and audio
     """
     voice_b64 = get_detected_symptoms_audio(req.symptoms, req.language)
-
-    return {
-        'symptoms_en': req.symptoms,
-        'symptoms_wp': req.symptoms,
-        'confidence': 1.0,  # 1.0 since user explicitly selected
-        'input_type': 'image',
-        'language': req.language,
-        'voice_b64': voice_b64,
-    }
+    return ExtractResponse(symptoms_en=req.symptoms, symptoms_wp=req.symptoms, confidence=1.0,
+                           language=req.language, input_type=InputType.IMAGE, voice_b64=voice_b64)
 
 
 @router.post('/questions', response_model=QuestionsResponse)
-def questions_endpoint(req: QuestionsRequest) -> dict:
+def questions_endpoint(req: QuestionsRequest) -> QuestionsResponse:
     """
     Return follow-up questions based on extracted symptoms.
     :param req: QuestionsRequest
+    :return: QuestionsResponse dict with question list and audio
     """
     return get_questions(req.symptoms, req.language)
 
 
 @router.post('/answer/audio', response_model=AnswerAudioResponse)
-def resolve_answer_audio_endpoint(req: AnswerAudioRequest) -> dict:
+def resolve_answer_audio_endpoint(req: AnswerAudioRequest) -> AnswerAudioResponse:
     """
     Resolve a spoken audio answer to an answer_id.
     Returns answer_id if recognised, None if not.
     Frontend re-prompts the same question if None returned.
+    :param req: AnswerAudioRequest
+    :return: AnswerAudioResponse dict with answer_id (or None) and confirmation audio
     """
     return resolve_answer_audio(
         audio_b64=req.audio_b64,
@@ -179,10 +178,11 @@ def resolve_answer_audio_endpoint(req: AnswerAudioRequest) -> dict:
 
 
 @router.post('/classify', response_model=ClassifyResponse)
-def classify_endpoint(req: ClassifyRequest) -> dict:
+def classify_endpoint(req: ClassifyRequest) -> ClassifyResponse:
     """
     Run full triage classification and return severity result.
     :param req: ClassifyRequest
+    :return: ClassifyResponse dict with severity, recommendation, and audio
     """
     answers_dicts = [
         {'question_id': answer.question_id, 'answer_id': answer.answer_id}

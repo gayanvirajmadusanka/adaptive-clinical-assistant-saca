@@ -7,7 +7,9 @@ import json
 import os
 import tempfile
 
+from backend.api.schemas.request_response import AnswerAudioResponse
 from backend.api.services.audio_service import get_unrecognized_audio, get_answer_selected_audio
+from backend.constants import Language
 from backend.speech.audio_english import transcribe as transcribe_english
 
 # from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
@@ -25,14 +27,7 @@ YES_NO_QUESTION_IDS = {
     if question.get('type') == 'yes_no'
 }
 
-# Warlpiri keyword -> answer_id
-# yes/no map to 'yes'/'no' which get resolved dynamically per question_id
-WARLPIRI_KEYWORD_TO_ANSWER = {
-    'yuwayi': 'yes',
-    'lawa': 'no',
-}
-
-# override keywords for options where label text isn't what someone would say
+# override keywords for options where label text is not naturally spoken
 _EN_KEYWORD_OVERRIDES = {
     '0b1': ['child', 'kid'],
     '0b2': ['youth', 'young', 'teen'],
@@ -47,44 +42,90 @@ _EN_KEYWORD_OVERRIDES = {
 }
 
 
-def _build_answer_keywords() -> dict:
+def _build_keyword_to_answer() -> dict:
     """
-    Build answer_id -> keyword list map for each mandatory question.
-    Derived from questions.json.
+    Build flat keyword -> answer_id map from questions.json.
+    Both English and Warlpiri keywords in one map.
+    Yes/no map to 'yes'/'no' for dynamic resolution per question_id.
+    :return: Dict mapping keyword string to answer_id or 'yes'/'no'
     """
     result = {
-        'yes_no': {
-            'yes': ['yes', 'yuwayi', 'yep', 'yeah'],
-            'no': ['no', 'lawa', 'nope', 'nah']
-        }
+        # yes/no hardcoded since they span all symptom questions
+        'yes': 'yes', 'yuwayi': 'yes', 'yep': 'yes', 'yeah': 'yes',
+        'no': 'no', 'lawa': 'no', 'nope': 'no', 'nah': 'no',
     }
+
     for question in _QUESTIONS['mandatory']:
         if 'options' not in question:
             continue
-        qid = question['id']
-        result[qid] = {}
         for option in question['options']:
             oid = option['id']
             wp_word = option.get('text_wp', '').lower().strip()
 
-            if oid in _EN_KEYWORD_OVERRIDES:
-                result[qid][oid] = _EN_KEYWORD_OVERRIDES[oid]
-            else:
-                en_text = option['text'].lower().strip()
-                result[qid][oid] = [en_text, wp_word]
-
-            # only add to warlpiri map if not a reserved yes/no keyword
+            # warlpiri keyword - skip reserved yes/no
             if wp_word and wp_word not in _WP_RESERVED:
-                WARLPIRI_KEYWORD_TO_ANSWER[wp_word] = oid
+                result[wp_word] = oid
+
+            # english keywords - use overrides if defined, else derive from option text
+            if oid in _EN_KEYWORD_OVERRIDES:
+                for key_word in _EN_KEYWORD_OVERRIDES[oid]:
+                    result[key_word.lower()] = oid
+            else:
+                result[option['text'].lower().strip()] = oid
 
     return result
 
 
-QUESTION_ANSWER_KEYWORDS = _build_answer_keywords()
+KEYWORD_TO_ANSWER = _build_keyword_to_answer()
+
+
+def _resolve_keyword(keyword: str, question_id: str) -> str | None:
+    """
+    Resolve a single keyword to an answer_id.
+    Works for both English and Warlpiri keywords.
+    For yes/no maps 'yes'/'no' to dynamic ids like '10y'/'10n'.
+    :param keyword: Spoken or matched keyword string
+    :param question_id: The question being answered (used for yes/no resolution)
+    :return: Resolved answer_id string, or None if no mapping exists
+    """
+    mapped = KEYWORD_TO_ANSWER.get(keyword.lower())
+    if not mapped:
+        return None
+    if mapped == 'yes' and question_id in YES_NO_QUESTION_IDS:
+        return question_id + 'y'
+    if mapped == 'no' and question_id in YES_NO_QUESTION_IDS:
+        return question_id + 'n'
+    return mapped
+
+
+def _recognised(base: dict, answer_id: str, confidence: float) -> dict:
+    """
+    Build a successful answer recognition result dict.
+    :param base: Base dict containing at minimum {'question_id': ...}
+    :param answer_id: The resolved answer id (e.g. '0a1', '10y')
+    :param confidence: Recognition confidence score
+    :return: Result dict with recognized=True and the resolved answer_id
+    """
+    return {**base, 'recognized': True, 'answer_id': answer_id, 'confidence': round(confidence, 3), 'message': None}
+
+
+def _unrecognised(base: dict, message: str, confidence: float = 0.0) -> dict:
+    """
+    Build a failed answer recognition result dict.
+    :param base: Base dict containing at minimum {'question_id': ...}
+    :param message: Human-readable reason for failure shown to the frontend
+    :param confidence: Recognition confidence score, defaults to 0.0
+    :return: Result dict with recognized=False and answer_id=None
+    """
+    return {**base, 'recognized': False, 'answer_id': None, 'confidence': confidence, 'message': message}
 
 
 def _b64_to_tempfile(audio_b64: str) -> str | None:
-    """Decode base64 audio and write to a temp WAV file."""
+    """
+    Decode base64 audio and write to a temp WAV file.
+    :param audio_b64: Base64-encoded WAV audio string
+    :return: Path to the temporary file, or None if decoding fails
+    """
     try:
         audio_bytes = base64.b64decode(audio_b64)
         tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
@@ -97,7 +138,10 @@ def _b64_to_tempfile(audio_b64: str) -> str | None:
 
 
 def _cleanup(path: str):
-    """Delete temp file."""
+    """
+    Delete a temporary file, silently ignoring errors.
+    :param path: Filesystem path of the file to delete
+    """
     try:
         if path and os.path.exists(path):
             os.remove(path)
@@ -105,170 +149,105 @@ def _cleanup(path: str):
         pass
 
 
-def _build_answer_map(question_id: str) -> dict | None:
+def _match_keywords(spoken_text: str, question_id: str) -> tuple | None:
     """
-    Build answer_id -> keywords map for a given question.
-    For yes/no questions dynamically builds ids like '10y', '10n'.
-    """
-    if question_id in YES_NO_QUESTION_IDS:
-        yes_no = QUESTION_ANSWER_KEYWORDS['yes_no']
-        return {
-            question_id + 'y': yes_no['yes'],
-            question_id + 'n': yes_no['no']
-        }
-    return QUESTION_ANSWER_KEYWORDS.get(question_id)
-
-
-def _match_keywords(spoken_text: str, answer_map: dict) -> tuple | None:
-    """
-    Match transcribed text against keyword lists.
-    Returns (answer_id, confidence) or None.
+    Match transcribed text against all keywords for the given question.
+    :param spoken_text: Transcribed text from the ASR engine
+    :param question_id: The question being answered
+    :return: Tuple of (answer_id, confidence) for the best match, or None if no match
     """
     spoken_lower = spoken_text.lower().strip()
     best_answer_id = None
     best_score = 0.0
 
-    for answer_id, keywords in answer_map.items():
-        for keyword in keywords:
-            if keyword in spoken_lower:
-                score = 1.0 if spoken_lower == keyword else 0.85
-                if score > best_score:
-                    best_score = score
-                    best_answer_id = answer_id
+    for keyword, mapped in KEYWORD_TO_ANSWER.items():
+        if keyword in spoken_lower:
+            answer_id = _resolve_keyword(keyword, question_id)
+            if not answer_id:
+                continue
+            score = 1.0 if spoken_lower == keyword else 0.85
+            if score > best_score:
+                best_score = score
+                best_answer_id = answer_id
 
     return (best_answer_id, best_score) if best_answer_id else None
-
-
-def _resolve_warlpiri_keyword(keyword: str, question_id: str) -> str | None:
-    """
-    Map a DTW-matched Warlpiri keyword to an answer_id.
-    For yes/no questions maps 'yes'/'no' to dynamic ids like '10y'/'10n'.
-    """
-    mapped = WARLPIRI_KEYWORD_TO_ANSWER.get(keyword)
-    if not mapped:
-        return None
-    if mapped == 'yes' and question_id in YES_NO_QUESTION_IDS:
-        return question_id + 'y'
-    if mapped == 'no' and question_id in YES_NO_QUESTION_IDS:
-        return question_id + 'n'
-    return mapped
 
 
 def resolve_answer_audio(
         audio_b64: str,
         question_id: str,
-        language: str = 'en'
-) -> dict:
+        language: str = Language.EN
+) -> AnswerAudioResponse:
     """
     Resolve spoken audio to an answer ID for the given question.
 
     :param audio_b64: base64 encoded WAV audio
     :param question_id: the question being answered
     :param language: 'en' or 'wp'
-    :return: dict with answer_id, confidence, recognized
+    :return: AnswerAudioResponse with answer_id, confidence, recognized, and confirmation audio
     """
     base = {'question_id': question_id}
 
     tmp_path = _b64_to_tempfile(audio_b64)
     if not tmp_path:
-        return {
-            **base,
-            'recognized': False,
-            'answer_id': None,
-            'confidence': 0.0,
-            'message': 'Invalid audio encoding.',
-            'voice_b64': get_unrecognized_audio(language)
-        }
+        result = _unrecognised(base, 'Invalid audio encoding.')
+        return AnswerAudioResponse(**result, voice_b64=get_unrecognized_audio(language))
 
     try:
-        if language == 'wp':
+        if language == Language.WP:
             result = _resolve_warlpiri(tmp_path, question_id, base)
         else:
             result = _resolve_english(tmp_path, question_id, base)
-        # add confirmation or error audio
+
         if result['recognized'] and result['answer_id']:
-            result['voice_b64'] = get_answer_selected_audio(
-                result['answer_id'], language
-            )
+            voice_b64 = get_answer_selected_audio(result['answer_id'], language)
         else:
-            result['voice_b64'] = get_unrecognized_audio(language)
-        return result
+            voice_b64 = get_unrecognized_audio(language)
+
+        return AnswerAudioResponse(**result, voice_b64=voice_b64)
     finally:
         _cleanup(tmp_path)
 
 
 def _resolve_english(tmp_path: str, question_id: str, base: dict) -> dict:
-    """English answer resolution via Whisper transcription + keyword matching."""
-    answer_map = _build_answer_map(question_id)
-    if not answer_map:
-        return {
-            **base,
-            'recognized': False,
-            'answer_id': None,
-            'confidence': 0.0,
-            'message': f'No answer mapping defined for question {question_id}'
-        }
-
+    """
+    Resolve an English spoken answer.
+    :param tmp_path: Path to a temporary WAV file containing the audio
+    :param question_id: The question being answered
+    :param base: Base dict passed through to _recognised/_unrecognised helpers
+    :return: Recognition result dict
+    """
     transcription = transcribe_english(tmp_path)
     if not transcription['success'] or not transcription['text']:
-        return {
-            **base,
-            'recognized': False,
-            'answer_id': None,
-            'confidence': 0.0,
-            'message': 'Could not transcribe audio. Please tap your answer instead.'
-        }
+        return _unrecognised(base, 'Could not transcribe audio. Please tap your answer instead.')
 
-    result = _match_keywords(transcription['text'], answer_map)
+    result = _match_keywords(transcription['text'], question_id)
     if result:
         answer_id, confidence = result
-        return {
-            **base,
-            'recognized': True,
-            'answer_id': answer_id,
-            'confidence': round(confidence, 3),
-            'message': None
-        }
+        return _recognised(base, answer_id, confidence)
 
-    return {
-        **base,
-        'recognized': False,
-        'answer_id': None,
-        'confidence': 0.0,
-        'message': 'Could not match spoken answer. Please tap your answer instead.'
-    }
+    return _unrecognised(base, 'Could not match spoken answer. Please tap your answer instead.')
 
 
 def _resolve_warlpiri(tmp_path: str, question_id: str, base: dict) -> dict:
-    """Warlpiri answer resolution via VAD+DTW keyword spotting."""
+    """
+    Resolve a Warlpiri spoken answer.
+    :param tmp_path: Path to a temporary WAV file containing the audio
+    :param question_id: The question being answered
+    :param base: Base dict passed through to _recognised/_unrecognised helpers
+    :return: Recognition result dict
+    """
     # result = recognize_warlpiri(tmp_path) TODO: implement recognize function in audio_warlpiri.py and uncomment this line
     result = {}
 
     if not result.get('recognized') or not result.get('matched_keywords'):
-        return {
-            **base,
-            'recognized': False,
-            'answer_id': None,
-            'confidence': 0.0,
-            'message': 'Could not recognise Warlpiri answer. Please tap your answer instead.'
-        }
+        return _unrecognised(base, 'Lawa nyangu. Milkikarriya.')
 
     best_keyword = min(result['matched_keywords'], key=result['matched_keywords'].get)
-    answer_id = _resolve_warlpiri_keyword(best_keyword, question_id)
+    answer_id = _resolve_keyword(best_keyword, question_id)
 
     if not answer_id:
-        return {
-            **base,
-            'recognized': False,
-            'answer_id': None,
-            'confidence': result.get('confidence', 0.0),
-            'message': f'Keyword matched but not an answer for this question: {best_keyword}'
-        }
+        return _unrecognised(base, f'Keyword matched but not an answer for this question: {best_keyword}',
+                             confidence=result.get('confidence', 0.0))
 
-    return {
-        **base,
-        'recognized': True,
-        'answer_id': answer_id,
-        'confidence': result.get('confidence', 0.0),
-        'message': None
-    }
+    return _recognised(base, answer_id, result.get('confidence', 0.0))

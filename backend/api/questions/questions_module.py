@@ -1,7 +1,14 @@
+"""
+Questions module.
+Builds follow-up question lists from questions.json based on extracted symptoms,
+formats them for the API response, and resolves answers to ML pipeline signals.
+"""
 import json
 import os
 
+from backend.api.schemas.request_response import Question, QuestionOption, QuestionsResponse
 from backend.api.services.audio_service import get_question_audio, QUESTION_AUDIO_KEY_MAP
+from backend.constants import Language
 
 _questions_path = os.path.join(os.path.dirname(__file__), '../../data/questions.json')
 with open(_questions_path) as file:
@@ -14,11 +21,7 @@ MANDATORY_QUESTIONS = QUESTIONS_DATA['mandatory']
 ID = "id"
 TEXT = "text"
 TEXT_WP = "text_wp"
-LANG_EN = "en"
-LANG_WP = "wp"
 OPTIONS = "options"
-TYPE = "type"
-VOICE_B64 = "voice_b64"
 
 _QUESTION_LOOKUP = {
     question[ID]: question
@@ -27,14 +30,14 @@ _QUESTION_LOOKUP = {
 }
 
 
-def get_questions(symptoms: list, language: str = LANG_EN) -> dict:
+def get_questions(symptoms: list, language: str = Language.EN) -> QuestionsResponse:
     """
     Build the question list for a given set of symptoms.
     Mandatory questions always included first, followed by exactly
     2 symptom-specific questions selected based on number of symptoms.
     :param symptoms: List of extracted symptom strings
     :param language: Language code - 'en' or 'wp'
-    :return: Dict with language and list of formatted questions
+    :return: QuestionsResponse with language and list of formatted questions
     """
     questions = []
 
@@ -63,57 +66,53 @@ def get_questions(symptoms: list, language: str = LANG_EN) -> dict:
             first_question = SYMPTOM_QUESTIONS[symptom_lower][0]
             questions.append(_format_question(first_question, language))
 
-    return {
-        "language": language,
-        "questions": questions
-    }
+    return QuestionsResponse(language=language, questions=questions)
 
 
-def _format_question(question: dict, language: str) -> dict:
+def _format_question(question: dict, language: str) -> Question:
     """
     Format a single question for the API response.
     Falls back to English if Warlpiri text is not available.
     :param question: Raw question dict from questions.json
     :param language: Language code - 'en' or 'wp'
-    :return: Formatted question dict for API response
+    :return: Question instance for the API response
     """
-    text = question.get(TEXT_WP) if language == LANG_WP else question.get(TEXT)
+    text = question.get(TEXT_WP) if language == Language.WP else question.get(TEXT)
 
     if OPTIONS in question:
         q_type = 'multiple_choice'
-        options = [
+        options_data = [
             {
                 ID: option[ID],
-                TEXT: option.get(TEXT_WP) if language == LANG_WP else option.get(TEXT)
+                TEXT: option.get(TEXT_WP) if language == Language.WP else option.get(TEXT)
             }
             for option in question[OPTIONS]
         ]
     else:
         q_type = 'yes_no'
-        options = [
-            {ID: question[ID] + 'y', TEXT: "Yes" if language == LANG_EN else "Yuwayi"},
-            {ID: question[ID] + 'n', TEXT: "No" if language == LANG_EN else "Lawa"}
+        options_data = [
+            {ID: question[ID] + 'y', TEXT: "Yes" if language == Language.EN else "Yuwayi"},
+            {ID: question[ID] + 'n', TEXT: "No" if language == Language.EN else "Lawa"}
         ]
 
     audio_key = QUESTION_AUDIO_KEY_MAP.get(question[ID], question[ID])
-    voice_b64 = get_question_audio(audio_key, options, language)
+    voice_b64 = get_question_audio(audio_key, options_data, language)
 
-    return {
-        ID: question[ID],
-        TEXT: text or question[TEXT],
-        TYPE: q_type,
-        OPTIONS: options,
-        VOICE_B64: voice_b64,
-    }
+    return Question(
+        id=question[ID],
+        text=text or question[TEXT],
+        type=q_type,
+        options=[QuestionOption(id=option[ID], text=option[TEXT]) for option in options_data],
+        voice_b64=voice_b64,
+    )
 
 
 def resolve_answers(answers: list, symptoms: list) -> dict:
     """
-    Process the answers array from /classify and derive the signals
-    needed by the ML component.
+    Process the answers array and derive the signals needed by the ML component.
     :param answers: List of dicts with question_id and answer_id
     :param symptoms: List of symptom strings to check against critical list
-    :return: Dict with intensity_signal, has_critical, duration_value
+    :return: Dict with intensity_signal, has_critical, duration_value, gender, age_group
     """
     gender = None
     age_group = None
@@ -152,7 +151,7 @@ def resolve_answers(answers: list, symptoms: list) -> dict:
         elif qid == '1':
             if aid in ('1a', '1b', '1c'):  # today / yesterday / 2-3 days
                 duration_value = 0
-            elif aid in ('1d', '1e'):  # About a week / More than a week
+            elif aid in ('1d', '1e'):  # about a week / more than a week
                 duration_value = 1
 
         # severity question

@@ -5,69 +5,68 @@ class TestGetQuestions:
 
     def test_returns_mandatory_questions_always(self):
         result = get_questions([], 'en')
-        assert result['language'] == 'en'
-        # now 4 mandatory questions: 0a, 0b, 1, 2
-        assert len(result['questions']) >= 4
-        assert result['questions'][0]['id'] == '0a'
-        assert result['questions'][1]['id'] == '0b'
-        assert result['questions'][2]['id'] == '1'
-        assert result['questions'][3]['id'] == '2'
+        assert result.language == 'en'
+        assert len(result.questions) >= 4
+        assert result.questions[0].id == '0a'
+        assert result.questions[1].id == '0b'
+        assert result.questions[2].id == '1'
+        assert result.questions[3].id == '2'
 
     def test_returns_symptom_questions_for_known_symptom(self):
         result = get_questions(['fever'], 'en')
-        question_ids = [q['id'] for q in result['questions']]
+        question_ids = [q.id for q in result.questions]
         assert '10' in question_ids or '11' in question_ids
 
     def test_unknown_symptom_returns_only_mandatory(self):
         result = get_questions(['some random thing'], 'en')
-        assert len(result['questions']) == 4  # 4 mandatory now
+        assert len(result.questions) == 4  # 4 mandatory now
 
     def test_max_symptom_questions_capped(self):
         symptoms = ['fever', 'headache', 'cough', 'dizziness', 'vomiting', 'diarrhea']
         result = get_questions(symptoms, 'en')
         # mandatory (4) + symptom questions (max 2) = max 6
-        assert len(result['questions']) <= 6
+        assert len(result.questions) <= 6
 
     def test_warlpiri_language_returns_wp_text(self):
         result = get_questions([], 'wp')
-        assert result['language'] == 'wp'
+        assert result.language == 'wp'
         # first mandatory question is gender (0a)
-        first_q = result['questions'][0]
-        assert first_q['text'] == 'Nyuntu wati manu karnta?'
+        first_q = result.questions[0]
+        assert first_q.text == 'Nyuntu wati manu karnta?'
         # duration question is index 2
-        duration_q = result['questions'][2]
-        assert duration_q['text'] == 'Nyarrpajarrirla nyinami?'
+        duration_q = result.questions[2]
+        assert duration_q.text == 'Nyarrpajarrirla nyinami?'
 
     def test_yes_no_question_has_yes_no_options(self):
         result = get_questions(['fever'], 'en')
-        symptom_qs = [q for q in result['questions'] if q.get('type') == 'yes_no']
+        symptom_qs = [q for q in result.questions if q.type == 'yes_no']
         assert len(symptom_qs) > 0
-        options = symptom_qs[0]['options']
-        option_ids = [o['id'] for o in options]
+        options = symptom_qs[0].options
+        option_ids = [o.id for o in options]
         assert any(oid.endswith('y') for oid in option_ids)
         assert any(oid.endswith('n') for oid in option_ids)
 
     def test_mandatory_questions_are_multiple_choice(self):
         result = get_questions([], 'en')
         # all 4 mandatory questions should be multiple choice
-        for q in result['questions'][:4]:
-            assert q['type'] == 'multiple_choice'
-            assert len(q['options']) > 0
+        for q in result.questions[:4]:
+            assert q.type == 'multiple_choice'
+            assert len(q.options) > 0
 
     def test_gender_question_has_two_options(self):
         result = get_questions([], 'en')
-        gender_q = result['questions'][0]
-        assert gender_q['id'] == '0a'
-        assert len(gender_q['options']) == 2
-        option_texts = [o['text'] for o in gender_q['options']]
+        gender_q = result.questions[0]
+        assert gender_q.id == '0a'
+        assert len(gender_q.options) == 2
+        option_texts = [o.text for o in gender_q.options]
         assert 'Male' in option_texts
         assert 'Female' in option_texts
 
     def test_age_question_has_four_options(self):
         result = get_questions([], 'en')
-        age_q = result['questions'][1]
-        assert age_q['id'] == '0b'
-        assert len(age_q['options']) == 4
+        age_q = result.questions[1]
+        assert age_q.id == '0b'
+        assert len(age_q.options) == 4
 
 
 class TestResolveAnswers:
