@@ -14,13 +14,18 @@ from backend.api.schemas.request_response import QuestionsRequest, QuestionsResp
     AnswerAudioRequest
 from backend.api.services.answer_audio_service import resolve_answer_audio
 from backend.api.services.audio_service import get_detected_symptoms_audio
-from backend.api.services.pipeline_service import classify as run_classify
 from backend.constants import InputType, Language
 from backend.nlp.preprocessor import preprocess_text
 from backend.nlp.symptom_extractor import extract_symptoms
 from backend.translation.warlpiri_text import translate as translate_warlpiri
 from backend.speech.audio_english import transcribe
 from backend.nlp.audio_warlpiri import recognize as recognize_warlpiri
+from backend.api.services.pipeline_service import (
+    classify as run_classify,
+    process_text,
+    process_audio,
+    symptoms_to_ids
+)
 
 LANG_WP = "wp"
 LANG_EN = "en"
@@ -32,29 +37,12 @@ router = APIRouter()
 def extract_text(req: ExtractTextRequest) -> dict:
     """
     Extract symptoms from typed text input.
-    Warlpiri text is translated before extraction.
-    English text is processed directly through NLP pipeline.
     :param req: ExtractTextRequest
+    :return: ExtractResponse with symptoms and stitched audio
     """
-    if req.language == LANG_WP:
-        translation  = translate_warlpiri(req.text)
-        english_text = translation.get("translated_text") or ""
-        is_warlpiri  = True
-    else:
-        english_text = req.text
-        is_warlpiri  = False
-
-    if not english_text.strip():
-        voice_b64 = get_detected_symptoms_audio([], req.language)
-        return {
-            'symptoms_en': [], 'symptoms_wp': [],
-            'confidence': 0.0, 'input_type': 'text',
-            'language': req.language, 'voice_b64': voice_b64
-        }
-
-    preprocessed = preprocess_text(english_text)
-    result       = extract_symptoms(preprocessed["clean_text"], is_warlpiri=is_warlpiri, raw_text=english_text)
-    voice_b64    = get_detected_symptoms_audio(result["symptoms_en"], req.language)
+    result      = process_text(req.text, req.language)
+    symptom_ids = symptoms_to_ids(result["symptoms_en"])
+    voice_b64   = get_detected_symptoms_audio(symptom_ids, req.language)
 
     return {
         'symptoms_en': result["symptoms_en"],
@@ -70,63 +58,13 @@ def extract_text(req: ExtractTextRequest) -> dict:
 def extract_audio(req: ExtractAudioRequest) -> dict:
     """
     Extract symptoms from audio input.
-    English audio uses Whisper offline ASR.
-    Warlpiri audio uses VAD segmentation and CNN-DTW keyword spotting.
     :param req: ExtractAudioRequest
+    :return: ExtractResponse with symptoms and stitched audio
     """
     audio_bytes = base64.b64decode(req.audio_b64)
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(audio_bytes)
-        tmp_path = tmp.name
-
-    try:
-        if req.language == LANG_EN:
-            asr          = transcribe(tmp_path)
-            english_text = asr.get("text", "") or ""
-
-            if not english_text.strip():
-                voice_b64 = get_detected_symptoms_audio([], req.language)
-                return {
-                    'symptoms_en': [], 'symptoms_wp': [],
-                    'confidence': 0.0, 'input_type': 'audio',
-                    'language': req.language, 'voice_b64': voice_b64
-                }
-
-            preprocessed = preprocess_text(english_text)
-            result = extract_symptoms(preprocessed["clean_text"], is_warlpiri=False, raw_text=english_text)
-
-        elif req.language == LANG_WP:
-            wp_result = recognize_warlpiri(tmp_path)
-
-            if not wp_result.get("recognized") or not wp_result.get("symptoms"):
-                voice_b64 = get_detected_symptoms_audio([], req.language)
-                return {
-                    'symptoms_en': [], 'symptoms_wp': [],
-                    'confidence': 0.0, 'input_type': 'audio',
-                    'language': req.language, 'voice_b64': voice_b64
-                }
-
-            from backend.nlp.symptom_extractor import _load_symptom_map, get_has_critical
-            symptoms_en = wp_result["symptoms"]
-            sym_map     = _load_symptom_map()
-            wp_lookup   = {v["en"].lower(): v["wp"] for v in sym_map.values()}
-            symptoms_wp = [wp_lookup[s.lower()] for s in symptoms_en if s.lower() in wp_lookup]
-
-            result = {
-                "symptoms_en":  symptoms_en,
-                "symptoms_wp":  symptoms_wp,
-                "confidence":   wp_result.get("confidence", 0.0),
-                "has_critical": get_has_critical(symptoms_en)
-            }
-        else:
-            result = {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}
-
-    finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
-
-    voice_b64 = get_detected_symptoms_audio(result["symptoms_en"], req.language)
+    result      = process_audio(audio_bytes, req.language)
+    symptom_ids = symptoms_to_ids(result["symptoms_en"])
+    voice_b64   = get_detected_symptoms_audio(symptom_ids, req.language)
 
     return {
         'symptoms_en': result["symptoms_en"],
