@@ -88,6 +88,7 @@ export default function InputScreen() {
                 styles.voiceCard,
                 pressed && styles.cardPressedGrey,
               ]}
+              onPress={() => router.push('/voiceinput')}
             >
               <Image
                 source={require('../../assets/images/voice.png')}

@@ -173,7 +173,7 @@ export const translations = {
     severe_label: '⚠ Pina Wiri — Help japirli now',
 
     headache: 'Jangka marda',
-    fever: 'Karraly',
+    fever: 'ngaju rdurrurlpu',
     body_pain: 'Ngurrju-nyanu marda',
     tiredness: 'Wiya-rla',
     cough: 'Cough',
