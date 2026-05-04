@@ -8,12 +8,12 @@ import webrtcvad
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA_DIR = os.path.join(_BASE_DIR, "data", "warlpiri")
 
-SAMPLE_RATE          = 16000
-N_MFCC               = 13
-VAD_AGGRESSIVENESS   = 2
-VAD_FRAME_DURATION   = 30    # ms
+SAMPLE_RATE         = 16000
+N_MFCC              = 13
+VAD_AGGRESSIVENESS  = 2   # 0-3, higher = more aggressive filtering
+VAD_FRAME_DURATION  = 30  # ms
 MIN_SEGMENT_DURATION = 0.15  # seconds
-DTW_THRESHOLD        = 150.0
+DTW_THRESHOLD       = 150.0
 
 
 def _load(filename: str) -> dict:
@@ -22,10 +22,11 @@ def _load(filename: str) -> dict:
         return json.load(f)
 
 
-# load at module startup - fails fast if files are missing
+# load data at module startup - fails fast if files are missing
 KEYWORD_MFCC        = _load("keyword_mfcc.json")
 KEYWORD_SYMPTOM_MAP = _load("keyword_symptom_map.json")
 
+# convert MFCC lists to numpy arrays once at load time
 _KEYWORD_REFS = {
     keyword: np.array(mfcc_list)
     for keyword, mfcc_list in KEYWORD_MFCC.items()
@@ -52,11 +53,12 @@ def _dtw_distance(seq1: np.ndarray, seq2: np.ndarray) -> float:
     """
     Compute normalised DTW distance between two MFCC matrices.
     Normalised by (n+m) to be independent of sequence length.
-    :param seq1: reference MFCC matrix (n_mfcc, frames)
-    :param seq2: query MFCC matrix (n_mfcc, frames)
-    :return: normalised DTW distance score
+    seq1, seq2 are (n_mfcc, frames) matrices.
+    :param seq1: reference MFCC matrix
+    :param seq2: query MFCC matrix
+    :return: normalised DTW distance
     """
-    s1 = seq1.T
+    s1 = seq1.T  # (frames, n_mfcc)
     s2 = seq2.T
     n, m = len(s1), len(s2)
 
@@ -75,13 +77,14 @@ def _dtw_distance(seq1: np.ndarray, seq2: np.ndarray) -> float:
                 cost[i - 1, j - 1]
             )
 
+    # normalise by path length to handle variable duration recordings
     return cost[n - 1, m - 1] / (n + m)
 
 
 def _segment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list:
     """
     Use WebRTC VAD to split continuous speech into word/phrase segments.
-    Filters silence and background noise before DTW matching.
+    Filters out silence and background noise before DTW matching.
     :param audio: float32 audio array
     :param sr: sample rate
     :return: list of audio segment arrays
@@ -137,6 +140,17 @@ def _match_segment(segment: np.ndarray) -> tuple | None:
     return None
 
 
+def _keyword_to_symptom(keyword: str) -> str | None:
+    """
+    Map a matched Warlpiri keyword to its English symptom string.
+    Uses keyword_symptom_map.json which maps directly to the 33
+    symptom vocabulary expected by the ML classifier.
+    :param keyword: matched Warlpiri keyword string
+    :return: English symptom string or None
+    """
+    return KEYWORD_SYMPTOM_MAP.get(keyword)
+
+
 def recognize(audio_path: str) -> dict:
     """
     Recognise Warlpiri symptom keywords from continuous speech audio.
@@ -175,6 +189,7 @@ def recognize(audio_path: str) -> dict:
         return {**base, "recognized": False,
                 "error": "no speech detected - please speak clearly and try again"}
 
+    # match each segment and keep best distance per keyword
     matched_keywords = {}
     for segment in segments:
         result = _match_segment(segment)
@@ -186,17 +201,18 @@ def recognize(audio_path: str) -> dict:
     if not matched_keywords:
         return {
             **base,
-            "recognized":       False,
+            "recognized":      False,
             "matched_keywords": {},
-            "symptoms":         [],
-            "confidence":       0.0,
-            "message":          "could not recognise any Warlpiri keywords"
+            "symptoms":        [],
+            "confidence":      0.0,
+            "message":         "could not recognise any Warlpiri keywords - please try again"
         }
 
+    # map keywords to English symptoms
     symptoms       = []
     keyword_scores = {}
     for keyword, distance in matched_keywords.items():
-        symptom = KEYWORD_SYMPTOM_MAP.get(keyword)
+        symptom = _keyword_to_symptom(keyword)
         if symptom and symptom not in symptoms:
             symptoms.append(symptom)
         keyword_scores[keyword] = round(distance, 3)
@@ -206,10 +222,10 @@ def recognize(audio_path: str) -> dict:
 
     return {
         **base,
-        "recognized":        True,
-        "matched_keywords":  keyword_scores,
-        "symptoms":          symptoms,
-        "confidence":        confidence,
+        "recognized":       True,
+        "matched_keywords": keyword_scores,
+        "symptoms":         symptoms,
+        "confidence":       confidence,
         "segments_detected": len(segments),
         "segments_matched":  len(matched_keywords)
     }

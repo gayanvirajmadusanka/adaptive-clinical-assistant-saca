@@ -4,6 +4,12 @@ Orchestrates answer resolution, ML inference, and symptom translation.
 """
 import json
 import os
+import tempfile
+from backend.nlp.preprocessor import preprocess_text
+from backend.nlp.symptom_extractor import extract_symptoms
+from backend.translation.warlpiri_text import translate as translate_warlpiri
+from backend.speech.audio_english import transcribe
+from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
 from dataclasses import asdict
 
 from backend.api.questions.questions_module import resolve_answers
@@ -25,6 +31,8 @@ with open(_symptom_map_path, encoding='utf-8') as f:
 
 # symptom_id -> wp label
 _ID_TO_WP = {key: value[Language.WP] for key, value in _SYMPTOM_MAP.items()}
+_EN_TO_ID = {value['en']: key for key, value in _SYMPTOM_MAP.items()}
+_EN_TO_WP = {value['en']: value['wp'] for value in _SYMPTOM_MAP.values()}
 _EN_TO_ID = {value['en']: key for key, value in _SYMPTOM_MAP.items()}
 _EN_TO_WP = {value['en']: value['wp'] for value in _SYMPTOM_MAP.values()}
 

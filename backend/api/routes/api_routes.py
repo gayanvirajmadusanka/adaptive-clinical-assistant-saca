@@ -3,8 +3,6 @@ API routes module. Defines all API endpoints supported.
 """
 import base64
 import io
-import os
-import tempfile
 
 from fastapi import APIRouter
 
@@ -19,7 +17,7 @@ from backend.nlp.preprocessor import preprocess_text
 from backend.nlp.symptom_extractor import extract_symptoms
 from backend.translation.warlpiri_text import translate as translate_warlpiri
 from backend.speech.audio_english import transcribe
-from backend.nlp.audio_warlpiri import recognize as recognize_warlpiri
+from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
 from backend.api.services.pipeline_service import (
     classify as run_classify,
     process_text,
