@@ -1,7 +1,12 @@
 fastapi==0.136.0
+uvicorn
 librosa==0.11.0
 numpy==2.4.4
 openai_whisper==20250625
 pydantic==2.13.3
 rapidfuzz==3.14.5
 scipy==1.17.1
+spacy
+scikit-learn
+pydub
+webrtcvad-wheels
