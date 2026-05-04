@@ -15,11 +15,13 @@ export default StyleSheet.create({
     flex: 1,
   },
 
-  container: {
-    flex: 1,
-    paddingHorizontal: 22,
-    paddingTop: 45,
-  },
+ container: {
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  paddingHorizontal: 25,
+  paddingTop: 80, // 
+},
 
   loadingContainer: {
     flex: 1,
@@ -33,36 +35,37 @@ export default StyleSheet.create({
     color: '#2B1B12',
   },
 
+  
   headerBar: {
-    height: 88,
-    borderRadius: 12,
-    backgroundColor: '#C8661F',
+    width: '92%',
+    height: 60,
+    backgroundColor: '#C87936',
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
-    marginBottom: 32,
+    marginBottom: 35,
   },
 
   backCircle: {
     position: 'absolute',
-    left: 22,
+    left: 18,
     width: 34,
     height: 34,
     borderRadius: 17,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
 
   backArrow: {
     fontSize: 28,
-    color: '#1E160F',
     fontWeight: 'bold',
+    color: '#1E160F',
   },
 
   headerText: {
-    fontSize: 30,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#111',
+    color: '#000',
   },
 
   questionNumber: {
@@ -70,13 +73,13 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#7A180E',
-    marginBottom: 32,
+    marginBottom: 28,
   },
 
   progressTrack: {
     width: '100%',
     height: 9,
-    borderRadius: 8,
+    borderRadius: 10,
     backgroundColor: '#E8D5A8',
     overflow: 'hidden',
     marginBottom: 34,
@@ -84,17 +87,20 @@ export default StyleSheet.create({
 
   progressFill: {
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 10,
     backgroundColor: '#C8661F',
   },
 
   questionBox: {
+    width: '100%',
     borderWidth: 1.5,
     borderColor: '#B8A37D',
-    backgroundColor: 'rgba(246, 232, 203, 0.88)',
+    backgroundColor: 'rgba(246, 232, 203, 0.90)',
     borderRadius: 14,
-    padding: 20,
-    minHeight: 210,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 18,
+    minHeight: 205,
   },
 
   questionHeader: {
@@ -116,11 +122,11 @@ export default StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#B8A37D',
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#F7E9C8',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   speakerIcon: {
@@ -153,7 +159,9 @@ export default StyleSheet.create({
   },
 
   optionSelected: {
-    backgroundColor: '#8F1E0C',
+    backgroundColor: '#8B1E0D',
+    borderWidth: 1.5,
+    borderColor: '#5F1207',
   },
 
   optionText: {
@@ -167,18 +175,19 @@ export default StyleSheet.create({
   },
 
   continueButton: {
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#D99000',
-    borderWidth: 2,
-    borderColor: '#111',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 34,
-  },
+  width: '100%',
+  height: 64,
+  borderRadius: 32,
+  backgroundColor: '#D99000',
+  borderWidth: 2,
+  borderColor: '#111',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: 34,
+},
 
   continuePressed: {
-    opacity: 0.8,
+    opacity: 0.85,
   },
 
   continueText: {
@@ -188,7 +197,7 @@ export default StyleSheet.create({
   },
 
   footer: {
-    height: 75,
+    height: 72,
     backgroundColor: '#000',
     flexDirection: 'row',
     justifyContent: 'space-around',

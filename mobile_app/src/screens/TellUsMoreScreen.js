@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,154 +6,245 @@ import {
   Pressable,
   StatusBar,
   SafeAreaView,
+  Image,
   Modal,
   Animated,
+  Alert,
+  BackHandler
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreStyles';
 
+const API_URL = 'http://192.168.1.106:8000';
+
 export default function TellUsMoreScreen() {
   const router = useRouter();
-  const { t, setLang } = useLanguage();
+  const params = useLocalSearchParams();
+  const { t, lang, setLang } = useLanguage();
 
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const symptomsEn = params.symptoms_en ? JSON.parse(params.symptoms_en) : [];
+
+  const [questions, setQuestions] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [loadingQuestions, setLoadingQuestions] = useState(true);
+  const [audioLoading, setAudioLoading] = useState(false);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
 
+  const soundRef = useRef(null);
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
-  const questions = [
-    {
-      id: 'pain_level',
-      title: t('pain_level'),
-      question: t('pain_question'),
-      options: [
-        {
-          label: t('none'),
-          value: 'None',
-          style: 'noneButton',
-          textStyle: 'noneText',
-        },
-        {
-          label: t('little'),
-          value: 'A little',
-          style: 'littleButton',
-          textStyle: 'littleText',
-        },
-        {
-          label: t('moderate'),
-          value: 'Moderate',
-          style: 'moderateButton',
-          textStyle: 'lightText',
-        },
-        {
-          label: t('very_bad'),
-          value: 'Very bad',
-          style: 'veryBadButton',
-          textStyle: 'lightText',
-        },
-        {
-          label: t('unbearable'),
-          value: 'Unbearable',
-          style: 'unbearableButton',
-          textStyle: 'lightText',
-        },
-      ],
-    },
-    {
-      id: 'duration',
-      title: t('duration'),
-      question: t('duration_question'),
-      options: [
-        {
-          label: t('today'),
-          value: 'Today',
-          style: 'noneButton',
-          textStyle: 'noneText',
-        },
-        {
-          label: t('few_days'),
-          value: 'Few days',
-          style: 'littleButton',
-          textStyle: 'littleText',
-        },
-        {
-          label: t('one_week'),
-          value: 'One week',
-          style: 'moderateButton',
-          textStyle: 'lightText',
-        },
-        {
-          label: t('more_than_week'),
-          value: 'More than one week',
-          style: 'veryBadButton',
-          textStyle: 'lightText',
-        },
-      ],
-    },
-    {
-      id: 'fever',
-      title: t('fever'),
-      question: t('fever_question'),
-      options: [
-        {
-          label: t('yes'),
-          value: 'Yes',
-          style: 'veryBadButton',
-          textStyle: 'lightText',
-        },
-        {
-          label: t('no'),
-          value: 'No',
-          style: 'noneButton',
-          textStyle: 'noneText',
-        },
-      ],
-    },
-    {
-      id: 'breathing',
-      title: t('breathing'),
-      question: t('breathing_question'),
-      options: [
-        {
-          label: t('yes'),
-          value: 'Yes',
-          style: 'veryBadButton',
-          textStyle: 'lightText',
-        },
-        {
-          label: t('no'),
-          value: 'No',
-          style: 'noneButton',
-          textStyle: 'noneText',
-        },
-      ],
-    },
-    {
-      id: 'getting_worse',
-      title: t('getting_worse'),
-      question: t('getting_worse_question'),
-      options: [
-        {
-          label: t('yes'),
-          value: 'Yes',
-          style: 'veryBadButton',
-          textStyle: 'lightText',
-        },
-        {
-          label: t('no'),
-          value: 'No',
-          style: 'noneButton',
-          textStyle: 'noneText',
-        },
-      ],
-    },
-  ];
+  const currentQuestion = questions[currentIndex];
+  const totalQuestions = questions.length || 6;
+  const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const selectedAnswer = answers[currentQuestion.id];
+  const fetchQuestions = async (languageCode) => {
+    try {
+      setLoadingQuestions(true);
+
+      const response = await fetch(`${API_URL}/questions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symptoms: symptomsEn,
+          language: languageCode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load questions');
+      }
+
+      const data = await response.json();
+
+      setQuestions(data.questions || []);
+      setCurrentIndex(0);
+      setAnswers({});
+      setSelectedOption(null);
+    } catch (error) {
+      console.log('Questions API error:', error);
+      Alert.alert('Error', 'Could not load questions.');
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuestions(lang || 'en');
+  }, []);
+
+  const stopCurrentAudio = async () => {
+    try {
+      if (soundRef.current) {
+        const sound = soundRef.current;
+        soundRef.current = null;
+
+        const status = await sound.getStatusAsync();
+
+        if (status.isLoaded) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop audio error:', error);
+    }
+  };
+
+  const playQuestionAudio = async () => {
+    try {
+      if (!currentQuestion?.voice_b64) {
+        Alert.alert('Audio Error', 'No audio available.');
+        return;
+      }
+
+      if (audioLoading) return;
+
+      setAudioLoading(true);
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+      });
+
+      await stopCurrentAudio();
+
+      const cleaned = currentQuestion.voice_b64.replace(
+        /^data:audio\/\w+;base64,/,
+        ''
+      );
+
+      const fileUri =
+        FileSystem.cacheDirectory + `question_${currentQuestion.id}.wav`;
+
+      await FileSystem.writeAsStringAsync(fileUri, cleaned, {
+        encoding: 'base64',
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: fileUri },
+        { shouldPlay: true, volume: 1.0 }
+      );
+
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          if (soundRef.current === sound) {
+            soundRef.current = null;
+          }
+          await sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log('Audio error:', error);
+      Alert.alert('Audio Error', 'Cannot play audio.');
+    } finally {
+      setAudioLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        const sound = soundRef.current;
+        soundRef.current = null;
+
+        sound
+          .getStatusAsync()
+          .then((status) => {
+            if (status.isLoaded) {
+              sound.stopAsync();
+              sound.unloadAsync();
+            }
+          })
+          .catch((error) => {
+            console.log('Cleanup audio error:', error);
+          });
+      }
+    };
+  }, []);
+
+  const handleOptionPress = (option) => {
+    setSelectedOption(option.id);
+  };
+
+  const handleContinue = async () => {
+    if (!selectedOption) {
+      Alert.alert('Select answer', 'Please select one option.');
+      return;
+    }
+
+    const selected = currentQuestion.options.find(
+      (item) => item.id === selectedOption
+    );
+
+    const updatedAnswers = {
+      ...answers,
+      [currentQuestion.id]: {
+        question_id: currentQuestion.id,
+        answer_id: selected.id,
+        answer_text: selected.text,
+      },
+    };
+
+    setAnswers(updatedAnswers);
+    await stopCurrentAudio();
+
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setSelectedOption(null);
+    } else {
+      const finalAnswers = Object.values(updatedAnswers).map((item) => ({
+        question_id: item.question_id,
+        answer_id: item.answer_id,
+      }));
+
+      router.push({
+        pathname: '/loadingseverity',
+        params: {
+          symptoms_en: JSON.stringify(symptomsEn),
+          symptoms_wp: params.symptoms_wp || JSON.stringify([]),
+          answers: JSON.stringify(finalAnswers),
+          language: params.language || lang || 'en',
+        },
+      });
+    }
+  };
+
+  const handleBack = async () => {
+    await stopCurrentAudio();
+
+    if (currentIndex > 0) {
+      const previousIndex = currentIndex - 1;
+      const previousQuestion = questions[previousIndex];
+      const previousAnswer = answers[previousQuestion.id];
+
+      setCurrentIndex(previousIndex);
+      setSelectedOption(previousAnswer?.answer_id || null);
+    } else {
+      router.back();
+    }
+  };
+
+  useEffect(() => {
+  const backAction = () => {
+    handleBack();
+    return true;
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    'hardwareBackPress',
+    backAction
+  );
+
+  return () => backHandler.remove();
+}, [currentIndex, questions, answers]);
 
   const openModal = () => {
     setSelectedLang(null);
@@ -174,46 +265,34 @@ export default function TellUsMoreScreen() {
     }).start(() => setModalVisible(false));
   };
 
-  const confirmLanguage = () => {
-    if (selectedLang) {
-      setLang(selectedLang);
-      closeModal();
-    }
+  const confirmLanguage = async () => {
+    if (!selectedLang) return;
+
+    await stopCurrentAudio();
+
+    setLang(selectedLang);
+    closeModal();
+
+    await fetchQuestions(selectedLang);
   };
 
-  const selectAnswer = (value) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: value,
-    }));
-  };
+  if (loadingQuestions) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
 
-  const handleContinue = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-    } else {
-      router.push({
-        pathname: '/result',
-        params: {
-          answers: JSON.stringify({
-            ...answers,
-            [currentQuestion.id]: selectedAnswer,
-          }),
-        },
-      });
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentQuestionIndex((prevIndex) => {
-      if (prevIndex > 0) {
-        return prevIndex - 1;
-      }
-
-      router.back();
-      return prevIndex;
-    });
-  };
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading questions...</Text>
+          </View>
+        </ImageBackground>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -227,79 +306,95 @@ export default function TellUsMoreScreen() {
         >
           <View style={styles.container}>
             <View style={styles.headerBar}>
-              <Text style={styles.headerText}>{t('tell_us_more')}</Text>
+              <Pressable onPress={handleBack} style={styles.backCircle}>
+                <Text style={styles.backArrow}>←</Text>
+              </Pressable>
+
+              <Text style={styles.headerText}>Tell us more</Text>
             </View>
 
-            <View style={styles.card}>
-              <Text style={styles.question}>
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </Text>
+            <Text style={styles.questionNumber}>
+              Question {currentIndex + 1} of {totalQuestions}
+            </Text>
 
-              <Text style={styles.sectionTitle}>{currentQuestion.title}</Text>
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${progressPercent}%` },
+                ]}
+              />
+            </View>
 
-              <Text style={styles.question}>{currentQuestion.question}</Text>
+            <View style={styles.questionBox}>
+              <View style={styles.questionHeader}>
+                <Text style={styles.questionText}>
+                  {currentQuestion?.text}
+                </Text>
 
-              {currentQuestion.options.map((item) => (
                 <Pressable
-                  key={item.value}
-                  style={({ pressed }) => [
-                    styles.answerButton,
-                    styles[item.style],
-                    selectedAnswer === item.value && styles.selectedAnswer,
-                    pressed && styles.pressedAnswer,
-                  ]}
-                  onPress={() => selectAnswer(item.value)}
+                  style={styles.speakerButton}
+                  onPress={playQuestionAudio}
+                  disabled={audioLoading}
                 >
-                  <View
-                    style={[
-                      styles.radioOuter,
-                      selectedAnswer === item.value &&
-                        styles.radioOuterSelected,
-                    ]}
-                  >
-                    {selectedAnswer === item.value && (
-                      <View style={styles.radioInner} />
-                    )}
-                  </View>
-
-                  <Text style={[styles.answerText, styles[item.textStyle]]}>
-                    {item.label}
-                  </Text>
+                  <Image
+                    source={require('../../assets/images/speaker.png')}
+                    style={styles.speakerIcon}
+                    resizeMode="contain"
+                  />
                 </Pressable>
-              ))}
+              </View>
+
+              <View style={styles.optionsWrapper}>
+                {currentQuestion?.options?.map((option, index) => {
+                  const isSelected = selectedOption === option.id;
+
+                  return (
+                    <Pressable
+                      key={option.id}
+                      style={[
+                        styles.optionItem,
+                        index === 1 && styles.optionLight,
+                        index === 2 && styles.optionMedium,
+                        index === 3 && styles.optionDark,
+                        isSelected && styles.optionSelected,
+                      ]}
+                      onPress={() => handleOptionPress(option)}
+                    >
+                      <Text
+                        style={[
+                          styles.optionText,
+                          isSelected && styles.optionTextSelected,
+                        ]}
+                      >
+                        • {option.text}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
 
             <Pressable
               style={({ pressed }) => [
                 styles.continueButton,
-                !selectedAnswer && styles.disabledButton,
                 pressed && styles.continuePressed,
               ]}
-              disabled={!selectedAnswer}
               onPress={handleContinue}
             >
               <Text style={styles.continueText}>
-                {currentQuestionIndex === questions.length - 1
-                  ? t('submit')
-                  : t('continue')}
+                {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
               </Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed && styles.backPressedGrey,
-              ]}
-              onPress={handleBack}
-            >
-              <Text style={styles.backText}>{t('back')}</Text>
             </Pressable>
           </View>
 
           <View style={styles.footer}>
             <Pressable
               style={styles.footerItem}
-              onPress={() => router.replace('/input')}
+              onPress={async () => {
+                await stopCurrentAudio();
+                router.replace('/input');
+              }}
             >
               <Text style={styles.footerIcon}>🏠</Text>
               <Text style={styles.footerText}>{t('home')}</Text>

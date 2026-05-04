@@ -60,9 +60,10 @@ export default StyleSheet.create({
   },
 
   startPressedGreen: {
-    backgroundColor: '#27AE60', // green flash
-    transform: [{ scale: 0.96 }],
-  },
+  backgroundColor: '#8B3A1C', 
+  borderColor: '#5C2E0A',     
+  transform: [{ scale: 0.96 }],
+},
 
   startButtonText: {
     fontSize: 30,

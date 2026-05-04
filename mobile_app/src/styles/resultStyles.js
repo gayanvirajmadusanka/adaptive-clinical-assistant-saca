@@ -112,6 +112,29 @@ export default StyleSheet.create({
     paddingHorizontal: 10,
   },
 
+  severeBadge: {
+    backgroundColor: '#5A0500',
+    borderWidth: 1.5,
+    borderColor: '#1E0000',
+    shadowColor: '#5A0500',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.45,
+    shadowRadius: 5,
+    elevation: 7,
+  },
+
+  severeBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  warningIcon: {
+    fontSize: 19,
+    marginRight: 10,
+    color: '#F5E6C8',
+  },
+
   severityText: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -120,12 +143,25 @@ export default StyleSheet.create({
 
   callButton: {
     width: '100%',
-    height: 50,
+    height: 54,
     backgroundColor: '#F5E6C8',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 18,
+    borderWidth: 2,
+    borderColor: '#4A0A04',
+  },
+
+  callButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  callIcon: {
+    fontSize: 22,
+    marginRight: 10,
   },
 
   callButtonText: {

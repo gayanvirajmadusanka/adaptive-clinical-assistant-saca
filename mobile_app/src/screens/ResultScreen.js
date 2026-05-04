@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,51 +10,143 @@ import {
   Modal,
   Animated,
   Linking,
+  Alert,
+  BackHandler,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
 import styles, { resultTheme } from '../styles/resultStyles';
+
+const API_URL = 'http://192.168.1.106:8000';
 
 export default function ResultScreen() {
   const router = useRouter();
   const { t, setLang } = useLanguage();
-  const { painLevel, duration } = useLocalSearchParams();
+  const params = useLocalSearchParams();
 
+  const initialResultData = params.result_data
+    ? JSON.parse(params.result_data)
+    : null;
+
+  const classifyPayload = params.classify_payload
+    ? JSON.parse(params.classify_payload)
+    : null;
+
+  const [resultData, setResultData] = useState(initialResultData);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
+  const [changingLanguage, setChangingLanguage] = useState(false);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const soundRef = useRef(null);
 
-  const getSeverity = () => {
-    if (
-      painLevel === 'Unbearable' ||
-      painLevel === 'Very bad' ||
-      duration === 'More than a week'
-    ) {
-      return 'severe';
+  const severity = resultData?.severity_mode
+    ? resultData.severity_mode.toLowerCase()
+    : 'mild';
+
+  const theme = resultTheme[severity] || resultTheme.mild;
+
+  const symptoms = resultData?.symptoms || [];
+  const recommendation = resultData?.recommendation || '';
+  const recommendedAction = resultData?.recommended_action || '';
+  const confidence = resultData?.confidence || 0;
+  const hasCritical = resultData?.has_critical || false;
+
+  useEffect(() => {
+    const backAction = () => {
+      router.replace('/input');
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    if (severity === 'severe') {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.06,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 650,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
     }
+  }, [severity]);
 
-    if (
-      painLevel === 'Moderate' ||
-      duration === 'About a week' ||
-      duration === '2–3 days'
-    ) {
-      return 'moderate';
+  const stopAudio = async () => {
+    try {
+      Speech.stop();
+
+      if (soundRef.current) {
+        const sound = soundRef.current;
+        soundRef.current = null;
+
+        const status = await sound.getStatusAsync();
+
+        if (status.isLoaded) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop audio error:', error);
     }
-
-    return 'mild';
   };
 
-  const severity = getSeverity();
-  const theme = resultTheme[severity];
+  const speakResult = async () => {
+    try {
+      await stopAudio();
 
-  const speakResult = () => {
-    Speech.stop();
-    Speech.speak(t(`${severity}_speak`), {
-      language: 'en-AU',
-      rate: 0.9,
-    });
+      if (resultData?.voice_b64) {
+        const cleanedBase64 = resultData.voice_b64.replace(
+          /^data:audio\/\w+;base64,/,
+          ''
+        );
+
+        const fileUri = FileSystem.cacheDirectory + 'saca_result_voice.wav';
+
+        await FileSystem.writeAsStringAsync(fileUri, cleanedBase64, {
+          encoding: 'base64',
+        });
+
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: fileUri },
+          { shouldPlay: true, volume: 1.0 }
+        );
+
+        soundRef.current = sound;
+        return;
+      }
+
+      const textToSpeak = `
+        Severity is ${resultData?.severity || severity}.
+        ${recommendedAction}
+      `;
+
+      Speech.speak(textToSpeak, {
+        language: 'en-AU',
+        rate: 0.9,
+      });
+    } catch (error) {
+      console.log('Result audio error:', error);
+      Alert.alert('Audio Error', 'Cannot play result audio.');
+    }
   };
 
   const openModal = () => {
@@ -76,10 +168,39 @@ export default function ResultScreen() {
     }).start(() => setModalVisible(false));
   };
 
-  const confirmLanguage = () => {
-    if (selectedLang) {
+  const confirmLanguage = async () => {
+    if (!selectedLang || !classifyPayload) return;
+
+    try {
+      setChangingLanguage(true);
+      await stopAudio();
+
+      const response = await fetch(`${API_URL}/classify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symptoms: classifyPayload.symptoms,
+          answers: classifyPayload.answers,
+          language: selectedLang,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reload result');
+      }
+
+      const data = await response.json();
+
+      setResultData(data);
       setLang(selectedLang);
       closeModal();
+    } catch (error) {
+      console.log('Language result API error:', error);
+      Alert.alert('Error', 'Could not reload result in selected language.');
+    } finally {
+      setChangingLanguage(false);
     }
   };
 
@@ -129,30 +250,50 @@ export default function ResultScreen() {
                   style={[
                     styles.severityBadge,
                     { backgroundColor: theme.severityFill },
+                    severity === 'severe' && styles.severeBadge,
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.severityText,
-                      { color: theme.severityText },
-                    ]}
-                  >
-                    {t(`${severity}_label`)}
-                  </Text>
+                  {severity === 'severe' ? (
+                    <View style={styles.severeBadgeRow}>
+                      <Text style={styles.warningIcon}>⚠</Text>
+                      <Text
+                        style={[
+                          styles.severityText,
+                          { color: theme.severityText },
+                        ]}
+                      >
+                        Severe - Seek help now
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text
+                      style={[
+                        styles.severityText,
+                        { color: theme.severityText },
+                      ]}
+                    >
+                      {resultData?.severity || severity.toUpperCase()}
+                    </Text>
+                  )}
                 </View>
 
                 {severity === 'severe' && (
-                  <Pressable
-                    style={({ pressed }) => [
-                      styles.callButton,
-                      pressed && styles.pressedButton,
-                    ]}
-                    onPress={callEmergency}
-                  >
-                    <Text style={styles.callButtonText}>
-                      {t('call_emergency')}
-                    </Text>
-                  </Pressable>
+                  <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.callButton,
+                        pressed && styles.pressedButton,
+                      ]}
+                      onPress={callEmergency}
+                    >
+                      <View style={styles.callButtonContent}>
+                        <Text style={styles.callIcon}>📞</Text>
+                        <Text style={styles.callButtonText}>
+                          {t('call_emergency')}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  </Animated.View>
                 )}
 
                 <View
@@ -165,21 +306,23 @@ export default function ResultScreen() {
                   ]}
                 >
                   <Text style={[styles.infoTitle, { color: theme.boxText }]}>
-                    {t('symptoms')}
+                    Symptoms
                   </Text>
 
-                  <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t('headache')}
-                  </Text>
-                  <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t('fever')}
-                  </Text>
-                  <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t('body_pain')}
-                  </Text>
-                  <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t('tiredness')}
-                  </Text>
+                  {symptoms.length > 0 ? (
+                    symptoms.map((item, index) => (
+                      <Text
+                        key={`${item}-${index}`}
+                        style={[styles.infoText, { color: theme.boxText }]}
+                      >
+                        • {item}
+                      </Text>
+                    ))
+                  ) : (
+                    <Text style={[styles.infoText, { color: theme.boxText }]}>
+                      No symptoms found
+                    </Text>
+                  )}
                 </View>
 
                 <View
@@ -192,18 +335,26 @@ export default function ResultScreen() {
                   ]}
                 >
                   <Text style={[styles.infoTitle, { color: theme.boxText }]}>
-                    {t('recommendations')}
+                    Recommendation
                   </Text>
 
                   <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t(`${severity}_recommendation_1`)}
+                    • {recommendation}
                   </Text>
+
                   <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t(`${severity}_recommendation_2`)}
+                    • {recommendedAction}
                   </Text>
+
                   <Text style={[styles.infoText, { color: theme.boxText }]}>
-                    • {t(`${severity}_recommendation_3`)}
+                    • Confidence: {Math.round(confidence * 100)}%
                   </Text>
+
+                  {hasCritical && (
+                    <Text style={[styles.infoText, { color: theme.boxText }]}>
+                      • Critical symptoms detected
+                    </Text>
+                  )}
                 </View>
 
                 <Pressable
@@ -288,19 +439,28 @@ export default function ResultScreen() {
                   </Text>
                 </Pressable>
 
-                <Text style={styles.confirmText}>{t('change_language')}</Text>
+                <Text style={styles.confirmText}>
+                  {changingLanguage
+                    ? 'Changing language...'
+                    : t('change_language')}
+                </Text>
 
                 <View style={styles.modalButtonRow}>
-                  <Pressable style={styles.cancelButton} onPress={closeModal}>
+                  <Pressable
+                    style={styles.cancelButton}
+                    onPress={closeModal}
+                    disabled={changingLanguage}
+                  >
                     <Text style={styles.cancelText}>{t('no')}</Text>
                   </Pressable>
 
                   <Pressable
                     style={[
                       styles.confirmButton,
-                      !selectedLang && styles.disabledButton,
+                      (!selectedLang || changingLanguage) &&
+                        styles.disabledButton,
                     ]}
-                    disabled={!selectedLang}
+                    disabled={!selectedLang || changingLanguage}
                     onPress={confirmLanguage}
                   >
                     <Text style={styles.confirmButtonText}>{t('yes')}</Text>

@@ -32,6 +32,7 @@ export default function DetectedSymptomsScreen() {
 
   const [voiceFileUri, setVoiceFileUri] = useState(initialVoiceFileUri);
   const [modalVisible, setModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
   const [loading, setLoading] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
@@ -44,6 +45,12 @@ export default function DetectedSymptomsScreen() {
       setLoading(false);
     }, [])
   );
+
+  useEffect(() => {
+    if (lang === 'wp' && symptomsWp.length === 0) {
+      setErrorModalVisible(true);
+    }
+  }, [lang, symptomsWp]);
 
   const symptomsToShow =
     lang === 'wp'
@@ -223,6 +230,11 @@ export default function DetectedSymptomsScreen() {
   const handleYesPress = async () => {
     if (loading) return;
 
+    if (lang === 'wp' && symptomsWp.length === 0) {
+      setErrorModalVisible(true);
+      return;
+    }
+
     setLoading(true);
     await stopCurrentAudio();
 
@@ -397,6 +409,120 @@ export default function DetectedSymptomsScreen() {
                   </Pressable>
                 </View>
               </Animated.View>
+            </View>
+          </Modal>
+
+          <Modal transparent visible={errorModalVisible} animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View
+                style={{
+                  width: '90%',
+                  backgroundColor: '#F5E6C8',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  borderWidth: 1,
+                  borderColor: '#5C2E0A',
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: '#8B2E0A',
+                    paddingVertical: 18,
+                    paddingHorizontal: 18,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: '#FFF',
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      flex: 1,
+                      paddingRight: 12,
+                    }}
+                  >
+                    No Symptoms Detected
+                  </Text>
+
+                  <Pressable
+                    onPress={() => {
+                      setErrorModalVisible(false);
+                      router.replace('/textinput');
+                    }}
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 8,
+                      borderWidth: 3,
+                      borderColor: '#FFF',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#FFF',
+                        fontSize: 28,
+                        fontWeight: 'bold',
+                        lineHeight: 30,
+                      }}
+                    >
+                      ×
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <View style={{ padding: 22 }}>
+                  <Text
+                    style={{
+                      color: '#5C2E0A',
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      marginBottom: 18,
+                      lineHeight: 22,
+                    }}
+                  >
+                    We could not detect any symptoms from your description.
+                  </Text>
+
+                  <Text
+                    style={{
+                      color: '#5C2E0A',
+                      fontSize: 15,
+                      marginBottom: 20,
+                      lineHeight: 22,
+                    }}
+                  >
+                    Please try describing your symptoms in more detail.
+                  </Text>
+
+                  <Pressable
+                    style={{
+                      alignSelf: 'flex-end',
+                      backgroundColor: '#8B2E0A',
+                      paddingHorizontal: 28,
+                      paddingVertical: 10,
+                      borderRadius: 22,
+                    }}
+                    onPress={() => {
+                      setErrorModalVisible(false);
+                      router.replace('/textinput');
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#FFF',
+                        fontWeight: 'bold',
+                        fontSize: 15,
+                      }}
+                    >
+                      Ok
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
           </Modal>
         </ImageBackground>

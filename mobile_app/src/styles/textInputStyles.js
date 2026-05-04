@@ -84,9 +84,10 @@ export default StyleSheet.create({
   },
 
   continuePressedGreen: {
-    backgroundColor: '#27AE60',
+    backgroundColor: '#8B3A1C', 
+    borderColor: '#5C2E0A',     
     transform: [{ scale: 0.96 }],
-  },
+  }, 
 
   continueText: {
     fontSize: 24,
