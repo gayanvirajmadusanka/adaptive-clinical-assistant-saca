@@ -1,61 +1,78 @@
+"""
+ML triage predictor module.
+Loads a stacking ensemble model and runs inference to produce
+severity classification and treatment recommendations.
+"""
 import pickle
+from dataclasses import dataclass
 
 import numpy as np
 import scipy.sparse
 
 from backend.api.services.audio_service import get_severity_audio
+from backend.constants import Language, Recommendation, Severity
 
-DOCTOR_CONSULTATION = "Doctor Consultation"
-OTC_DRUG = "OTC Drug"
-MILD = "Mild"
-MODERATE = "Moderate"
-SEVERE = "Severe"
+
+@dataclass
+class PredictorResult:
+    """Result returned by TriagePredictor.predict."""
+    recommendation: str
+    severity: str
+    severity_mode: str
+    confidence: float
+    recommended_action: str
+    has_critical: bool
+    intensity_signal: int
+    voice_b64: str
+
 
 SEVERITY_MAP = {
-    (DOCTOR_CONSULTATION, 2, 1): SEVERE,
-    (DOCTOR_CONSULTATION, 2, 0): SEVERE,
-    (DOCTOR_CONSULTATION, 1, 1): SEVERE,
-    (DOCTOR_CONSULTATION, 1, 0): MODERATE,
-    (DOCTOR_CONSULTATION, 0, 1): MODERATE,
-    (DOCTOR_CONSULTATION, 0, 0): MODERATE,
-    (OTC_DRUG, 2, 1): MODERATE,
-    (OTC_DRUG, 2, 0): MODERATE,
-    (OTC_DRUG, 1, 1): MODERATE,
-    (OTC_DRUG, 1, 0): MILD,
-    (OTC_DRUG, 0, 1): MODERATE,
-    (OTC_DRUG, 0, 0): MILD,
+    (Recommendation.DOCTOR_CONSULTATION, 2, 1): Severity.SEVERE,
+    (Recommendation.DOCTOR_CONSULTATION, 2, 0): Severity.SEVERE,
+    (Recommendation.DOCTOR_CONSULTATION, 1, 1): Severity.SEVERE,
+    (Recommendation.DOCTOR_CONSULTATION, 1, 0): Severity.MODERATE,
+    (Recommendation.DOCTOR_CONSULTATION, 0, 1): Severity.MODERATE,
+    (Recommendation.DOCTOR_CONSULTATION, 0, 0): Severity.MODERATE,
+    (Recommendation.OTC_DRUG, 2, 1): Severity.MODERATE,
+    (Recommendation.OTC_DRUG, 2, 0): Severity.MODERATE,
+    (Recommendation.OTC_DRUG, 1, 1): Severity.MODERATE,
+    (Recommendation.OTC_DRUG, 1, 0): Severity.MILD,
+    (Recommendation.OTC_DRUG, 0, 1): Severity.MODERATE,
+    (Recommendation.OTC_DRUG, 0, 0): Severity.MILD,
 }
 
 RECOMMENDED_ACTIONS = {
-    'Mild': {
-        'en': 'You can treat this at home with over-the-counter medication. See a doctor if symptoms worsen.',
-        'wp': 'Mirrijini nyuntu mardarni. Ngangkayikurra yanta kaji wirinyayirni.'
+    Severity.MILD: {
+        Language.EN: 'You can treat this at home with over-the-counter medication. See a doctor if symptoms worsen.',
+        Language.WP: 'Mirrijini nyuntu mardarni. Ngangkayikurra yanta kaji wirinyayirni.'
     },
-    'Moderate': {
-        'en': 'Please visit the clinic or health worker today.',
-        'wp': 'Jalangu ngangkayikurra yanta.'
+    Severity.MODERATE: {
+        Language.EN: 'Please visit the clinic or health worker today.',
+        Language.WP: 'Jalangu ngangkayikurra yanta.'
     },
-    'Severe': {
-        'en': 'Seek emergency medical attention immediately or call 000.',
-        'wp': 'Kapanku ngangkayikurra yanta. 000 wangkaya.'
+    Severity.SEVERE: {
+        Language.EN: 'Seek emergency medical attention immediately or call 000.',
+        Language.WP: 'Kapanku ngangkayikurra yanta. 000 wangkaya.'
     }
 }
 
 SEVERITY_TRANSLATIONS = {
-    'Mild': {'en': 'Mild', 'wp': 'Witapardu'},
-    'Moderate': {'en': 'Moderate', 'wp': 'Wiriwiri'},
-    'Severe': {'en': 'Severe', 'wp': 'Wirinyayirni'}
+    Severity.MILD: {Language.EN: 'Mild', Language.WP: 'Witapardu'},
+    Severity.MODERATE: {Language.EN: 'Moderate', Language.WP: 'Wiriwiri'},
+    Severity.SEVERE: {Language.EN: 'Severe', Language.WP: 'Wirinyayirni'}
 }
 
 RECOMMENDATION_TRANSLATIONS = {
-    'Doctor Consultation': {'en': 'Doctor Consultation', 'wp': 'Ngangkayi nyanyi'},
-    'OTC Drug': {'en': 'OTC Drug', 'wp': 'Mirrijini'}
+    Recommendation.DOCTOR_CONSULTATION: {Language.EN: 'Doctor Consultation', Language.WP: 'Ngangkayi nyanyi'},
+    Recommendation.OTC_DRUG: {Language.EN: 'OTC Drug', Language.WP: 'Mirrijini'}
 }
 
 
 class TriagePredictor:
     """
-    Class for predicting triage result
+    Loads a stacking ensemble model and runs triage inference.
+    Combines TF-IDF symptom features with demographic and severity signals
+    to predict a recommendation and severity level.
     """
 
     def __init__(self, model_path: str, tfidf_path: str, le_path: str):
@@ -81,19 +98,19 @@ class TriagePredictor:
             intensity_signal: int,
             has_critical: int,
             severity_context: int = 1,
-            language: str = 'en'
-    ) -> dict:
+            language: str = Language.EN
+    ) -> PredictorResult:
         """
         Run inference on structured symptom and demographic input.
         :param symptoms: List of extracted English symptom strings
-        :param age: Age string or integer
+        :param age: Age group string - 'child', 'youth', 'adult', or 'elder'
         :param gender: Gender string - 'male' or 'female'
         :param duration_value: Encoded duration from questions (0 or 1)
         :param intensity_signal: Pain intensity signal (0, 1, or 2)
         :param has_critical: Critical symptom flag (0 or 1)
         :param severity_context: Severity context feature for ML (default 1)
-        :param language: Language (default 'en')
-        :return: Dict with recommendation, severity, confidence, action
+        :param language: Language code - 'en' or 'wp' (default 'en')
+        :return: PredictorResult with recommendation, severity, severity_mode, confidence, and action
         """
         gender_enc = 1 if gender.lower() == 'female' else 0
         age_enc = self._encode_age(age)
@@ -116,36 +133,32 @@ class TriagePredictor:
 
         severity = SEVERITY_MAP.get(
             (recommendation, intensity_signal, has_critical),
-            MODERATE  # safe default - always escalate if unknown
+            Severity.MODERATE  # safe default - always escalate if unknown
         )
 
-        # get severity audio for the result screen
         voice_b64 = get_severity_audio(severity, language)
-
-        return {
-            'recommendation': RECOMMENDATION_TRANSLATIONS[recommendation][language],
-            'severity_mode': severity.upper(),
-            'severity': SEVERITY_TRANSLATIONS[severity][language],
-            'confidence': float(f"{confidence:.4f}"),
-            'recommended_action': RECOMMENDED_ACTIONS[severity][language],
-            'has_critical': bool(has_critical),
-            'intensity_signal': intensity_signal,
-            'voice_b64': voice_b64,
-        }
+        return PredictorResult(
+            recommendation=RECOMMENDATION_TRANSLATIONS[recommendation][language],
+            severity_mode=severity.name,
+            severity=SEVERITY_TRANSLATIONS[severity][language],
+            confidence=float(f"{confidence:.4f}"),
+            recommended_action=RECOMMENDED_ACTIONS[severity][language],
+            has_critical=bool(has_critical),
+            intensity_signal=intensity_signal,
+            voice_b64=voice_b64,
+        )
 
     @staticmethod
     def _encode_age(age: str) -> int:
         """
-        Convert age group or integer to ordinal encoded value.
-        :param age: Age as string group
+        Convert age group string to ordinal encoded value.
+        :param age: Age group string - 'child', 'youth', 'adult', or 'elder'
         :return: Encoded integer 0-4
         """
-        # handle age_group strings from questions
         age_group_map = {
-            'child': 1,  # maps to 6-15 years bracket
-            'youth': 1,  # also 6-15 years bracket
+            'child': 1,  # 6-15 years bracket
+            'youth': 1,  # 6-15 years bracket
             'adult': 2,  # 16-45 years bracket
             'elder': 4  # above 60 years bracket
         }
-
         return age_group_map.get((age or '').lower().strip(), 2)  # safe default - adult

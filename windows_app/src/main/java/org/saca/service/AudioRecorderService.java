@@ -118,6 +118,11 @@ public class AudioRecorderService {
         recordedBytes = null;
     }
 
+    public static void restoreRecording(String base64Wav) {
+        if (base64Wav == null) return;
+        lastRecordedWav = Base64.getDecoder().decode(base64Wav);
+    }
+
     private static byte[] pcmToWav(byte[] pcmData, AudioFormat format) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int pcmLength = pcmData.length;

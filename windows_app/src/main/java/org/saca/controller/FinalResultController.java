@@ -21,6 +21,7 @@ import javafx.util.Duration;
 import org.saca.model.request.ClassifyRQ;
 import org.saca.model.response.ClassifyRS;
 import org.saca.model.response.TextResultRS;
+import org.saca.model.response.VoiceResultRS;
 import org.saca.service.ApiService;
 import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
@@ -93,9 +94,31 @@ public class FinalResultController implements Initializable {
         loading.getStyleClass().add("symptom-item");
         symptomsBox.getChildren().add(loading);
 
+        List<String> symptomsEn = null;
+
         TextResultRS textResult = CacheManager.getTextResultRS();
+        if (textResult != null && textResult.getSymptomsEn() != null && !textResult.getSymptomsEn().isEmpty()) {
+            symptomsEn = textResult.getSymptomsEn();
+        }
+
+        if (symptomsEn == null) {
+            VoiceResultRS voiceResult = CacheManager.getVoiceResultRS();
+            if (voiceResult != null && voiceResult.getSymptomsEn() != null && !voiceResult.getSymptomsEn().isEmpty()) {
+                symptomsEn = voiceResult.getSymptomsEn();
+            }
+        }
+
+        if (symptomsEn == null) {
+            symptomsEn = cached.getSymptoms();
+        }
+
+        if (symptomsEn == null || symptomsEn.isEmpty()) {
+            setResult(cached);
+            return;
+        }
+
         ClassifyRQ classifyRQ = new ClassifyRQ();
-        classifyRQ.setSymptoms(textResult.getSymptomsEn());
+        classifyRQ.setSymptoms(symptomsEn);
         classifyRQ.setAnswers(CacheManager.getSavedAnswers());
         classifyRQ.setLanguage(LanguageManager.isLanguageEnglish()
                 ? AppsConstants.AppLanguage.EN.getShortDescription()
@@ -248,9 +271,14 @@ public class FinalResultController implements Initializable {
     private void handleBack(ActionEvent event) {
         AudioService.stop();
         try {
-            NavBarManager.setCurrentView("/view/TellUsMoreText.fxml");
+            String prev = NavBarManager.getPreviousView();
+            String target = (prev != null && !prev.isEmpty())
+                    ? prev
+                    : "/view/TellUsMoreTextView.fxml";
+
+            NavBarManager.setCurrentView(target);
             Parent root = FXMLLoader.load(
-                    getClass().getResource("/view/TellUsMoreText.fxml"),
+                    getClass().getResource(target),
                     LanguageManager.getBundle()
             );
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
