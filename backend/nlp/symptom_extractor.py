@@ -8,6 +8,7 @@ _DATA_DIR  = os.path.join(_BASE_DIR, "data", "warlpiri")
 _MODEL_DIR = os.path.join(_BASE_DIR, "models")
 
 _SYMPTOM_MAP_PATH = os.path.join(_DATA_DIR, "symptom_map.json")
+_SYNONYM_MAP_PATH = os.path.join(_DATA_DIR, "synonym_map.json")
 _MODEL_PATH       = os.path.join(_MODEL_DIR, "nlp_symptom_classifier.pkl")
 _TFIDF_PATH       = os.path.join(_MODEL_DIR, "nlp_tfidf_vectorizer.pkl")
 _ENCODER_PATH     = os.path.join(_MODEL_DIR, "nlp_label_encoder.pkl")
@@ -17,95 +18,9 @@ _FUZZY_CONF = 0.85
 _MIN_CONF   = 0.75
 _FUZZY_CUT  = 70
 
-# maps informal/variant expressions to exact symptom_map vocabulary
-# covers colloquial language, plurals, and common alternate descriptions
-_SYNONYMS = {
-    "stomach ache":          "abdominal pain",
-    "stomach pain":          "abdominal pain",
-    "tummy pain":            "abdominal pain",
-    "belly pain":            "abdominal pain",
-    "abdominal cramp":       "abdominal pain",
-    "stomach cramp":         "abdominal pain",
-    "shortness of breath":   "shortness breath",
-    "cant breathe":          "shortness breath",
-    "cannot breathe":        "shortness breath",
-    "difficulty breathing":  "shortness breath",
-    "breathless":            "shortness breath",
-    "out of breath":         "shortness breath",
-    "head hurts":            "headache",
-    "head pain":             "headache",
-    "head ache":             "headache",
-    "migraine":              "headache",
-    "high temperature":      "fever",
-    "temperature":           "fever",
-    "burning up":            "fever",
-    "tired":                 "fatigue",
-    "exhausted":             "fatigue",
-    "tiredness":             "fatigue",
-    "no energy":             "fatigue",
-    "lethargy":              "fatigue",
-    "throwing up":           "vomiting",
-    "being sick":            "vomiting",
-    "puking":                "vomiting",
-    "dizzy":                 "dizziness",
-    "lightheaded":           "dizziness",
-    "spinning":              "dizziness",
-    "vertigo":               "dizziness",
-    "weak":                  "weakness",
-    "feeling weak":          "weakness",
-    "no strength":           "weakness",
-    "back ache":             "back pain",
-    "backache":              "back pain",
-    "sore back":             "back pain",
-    "chest hurts":           "chest pain",
-    "chest tightness":       "chest pain",
-    "heart pain":            "chest pain",
-    "coughing":              "cough",
-    "dry cough":             "cough",
-    "diarrhoea":             "diarrhea",
-    "loose stool":           "diarrhea",
-    "watery stool":          "diarrhea",
-    "fainted":               "loss of consciousness",
-    "passed out":            "loss of consciousness",
-    "blacked out":           "loss of consciousness",
-    "unconscious":           "loss of consciousness",
-    "neck pain":             "stiff neck",
-    "neck stiffness":        "stiff neck",
-    "neck ache":             "stiff neck",
-    "thirsty":               "dehydration",
-    "very thirsty":          "dehydration",
-    "dry mouth":             "dehydration",
-    "blood in stool":        "blood stool",
-    "blood in poo":          "blood stool",
-    "blood in urine":        "blood urine",
-    "blood in pee":          "blood urine",
-    "shivering":             "chills",
-    "shaking":               "chills",
-    "cold shivers":          "chills",
-    "skin rash":             "rash",
-    "hives":                 "rash",
-    "itching":               "itchy",
-    "swollen":               "swelling parts of body",
-    "body ache":             "body pain",
-    "muscle pain":           "body pain",
-    "aching":                "body pain",
-    "all over pain":         "body pain",
-    "arm ache":              "arm pain",
-    "sore arm":              "arm pain",
-    "earache":               "ear pain",
-    "ear ache":              "ear pain",
-    "sore eyes":             "eye pain",
-    "throat pain":           "sore throat",
-    "painful throat":        "sore throat",
-    "blocked nose":          "runny nose",
-    "stuffy nose":           "runny nose",
-    "nauseous":              "nausea",
-    "feel sick":             "nausea",
-    "queasy":                "nausea",
-    "bleeding":              "bleeding",
-}
-
+# module-level cache - loaded once at startup
 _symptom_map = None
+_synonym_map = None
 _en_vocab    = None
 _model       = None
 _tfidf       = None
@@ -122,6 +37,19 @@ def _load_symptom_map() -> dict:
         with open(_SYMPTOM_MAP_PATH, "r", encoding="utf-8") as f:
             _symptom_map = json.load(f)
     return _symptom_map
+
+
+def _load_synonym_map() -> dict:
+    """
+    Load synonym_map.json once and cache in memory.
+    Maps informal/variant expressions to exact symptom_map vocabulary.
+    :return: synonym map dict
+    """
+    global _synonym_map
+    if _synonym_map is None:
+        with open(_SYNONYM_MAP_PATH, "r", encoding="utf-8") as f:
+            _synonym_map = json.load(f)
+    return _synonym_map
 
 
 def _get_en_vocab() -> list:
@@ -154,36 +82,37 @@ def _load_model() -> bool:
 
 def _apply_synonyms(text: str) -> list:
     """
-    Check input text and bigrams against synonym map.
-    Returns list of matched vocabulary terms.
-    Handles informal/colloquial expressions before fuzzy matching.
-    :param text: preprocessed or raw English text
+    Check input text against synonym_map at unigram, bigram, and trigram level.
+    Catches informal expressions before fuzzy matching runs.
+    Checks raw text to preserve compound phrases that preprocessing may split.
+    :param text: raw or preprocessed English text
     :return: list of matched symptom_map English strings
     """
+    synonyms   = _load_synonym_map()
     text_lower = text.lower().strip()
     matched    = []
     tokens     = text_lower.split()
 
-    # check full text
-    if text_lower in _SYNONYMS:
-        matched.append(_SYNONYMS[text_lower])
+    # full text check
+    if text_lower in synonyms:
+        matched.append(synonyms[text_lower])
 
-    # check individual tokens
+    # unigrams
     for token in tokens:
-        if token in _SYNONYMS and _SYNONYMS[token] not in matched:
-            matched.append(_SYNONYMS[token])
+        if token in synonyms and synonyms[token] not in matched:
+            matched.append(synonyms[token])
 
-    # check bigrams
+    # bigrams
     for i in range(len(tokens) - 1):
         bigram = f"{tokens[i]} {tokens[i + 1]}"
-        if bigram in _SYNONYMS and _SYNONYMS[bigram] not in matched:
-            matched.append(_SYNONYMS[bigram])
+        if bigram in synonyms and synonyms[bigram] not in matched:
+            matched.append(synonyms[bigram])
 
-    # check trigrams
+    # trigrams
     for i in range(len(tokens) - 2):
         trigram = f"{tokens[i]} {tokens[i + 1]} {tokens[i + 2]}"
-        if trigram in _SYNONYMS and _SYNONYMS[trigram] not in matched:
-            matched.append(_SYNONYMS[trigram])
+        if trigram in synonyms and synonyms[trigram] not in matched:
+            matched.append(synonyms[trigram])
 
     return matched
 
@@ -193,9 +122,9 @@ def _stage1_match(text: str) -> dict:
     Stage 1: token-level matching against 33 symptom_map vocabulary terms.
 
     Three matching layers:
-        1. Synonym expansion - handles informal/variant expressions
+        1. Synonym expansion from synonym_map.json
         2. Direct vocabulary match on tokens and bigrams
-        3. Fuzzy matching for near-matches
+        3. Fuzzy matching for near-matches and plurals
 
     Splits input into unigrams and bigrams so multi-symptom inputs
     like 'fever headache cough' correctly extract all three symptoms.
@@ -206,13 +135,13 @@ def _stage1_match(text: str) -> dict:
     if not text.strip():
         return {}
 
-    vocab   = _get_en_vocab()
-    tokens  = text.lower().split()
-    matched = {}
+    synonyms = _load_synonym_map()
+    vocab    = _get_en_vocab()
+    tokens   = text.lower().split()
+    matched  = {}
 
-    # layer 1: synonym expansion on original text
-    synonym_hits = _apply_synonyms(text)
-    for sym in synonym_hits:
+    # layer 1: synonym expansion on preprocessed text
+    for sym in _apply_synonyms(text):
         if sym in vocab:
             matched[sym] = _EXACT_CONF
 
@@ -223,9 +152,9 @@ def _stage1_match(text: str) -> dict:
     candidates.append(text.lower())
 
     for candidate in candidates:
-        # check synonym for each candidate too
-        if candidate in _SYNONYMS:
-            sym = _SYNONYMS[candidate]
+        # check synonym for each candidate
+        if candidate in synonyms:
+            sym = synonyms[candidate]
             if sym in vocab and (sym not in matched or _EXACT_CONF > matched[sym]):
                 matched[sym] = _EXACT_CONF
             continue
@@ -268,42 +197,37 @@ def extract_symptoms(text: str, raw_text: str = None) -> list:
     """
     Extract English symptom strings from preprocessed text.
     Returns only strings from symptom_map vocabulary so ML
-    classifier always receives aligned input.
+    classifier always receives vocabulary-aligned input.
 
-    Three-layer stage 1:
-        1. Synonym map handles informal/variant expressions
-        2. Direct token/bigram matching handles clinical terms
-        3. Fuzzy matching handles near-matches and plurals
-
+    Stage 1 splits input into tokens and bigrams, matches each against
+    33 symptom vocabulary with synonym expansion for informal phrasing.
     Stage 2 TF-IDF activates when stage 1 finds nothing or all low confidence.
-    Raw text passed to stage 2 for better informal phrasing coverage.
+    Raw text is used for stage 2 and synonym check to preserve context
+    that preprocessing may remove.
 
     :param text: preprocessed English text from preprocessor
-    :param raw_text: original unprocessed text - passed to stage 2
+    :param raw_text: original unprocessed text - used for stage 2 and synonym check
     :return: list of matched English symptom strings
     """
     if not text or not text.strip():
         return []
 
-    # also run synonyms on raw text before preprocessing removed context
     stage2_input = raw_text if raw_text else text
 
-    # run synonym check on raw text first to catch informal phrases
-    # that preprocessing might break (e.g. "throwing up" -> "throw")
-    if raw_text:
-        raw_synonym_hits = _apply_synonyms(raw_text)
-    else:
-        raw_synonym_hits = []
+    # run synonym check on raw text first - catches informal phrases
+    # that preprocessing breaks e.g. "throwing up" lemmatises to "throw"
+    raw_synonym_hits = _apply_synonyms(raw_text) if raw_text else []
 
     stage1 = _stage1_match(text)
 
-    # add any raw text synonym hits not already found
+    # add raw text synonym hits not already found by stage 1
     vocab = _get_en_vocab()
     for sym in raw_synonym_hits:
         if sym in vocab and sym not in stage1:
             stage1[sym] = _EXACT_CONF
 
     if not stage1:
+        # nothing found - try stage 2 on raw text before giving up
         stage2 = _stage2_tfidf(stage2_input)
         return list(stage2.keys()) if stage2 else []
 
@@ -312,6 +236,7 @@ def extract_symptoms(text: str, raw_text: str = None) -> list:
     if high_conf:
         return list(high_conf.keys())
 
+    # stage 1 found candidates but all low confidence - try stage 2
     stage2 = _stage2_tfidf(stage2_input)
     if stage2:
         return list({**stage1, **stage2}.keys())

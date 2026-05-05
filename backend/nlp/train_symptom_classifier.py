@@ -13,6 +13,7 @@ from rapidfuzz import process, fuzz
 _BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _CSV_PATH   = os.path.join(_BASE_DIR, "data", "synapse.csv")
 _MAP_PATH   = os.path.join(_BASE_DIR, "data", "warlpiri", "symptom_map.json")
+_SYN_PATH   = os.path.join(_BASE_DIR, "data", "warlpiri", "synonym_map.json")
 _MODELS_DIR = os.path.join(_BASE_DIR, "models")
 os.makedirs(_MODELS_DIR, exist_ok=True)
 
@@ -20,7 +21,7 @@ _MODEL_PATH   = os.path.join(_MODELS_DIR, "nlp_symptom_classifier.pkl")
 _TFIDF_PATH   = os.path.join(_MODELS_DIR, "nlp_tfidf_vectorizer.pkl")
 _ENCODER_PATH = os.path.join(_MODELS_DIR, "nlp_label_encoder.pkl")
 
-_MATCH_THRESHOLD = 60  # minimum rapidfuzz score to accept a label mapping
+_MATCH_THRESHOLD = 60
 
 
 def _clean(text: str) -> str:
@@ -32,8 +33,7 @@ def _clean(text: str) -> str:
 def _load_target_vocab() -> list:
     """
     Load 33 English symptom labels from symptom_map.json.
-    Classifier output is restricted to these labels only,
-    ensuring alignment with the ML triage classifier vocabulary.
+    Classifier output restricted to these labels only - aligns with ML triage vocabulary.
     :return: list of English symptom strings
     """
     with open(_MAP_PATH, "r", encoding="utf-8") as f:
@@ -41,40 +41,60 @@ def _load_target_vocab() -> list:
     return [v["en"] for v in data.values()]
 
 
+def _load_synonym_map() -> dict:
+    """
+    Load synonym_map.json for training augmentation.
+    :return: dict of informal phrase to vocabulary label
+    """
+    with open(_SYN_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def _build_training_data(df: pd.DataFrame, target_vocab: list) -> tuple:
     """
     Build training pairs from Synapse Symptoms column.
-    Each Synapse symptom is mapped to the closest label in target_vocab
-    using rapidfuzz. Augmented with partial phrase variations.
-    Samples with no close match are discarded.
+    Each Synapse symptom mapped to closest label in target_vocab via rapidfuzz.
+    Augmented with partial phrase variations for better generalisation.
+    Also augmented with synonym_map entries for informal phrasing coverage.
     :param df: Synapse dataframe
     :param target_vocab: 33 valid symptom label strings
     :return: X list of text samples, y list of label strings
     """
     X, y = [], []
 
+    # build from Synapse dataset
     for raw in df["Symptoms"].dropna():
         for part in raw.split(","):
             cleaned = _clean(part)
             if not cleaned or len(cleaned) <= 2:
                 continue
 
-            # map to closest label in target vocab
             result = process.extractOne(
                 cleaned, target_vocab, scorer=fuzz.token_sort_ratio
             )
             if not result or result[1] < _MATCH_THRESHOLD:
-                continue  # no close match - skip
+                continue
 
             label = result[0]
             X.append(cleaned)
             y.append(label)
 
-            # augment with partial phrase variations for generalisation
             words = cleaned.split()
             if len(words) > 1:
                 X.append(words[-1]);           y.append(label)
                 X.append(" ".join(words[:2])); y.append(label)
+
+    # augment with synonym_map entries for informal phrasing
+    synonym_map = _load_synonym_map()
+    for informal, label in synonym_map.items():
+        if label in target_vocab:
+            X.append(informal)
+            y.append(label)
+            # add word-level augmentations
+            words = informal.split()
+            if len(words) > 1:
+                X.append(words[0]);  y.append(label)
+                X.append(words[-1]); y.append(label)
 
     return X, y
 
@@ -83,6 +103,7 @@ def train():
     """
     Train TF-IDF + Random Forest classifier on Synapse symptom data.
     Output labels restricted to 33 terms in symptom_map.json.
+    Augmented with synonym_map entries for informal phrasing coverage.
     Run once before starting the server:
         python -m backend.nlp.train_symptom_classifier
     """
@@ -96,7 +117,7 @@ def train():
     print("reading synapse.csv...")
     df = pd.read_csv(_CSV_PATH)
 
-    print("building training data...")
+    print("building training data with synonym augmentation...")
     X, y = _build_training_data(df, target_vocab)
     print(f"training samples: {len(X)}  unique labels: {len(set(y))}")
 
