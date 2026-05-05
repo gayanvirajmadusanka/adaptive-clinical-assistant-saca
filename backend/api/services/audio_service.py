@@ -123,7 +123,7 @@ def _normalize_clip(clip: AudioSegment) -> AudioSegment:
 
 
 # map question ids to audio_map question keys
-QUESTION_AUDIO_KEY_MAP = {
+_QUESTION_AUDIO_KEY_MAP = {
     '0a': 'q_gender',
     '0b': 'q_age',
     '1': 'q_duration',
@@ -179,7 +179,7 @@ def get_question_audio(question_id: str, options: list, language: str) -> str:
     :param language: 'en' or 'wp'
     :return: base64 encoded WAV string
     """
-    audio_key = QUESTION_AUDIO_KEY_MAP.get(question_id)
+    audio_key = _QUESTION_AUDIO_KEY_MAP.get(question_id)
     if not audio_key:
         logger.error(f'No audio key mapping for question {question_id}')
         return _to_b64(AudioSegment.silent(duration=100))
