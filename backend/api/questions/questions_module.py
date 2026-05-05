@@ -7,7 +7,7 @@ import json
 import os
 
 from backend.api.schemas.request_response import Question, QuestionOption, QuestionsResponse
-from backend.api.services.audio_service import get_question_audio, QUESTION_AUDIO_KEY_MAP
+from backend.api.services.audio_service import get_question_audio
 from backend.constants import Language
 
 _questions_path = os.path.join(os.path.dirname(__file__), '../../data/questions.json')
@@ -95,8 +95,7 @@ def _format_question(question: dict, language: str) -> Question:
             {ID: question[ID] + 'n', TEXT: "No" if language == Language.EN else "Lawa"}
         ]
 
-    audio_key = QUESTION_AUDIO_KEY_MAP.get(question[ID], question[ID])
-    voice_b64 = get_question_audio(audio_key, options_data, language)
+    voice_b64 = get_question_audio(question[ID], options_data, language)
 
     return Question(
         id=question[ID],
