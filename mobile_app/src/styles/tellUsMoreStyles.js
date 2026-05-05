@@ -1,4 +1,5 @@
 import { StyleSheet, StatusBar } from 'react-native';
+import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
   safeArea: {
@@ -31,6 +32,7 @@ export default StyleSheet.create({
 
   loadingText: {
     fontSize: 20,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2B1B12',
   },
@@ -58,12 +60,14 @@ export default StyleSheet.create({
 
   backArrow: {
     fontSize: 28,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#1E160F',
   },
 
   headerText: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
@@ -71,6 +75,7 @@ export default StyleSheet.create({
   questionNumber: {
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#7A180E',
     marginBottom: 28,
@@ -113,6 +118,7 @@ export default StyleSheet.create({
   questionText: {
     flex: 1,
     fontSize: 18,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     paddingRight: 12,
@@ -166,6 +172,7 @@ export default StyleSheet.create({
 
   optionText: {
     fontSize: 16,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
   },
@@ -192,6 +199,7 @@ export default StyleSheet.create({
 
   continueText: {
     fontSize: 18,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
   },
@@ -211,11 +219,13 @@ export default StyleSheet.create({
 
   footerIcon: {
     fontSize: 24,
+    fontFamily: FONTS.regular,
   },
 
   footerText: {
     color: '#777',
     fontSize: 13,
+    fontFamily: FONTS.regular,
     marginTop: 3,
   },
 
@@ -235,6 +245,7 @@ export default StyleSheet.create({
 
   modalTitle: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 18,
@@ -255,6 +266,7 @@ export default StyleSheet.create({
 
   languageOptionText: {
     fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
   },

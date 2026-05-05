@@ -44,11 +44,11 @@ export default function WelcomeScreen() {
               Welcome{'\n'}Nyampu nyinami
             </Text>
 
-            {/* Start Button with GREEN FLASH */}
+            {/* Start Button with Dark Red FLASH */}
             <Pressable
               style={({ pressed }) => [
                 styles.startButton,
-                pressed && styles.startPressedGreen,
+                pressed && styles.startPressedRed,
               ]}
               onPress={() => router.push('/language')}
             >

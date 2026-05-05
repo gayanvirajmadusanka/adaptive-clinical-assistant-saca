@@ -1,4 +1,5 @@
 import { StyleSheet, StatusBar } from 'react-native';
+import { FONTS } from '../constants/fonts';
 
 export const resultTheme = {
   severe: {
@@ -85,6 +86,7 @@ export default StyleSheet.create({
 
   headerText: {
     fontSize: 24,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
   },
 
@@ -131,12 +133,14 @@ export default StyleSheet.create({
 
   warningIcon: {
     fontSize: 19,
+    fontFamily: FONTS.bold,
     marginRight: 10,
     color: '#F5E6C8',
   },
 
   severityText: {
     fontSize: 20,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -161,11 +165,13 @@ export default StyleSheet.create({
 
   callIcon: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     marginRight: 10,
   },
 
   callButtonText: {
     fontSize: 18,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#4A0A04',
   },
@@ -181,12 +187,14 @@ export default StyleSheet.create({
 
   infoTitle: {
     fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     marginBottom: 12,
   },
 
   infoText: {
     fontSize: 15,
+    fontFamily: FONTS.bold,
     marginBottom: 7,
     lineHeight: 20,
   },
@@ -201,6 +209,7 @@ export default StyleSheet.create({
 
   startAgainText: {
     fontSize: 15,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
   },
 
@@ -218,12 +227,14 @@ export default StyleSheet.create({
 
   footerIcon: {
     fontSize: 22,
+    fontFamily: FONTS.regular,
     color: '#fff',
   },
 
   footerText: {
     color: '#fff',
     fontSize: 10,
+    fontFamily: FONTS.regular,
     marginTop: 2,
   },
 
@@ -253,6 +264,7 @@ export default StyleSheet.create({
 
   modalTitle: {
     fontSize: 24,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2C1A0E',
     marginBottom: 20,
@@ -278,6 +290,7 @@ export default StyleSheet.create({
 
   languageOptionText: {
     fontSize: 20,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#5C2E0A',
   },
@@ -288,6 +301,7 @@ export default StyleSheet.create({
 
   confirmText: {
     fontSize: 15,
+    fontFamily: FONTS.regular,
     color: '#2C1A0E',
     marginTop: 8,
     marginBottom: 18,
@@ -313,6 +327,7 @@ export default StyleSheet.create({
 
   cancelText: {
     fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
@@ -330,6 +345,7 @@ export default StyleSheet.create({
 
   confirmButtonText: {
     fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },

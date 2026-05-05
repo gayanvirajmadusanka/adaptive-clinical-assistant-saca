@@ -14,18 +14,20 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreStyles';
+import { getFollowUpQuestions } from '../services/triageApi';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
+import { parseJsonParam } from '../utils/routeParams';
+import { buildAnswerList } from '../utils/triagePayloads';
 
-const API_URL = 'http://192.168.1.106:8000';
 
 export default function TellUsMoreScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { t, lang, setLang } = useLanguage();
 
-  const symptomsEn = params.symptoms_en ? JSON.parse(params.symptoms_en) : [];
+  const symptomsEn = parseJsonParam(params.symptoms_en, []);
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,26 +46,14 @@ export default function TellUsMoreScreen() {
   const totalQuestions = questions.length || 6;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
-  const fetchQuestions = async (languageCode) => {
+  // Loads follow-up questions from FastAPI for the selected language.
+  async function fetchQuestions(languageCode) {
     try {
       setLoadingQuestions(true);
 
-      const response = await fetch(`${API_URL}/questions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          symptoms: symptomsEn,
-          language: languageCode,
-        }),
-      });
+      const data = await getFollowUpQuestions(symptomsEn, languageCode);
 
-      if (!response.ok) {
-        throw new Error('Failed to load questions');
-      }
-
-      const data = await response.json();
-
-      setQuestions(data.questions || []);
+      setQuestions(data?.questions || []);
       setCurrentIndex(0);
       setAnswers({});
       setSelectedOption(null);
@@ -73,7 +63,7 @@ export default function TellUsMoreScreen() {
     } finally {
       setLoadingQuestions(false);
     }
-  };
+  }
 
   useEffect(() => {
     fetchQuestions(lang || 'en');
@@ -114,17 +104,10 @@ export default function TellUsMoreScreen() {
 
       await stopCurrentAudio();
 
-      const cleaned = currentQuestion.voice_b64.replace(
-        /^data:audio\/\w+;base64,/,
-        ''
+      const fileUri = await saveBase64AudioToCache(
+        currentQuestion.voice_b64,
+        `question_${currentQuestion.id}.wav`
       );
-
-      const fileUri =
-        FileSystem.cacheDirectory + `question_${currentQuestion.id}.wav`;
-
-      await FileSystem.writeAsStringAsync(fileUri, cleaned, {
-        encoding: 'base64',
-      });
 
       const { sound } = await Audio.Sound.createAsync(
         { uri: fileUri },
@@ -200,10 +183,7 @@ export default function TellUsMoreScreen() {
       setCurrentIndex(currentIndex + 1);
       setSelectedOption(null);
     } else {
-      const finalAnswers = Object.values(updatedAnswers).map((item) => ({
-        question_id: item.question_id,
-        answer_id: item.answer_id,
-      }));
+      const finalAnswers = buildAnswerList(updatedAnswers);
 
       router.push({
         pathname: '/loadingseverity',

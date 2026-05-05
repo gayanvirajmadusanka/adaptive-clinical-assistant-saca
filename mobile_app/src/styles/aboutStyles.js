@@ -1,4 +1,5 @@
 import { StyleSheet, StatusBar } from 'react-native';
+import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
   safeArea: {
@@ -26,6 +27,7 @@ export default StyleSheet.create({
 
   title: {
     fontSize: 24,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
@@ -42,6 +44,7 @@ export default StyleSheet.create({
 
   subTitle: {
     fontSize: 15,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
@@ -50,6 +53,7 @@ export default StyleSheet.create({
 
   paragraph: {
     fontSize: 16,
+    fontFamily: FONTS.bold,
     color: '#111',
     textAlign: 'left',
     lineHeight: 22,
@@ -77,6 +81,7 @@ export default StyleSheet.create({
 
   backText: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',

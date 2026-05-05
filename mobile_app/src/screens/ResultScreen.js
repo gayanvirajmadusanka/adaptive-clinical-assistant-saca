@@ -16,24 +16,21 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
 import styles, { resultTheme } from '../styles/resultStyles';
+import { classifySymptoms } from '../services/triageApi';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
+import { parseJsonParam } from '../utils/routeParams';
 
-const API_URL = 'http://192.168.1.106:8000';
 
 export default function ResultScreen() {
   const router = useRouter();
   const { t, setLang } = useLanguage();
   const params = useLocalSearchParams();
 
-  const initialResultData = params.result_data
-    ? JSON.parse(params.result_data)
-    : null;
+  const initialResultData = parseJsonParam(params.result_data, null);
 
-  const classifyPayload = params.classify_payload
-    ? JSON.parse(params.classify_payload)
-    : null;
+  const classifyPayload = parseJsonParam(params.classify_payload, null);
 
   const [resultData, setResultData] = useState(initialResultData);
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,16 +111,10 @@ export default function ResultScreen() {
       await stopAudio();
 
       if (resultData?.voice_b64) {
-        const cleanedBase64 = resultData.voice_b64.replace(
-          /^data:audio\/\w+;base64,/,
-          ''
+        const fileUri = await saveBase64AudioToCache(
+          resultData.voice_b64,
+          'saca_result_voice.wav'
         );
-
-        const fileUri = FileSystem.cacheDirectory + 'saca_result_voice.wav';
-
-        await FileSystem.writeAsStringAsync(fileUri, cleanedBase64, {
-          encoding: 'base64',
-        });
 
         const { sound } = await Audio.Sound.createAsync(
           { uri: fileUri },
@@ -175,23 +166,11 @@ export default function ResultScreen() {
       setChangingLanguage(true);
       await stopAudio();
 
-      const response = await fetch(`${API_URL}/classify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          symptoms: classifyPayload.symptoms,
-          answers: classifyPayload.answers,
-          language: selectedLang,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reload result');
-      }
-
-      const data = await response.json();
+      const data = await classifySymptoms(
+        classifyPayload.symptoms,
+        classifyPayload.answers,
+        selectedLang
+      );
 
       setResultData(data);
       setLang(selectedLang);

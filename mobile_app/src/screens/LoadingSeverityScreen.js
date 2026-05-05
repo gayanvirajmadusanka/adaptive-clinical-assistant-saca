@@ -11,8 +11,9 @@ import {
 import Svg, { Circle } from 'react-native-svg';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import styles from '../styles/loadingStyles';
-
-const API_URL = 'http://192.168.1.106:8000';
+import { classifySymptoms } from '../services/triageApi';
+import { parseJsonParam, buildResultParams } from '../utils/routeParams';
+import { buildClassifyPayload } from '../utils/triagePayloads';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -23,6 +24,7 @@ export default function LoadingSeverityScreen() {
   const [percent, setPercent] = useState(0);
   const [apiFinished, setApiFinished] = useState(false);
   const [resultData, setResultData] = useState(null);
+  const [classifyPayload, setClassifyPayload] = useState(null);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const navigatedRef = useRef(false);
@@ -31,6 +33,7 @@ export default function LoadingSeverityScreen() {
   const strokeWidth = 15;
   const circumference = 2 * Math.PI * radius;
 
+  // Animates the circular progress value.
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: percent,
@@ -39,100 +42,74 @@ export default function LoadingSeverityScreen() {
     }).start();
   }, [percent]);
 
+  // Updates loading percentage while waiting for the API response.
   useEffect(() => {
-    const timer = setInterval(() => {
-      setPercent((prev) => {
-        if (!apiFinished && prev >= 90) return 90;
-        if (apiFinished && prev < 100) return prev + 2;
-        return prev;
-      });
-    }, 60);
-
+    const timer = setInterval(updateProgressPercent, 60);
     return () => clearInterval(timer);
   }, [apiFinished]);
 
+  // Starts severity classification when this screen opens.
   useEffect(() => {
-    const classifySeverity = async () => {
-      try {
-        const symptomsEn = params.symptoms_en
-          ? JSON.parse(params.symptoms_en)
-          : [];
-
-        const symptomsWp = params.symptoms_wp
-          ? JSON.parse(params.symptoms_wp)
-          : [];
-
-        const answers = params.answers
-          ? JSON.parse(params.answers)
-          : [];
-
-        const language = params.language || 'en';
-
-        const symptomsToSend =
-          symptomsEn.length > 0 ? symptomsEn : symptomsWp;
-
-        const response = await fetch(`${API_URL}/classify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            symptoms: symptomsToSend,
-            answers: answers,
-            language: language,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to classify severity');
-        }
-
-        const data = await response.json();
-
-        setResultData(data);
-        setApiFinished(true);
-      } catch (error) {
-        console.log('API ERROR:', error);
-        Alert.alert('Error', 'Could not get result.');
-        router.back();
-      }
-    };
-
     classifySeverity();
   }, []);
 
+  // Moves to the result screen after progress reaches 100 percent.
   useEffect(() => {
-    if (percent >= 100 && resultData && !navigatedRef.current) {
-      navigatedRef.current = true;
-
-      const symptomsEn = params.symptoms_en
-        ? JSON.parse(params.symptoms_en)
-        : [];
-
-      const symptomsWp = params.symptoms_wp
-        ? JSON.parse(params.symptoms_wp)
-        : [];
-
-      const answers = params.answers
-        ? JSON.parse(params.answers)
-        : [];
-
-      const language = params.language || 'en';
-
-      const symptomsToSend =
-        symptomsEn.length > 0 ? symptomsEn : symptomsWp;
-
-      router.replace({
-        pathname: '/result',
-        params: {
-          result_data: JSON.stringify(resultData),
-          classify_payload: JSON.stringify({
-            symptoms: symptomsToSend,
-            answers: answers,
-            language: language,
-          }),
-        },
-      });
-    }
+    navigateToResultWhenReady();
   }, [percent, resultData]);
+
+  // Controls fake loading progress while the real API is processing.
+  function updateProgressPercent() {
+    setPercent((prev) => {
+      if (!apiFinished && prev >= 90) return 90;
+      if (apiFinished && prev < 100) return prev + 2;
+      return prev;
+    });
+  }
+
+  // Reads route params and creates the classify request payload.
+  function getClassifyPayloadFromParams() {
+    const symptomsEn = parseJsonParam(params.symptoms_en, []);
+    const symptomsWp = parseJsonParam(params.symptoms_wp, []);
+    const answers = parseJsonParam(params.answers, []);
+    const language = params.language || 'en';
+
+    return buildClassifyPayload(symptomsEn, symptomsWp, answers, language);
+  }
+
+  // Sends symptoms and answers to FastAPI for severity classification.
+  async function classifySeverity() {
+    try {
+      const payload = getClassifyPayloadFromParams();
+      const data = await classifySymptoms(
+        payload.symptoms,
+        payload.answers,
+        payload.language
+      );
+
+      setClassifyPayload(payload);
+      setResultData(data);
+      setApiFinished(true);
+    } catch (error) {
+      console.log('Severity API error:', error);
+      Alert.alert('Error', 'Could not get result.');
+      router.back();
+    }
+  }
+
+  // Navigates to the result screen once both API data and loading are complete.
+  function navigateToResultWhenReady() {
+    if (percent < 100 || !resultData || !classifyPayload || navigatedRef.current) {
+      return;
+    }
+
+    navigatedRef.current = true;
+
+    router.replace({
+      pathname: '/result',
+      params: buildResultParams(resultData, classifyPayload),
+    });
+  }
 
   const strokeDashoffset = progressAnim.interpolate({
     inputRange: [0, 100],
@@ -154,7 +131,6 @@ export default function LoadingSeverityScreen() {
 
             <View style={styles.circleWrapper}>
               <Svg width={190} height={190}>
-                {/* background */}
                 <Circle
                   cx="95"
                   cy="95"
@@ -164,7 +140,6 @@ export default function LoadingSeverityScreen() {
                   fill="transparent"
                 />
 
-                {/* 🔥 FIXED PROGRESS */}
                 {percent >= 100 ? (
                   <Circle
                     cx="95"

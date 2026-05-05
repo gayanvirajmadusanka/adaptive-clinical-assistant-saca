@@ -1,4 +1,5 @@
 import { StyleSheet, StatusBar } from 'react-native';
+import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
   safeArea: {
@@ -34,6 +35,7 @@ export default StyleSheet.create({
 
   headerText: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
@@ -53,6 +55,7 @@ export default StyleSheet.create({
 
   symptomText: {
     fontSize: 18,
+    fontFamily: FONTS.regular,
     color: '#000',
     lineHeight: 30,
     flex: 1,
@@ -80,6 +83,7 @@ export default StyleSheet.create({
 
   questionText: {
     fontSize: 16,
+    fontFamily: FONTS.regular,
     color: '#111',
     marginBottom: 12,
   },
@@ -109,6 +113,7 @@ export default StyleSheet.create({
 
   choiceText: {
     fontSize: 13,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#5C2E0A',
   },
@@ -132,6 +137,7 @@ export default StyleSheet.create({
 
   backText: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
@@ -150,12 +156,14 @@ export default StyleSheet.create({
 
   footerIcon: {
     fontSize: 22,
+    fontFamily: FONTS.regular,
     color: '#fff',
   },
 
   footerText: {
     color: '#fff',
     fontSize: 10,
+    fontFamily: FONTS.regular,
     marginTop: 2,
   },
 
@@ -180,6 +188,7 @@ export default StyleSheet.create({
 
   modalTitle: {
     fontSize: 24,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2C1A0E',
     marginBottom: 20,
@@ -205,6 +214,7 @@ export default StyleSheet.create({
 
   languageOptionText: {
     fontSize: 20,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#5C2E0A',
   },
@@ -215,6 +225,7 @@ export default StyleSheet.create({
 
   confirmText: {
     fontSize: 15,
+    fontFamily: FONTS.regular,
     color: '#2C1A0E',
     marginTop: 8,
     marginBottom: 18,
@@ -240,6 +251,7 @@ export default StyleSheet.create({
 
   cancelText: {
     fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
@@ -257,6 +269,7 @@ export default StyleSheet.create({
 
   confirmButtonText: {
     fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },

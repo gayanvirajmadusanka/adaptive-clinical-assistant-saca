@@ -10,10 +10,11 @@ import {
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import * as FileSystem from 'expo-file-system/legacy';
 import styles from '../styles/loadingStyles';
+import { extractSymptomsFromText } from '../services/triageApi';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
+import { buildDetectedSymptomsParams } from '../utils/routeParams';
 
-const API_URL = 'http://192.168.1.106:8000';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -52,60 +53,30 @@ export default function LoadingScreen() {
     return () => clearInterval(timer);
   }, [apiFinished]);
 
+  // Sends text input to FastAPI and stores the extracted symptoms.
+  async function loadDetectedSymptoms() {
+    try {
+      const data = await extractSymptomsFromText(text, language || 'en');
+      const voiceFileUri = await saveBase64AudioToCache(
+        data?.voice_b64,
+        'saca_detected_voice.wav'
+      );
+
+      setApiData({
+        ...data,
+        voice_file_uri: voiceFileUri,
+      });
+
+      setApiFinished(true);
+    } catch (error) {
+      console.log('Text API error:', error);
+      Alert.alert('Connection Error', 'Could not connect to FastAPI.');
+      router.replace('/textinput');
+    }
+  }
+
   useEffect(() => {
-    const sendSymptomsToApi = async () => {
-      try {
-        const response = await fetch(`${API_URL}/extract/text`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: text,
-            language: language || 'en',
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to connect to FastAPI');
-        }
-
-        const data = await response.json();
-
-        let voiceFileUri = '';
-
-        if (data.voice_b64) {
-          const cleanedBase64 = data.voice_b64.replace(
-            /^data:audio\/\w+;base64,/,
-            ''
-          );
-
-          voiceFileUri = FileSystem.cacheDirectory + 'saca_detected_voice.wav';
-
-          await FileSystem.writeAsStringAsync(voiceFileUri, cleanedBase64, {
-            encoding: 'base64',
-          });
-        }
-
-        setApiData({
-          ...data,
-          voice_file_uri: voiceFileUri,
-        });
-
-        setApiFinished(true);
-      } catch (error) {
-        console.log('API ERROR:', error);
-
-        Alert.alert(
-          'Connection Error',
-          'Could not connect to FastAPI.'
-        );
-
-        router.replace('/textinput');
-      }
-    };
-
-    sendSymptomsToApi();
+    loadDetectedSymptoms();
   }, []);
 
   useEffect(() => {
@@ -114,13 +85,11 @@ export default function LoadingScreen() {
 
       router.replace({
         pathname: '/detectedsymptoms',
-        params: {
-          symptoms_en: JSON.stringify(apiData.symptoms_en || []),
-          symptoms_wp: JSON.stringify(apiData.symptoms_wp || []),
-          confidence: String(apiData.confidence || ''),
-          language: apiData.language || language || 'en',
-          voice_file_uri: apiData.voice_file_uri || '',
-        },
+        params: buildDetectedSymptomsParams(
+          apiData,
+          language,
+          apiData.voice_file_uri
+        ),
       });
     }
   }, [apiFinished, percent, apiData]);

@@ -1,4 +1,5 @@
 import { StyleSheet, StatusBar } from 'react-native';
+import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
   safeArea: {
@@ -33,6 +34,7 @@ export default StyleSheet.create({
 
   appName: {
     fontSize: 16,
+    fontFamily: FONTS.bold,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 55,
@@ -41,6 +43,7 @@ export default StyleSheet.create({
 
   welcomeText: {
     fontSize: 36,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 60,
@@ -59,7 +62,7 @@ export default StyleSheet.create({
     elevation: 4,
   },
 
-  startPressedGreen: {
+  startPressedRed: {
   backgroundColor: '#8B3A1C', 
   borderColor: '#5C2E0A',     
   transform: [{ scale: 0.96 }],
@@ -67,6 +70,7 @@ export default StyleSheet.create({
 
   startButtonText: {
     fontSize: 30,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#000',
@@ -75,6 +79,7 @@ export default StyleSheet.create({
 
   aboutText: {
     fontSize: 22,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2E65B8',
     textDecorationLine: 'underline',

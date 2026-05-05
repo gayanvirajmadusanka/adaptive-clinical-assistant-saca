@@ -14,19 +14,20 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system/legacy';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
+import { extractSymptomsFromText } from '../services/triageApi';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
+import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
-const API_URL = 'http://192.168.1.106:8000';
 
 export default function DetectedSymptomsScreen() {
   const router = useRouter();
   const { t, lang, setLang } = useLanguage();
   const params = useLocalSearchParams();
 
-  const symptomsEn = params.symptoms_en ? JSON.parse(params.symptoms_en) : [];
-  const symptomsWp = params.symptoms_wp ? JSON.parse(params.symptoms_wp) : [];
+  const symptomsEn = parseJsonParam(params.symptoms_en, []);
+  const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
   const initialVoiceFileUri = params.voice_file_uri || null;
 
@@ -83,41 +84,19 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
-  const saveBase64Audio = async (voiceB64, langCode) => {
-    if (!voiceB64) return null;
-
-    const cleaned = voiceB64.replace(/^data:audio\/\w+;base64,/, '');
-    const fileUri = FileSystem.cacheDirectory + `voice_${langCode}.wav`;
-
-    await FileSystem.writeAsStringAsync(fileUri, cleaned, {
-      encoding: 'base64',
-    });
-
-    return fileUri;
-  };
-
-  const fetchAudioForLanguage = async (languageCode) => {
+  // Fetches translated audio for the currently selected language.
+  async function fetchAudioForLanguage(languageCode) {
     try {
       setAudioLoading(true);
 
       const textToSend =
         languageCode === 'wp' ? symptomsWp.join(' ') : symptomsEn.join(' ');
 
-      const response = await fetch(`${API_URL}/extract/text`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: textToSend,
-          language: languageCode,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update audio');
-      }
-
-      const data = await response.json();
-      const newFile = await saveBase64Audio(data.voice_b64, languageCode);
+      const data = await extractSymptomsFromText(textToSend, languageCode);
+      const newFile = await saveBase64AudioToCache(
+        data?.voice_b64,
+        `voice_${languageCode}.wav`
+      );
 
       if (newFile) {
         setVoiceFileUri(newFile);
@@ -128,7 +107,7 @@ export default function DetectedSymptomsScreen() {
     } finally {
       setAudioLoading(false);
     }
-  };
+  }
 
   const playVoiceAudio = async () => {
     try {
@@ -241,8 +220,8 @@ export default function DetectedSymptomsScreen() {
     router.push({
       pathname: '/tellusmore',
       params: {
-        symptoms_en: JSON.stringify(symptomsEn),
-        symptoms_wp: JSON.stringify(symptomsWp),
+        symptoms_en: toJsonParam(symptomsEn),
+        symptoms_wp: toJsonParam(symptomsWp),
         language: lang,
       },
     });
