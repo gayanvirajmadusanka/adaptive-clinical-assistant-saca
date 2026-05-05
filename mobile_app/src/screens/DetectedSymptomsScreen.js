@@ -1,0 +1,511 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  ImageBackground,
+  Pressable,
+  StatusBar,
+  SafeAreaView,
+  Image,
+  Modal,
+  Animated,
+  Alert,
+} from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { Audio } from 'expo-av';
+import { useLanguage } from '../context/LanguageContext';
+import styles from '../styles/detectedSymptomsStyles';
+import { extractSymptomsFromText } from '../services/triageApi';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
+import { parseJsonParam, toJsonParam } from '../utils/routeParams';
+
+
+export default function DetectedSymptomsScreen() {
+  const router = useRouter();
+  const { t, lang, setLang } = useLanguage();
+  const params = useLocalSearchParams();
+
+  const symptomsEn = parseJsonParam(params.symptoms_en, []);
+  const symptomsWp = parseJsonParam(params.symptoms_wp, []);
+
+  const initialVoiceFileUri = params.voice_file_uri || null;
+
+  const [voiceFileUri, setVoiceFileUri] = useState(initialVoiceFileUri);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+
+  const soundRef = useRef(null);
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(false);
+    }, [])
+  );
+
+  useEffect(() => {
+    if (lang === 'wp' && symptomsWp.length === 0) {
+      setErrorModalVisible(true);
+    }
+  }, [lang, symptomsWp]);
+
+  const symptomsToShow =
+    lang === 'wp'
+      ? symptomsWp
+      : symptomsEn.map((item) => {
+          const key = item.toLowerCase().replaceAll(' ', '_');
+          return t(key);
+        });
+
+  const symptomText =
+    symptomsToShow.length > 0
+      ? symptomsToShow.map((item) => `• ${item}`).join('\n')
+      : 'No symptoms detected';
+
+  const stopCurrentAudio = async () => {
+    try {
+      if (soundRef.current) {
+        const currentSound = soundRef.current;
+        soundRef.current = null;
+
+        const status = await currentSound.getStatusAsync();
+
+        if (status.isLoaded) {
+          await currentSound.stopAsync();
+          await currentSound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop audio error:', error);
+    }
+  };
+
+  // Fetches translated audio for the currently selected language.
+  async function fetchAudioForLanguage(languageCode) {
+    try {
+      setAudioLoading(true);
+
+      const textToSend =
+        languageCode === 'wp' ? symptomsWp.join(' ') : symptomsEn.join(' ');
+
+      const data = await extractSymptomsFromText(textToSend, languageCode);
+      const newFile = await saveBase64AudioToCache(
+        data?.voice_b64,
+        `voice_${languageCode}.wav`
+      );
+
+      if (newFile) {
+        setVoiceFileUri(newFile);
+      }
+    } catch (error) {
+      console.log('Audio update error:', error);
+      Alert.alert('Audio Error', 'Could not update audio.');
+    } finally {
+      setAudioLoading(false);
+    }
+  }
+
+  const playVoiceAudio = async () => {
+    try {
+      if (!voiceFileUri) {
+        Alert.alert('Audio Error', 'No audio file found.');
+        return;
+      }
+
+      if (audioLoading) {
+        Alert.alert('Please wait', 'Updating audio...');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+      });
+
+      await stopCurrentAudio();
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: voiceFileUri },
+        {
+          shouldPlay: true,
+          volume: 1.0,
+        }
+      );
+
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          try {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
+            }
+
+            await sound.unloadAsync();
+          } catch (error) {
+            console.log('Finished audio unload error:', error);
+          }
+        }
+      });
+    } catch (error) {
+      console.log('Play error:', error);
+      Alert.alert('Audio Error', 'Unable to play audio.');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        const currentSound = soundRef.current;
+        soundRef.current = null;
+
+        currentSound
+          .getStatusAsync()
+          .then((status) => {
+            if (status.isLoaded) {
+              currentSound.stopAsync();
+              currentSound.unloadAsync();
+            }
+          })
+          .catch((error) => {
+            console.log('Cleanup audio error:', error);
+          });
+      }
+    };
+  }, []);
+
+  const openModal = () => {
+    setSelectedLang(null);
+    setModalVisible(true);
+
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(scaleAnim, {
+      toValue: 0.8,
+      duration: 120,
+      useNativeDriver: true,
+    }).start(() => setModalVisible(false));
+  };
+
+  const confirmLanguage = async () => {
+    if (!selectedLang) return;
+
+    await stopCurrentAudio();
+    setLang(selectedLang);
+    closeModal();
+
+    await fetchAudioForLanguage(selectedLang);
+  };
+
+  const handleYesPress = async () => {
+    if (loading) return;
+
+    if (lang === 'wp' && symptomsWp.length === 0) {
+      setErrorModalVisible(true);
+      return;
+    }
+
+    setLoading(true);
+    await stopCurrentAudio();
+
+    router.push({
+      pathname: '/tellusmore',
+      params: {
+        symptoms_en: toJsonParam(symptomsEn),
+        symptoms_wp: toJsonParam(symptomsWp),
+        language: lang,
+      },
+    });
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+
+      <View style={styles.wrapper}>
+        <ImageBackground
+          source={require('../../assets/images/background.png')}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          <View style={styles.container}>
+            <View style={styles.headerBar}>
+              <Text style={styles.headerText}>{t('detected_title')}</Text>
+            </View>
+
+            <View style={styles.symptomBox}>
+              <Text style={styles.symptomText}>{symptomText}</Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.speakerButton,
+                  pressed && styles.speakerPressed,
+                ]}
+                onPress={playVoiceAudio}
+              >
+                <Image
+                  source={require('../../assets/images/speaker.png')}
+                  style={styles.speakerIcon}
+                  resizeMode="contain"
+                />
+              </Pressable>
+            </View>
+
+            <Text style={styles.questionText}>{t('detected_question')}</Text>
+
+            <View style={styles.buttonRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.choiceButton,
+                  pressed && styles.choicePressed,
+                ]}
+                onPress={handleYesPress}
+              >
+                <Text style={styles.choiceText}>{t('yes')}</Text>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.choiceButton,
+                  pressed && styles.choicePressed,
+                ]}
+                onPress={async () => {
+                  await stopCurrentAudio();
+                  router.replace('/textinput');
+                }}
+              >
+                <Text style={styles.choiceText}>{t('no')}</Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backPressedGrey,
+              ]}
+              onPress={async () => {
+                await stopCurrentAudio();
+                router.back();
+              }}
+            >
+              <Text style={styles.backText}>{t('back')}</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.footer}>
+            <Pressable
+              style={styles.footerItem}
+              onPress={async () => {
+                await stopCurrentAudio();
+                router.replace('/input');
+              }}
+            >
+              <Text style={styles.footerIcon}>🏠</Text>
+              <Text style={styles.footerText}>{t('home')}</Text>
+            </Pressable>
+
+            <Pressable style={styles.footerItem} onPress={openModal}>
+              <Text style={styles.footerIcon}>🌐</Text>
+              <Text style={styles.footerText}>
+                {audioLoading ? 'Updating...' : t('language')}
+              </Text>
+            </Pressable>
+          </View>
+
+          <Modal transparent visible={modalVisible} animationType="fade">
+            <View style={styles.modalOverlay}>
+              <Animated.View
+                style={[
+                  styles.languageModal,
+                  { transform: [{ scale: scaleAnim }] },
+                ]}
+              >
+                <Text style={styles.modalTitle}>{t('select_language')}</Text>
+
+                <Pressable
+                  style={[
+                    styles.languageOption,
+                    selectedLang === 'en' && styles.languageOptionSelected,
+                  ]}
+                  onPress={() => setSelectedLang('en')}
+                >
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLang === 'en' &&
+                        styles.languageOptionTextSelected,
+                    ]}
+                  >
+                    {t('english')}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={[
+                    styles.languageOption,
+                    selectedLang === 'wp' && styles.languageOptionSelected,
+                  ]}
+                  onPress={() => setSelectedLang('wp')}
+                >
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      selectedLang === 'wp' &&
+                        styles.languageOptionTextSelected,
+                    ]}
+                  >
+                    {t('warlpiri')}
+                  </Text>
+                </Pressable>
+
+                <Text style={styles.confirmText}>{t('change_language')}</Text>
+
+                <View style={styles.modalButtonRow}>
+                  <Pressable style={styles.cancelButton} onPress={closeModal}>
+                    <Text style={styles.cancelText}>{t('no')}</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={[
+                      styles.confirmButton,
+                      !selectedLang && styles.disabledButton,
+                    ]}
+                    disabled={!selectedLang || audioLoading}
+                    onPress={confirmLanguage}
+                  >
+                    <Text style={styles.confirmButtonText}>
+                      {audioLoading ? '...' : t('yes')}
+                    </Text>
+                  </Pressable>
+                </View>
+              </Animated.View>
+            </View>
+          </Modal>
+
+          <Modal transparent visible={errorModalVisible} animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View
+                style={{
+                  width: '90%',
+                  backgroundColor: '#F5E6C8',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  borderWidth: 1,
+                  borderColor: '#5C2E0A',
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: '#8B2E0A',
+                    paddingVertical: 18,
+                    paddingHorizontal: 18,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: '#FFF',
+                      fontSize: 18,
+                      fontWeight: 'bold',
+                      flex: 1,
+                      paddingRight: 12,
+                    }}
+                  >
+                    No Symptoms Detected
+                  </Text>
+
+                  <Pressable
+                    onPress={() => {
+                      setErrorModalVisible(false);
+                      router.replace('/textinput');
+                    }}
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 8,
+                      borderWidth: 3,
+                      borderColor: '#FFF',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#FFF',
+                        fontSize: 28,
+                        fontWeight: 'bold',
+                        lineHeight: 30,
+                      }}
+                    >
+                      ×
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <View style={{ padding: 22 }}>
+                  <Text
+                    style={{
+                      color: '#5C2E0A',
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      marginBottom: 18,
+                      lineHeight: 22,
+                    }}
+                  >
+                    We could not detect any symptoms from your description.
+                  </Text>
+
+                  <Text
+                    style={{
+                      color: '#5C2E0A',
+                      fontSize: 15,
+                      marginBottom: 20,
+                      lineHeight: 22,
+                    }}
+                  >
+                    Please try describing your symptoms in more detail.
+                  </Text>
+
+                  <Pressable
+                    style={{
+                      alignSelf: 'flex-end',
+                      backgroundColor: '#8B2E0A',
+                      paddingHorizontal: 28,
+                      paddingVertical: 10,
+                      borderRadius: 22,
+                    }}
+                    onPress={() => {
+                      setErrorModalVisible(false);
+                      router.replace('/textinput');
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: '#FFF',
+                        fontWeight: 'bold',
+                        fontSize: 15,
+                      }}
+                    >
+                      Ok
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </ImageBackground>
+      </View>
+    </SafeAreaView>
+  );
+}

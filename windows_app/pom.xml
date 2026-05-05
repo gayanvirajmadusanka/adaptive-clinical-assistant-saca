@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
         <javafx.version>21.0.2</javafx.version>
+        <java.home.path>C:/Users/upadh/.jdks/azul-17.0.19</java.home.path>
+        <javafx.sdk.path>C:/Softwares/openjfx-21.0.11_windows-x64_bin-sdk/javafx-sdk-21.0.11/lib</javafx.sdk.path>
     </properties>
 
     <dependencies>
@@ -52,6 +54,13 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>org.saca.MainApp</mainClass>
+                    <executable>${java.home.path}/bin/java</executable>
+                    <options>
+                        <option>--module-path</option>
+                        <option>${javafx.sdk.path}</option>
+                        <option>--add-modules</option>
+                        <option>javafx.controls,javafx.fxml,javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.web</option>
+                    </options>
                 </configuration>
             </plugin>
         </plugins>
