@@ -1,29 +1,37 @@
+// Styles for LoadingScreen and LoadingSeverityScreen.
+// Defines circular loading screen layout, percentage text, and status message styling.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  wrapper: {
+    // Wrapper with status bar spacing.
+wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
+    // Background image area.
+background: {
     flex: 1,
   },
 
-  container: {
+    // Centered loading container.
+container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 25,
   },
 
-  topText: {
+    // Top loading message.
+topText: {
     fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
@@ -32,14 +40,16 @@ export default StyleSheet.create({
     marginBottom: 60,
   },
 
-  circleWrapper: {
+    // Circular progress wrapper.
+circleWrapper: {
     width: 190,
     height: 190,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  circleContent: {
+    // Text content inside progress circle.
+circleContent: {
     position: 'absolute',
     width: 130,
     height: 130,
@@ -48,14 +58,16 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  percent: {
+    // Percentage number text.
+percent: {
     fontSize: 34,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2B1B12',
   },
 
-  loadingText: {
+    // LOADING/DONE label.
+loadingText: {
     fontSize: 12,
     fontFamily: FONTS.bold,
     letterSpacing: 3,
@@ -63,7 +75,8 @@ export default StyleSheet.create({
     marginTop: 6,
   },
 
-  bottomText: {
+    // Bottom helper/status text.
+bottomText: {
     fontSize: 14,
     fontFamily: FONTS.regular,
     color: '#5C4A3A',

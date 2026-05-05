@@ -1,11 +1,16 @@
+// Styles for ResultScreen.
+// Includes severity-based result themes, result card layout, emergency button, footer, and modal styling.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
+// Severity theme colors used by ResultScreen.
 export const resultTheme = {
   severe: {
     cardBackground: '#8B3A1C',
     header: '#4A0A04',
-    headerText: '#F5E6C8',
+      // Result title text.
+headerText: '#F5E6C8',
 
     severityFill: '#4A0A04',
     severityText: '#F5E6C8',
@@ -49,21 +54,25 @@ export const resultTheme = {
 };
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  wrapper: {
+    // Wrapper with status bar spacing.
+wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
+    // Background image area.
+background: {
     flex: 1,
   },
 
-  contentWrapper: {
+    // Main result screen content wrapper.
+contentWrapper: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -71,14 +80,16 @@ export default StyleSheet.create({
     paddingTop: 95,
   },
 
-  resultCard: {
+    // Main result card container.
+resultCard: {
     width: '95%',
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 6,
   },
 
-  headerBar: {
+    // Result header bar.
+headerBar: {
     height: 75,
     justifyContent: 'center',
     alignItems: 'center',
@@ -94,7 +105,8 @@ export default StyleSheet.create({
     padding: 22,
   },
 
-  speakerButton: {
+    // Speaker button for result audio.
+speakerButton: {
     alignSelf: 'flex-end',
     marginBottom: 10,
   },
@@ -104,7 +116,8 @@ export default StyleSheet.create({
     height: 28,
   },
 
-  severityBadge: {
+    // Severity label badge.
+severityBadge: {
     width: '100%',
     minHeight: 55,
     borderRadius: 10,
@@ -114,7 +127,8 @@ export default StyleSheet.create({
     paddingHorizontal: 10,
   },
 
-  severeBadge: {
+    // Extra styling for severe cases.
+severeBadge: {
     backgroundColor: '#5A0500',
     borderWidth: 1.5,
     borderColor: '#1E0000',
@@ -145,7 +159,8 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
 
-  callButton: {
+    // Emergency call button.
+callButton: {
     width: '100%',
     height: 54,
     backgroundColor: '#F5E6C8',
@@ -176,7 +191,8 @@ export default StyleSheet.create({
     color: '#4A0A04',
   },
 
-  infoBox: {
+    // Information box for symptoms/recommendations.
+infoBox: {
     width: '100%',
     borderRadius: 10,
     borderWidth: 1,
@@ -199,7 +215,8 @@ export default StyleSheet.create({
     lineHeight: 20,
   },
 
-  startAgainButton: {
+    // Restart app flow button.
+startAgainButton: {
     alignSelf: 'flex-end',
     borderWidth: 2,
     borderRadius: 8,
@@ -213,7 +230,8 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  footer: {
+    // Bottom navigation footer.
+footer: {
     height: 55,
     backgroundColor: '#000',
     flexDirection: 'row',
@@ -243,7 +261,8 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  modalOverlay: {
+    // Overlay behind language modal.
+modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
@@ -251,7 +270,8 @@ export default StyleSheet.create({
     paddingHorizontal: 25,
   },
 
-  languageModal: {
+    // Language modal box.
+languageModal: {
     width: '90%',
     backgroundColor: '#F5E6C8',
     borderRadius: 22,

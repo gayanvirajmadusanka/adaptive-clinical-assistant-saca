@@ -1,17 +1,23 @@
+// Styles for VoiceInputScreen.
+// Defines microphone recording UI, pulse circle, waveform bars, playback controls, and continue button.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  background: {
+    // Background image area.
+background: {
     flex: 1,
   },
 
-  container: {
+    // Voice screen main container.
+container: {
     flex: 1,
     paddingTop: StatusBar.currentHeight || 20,
     paddingHorizontal: 18,
@@ -19,7 +25,8 @@ export default StyleSheet.create({
     transform: [{ translateY: -30 }],
   },
 
-  header: {
+    // Header row with back icon, title, and voice icon.
+header: {
     height: 70,
     backgroundColor: '#D4AF4A',
     borderRadius: 12,
@@ -30,7 +37,8 @@ export default StyleSheet.create({
     marginBottom: 20,
   },
 
-  headerTitle: {
+    // SPEAK title text.
+headerTitle: {
     fontSize: 26,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
@@ -42,7 +50,8 @@ export default StyleSheet.create({
     height: 28,
   },
 
-  recordBox: {
+    // Main recording box.
+recordBox: {
     height: 260,
     borderWidth: 2,
     borderColor: '#CDBB91',
@@ -53,7 +62,8 @@ export default StyleSheet.create({
     backgroundColor: 'rgba(248, 232, 199, 0.75)',
   },
 
-  pulseCircle: {
+    // Animated circle around mic.
+pulseCircle: {
     width: 125,
     height: 125,
     borderRadius: 62,
@@ -63,12 +73,14 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  recordingBorder: {
+    // Red border shown while recording.
+recordingBorder: {
     borderColor: 'red',
     borderWidth: 3,
   },
 
-  micCircle: {
+    // Touchable mic area.
+micCircle: {
     width: 115,
     height: 115,
     borderRadius: 60,
@@ -76,7 +88,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  waveformContainer: {
+    // Animated waveform container.
+waveformContainer: {
     height: 65,
     flexDirection: 'row',
     alignItems: 'center',
@@ -85,13 +98,15 @@ export default StyleSheet.create({
     marginTop: 12,
   },
 
-  waveBar: {
+    // Single waveform bar.
+waveBar: {
     width: 7,
     borderRadius: 8,
     backgroundColor: '#8B2E0A',
   },
 
-  recordText: {
+    // Instruction/status text.
+recordText: {
     marginTop: 8,
     fontSize: 16,
     fontFamily: FONTS.bold,
@@ -100,7 +115,8 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
 
-  bottomBox: {
+    // Bottom controls container.
+bottomBox: {
     height: 90,
     borderRadius: 40,
     borderWidth: 2,
@@ -118,7 +134,8 @@ export default StyleSheet.create({
     gap: 15,
   },
 
-  deleteButton: {
+    // Delete recording button.
+deleteButton: {
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -127,7 +144,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  playButton: {
+    // Play/stop recording button.
+playButton: {
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -136,14 +154,16 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  timeText: {
+    // Recording timer text.
+timeText: {
     fontSize: 16,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  continueButton: {
+    // Continue button after recording.
+continueButton: {
     paddingHorizontal: 28,
     height: 55,
     borderRadius: 25,

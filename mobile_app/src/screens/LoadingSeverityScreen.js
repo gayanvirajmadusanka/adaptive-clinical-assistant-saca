@@ -1,3 +1,8 @@
+// LoadingSeverityScreen.js
+// Purpose: Sends symptoms and follow-up answers to FastAPI for severity classification.
+// It displays a circular loading animation before navigating to ResultScreen.
+
+// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -17,8 +22,11 @@ import { buildClassifyPayload } from '../utils/triagePayloads';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
+// Main screen component: LoadingSeverityScreen
 export default function LoadingSeverityScreen() {
+    // Router is used to navigate to result screen or go back on error.
   const router = useRouter();
+    // Receives symptoms and answers from TellUsMoreScreen.
   const params = useLocalSearchParams();
 
   const [percent, setPercent] = useState(0);
@@ -59,6 +67,7 @@ export default function LoadingSeverityScreen() {
   }, [percent, resultData]);
 
   // Controls fake loading progress while the real API is processing.
+    // Updates fake progress while waiting for real severity API response.
   function updateProgressPercent() {
     setPercent((prev) => {
       if (!apiFinished && prev >= 90) return 90;
@@ -68,6 +77,7 @@ export default function LoadingSeverityScreen() {
   }
 
   // Reads route params and creates the classify request payload.
+    // Builds severity classification payload from route parameters.
   function getClassifyPayloadFromParams() {
     const symptomsEn = parseJsonParam(params.symptoms_en, []);
     const symptomsWp = parseJsonParam(params.symptoms_wp, []);
@@ -78,6 +88,7 @@ export default function LoadingSeverityScreen() {
   }
 
   // Sends symptoms and answers to FastAPI for severity classification.
+    // Sends symptoms and answers to FastAPI for severity classification.
   async function classifySeverity() {
     try {
       const payload = getClassifyPayloadFromParams();
@@ -98,6 +109,7 @@ export default function LoadingSeverityScreen() {
   }
 
   // Navigates to the result screen once both API data and loading are complete.
+    // Navigates to ResultScreen once progress and API response are complete.
   function navigateToResultWhenReady() {
     if (percent < 100 || !resultData || !classifyPayload || navigatedRef.current) {
       return;

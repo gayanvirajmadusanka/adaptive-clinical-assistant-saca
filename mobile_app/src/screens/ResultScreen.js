@@ -1,3 +1,8 @@
+// ResultScreen.js
+// Purpose: Displays final triage severity, symptoms, recommendation, confidence, and emergency action if severe.
+// It also supports audio playback, language switching, and start-again navigation.
+
+// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -23,11 +28,14 @@ import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam } from '../utils/routeParams';
 
 
+// Main screen component: ResultScreen
 export default function ResultScreen() {
+    // Router is used for navigation back to input or between screens.
   const router = useRouter();
   const { t, setLang } = useLanguage();
   const params = useLocalSearchParams();
 
+    // Reads final result data passed from LoadingSeverityScreen.
   const initialResultData = parseJsonParam(params.result_data, null);
 
   const classifyPayload = parseJsonParam(params.classify_payload, null);
@@ -41,6 +49,7 @@ export default function ResultScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const soundRef = useRef(null);
 
+    // Determines the severity level and selects the matching UI theme.
   const severity = resultData?.severity_mode
     ? resultData.severity_mode.toLowerCase()
     : 'mild';
@@ -53,6 +62,7 @@ export default function ResultScreen() {
   const confidence = resultData?.confidence || 0;
   const hasCritical = resultData?.has_critical || false;
 
+    // Overrides Android hardware back button to return user to input screen.
   useEffect(() => {
     const backAction = () => {
       router.replace('/input');
@@ -67,6 +77,7 @@ export default function ResultScreen() {
     return () => backHandler.remove();
   }, []);
 
+    // Starts pulse animation when severity is severe.
   useEffect(() => {
     if (severity === 'severe') {
       Animated.loop(
@@ -86,6 +97,7 @@ export default function ResultScreen() {
     }
   }, [severity]);
 
+    // Stops text-to-speech or audio playback and releases resources.
   const stopAudio = async () => {
     try {
       Speech.stop();
@@ -106,6 +118,7 @@ export default function ResultScreen() {
     }
   };
 
+    // Plays result audio from backend voice_b64, or falls back to Expo Speech.
   const speakResult = async () => {
     try {
       await stopAudio();
@@ -140,6 +153,7 @@ export default function ResultScreen() {
     }
   };
 
+    // Opens language selection modal with scale animation.
   const openModal = () => {
     setSelectedLang(null);
     setModalVisible(true);
@@ -151,6 +165,7 @@ export default function ResultScreen() {
     }).start();
   };
 
+    // Closes language modal with animation.
   const closeModal = () => {
     Animated.timing(scaleAnim, {
       toValue: 0.8,
@@ -159,6 +174,7 @@ export default function ResultScreen() {
     }).start(() => setModalVisible(false));
   };
 
+    // Re-runs classification API in selected language and updates result display.
   const confirmLanguage = async () => {
     if (!selectedLang || !classifyPayload) return;
 
@@ -183,6 +199,7 @@ export default function ResultScreen() {
     }
   };
 
+    // Opens the phone dialer to call emergency number 000.
   const callEmergency = () => {
     Linking.openURL('tel:000');
   };
@@ -197,6 +214,7 @@ export default function ResultScreen() {
           style={styles.background}
           resizeMode="cover"
         >
+                    {/* Main result card wrapper. */}
           <View style={styles.contentWrapper}>
             <View
               style={[
@@ -256,6 +274,7 @@ export default function ResultScreen() {
                   )}
                 </View>
 
+                                {/* Emergency call button is shown only for severe cases. */}
                 {severity === 'severe' && (
                   <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
                     <Pressable

@@ -1,3 +1,8 @@
+// VoiceInputScreen.js
+// Purpose: Records user voice using Expo AV, allows playback/delete, and sends the recorded audio to VoiceLoadingScreen.
+// It includes pulse and waveform animations during recording.
+
+// React and React Native imports used to build this screen component.
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -15,11 +20,16 @@ import { Audio } from 'expo-av';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import styles from '../styles/voiceInputStyles';
 
+// Main screen component: VoiceInputScreen
 export default function VoiceInputScreen() {
+    // Router is used to navigate to the voice loading screen or go back.
   const router = useRouter();
 
+    // Stores the active recording object while recording is in progress.
   const [recording, setRecording] = useState(null);
+    // Stores the playback sound object after recording is completed.
   const [recordedSound, setRecordedSound] = useState(null);
+    // Stores the local URI/path of the recorded audio file.
   const [recordingUri, setRecordingUri] = useState(null);
 
   const [isRecording, setIsRecording] = useState(false);
@@ -37,6 +47,7 @@ export default function VoiceInputScreen() {
   const timerRef = useRef(null);
   const secondsRef = useRef(0);
 
+    // Starts pulsing animation around the microphone while recording.
   const startPulse = () => {
     Animated.loop(
       Animated.sequence([
@@ -54,11 +65,13 @@ export default function VoiceInputScreen() {
     ).start();
   };
 
+    // Stops microphone pulse animation and resets scale.
   const stopPulse = () => {
     pulseAnim.stopAnimation();
     pulseAnim.setValue(1);
   };
 
+    // Animates waveform bars to give a real recorder visual effect.
   const animateBars = () => {
     const createAnimation = (bar, height) =>
       Animated.loop(
@@ -83,6 +96,7 @@ export default function VoiceInputScreen() {
     createAnimation(bar5, 38).start();
   };
 
+    // Stops waveform animation and resets bar heights.
   const stopBars = () => {
     bar1.stopAnimation();
     bar2.stopAnimation();
@@ -97,6 +111,7 @@ export default function VoiceInputScreen() {
     bar5.setValue(20);
   };
 
+    // Starts timer to display recording duration.
   const startTimer = () => {
     secondsRef.current = 0;
     setRecordTime('0.00');
@@ -107,6 +122,7 @@ export default function VoiceInputScreen() {
     }, 100);
   };
 
+    // Stops recording timer.
   const stopTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -114,6 +130,7 @@ export default function VoiceInputScreen() {
     }
   };
 
+    // Handles microphone button: starts recording if not recording, otherwise stops recording.
   const handleMicPress = async () => {
     try {
       if (isRecording) {
@@ -127,6 +144,7 @@ export default function VoiceInputScreen() {
     }
   };
 
+    // Requests microphone permission and starts high-quality audio recording.
   const startRecording = async () => {
     const permission = await Audio.requestPermissionsAsync();
 
@@ -161,6 +179,7 @@ export default function VoiceInputScreen() {
     startTimer();
   };
 
+    // Stops recording, saves audio URI, and stops animations/timer.
   const stopRecording = async () => {
     if (!recording) return;
 
@@ -176,6 +195,7 @@ export default function VoiceInputScreen() {
     stopTimer();
   };
 
+    // Plays or stops the recorded audio preview.
   const handlePlay = async () => {
     try {
       if (!recordingUri) {
@@ -212,6 +232,7 @@ export default function VoiceInputScreen() {
     }
   };
 
+    // Deletes the current recording and resets recording state.
   const handleDelete = async () => {
     try {
       if (recording) {
@@ -237,6 +258,7 @@ export default function VoiceInputScreen() {
     }
   };
 
+    // Sends recorded audio URI to VoiceLoadingScreen for API processing.
   const handleContinue = async () => {
     if (!recordingUri) {
       Alert.alert('No recording', 'Please record your voice first.');
@@ -283,6 +305,7 @@ export default function VoiceInputScreen() {
           </View>
 
           <View style={styles.recordBox}>
+                        {/* Animated microphone circle shows pulse effect while recording. */}
             <Animated.View
               style={[
                 styles.pulseCircle,
@@ -299,6 +322,7 @@ export default function VoiceInputScreen() {
               </Pressable>
             </Animated.View>
 
+                        {/* Waveform bars animate during recording. */}
             <View style={styles.waveformContainer}>
               <Animated.View style={[styles.waveBar, { height: bar1 }]} />
               <Animated.View style={[styles.waveBar, { height: bar2 }]} />
@@ -331,6 +355,7 @@ export default function VoiceInputScreen() {
               <Text style={styles.timeText}>{recordTime}</Text>
             </View>
 
+                        {/* Continue button only appears after audio has been recorded. */}
             {recordingUri && (
               <Pressable onPress={handleContinue} style={styles.continueButton}>
                 <Text style={styles.continueText}>Continue</Text>

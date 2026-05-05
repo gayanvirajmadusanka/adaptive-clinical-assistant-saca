@@ -1,22 +1,29 @@
+// Styles for TellUsMoreScreen.
+// Defines follow-up question card, progress bar, answer options, footer, and language modal.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  wrapper: {
+    // Wrapper with status bar spacing.
+wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
+    // Background image area.
+background: {
     flex: 1,
   },
 
- container: {
+   // Main question screen container.
+container: {
   flex: 1,
   alignItems: 'center',
   justifyContent: 'flex-start',
@@ -24,7 +31,8 @@ export default StyleSheet.create({
   paddingTop: 80, // 
 },
 
-  loadingContainer: {
+    // Loading state container.
+loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -38,7 +46,8 @@ export default StyleSheet.create({
   },
 
   
-  headerBar: {
+    // Header bar for question screen.
+headerBar: {
     width: '92%',
     height: 60,
     backgroundColor: '#C87936',
@@ -48,7 +57,8 @@ export default StyleSheet.create({
     marginBottom: 35,
   },
 
-  backCircle: {
+    // Back arrow touch area.
+backCircle: {
     position: 'absolute',
     left: 18,
     width: 34,
@@ -72,7 +82,8 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  questionNumber: {
+    // Question count text.
+questionNumber: {
     textAlign: 'center',
     fontSize: 16,
     fontFamily: FONTS.bold,
@@ -81,7 +92,8 @@ export default StyleSheet.create({
     marginBottom: 28,
   },
 
-  progressTrack: {
+    // Progress bar background.
+progressTrack: {
     width: '100%',
     height: 9,
     borderRadius: 10,
@@ -90,13 +102,15 @@ export default StyleSheet.create({
     marginBottom: 34,
   },
 
-  progressFill: {
+    // Filled progress bar.
+progressFill: {
     height: '100%',
     borderRadius: 10,
     backgroundColor: '#C8661F',
   },
 
-  questionBox: {
+    // Question and answer box.
+questionBox: {
     width: '100%',
     borderWidth: 1.5,
     borderColor: '#B8A37D',
@@ -108,7 +122,8 @@ export default StyleSheet.create({
     minHeight: 205,
   },
 
-  questionHeader: {
+    // Row for question text and speaker.
+questionHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
@@ -144,7 +159,8 @@ export default StyleSheet.create({
     gap: 10,
   },
 
-  optionItem: {
+    // Base answer option style.
+optionItem: {
     minHeight: 42,
     borderRadius: 10,
     paddingHorizontal: 16,
@@ -164,7 +180,8 @@ export default StyleSheet.create({
     backgroundColor: '#C8661F',
   },
 
-  optionSelected: {
+    // Selected answer style.
+optionSelected: {
     backgroundColor: '#8B1E0D',
     borderWidth: 1.5,
     borderColor: '#5F1207',
@@ -181,7 +198,8 @@ export default StyleSheet.create({
     color: '#FFF',
   },
 
-  continueButton: {
+    // Continue/Submit button.
+continueButton: {
   width: '100%',
   height: 64,
   borderRadius: 32,
@@ -204,7 +222,8 @@ export default StyleSheet.create({
     color: '#111',
   },
 
-  footer: {
+    // Bottom footer navigation.
+footer: {
     height: 72,
     backgroundColor: '#000',
     flexDirection: 'row',
@@ -229,14 +248,16 @@ export default StyleSheet.create({
     marginTop: 3,
   },
 
-  modalOverlay: {
+    // Language modal overlay.
+modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  languageModal: {
+    // Language modal box.
+languageModal: {
     width: '82%',
     backgroundColor: '#FFF7E8',
     borderRadius: 18,

@@ -1,29 +1,37 @@
+// Styles for TextInputScreen.
+// Defines text input form, header, continue/back buttons, footer, and language modal.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  wrapper: {
+    // Wrapper with status bar spacing.
+wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
+    // Background image area.
+background: {
     flex: 1,
   },
 
-  container: {
+    // Text input screen container.
+container: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 25,
     paddingTop: 80,
   },
 
-  headerBar: {
+    // Header bar containing title and icon.
+headerBar: {
     width: '92%',
     height: 60,
     backgroundColor: '#6F8F83',
@@ -34,21 +42,24 @@ export default StyleSheet.create({
     marginBottom: 25,
   },
 
-  headerText: {
+    // Header title text.
+headerText: {
     fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  headerIcon: {
+    // Header icon image.
+headerIcon: {
     position: 'absolute',
     right: 25,
     width: 30,
     height: 30,
   },
 
-  inputBox: {
+    // Text input outer box.
+inputBox: {
     width: '88%',
     height: 250,
     backgroundColor: '#E6D7BF',
@@ -57,7 +68,8 @@ export default StyleSheet.create({
     marginBottom: 45,
   },
 
-  questionText: {
+    // Prompt above text input.
+questionText: {
     fontSize: 16,
     fontFamily: FONTS.bold,
     fontWeight: '600',
@@ -65,7 +77,8 @@ export default StyleSheet.create({
     marginBottom: 18,
   },
 
-  textInput: {
+    // Multiline input field.
+textInput: {
     flex: 1,
     fontSize: 16,
     fontFamily: FONTS.regular,
@@ -73,7 +86,8 @@ export default StyleSheet.create({
     textAlignVertical: 'top',
   },
 
-  continueButton: {
+    // Continue button.
+continueButton: {
     width: 230,
     height: 65,
     backgroundColor: '#E3AD35',
@@ -108,7 +122,8 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  backButton: {
+    // Back button.
+backButton: {
     width: 140,
     height: 55,
     borderRadius: 28,
@@ -132,7 +147,8 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  footer: {
+    // Bottom footer navigation.
+footer: {
     height: 55,
     backgroundColor: '#000',
     flexDirection: 'row',
@@ -157,7 +173,8 @@ export default StyleSheet.create({
     marginTop: 2,
   },
 
-  modalOverlay: {
+    // Language modal overlay.
+modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
@@ -165,7 +182,8 @@ export default StyleSheet.create({
     paddingHorizontal: 25,
   },
 
-  languageModal: {
+    // Language modal box.
+languageModal: {
     width: '90%',
     backgroundColor: '#F5E6C8',
     borderRadius: 22,

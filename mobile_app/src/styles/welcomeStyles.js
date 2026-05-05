@@ -1,38 +1,47 @@
+// Styles for WelcomeScreen.
+// Defines logo, welcome text, start button, about link, and full-screen background layout.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  wrapper: {
+    // Wrapper with status bar spacing.
+wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
+    // Full-screen background image.
+background: {
     flex: 1,
     width: '100%',
     height: '100%',
   },
 
-  container: {
+    // Centered welcome screen content.
+container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
 
-  logo: {
+    // SACA logo image.
+logo: {
     width: 220,
     height: 220,
     marginBottom: 15,
     borderRadius: 20,
   },
 
-  appName: {
+    // Full app name text.
+appName: {
     fontSize: 16,
     fontFamily: FONTS.bold,
     fontWeight: '600',
@@ -41,7 +50,8 @@ export default StyleSheet.create({
     color: '#111',
   },
 
-  welcomeText: {
+    // Welcome message text.
+welcomeText: {
     fontSize: 36,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
@@ -51,7 +61,8 @@ export default StyleSheet.create({
     lineHeight: 42,
   },
 
-  startButton: {
+    // Start button.
+startButton: {
     backgroundColor: '#E3AD35',
     width: 250,
     height: 80,
@@ -62,13 +73,15 @@ export default StyleSheet.create({
     elevation: 4,
   },
 
-  startPressedRed: {
+    // Start button pressed state.
+startPressedRed: {
   backgroundColor: '#8B3A1C', 
   borderColor: '#5C2E0A',     
   transform: [{ scale: 0.96 }],
 },
 
-  startButtonText: {
+    // Start button label.
+startButtonText: {
     fontSize: 30,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
@@ -77,7 +90,8 @@ export default StyleSheet.create({
     lineHeight: 32,
   },
 
-  aboutText: {
+    // About link text.
+aboutText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',

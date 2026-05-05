@@ -1,3 +1,8 @@
+// DetectedSymptomsScreen.js
+// Purpose: Displays symptoms detected by the FastAPI backend.
+// It supports English/Warlpiri display, audio playback, language switching, error handling, and navigation to TellUsMore.
+
+// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View,
@@ -11,48 +16,71 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
-import { Audio } from 'expo-av';
-import { useLanguage } from '../context/LanguageContext';
-import styles from '../styles/detectedSymptomsStyles';
+
+import { useRouter, useLocalSearchParams } from 'expo-router'; // Used for navigation and receiving route params
+import { useFocusEffect } from '@react-navigation/native'; // Runs logic when screen comes into focus
+import { Audio } from 'expo-av'; // Used to play audio files
+
+import { useLanguage } from '../context/LanguageContext'; // Global language context
+import styles from '../styles/detectedSymptomsStyles'; // Styles for this screen
+
+// API and utility helper files
 import { extractSymptomsFromText } from '../services/triageApi';
 import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
-
+// Main screen component: DetectedSymptomsScreen
 export default function DetectedSymptomsScreen() {
-  const router = useRouter();
-  const { t, lang, setLang } = useLanguage();
-  const params = useLocalSearchParams();
+  const router = useRouter(); // Router for navigation
+  const { t, lang, setLang } = useLanguage(); // Translation function, current language, and language setter
+  const params = useLocalSearchParams(); // Receives params from LoadingScreen
 
+  // Convert JSON string params back into arrays
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
   const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
+  // Audio file path received from previous screen
   const initialVoiceFileUri = params.voice_file_uri || null;
 
+  // Stores current audio file URI
   const [voiceFileUri, setVoiceFileUri] = useState(initialVoiceFileUri);
+
+  // Controls language modal visibility
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Controls error modal visibility
   const [errorModalVisible, setErrorModalVisible] = useState(false);
+
+  // Stores selected language before confirmation
   const [selectedLang, setSelectedLang] = useState(null);
+
+  // Prevents double clicking on Yes button
   const [loading, setLoading] = useState(false);
+
+  // Shows loading state while audio is being updated
   const [audioLoading, setAudioLoading] = useState(false);
 
+  // Keeps reference to currently playing audio
   const soundRef = useRef(null);
+
+  // Animation value for language modal popup
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
+  // Reset loading when returning to this screen
   useFocusEffect(
     useCallback(() => {
       setLoading(false);
     }, [])
   );
 
+  // If Warlpiri is selected but no Warlpiri symptoms exist, show error
   useEffect(() => {
     if (lang === 'wp' && symptomsWp.length === 0) {
       setErrorModalVisible(true);
     }
   }, [lang, symptomsWp]);
 
+  // Decide which symptoms should be displayed based on selected language
   const symptomsToShow =
     lang === 'wp'
       ? symptomsWp
@@ -61,11 +89,13 @@ export default function DetectedSymptomsScreen() {
           return t(key);
         });
 
+  // Convert symptoms array into bullet list text
   const symptomText =
     symptomsToShow.length > 0
       ? symptomsToShow.map((item) => `• ${item}`).join('\n')
       : 'No symptoms detected';
 
+  // Stops current audio and removes it from memory
   const stopCurrentAudio = async () => {
     try {
       if (soundRef.current) {
@@ -84,20 +114,25 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
-  // Fetches translated audio for the currently selected language.
+  // Fetch translated audio from backend when language changes
   async function fetchAudioForLanguage(languageCode) {
     try {
       setAudioLoading(true);
 
+      // Choose text to send based on selected language
       const textToSend =
         languageCode === 'wp' ? symptomsWp.join(' ') : symptomsEn.join(' ');
 
+      // Send symptoms to backend and receive audio response
       const data = await extractSymptomsFromText(textToSend, languageCode);
+
+      // Save base64 audio as local file
       const newFile = await saveBase64AudioToCache(
         data?.voice_b64,
         `voice_${languageCode}.wav`
       );
 
+      // Update audio file URI
       if (newFile) {
         setVoiceFileUri(newFile);
       }
@@ -109,6 +144,7 @@ export default function DetectedSymptomsScreen() {
     }
   }
 
+  // Plays detected symptoms audio
   const playVoiceAudio = async () => {
     try {
       if (!voiceFileUri) {
@@ -121,12 +157,15 @@ export default function DetectedSymptomsScreen() {
         return;
       }
 
+      // Allows playback even if iPhone is in silent mode
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
       });
 
+      // Stop previous audio before playing new audio
       await stopCurrentAudio();
 
+      // Load and play audio file
       const { sound } = await Audio.Sound.createAsync(
         { uri: voiceFileUri },
         {
@@ -137,6 +176,7 @@ export default function DetectedSymptomsScreen() {
 
       soundRef.current = sound;
 
+      // Unload audio when playback finishes
       sound.setOnPlaybackStatusUpdate(async (status) => {
         if (status.isLoaded && status.didJustFinish) {
           try {
@@ -156,6 +196,7 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
+  // Cleanup audio when leaving screen
   useEffect(() => {
     return () => {
       if (soundRef.current) {
@@ -177,6 +218,7 @@ export default function DetectedSymptomsScreen() {
     };
   }, []);
 
+  // Opens language selection popup
   const openModal = () => {
     setSelectedLang(null);
     setModalVisible(true);
@@ -188,6 +230,7 @@ export default function DetectedSymptomsScreen() {
     }).start();
   };
 
+  // Closes language popup
   const closeModal = () => {
     Animated.timing(scaleAnim, {
       toValue: 0.8,
@@ -196,6 +239,7 @@ export default function DetectedSymptomsScreen() {
     }).start(() => setModalVisible(false));
   };
 
+  // Confirms selected language and refreshes audio
   const confirmLanguage = async () => {
     if (!selectedLang) return;
 
@@ -206,6 +250,7 @@ export default function DetectedSymptomsScreen() {
     await fetchAudioForLanguage(selectedLang);
   };
 
+  // Handles YES button and navigates to TellUsMore screen
   const handleYesPress = async () => {
     if (loading) return;
 
@@ -238,13 +283,16 @@ export default function DetectedSymptomsScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
+            {/* Header */}
             <View style={styles.headerBar}>
               <Text style={styles.headerText}>{t('detected_title')}</Text>
             </View>
 
+            {/* Symptoms display box */}
             <View style={styles.symptomBox}>
               <Text style={styles.symptomText}>{symptomText}</Text>
 
+              {/* Speaker button */}
               <Pressable
                 style={({ pressed }) => [
                   styles.speakerButton,
@@ -260,8 +308,10 @@ export default function DetectedSymptomsScreen() {
               </Pressable>
             </View>
 
+            {/* Confirmation question */}
             <Text style={styles.questionText}>{t('detected_question')}</Text>
 
+            {/* Yes / No buttons */}
             <View style={styles.buttonRow}>
               <Pressable
                 style={({ pressed }) => [
@@ -287,6 +337,7 @@ export default function DetectedSymptomsScreen() {
               </Pressable>
             </View>
 
+            {/* Back button */}
             <Pressable
               style={({ pressed }) => [
                 styles.backButton,
@@ -301,6 +352,7 @@ export default function DetectedSymptomsScreen() {
             </Pressable>
           </View>
 
+          {/* Footer navigation */}
           <View style={styles.footer}>
             <Pressable
               style={styles.footerItem}
@@ -321,6 +373,7 @@ export default function DetectedSymptomsScreen() {
             </Pressable>
           </View>
 
+          {/* Language selection modal */}
           <Modal transparent visible={modalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <Animated.View
@@ -391,6 +444,7 @@ export default function DetectedSymptomsScreen() {
             </View>
           </Modal>
 
+          {/* Error modal when no symptoms are detected */}
           <Modal transparent visible={errorModalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <View

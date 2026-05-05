@@ -1,3 +1,8 @@
+// TellUsMore2Screen.js
+// Purpose: Collects additional symptom duration information from the user.
+// This is an extra follow-up question screen used before severity loading.
+
+// React and React Native imports used to build this screen component.
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -13,17 +18,22 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreStyles';
 
+// Main screen component: TellUsMore2Screen
 export default function TellUsMore2Screen() {
+    // Router navigates to severity loading screen.
   const router = useRouter();
+    // Receives pain level from previous follow-up screen.
   const { painLevel } = useLocalSearchParams();
   const { t, setLang } = useLanguage();
 
+    // Stores selected duration answer.
   const [duration, setDuration] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
+    // Duration options displayed as answer buttons.
   const options = [
     {
       label: t('today'),
@@ -57,6 +67,7 @@ export default function TellUsMore2Screen() {
     },
   ];
 
+    // Opens language selection modal.
   const openModal = () => {
     setSelectedLang(null);
     setModalVisible(true);
@@ -76,6 +87,7 @@ export default function TellUsMore2Screen() {
     }).start(() => setModalVisible(false));
   };
 
+    // Confirms and applies selected language globally.
   const confirmLanguage = () => {
     if (selectedLang) {
       setLang(selectedLang);

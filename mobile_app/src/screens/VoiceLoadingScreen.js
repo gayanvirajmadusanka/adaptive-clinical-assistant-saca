@@ -1,3 +1,8 @@
+// VoiceLoadingScreen.js
+// Purpose: Converts recorded audio into base64, sends it to FastAPI, and navigates to DetectedSymptomsScreen.
+// This screen is used after the user records symptoms by voice.
+
+// React and React Native imports used to build this screen component.
 import React, { useEffect } from 'react';
 import {
   View,
@@ -17,8 +22,11 @@ import {
 } from '../utils/base64Audio';
 import { buildDetectedSymptomsParams } from '../utils/routeParams';
 
+// Main screen component: VoiceLoadingScreen
 export default function VoiceLoadingScreen() {
+    // Router is used to move to DetectedSymptomsScreen or go back on error.
   const router = useRouter();
+    // Receives recorded audio URI and selected language from VoiceInputScreen.
   const { audio_uri, language } = useLocalSearchParams();
 
   // Sends the recorded voice file to FastAPI when this screen opens.
@@ -68,6 +76,7 @@ export default function VoiceLoadingScreen() {
         resizeMode="cover"
       >
         <View style={styles.container}>
+                    {/* Spinner shown while audio is being processed by the backend. */}
           <ActivityIndicator size="large" color="#8B2E0A" />
           <Text style={styles.loadingText}>Processing your voice...</Text>
         </View>

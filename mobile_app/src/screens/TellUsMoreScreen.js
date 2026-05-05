@@ -1,3 +1,8 @@
+// TellUsMoreScreen.js
+// Purpose: Loads dynamic follow-up questions from FastAPI and collects user answers.
+// It supports question audio, progress tracking, back navigation, and language switching.
+
+// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -22,11 +27,14 @@ import { parseJsonParam } from '../utils/routeParams';
 import { buildAnswerList } from '../utils/triagePayloads';
 
 
+// Main screen component: TellUsMoreScreen
 export default function TellUsMoreScreen() {
+    // Router handles navigation to severity loading and back screens.
   const router = useRouter();
   const params = useLocalSearchParams();
   const { t, lang, setLang } = useLanguage();
 
+    // Read detected symptoms passed from DetectedSymptomsScreen.
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
 
   const [questions, setQuestions] = useState([]);
@@ -42,11 +50,13 @@ export default function TellUsMoreScreen() {
   const soundRef = useRef(null);
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
+    // Current question based on question index.
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length || 6;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
   // Loads follow-up questions from FastAPI for the selected language.
+    // Fetches follow-up questions from FastAPI based on detected symptoms and language.
   async function fetchQuestions(languageCode) {
     try {
       setLoadingQuestions(true);
@@ -69,6 +79,7 @@ export default function TellUsMoreScreen() {
     fetchQuestions(lang || 'en');
   }, []);
 
+    // Stops currently playing question audio and unloads it from memory.
   const stopCurrentAudio = async () => {
     try {
       if (soundRef.current) {
@@ -87,6 +98,7 @@ export default function TellUsMoreScreen() {
     }
   };
 
+    // Plays audio for the current question using the backend voice_b64 response.
   const playQuestionAudio = async () => {
     try {
       if (!currentQuestion?.voice_b64) {
@@ -153,10 +165,12 @@ export default function TellUsMoreScreen() {
     };
   }, []);
 
+    // Saves the selected answer option for the current question.
   const handleOptionPress = (option) => {
     setSelectedOption(option.id);
   };
 
+    // Saves current answer, moves to next question, or submits all answers to severity loading screen.
   const handleContinue = async () => {
     if (!selectedOption) {
       Alert.alert('Select answer', 'Please select one option.');
@@ -197,6 +211,7 @@ export default function TellUsMoreScreen() {
     }
   };
 
+    // Moves back to previous question, or previous screen if already on first question.
   const handleBack = async () => {
     await stopCurrentAudio();
 
@@ -226,6 +241,7 @@ export default function TellUsMoreScreen() {
   return () => backHandler.remove();
 }, [currentIndex, questions, answers]);
 
+    // Opens language selection modal.
   const openModal = () => {
     setSelectedLang(null);
     setModalVisible(true);
@@ -245,6 +261,7 @@ export default function TellUsMoreScreen() {
     }).start(() => setModalVisible(false));
   };
 
+    // Changes language and reloads follow-up questions from backend.
   const confirmLanguage = async () => {
     if (!selectedLang) return;
 
@@ -256,6 +273,7 @@ export default function TellUsMoreScreen() {
     await fetchQuestions(selectedLang);
   };
 
+    // Show loading UI while follow-up questions are being fetched.
   if (loadingQuestions) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -297,6 +315,7 @@ export default function TellUsMoreScreen() {
               Question {currentIndex + 1} of {totalQuestions}
             </Text>
 
+                        {/* Progress bar shows current question progress. */}
             <View style={styles.progressTrack}>
               <View
                 style={[
@@ -326,6 +345,7 @@ export default function TellUsMoreScreen() {
               </View>
 
               <View style={styles.optionsWrapper}>
+                                {/* Render answer options dynamically from backend. */}
                 {currentQuestion?.options?.map((option, index) => {
                   const isSelected = selectedOption === option.id;
 

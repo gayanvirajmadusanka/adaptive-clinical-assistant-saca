@@ -1,29 +1,37 @@
+// Styles for LanguageScreen.
+// Defines language selection layout, selected button state, and bilingual screen typography.
+
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
+    // Main safe area background.
+safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  wrapper: {
+    // Wrapper with status bar spacing.
+wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  background: {
+    // Background image area.
+background: {
     flex: 1,
   },
 
-  container: {
+    // Centered language selection container.
+container: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 25,
     paddingTop: 120,
   },
 
-  title: {
+    // Language screen title.
+title: {
     fontSize: 30,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
@@ -32,7 +40,8 @@ export default StyleSheet.create({
     marginBottom: 80,
   },
 
-  button: {
+    // Base language button.
+button: {
     width: '78%',
     height: 75,
     borderRadius: 28,
@@ -43,27 +52,32 @@ export default StyleSheet.create({
   },
 
   /* DEFAULT (ENGLISH STYLE FOR BOTH) */
-  defaultButton: {
+    // Default unselected button state.
+defaultButton: {
     backgroundColor: '#E8D5A0',
     borderColor: '#D4A96A',
   },
 
-  defaultText: {
+    // Default unselected text color.
+defaultText: {
     color: '#5C2E0A',
   },
 
   /* SELECTED → WARLPIRI STYLE */
-  selectedButton: {
+    // Selected language button state.
+selectedButton: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
     transform: [{ scale: 0.96 }],
   },
 
-  selectedText: {
+    // Selected language text color.
+selectedText: {
     color: '#F5E6C8',
   },
 
-  text: {
+    // Language option text.
+text: {
     fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
