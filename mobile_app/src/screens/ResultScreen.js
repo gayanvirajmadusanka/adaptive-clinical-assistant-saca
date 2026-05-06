@@ -123,7 +123,7 @@ export default function ResultScreen() {
     try {
       await stopAudio();
 
-      if (resultData?.voice_b64) {
+      if (resultData?.voice_b64 && resultData.voice_b64.length > 10000) {
         const fileUri = await saveBase64AudioToCache(
           resultData.voice_b64,
           'saca_result_voice.wav'
