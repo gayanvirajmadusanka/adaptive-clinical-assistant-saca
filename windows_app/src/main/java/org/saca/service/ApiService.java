@@ -187,14 +187,16 @@ public class ApiService {
     }
 
     private static HttpRequest buildHttpPostRequest(String json, String endPoint) {
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + endPoint))
-                .timeout(Duration.ofSeconds(TIMEOUT_S))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+        byte[] bodyBytes = json.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
-        return httpRequest;
+        return HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + endPoint))
+                .version(HttpClient.Version.HTTP_1_1)
+                .timeout(Duration.ofSeconds(TIMEOUT_S))
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
+                .build();
     }
 
     private static HttpResponse<String> getHttpResponse(HttpRequest request) throws IOException, InterruptedException {
