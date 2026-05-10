@@ -26,6 +26,7 @@ YES_NO_QUESTION_IDS = {
     for question in questions
     if question.get('type') == 'yes_no'
 }
+YES_NO_QUESTION_IDS.add('confirm_symptoms')
 
 # override keywords for options where label text is not naturally spoken
 _EN_KEYWORD_OVERRIDES = {
@@ -243,6 +244,7 @@ def _resolve_warlpiri(tmp_path: str, question_id: str, base: dict) -> dict:
     if not result.get('recognized') or not result.get('matched_keywords'):
         return _unrecognised(base, 'Lawa nyangu. Milkikarriya.')
 
+    # pick the best keyword using lowest DTW distance
     best_keyword = min(result['matched_keywords'], key=result['matched_keywords'].get)
     answer_id = _resolve_keyword(best_keyword, question_id)
 
