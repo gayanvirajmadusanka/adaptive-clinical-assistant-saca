@@ -122,6 +122,7 @@ public class TextInputController implements Initializable {
         try {
             NavBarManager.setCurrentView("/view/TextResultView.fxml");
             CacheManager.setTextResultRS(result);
+            CacheManager.setIsTextResultLoadFromShow(false);
 
             FXMLLoader resultLoader = new FXMLLoader(
                     getClass().getResource("/view/TextResultView.fxml"),
