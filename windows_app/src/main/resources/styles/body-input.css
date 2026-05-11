@@ -1,0 +1,227 @@
+.body-bg {
+}
+
+.body-card-container {
+    -fx-alignment: TOP_CENTER;
+}
+
+.body-header-bar {
+    -fx-background-color: #B5523B;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 12 20 12 20;
+    -fx-min-height: 76px;
+    -fx-pref-height: 76px;
+}
+
+.body-back-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-min-width: 38px; -fx-min-height: 38px;
+    -fx-max-width: 38px; -fx-max-height: 38px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.body-back-btn:hover   { -fx-background-color: rgba(0,0,0,0.12); }
+.body-back-btn:pressed { -fx-background-color: rgba(0,0,0,0.22); }
+
+.body-pen-icon {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-min-width: 38px; -fx-min-height: 38px;
+    -fx-max-width: 38px; -fx-max-height: 38px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.body-title {
+    -fx-text-fill: #1a0e00;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-alignment: CENTER;
+}
+
+.body-hint-label {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 15px;
+    -fx-text-fill: #7a6a52;
+    -fx-alignment: CENTER;
+}
+
+.parts-list-title {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a2a1a;
+    -fx-padding: 0 0 6 2;
+}
+
+.parts-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+.parts-scroll .viewport { -fx-background-color: transparent; }
+
+.body-part-row {
+    -fx-background-color: #fffdf8;
+    -fx-background-radius: 50;
+    -fx-border-color: #e0cdb0;
+    -fx-border-radius: 50;
+    -fx-border-width: 1.5;
+    -fx-padding: 8 8 8 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);
+}
+.body-part-row:hover {
+    -fx-background-color: #ede0ce;
+    -fx-border-color: #B5523B;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.14), 7, 0, 0, 2);
+}
+
+
+.body-part-name {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a2a1a;
+}
+
+.body-speaker-btn {
+    -fx-background-color: #D2A84B;
+    -fx-background-radius: 50;
+    -fx-min-width: 30px; -fx-min-height: 30px;
+    -fx-max-width: 30px; -fx-max-height: 30px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 4, 0, 0, 1);
+}
+.body-speaker-btn:hover   { -fx-background-color: #e0b855; }
+.body-speaker-btn:pressed { -fx-background-color: #b08830; }
+
+.symptom-select-btn {
+    -fx-background-color: #fffdf8;
+    -fx-border-color: #e0cdb0;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #3a2a1a;
+    -fx-padding: 14 20 14 20;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 3, 0, 0, 1);
+}
+.symptom-select-btn:hover { -fx-background-color: #ede0ce; -fx-border-color: #B5523B; }
+
+.symptom-select-btn-active {
+    -fx-background-color: #B5523B;
+    -fx-border-color: #8a3020;
+    -fx-text-fill: #f5ead4;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(181,82,59,0.38), 8, 0, 0, 2);
+}
+
+.body-confirm-btn {
+    -fx-background-color: #c8902a;
+    -fx-text-fill: #1a1000;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-padding: 16 40 16 40;
+    -fx-cursor: hand;
+    -fx-border-color: #1a1000;
+    -fx-border-width: 2;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 6, 0, 0, 2);
+}
+.body-confirm-btn:hover   { -fx-background-color: #d9a030; }
+.body-confirm-btn:pressed { -fx-background-color: #b07820; }
+
+.gender-toggle-bar {
+    -fx-background-color: #e8d9c0;
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-border-color: #c8b99a;
+    -fx-border-width: 1.5;
+    -fx-padding: 4;
+}
+
+.gender-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-border-color: transparent;
+    -fx-border-radius: 50;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7a6a52;
+    -fx-padding: 8 28 8 28;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.gender-btn-active {
+    -fx-background-color: #B5523B;
+    -fx-text-fill: #f5ead4;
+}
+
+.gender-btn:hover {
+    -fx-background-color: rgba(181,82,59,0.15);
+    -fx-text-fill: #3a2a1a;
+}
+
+.gender-btn-active:hover {
+    -fx-background-color: #c45e44;
+    -fx-text-fill: #f5ead4;
+}
+
+.gender-toggle-bar-header {
+    -fx-background-color: rgba(0,0,0,0.20);
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-border-color: rgba(255,255,255,0.25);
+    -fx-border-width: 1.5;
+    -fx-padding: 3;
+}
+
+.gender-btn-header {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50;
+    -fx-border-color: transparent;
+    -fx-border-radius: 50;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255,255,255,0.75);
+    -fx-padding: 6 18 6 18;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.gender-btn-header-active {
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-text-fill: #ffffff;
+}
+
+.gender-btn-header:hover {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-text-fill: #ffffff;
+}
+
+.gender-btn-header-active:hover {
+    -fx-background-color: rgba(255,255,255,0.30);
+    -fx-text-fill: #ffffff;
+}

@@ -205,14 +205,40 @@ public class TextResultController implements Initializable {
     }
 
     private void navigateToTextInput(Scene scene) {
+        AudioService.stop();
+
         try {
-            NavBarManager.setCurrentView("/view/TextInputView.fxml");
-            CacheManager.clearTextResultRS();
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/view/TextInputView.fxml"),
-                    LanguageManager.getBundle()
-            );
-            scene.setRoot(root);
+            // If came from body map then go back to BodySymptomsView with part restored
+            if (CacheManager.isIsTextResultLoadFromShow()
+                    && !CacheManager.getCachedBodyPartKey().isEmpty()) {
+
+                String partKey = CacheManager.getCachedBodyPartKey();
+                org.saca.model.body.BodyPart part = org.saca.model.body.BodyPartsData.get(partKey);
+
+                CacheManager.setIsTextResultLoadFromShow(false);
+                NavBarManager.setCurrentView("/view/BodySymptomsView.fxml");
+
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/view/BodySymptomsView.fxml"),
+                        LanguageManager.getBundle()
+                );
+                Parent root = loader.load();
+                if (part != null) {
+                    ((BodySymptomsController) loader.getController()).setPart(part);
+                }
+                scene.setRoot(root);
+
+            } else {
+                // If came from text input, go back to TextInputView
+                CacheManager.setIsTextResultLoadFromShow(false);
+                NavBarManager.setCurrentView("/view/TextInputView.fxml");
+                CacheManager.clearTextResultRS();
+                Parent root = FXMLLoader.load(
+                        getClass().getResource("/view/TextInputView.fxml"),
+                        LanguageManager.getBundle()
+                );
+                scene.setRoot(root);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -247,7 +273,7 @@ public class TextResultController implements Initializable {
 
     private void setSpeakerStopIcon() {
         speakerIcon.setImage(new Image(
-                getClass().getResource("/icons/stop.png").toExternalForm()
+                getClass().getResource("/icons/mute.png").toExternalForm()
         ));
     }
 
