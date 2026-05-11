@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.saca.controller.BodyInputController"
+            stylesheets="@/styles/style.css, @/styles/body-input.css"
+            styleClass="root">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+            <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <left>
+        <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true"
+                    pannable="false" styleClass="center-scroll">
+            <content>
+                <StackPane styleClass="body-bg">
+
+                    <VBox alignment="TOP_CENTER"
+                          spacing="20"
+                          maxWidth="680"
+                          styleClass="body-card-container">
+
+                        <padding><Insets top="20" right="30" bottom="30" left="30"/></padding>
+
+                        <!-- HEADER -->
+                        <HBox alignment="CENTER" styleClass="body-header-bar">
+
+                            <Button onAction="#handleBack" styleClass="body-back-btn">
+                                <graphic>
+                                    <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                        <image><Image url="@/icons/back-arrow.png"/></image>
+                                    </ImageView>
+                                </graphic>
+                            </Button>
+
+                            <Label text="%show_option"
+                                   styleClass="body-title"
+                                   HBox.hgrow="ALWAYS"
+                                   maxWidth="Infinity"
+                                   alignment="CENTER"/>
+
+                            <HBox alignment="CENTER" spacing="0" styleClass="gender-toggle-bar-header">
+                                <Button fx:id="maleBtn"
+                                        text="%body_map_male"
+                                        styleClass="gender-btn-header, gender-btn-header-active"
+                                        onAction="#handleMale"/>
+                                <Button fx:id="femaleBtn"
+                                        text="%body_map_female"
+                                        styleClass="gender-btn-header"
+                                        onAction="#handleFemale"/>
+                            </HBox>
+
+                        </HBox>
+
+                        <Label text="%body_map_hint"
+                               styleClass="body-hint-label"
+                               alignment="CENTER"
+                               maxWidth="Infinity"
+                               wrapText="true"/>
+
+                        <!-- BODY IMAGE (LEFT) + PARTS LIST (RIGHT) -->
+                        <HBox spacing="24" maxWidth="Infinity" alignment="TOP_CENTER">
+
+                            <!-- Image with transparent zone overlay -->
+                            <StackPane fx:id="bodyImagePane"
+                                       prefWidth="360" minWidth="300" maxWidth="380">
+
+                                <ImageView fx:id="bodyImage"
+                                           fitWidth="360" fitHeight="640"
+                                           preserveRatio="true">
+                                    <image><Image url="@/images/male_image.png"/></image>
+                                </ImageView>
+
+                                <!-- Invisible clickable zones drawn in controller -->
+                                <Pane fx:id="zonesPane" prefWidth="360" prefHeight="640"/>
+
+                            </StackPane>
+
+                            <!-- Parts list -->
+                            <VBox HBox.hgrow="ALWAYS" spacing="10" alignment="TOP_LEFT">
+
+                                <Label text="%body_parts_label" styleClass="parts-list-title"/>
+
+                                <ScrollPane fitToWidth="true"
+                                            styleClass="parts-scroll"
+                                            maxHeight="600">
+                                    <content>
+                                        <VBox fx:id="partsListBox" spacing="8">
+                                            <padding>
+                                                <Insets top="4" right="2" bottom="4" left="2"/>
+                                            </padding>
+                                        </VBox>
+                                    </content>
+                                </ScrollPane>
+
+                            </VBox>
+
+                        </HBox>
+
+                    </VBox>
+
+                </StackPane>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
