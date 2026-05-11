@@ -21,6 +21,10 @@ export const translations = {
     no: 'NO',
 
     text_input_title: 'Text',
+    speak_option: 'Speak',
+    speak_hint: 'Click on mic to record voice',
+    recording_hint: 'Recording... tap to stop',
+    processing_voice: 'Processing your voice...',
     text_input_question: 'What can I help with?',
     text_placeholder: 'Describe your symptoms and press Continue',
     continue: 'Continue',
@@ -125,6 +129,10 @@ export const translations = {
     no: 'LAWA',
 
     text_input_title: 'Yimi',
+    speak_option: 'Wangka',
+    speak_hint: 'Mic-kurra nyampu, wangka record-ki',
+    recording_hint: 'Recording... stop-ki mic nyampuju',
+    processing_voice: 'Voice nyanyi...',
     text_input_question: 'Nyiya ka nyuntu nyampuju?',
     text_placeholder: 'Nyuntu symptoms yimi manu yangka',
     continue: 'Yangka',
