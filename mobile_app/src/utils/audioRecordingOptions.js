@@ -1,8 +1,8 @@
 import { Audio } from 'expo-av';
 
-export const recordingOptions = {
+export const WAV_RECORDING_OPTIONS = {
   android: {
-    extension: '.m4a',
+    extension: '.mp4',
     outputFormat: Audio.AndroidOutputFormat.MPEG_4,
     audioEncoder: Audio.AndroidAudioEncoder.AAC,
     sampleRate: 44100,
