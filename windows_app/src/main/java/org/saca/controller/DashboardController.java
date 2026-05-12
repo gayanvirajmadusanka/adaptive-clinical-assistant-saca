@@ -59,6 +59,17 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void handleBodyCardClick(MouseEvent mouseEvent) {
-        System.out.println("Body card clicked");
+        try {
+            NavBarManager.setCurrentView("/view/BodyInputView.fxml");
+
+            Parent speakView = FXMLLoader.load(
+                    getClass().getResource("/view/BodyInputView.fxml"),
+                    LanguageManager.getBundle()
+            );
+            sceneNode.getScene().setRoot(speakView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

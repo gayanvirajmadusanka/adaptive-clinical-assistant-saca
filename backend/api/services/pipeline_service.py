@@ -5,6 +5,8 @@ Orchestrates answer resolution, ML inference, and symptom translation.
 import json
 import os
 import tempfile
+
+from backend.api.services.audio_service import convert_to_wav
 from backend.nlp.preprocessor import preprocess_text
 from backend.nlp.symptom_extractor import extract_symptoms
 from backend.translation.warlpiri_text import translate as translate_warlpiri
@@ -116,11 +118,9 @@ def process_audio(audio_bytes: bytes, language: str) -> dict:
     :param language: 'en' or 'wp'
     :return: dict with symptoms_en, symptoms_wp, confidence
     """
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(audio_bytes)
-        tmp_path = tmp.name
-
+    tmp_path = None
     try:
+        tmp_path = convert_to_wav(audio_bytes)
         if language == 'en':
             asr          = transcribe(tmp_path)
             english_text = asr.get("text", "") or ""
@@ -149,7 +149,7 @@ def process_audio(audio_bytes: bytes, language: str) -> dict:
         return {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}
 
     finally:
-        if os.path.exists(tmp_path):
+        if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
 
 

@@ -5,10 +5,9 @@ Resolves spoken audio answers to answer IDs.
 import base64
 import json
 import os
-import tempfile
 
 from backend.api.schemas.request_response import AnswerAudioResponse
-from backend.api.services.audio_service import get_unrecognized_audio, get_answer_selected_audio
+from backend.api.services.audio_service import get_unrecognized_audio, get_answer_selected_audio, convert_to_wav
 from backend.constants import Language
 from backend.speech.audio_english import transcribe as transcribe_english
 
@@ -26,6 +25,7 @@ YES_NO_QUESTION_IDS = {
     for question in questions
     if question.get('type') == 'yes_no'
 }
+YES_NO_QUESTION_IDS.add('confirm_symptoms')
 
 # override keywords for options where label text is not naturally spoken
 _EN_KEYWORD_OVERRIDES = {
@@ -128,12 +128,9 @@ def _b64_to_tempfile(audio_b64: str) -> str | None:
     """
     try:
         audio_bytes = base64.b64decode(audio_b64)
-        tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
-        tmp.write(audio_bytes)
-        tmp.close()
-        return tmp.name
+        return convert_to_wav(audio_bytes)
     except Exception as e:
-        print(f'Failed to decode audio b64: {e}')
+        print(f'Failed to decode/convert audio: {e}')
         return None
 
 
@@ -242,6 +239,7 @@ def _resolve_warlpiri(tmp_path: str, question_id: str, base: dict) -> dict:
     if not result.get('recognized') or not result.get('matched_keywords'):
         return _unrecognised(base, 'Lawa nyangu. Milkikarriya.')
 
+    # pick the best keyword using lowest DTW distance
     best_keyword = min(result['matched_keywords'], key=result['matched_keywords'].get)
     answer_id = _resolve_keyword(best_keyword, question_id)
 

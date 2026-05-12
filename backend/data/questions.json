@@ -267,6 +267,12 @@
       }
     ]
   },
+  "confirmation": {
+    "id": "confirm_symptoms",
+    "text": "Does this match you?",
+    "text_wp": "Nyampu nyuntu-nyangu?",
+    "type": "yes_no"
+  },
   "critical_symptoms": [
     "loss of consciousness",
     "chest pain",

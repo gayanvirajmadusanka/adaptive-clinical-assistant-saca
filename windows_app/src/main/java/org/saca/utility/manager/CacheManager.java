@@ -27,6 +27,14 @@ public class CacheManager {
 
     private static List<String> cachedSymptomsEn = new ArrayList<>();
 
+    private static boolean isTextResultLoadFromShow = false;
+
+    private static String cachedBodyPartKey = "";
+
+    private static List<String> cachedBodySymptomIds = new ArrayList<>();
+
+    private static List<String> cachedBodySymptomLabels = new ArrayList<>();
+
     public static TextResultRS getTextResultRS() {
         return textResultRS;
     }
@@ -107,11 +115,55 @@ public class CacheManager {
         return cachedSymptomsEn;
     }
 
-    public static void setCachedSymptomsEn(List<String> symptoms) {
-        cachedSymptomsEn = symptoms != null ? symptoms : new ArrayList<>();
+    public static void setCachedSymptomsEn(List<String> s) {
+        cachedSymptomsEn = s != null ? s : new ArrayList<>();
     }
 
     public static void clearCachedSymptomsEn() {
         cachedSymptomsEn = new ArrayList<>();
+    }
+
+    public static boolean isIsTextResultLoadFromShow() {
+        return isTextResultLoadFromShow;
+    }
+
+    public static void setIsTextResultLoadFromShow(boolean v) {
+        isTextResultLoadFromShow = v;
+    }
+
+    public static String getCachedBodyPartKey() {
+        return cachedBodyPartKey;
+    }
+
+    public static void setCachedBodyPartKey(String key) {
+        cachedBodyPartKey = key != null ? key : "";
+    }
+
+    public static void clearCachedBodyPartKey() {
+        cachedBodyPartKey = "";
+    }
+
+    public static List<String> getCachedBodySymptomIds() {
+        return cachedBodySymptomIds;
+    }
+
+    public static void setCachedBodySymptomIds(List<String> ids) {
+        cachedBodySymptomIds = ids != null ? ids : new ArrayList<>();
+    }
+
+    public static void clearCachedBodySymptomIds() {
+        cachedBodySymptomIds = new ArrayList<>();
+    }
+
+    public static List<String> getCachedBodySymptomLabels() {
+        return cachedBodySymptomLabels;
+    }
+
+    public static void setCachedBodySymptomLabels(List<String> labels) {
+        cachedBodySymptomLabels = labels != null ? labels : new ArrayList<>();
+    }
+
+    public static void clearCachedBodySymptomLabels() {
+        cachedBodySymptomLabels = new ArrayList<>();
     }
 }
