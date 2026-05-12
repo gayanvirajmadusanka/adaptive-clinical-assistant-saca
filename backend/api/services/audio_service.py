@@ -8,6 +8,8 @@ import io
 import json
 import logging
 import os
+import subprocess
+import tempfile
 
 from pydub import AudioSegment
 from pydub.effects import normalize
@@ -277,3 +279,37 @@ def get_unrecognized_audio(language: str) -> str:
         logger.error(f'could_not_catch audio missing for language: {language}')
         return _to_b64(AudioSegment.silent(duration=100))
     return _to_b64(clip)
+
+
+def convert_to_wav(audio_bytes: bytes) -> str:
+    """
+    Write audio bytes to a temp file and convert to 16kHz mono WAV using ffmpeg.
+    Supports any format ffmpeg handles (WAV, M4A, MP3, OGG, etc).
+    Returns path to the converted WAV temp file — caller is responsible for cleanup.
+    :param audio_bytes: Raw audio bytes in any format
+    :return: Path to converted WAV file
+    :raises RuntimeError: If conversion fails
+    """
+
+    tmp_input = tempfile.NamedTemporaryFile(delete=False, suffix='.audio')
+    try:
+        tmp_input.write(audio_bytes)
+        tmp_input.close()
+
+        wav_path = tmp_input.name + '_converted.wav'
+        result = subprocess.run([
+            'ffmpeg', '-i', tmp_input.name,
+            '-ar', '16000',
+            '-ac', '1',
+            '-f', 'wav',
+            wav_path,
+            '-y', '-loglevel', 'error'
+        ], capture_output=True)
+
+        if result.returncode != 0:
+            raise RuntimeError(f'ffmpeg conversion failed: {result.stderr.decode()}')
+
+        return wav_path
+    finally:
+        if os.path.exists(tmp_input.name):
+            os.remove(tmp_input.name)
