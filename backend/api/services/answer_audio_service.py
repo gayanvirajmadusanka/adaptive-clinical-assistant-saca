@@ -12,7 +12,7 @@ from backend.api.services.audio_service import get_unrecognized_audio, get_answe
 from backend.constants import Language
 from backend.speech.audio_english import transcribe as transcribe_english
 
-# from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
+from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
 
 _questions_path = os.path.join(os.path.dirname(__file__), '../../data/questions.json')
 with open(_questions_path, encoding='utf-8') as file:
@@ -237,8 +237,7 @@ def _resolve_warlpiri(tmp_path: str, question_id: str, base: dict) -> dict:
     :param base: Base dict passed through to _recognised/_unrecognised helpers
     :return: Recognition result dict
     """
-    # result = recognize_warlpiri(tmp_path) TODO: implement recognize function in audio_warlpiri.py and uncomment this line
-    result = {}
+    result = recognize_warlpiri(tmp_path)
 
     if not result.get('recognized') or not result.get('matched_keywords'):
         return _unrecognised(base, 'Lawa nyangu. Milkikarriya.')
