@@ -116,8 +116,12 @@ public class TellUsMoreTextController implements Initializable {
         titleBuilder.append(LanguageManager.get("question"));
         titleBuilder.append(" ");
         titleBuilder.append((index + 1));
-        titleBuilder.append(" of ");
+        titleBuilder.append(" ");
+        titleBuilder.append(LanguageManager.get("of"));
+        titleBuilder.append(" ");
         titleBuilder.append(total);
+
+        progressLabel.setText(titleBuilder.toString());
 
         progressLabel.setText(titleBuilder.toString());
         progressBar.setProgress((double) (index + 1) / total);
