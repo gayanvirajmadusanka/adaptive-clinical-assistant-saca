@@ -7,6 +7,7 @@ export const translations = {
     text: 'TEXT',
     voice: 'VOICE',
     body: 'BODY',
+    show:'SHOW',
 
     home: 'Home',
     language: 'Language',
@@ -115,6 +116,7 @@ export const translations = {
     text: 'YIMI',
     voice: 'WANGKA',
     body: 'BODY',
+    show: 'Milkikarriya',
 
     home: 'Ngurra',
     language: 'Wangka',

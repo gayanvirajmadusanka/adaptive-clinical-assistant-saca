@@ -133,13 +133,14 @@ export default function InputScreen() {
                 styles.bodyCard,
                 pressed && styles.cardPressedGrey,
               ]}
+              onPress={() => router.push('/bodyinput')} // Navigate to body input screen
             >
               <Image
                 source={require('../../assets/images/body.png')}
                 style={styles.cardImage}
                 resizeMode="contain"
               />
-              <Text style={styles.cardText}>{t('body')}</Text>
+              <Text style={styles.cardText}>{t('show')}</Text>
             </Pressable>
           </View>
 
