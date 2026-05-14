@@ -17,7 +17,7 @@ import os
 import librosa
 import numpy as np
 
-_BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_BASE_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../backend")
 _TRAIN_DIR  = os.path.join(_BASE_DIR, "data", "recordings", "train_set")
 _DATA_DIR   = os.path.join(_BASE_DIR, "data", "warlpiri")
 _KSM_PATH   = os.path.join(_DATA_DIR, "keyword_symptom_map.json")
