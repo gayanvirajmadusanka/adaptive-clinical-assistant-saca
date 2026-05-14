@@ -14,18 +14,6 @@
     -fx-pref-height: 76px;
 }
 
-.body-back-btn {
-    -fx-background-color: transparent;
-    -fx-background-radius: 50;
-    -fx-min-width: 38px; -fx-min-height: 38px;
-    -fx-max-width: 38px; -fx-max-height: 38px;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-.body-back-btn:hover   { -fx-background-color: rgba(0,0,0,0.12); }
-.body-back-btn:pressed { -fx-background-color: rgba(0,0,0,0.22); }
-
 .body-pen-icon {
     -fx-background-color: transparent;
     -fx-background-radius: 50;

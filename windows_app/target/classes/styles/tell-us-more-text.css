@@ -18,26 +18,6 @@
     -fx-pref-height: 80px;
 }
 
-.tell-back-btn {
-    -fx-background-color: transparent;
-    -fx-background-radius: 50;
-    -fx-min-width: 38px;
-    -fx-min-height: 38px;
-    -fx-max-width: 38px;
-    -fx-max-height: 38px;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.tell-back-btn:hover {
-    -fx-background-color: rgba(0, 0, 0, 0.10);
-}
-
-.tell-back-btn:pressed {
-    -fx-background-color: rgba(0, 0, 0, 0.18);
-}
-
 .tell-header-title {
     -fx-text-fill: #1a0e00;
     -fx-font-size: 28px;

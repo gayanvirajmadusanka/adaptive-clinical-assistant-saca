@@ -18,29 +18,6 @@
     -fx-pref-height: 80px;
 }
 
-.result-back-btn {
-    -fx-background-color: transparent;
-    -fx-background-radius: 50;
-    -fx-text-fill: #2e3d35;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-min-width: 38px;
-    -fx-min-height: 38px;
-    -fx-max-width: 38px;
-    -fx-max-height: 38px;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.result-back-btn:hover {
-    -fx-background-color: rgba(0, 0, 0, 0.10);
-}
-
-.result-back-btn:pressed {
-    -fx-background-color: rgba(0, 0, 0, 0.18);
-}
-
 .result-header-title {
     -fx-text-fill: #1a0e00;
     -fx-font-size: 28px;

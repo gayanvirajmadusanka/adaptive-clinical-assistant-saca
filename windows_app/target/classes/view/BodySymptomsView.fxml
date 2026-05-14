@@ -34,10 +34,12 @@
 
                         <padding><Insets top="30" right="36" bottom="60" left="36"/></padding>
 
-                        <!-- HEADER -->
                         <HBox alignment="CENTER" styleClass="body-header-bar">
 
-                            <Button onAction="#handleBack" styleClass="body-back-btn">
+                            <Button onAction="#handleBack" styleClass="header-back-btn">
+                                <tooltip>
+                                    <Tooltip text="%back"/>
+                                </tooltip>
                                 <graphic>
                                     <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
                                         <image><Image url="@/icons/back-arrow.png"/></image>
@@ -52,7 +54,7 @@
                                    alignment="CENTER"/>
 
                             <Button fx:id="partSpeakerBtn"
-                                    styleClass="body-back-btn"
+                                    styleClass="write-pen-icon"
                                     onAction="#handlePartSpeak">
                                 <graphic>
                                     <ImageView fx:id="partSpeakerIcon"
