@@ -392,10 +392,10 @@ public class TellUsMoreVoiceController implements Initializable {
     private void submitVoiceAndProceed(QuestionRS question, String audioB64, String fallbackAnswerId) {
         stage = (Stage) questionCard.getScene().getWindow();
 
-        AnswerAudioRQ rq = new AnswerAudioRQ();
-        rq.setAudioB64(audioB64);
-        rq.setQuestionId(question.getId());
-        rq.setLanguage(LanguageManager.isLanguageEnglish()
+        AnswerAudioRQ answerAudioRQ = new AnswerAudioRQ();
+        answerAudioRQ.setAudioB64(audioB64);
+        answerAudioRQ.setQuestionId(question.getId());
+        answerAudioRQ.setLanguage(LanguageManager.isLanguageEnglish()
                 ? AppsConstants.AppLanguage.EN.getShortDescription()
                 : AppsConstants.AppLanguage.WP.getShortDescription());
 
@@ -412,7 +412,7 @@ public class TellUsMoreVoiceController implements Initializable {
             Parent voiceView = stage.getScene().getRoot();
 
             ApiService.submitAnswerAudio(
-                    rq,
+                    answerAudioRQ,
                     rs -> Platform.runLater(() -> {
                         loadingCtrl.stop();
                         stage.getScene().setRoot(voiceView);
@@ -700,8 +700,14 @@ public class TellUsMoreVoiceController implements Initializable {
     }
 
     private String getLevelStyle(int index, int total) {
-        if (total <= 1) return "option-level-0";
-        if (total == 2) return index == 0 ? "option-level-0" : "option-level-1";
+        if (total <= 1) {
+            return "option-level-0";
+        }
+
+        if (total == 2) {
+            return "option-level-1";
+        }
+
         int level = Math.round((float) index / (total - 1) * 4);
         return "option-level-" + level;
     }
