@@ -178,7 +178,16 @@ public class TellUsMoreVoiceController implements Initializable {
         QuestionRS question = questions.get(index);
         int total = questions.size();
 
-        progressLabel.setText("Question " + (index + 1) + " of " + total);
+        StringBuilder labelSb = new StringBuilder();
+        labelSb.append(LanguageManager.get("question"));
+        labelSb.append(" ");
+        labelSb.append((index + 1));
+        labelSb.append(" ");
+        labelSb.append(LanguageManager.get("of"));
+        labelSb.append(" ");
+        labelSb.append(total);
+
+        progressLabel.setText(labelSb.toString());
         progressBar.setProgress((double) (index + 1) / total);
         questionText.setText(question.getText());
 
@@ -210,14 +219,9 @@ public class TellUsMoreVoiceController implements Initializable {
             AudioRecorderService.restoreRecording(savedAudio);
             miniDurationLabel.setText(String.format("%.2f", savedDuration != null ? savedDuration : 0.0));
             showMiniPlayback();
-            voiceAnswerLabel.setText(LanguageManager.get("voice_answer_recorded"));
-            voiceAnswerLabel.setVisible(true);
-            voiceAnswerLabel.setManaged(true);
         } else {
             AudioRecorderService.clearRecording();
             hideMiniPlayback();
-            voiceAnswerLabel.setVisible(false);
-            voiceAnswerLabel.setManaged(false);
         }
 
         boolean isLast = (index == total - 1);
@@ -306,7 +310,9 @@ public class TellUsMoreVoiceController implements Initializable {
             micBtn.getStyleClass().remove("speak-mic-btn-recording");
             micHintLabel.setText(LanguageManager.get("speak_hint"));
 
-            if (!AudioRecorderService.hasRecording()) return;
+            if (!AudioRecorderService.hasRecording()) {
+                return;
+            }
 
             String questionId = questions.get(currentIndex).getId();
             String audioB64 = AudioRecorderService.getBase64Wav();
@@ -318,9 +324,7 @@ public class TellUsMoreVoiceController implements Initializable {
             miniDurationLabel.setText(String.format("%.2f", duration));
             showMiniPlayback();
 
-            voiceAnswerLabel.setText(LanguageManager.get("voice_answer_recorded"));
-            voiceAnswerLabel.setVisible(true);
-            voiceAnswerLabel.setManaged(true);
+            submitVoiceForHighlight(questions.get(currentIndex), audioB64);
         });
     }
 
@@ -350,11 +354,9 @@ public class TellUsMoreVoiceController implements Initializable {
         voiceDurationMap.remove(questionId);
         resolvedAnswers.remove(questionId);
 
-        voiceAnswerLabel.setVisible(false);
-        voiceAnswerLabel.setManaged(false);
-
         currentSelectedId = selectedAnswers.get(questionId);
         currentOptionButtons.forEach(b -> b.getStyleClass().remove("option-btn-selected"));
+
         if (currentSelectedId != null) {
             QuestionRS current = questions.get(currentIndex);
             for (int i = 0; i < current.getOptions().size(); i++) {
@@ -382,7 +384,7 @@ public class TellUsMoreVoiceController implements Initializable {
             return;
         }
 
-        if (voiceAudio != null) {
+        if (voiceAudio != null && resolvedId == null) {
             submitVoiceAndProceed(current, voiceAudio, selectedId);
         } else {
             proceedToNext(current.getId(), resolvedId != null ? resolvedId : selectedId);
@@ -422,24 +424,17 @@ public class TellUsMoreVoiceController implements Initializable {
                             answerId = rs.getAnswerId();
                             resolvedAnswers.put(question.getId(), answerId);
                             highlightOptionById(answerId);
-                            voiceAnswerLabel.setText(LanguageManager.get("voice_answer_recorded"));
+                            proceedToNext(question.getId(), answerId);
                         } else if (fallbackAnswerId != null) {
                             answerId = fallbackAnswerId;
                             resolvedAnswers.put(question.getId(), answerId);
-                            String msg = rs.getMessage() != null
-                                    ? rs.getMessage() + " — using selected answer"
-                                    : LanguageManager.get("voice_not_recognized");
-                            voiceAnswerLabel.setText(msg);
+                            proceedToNext(question.getId(), answerId);
                         } else {
-                            voiceAnswerLabel.setText(rs.getMessage() != null
+                            String msg = rs.getMessage() != null
                                     ? rs.getMessage()
-                                    : LanguageManager.get("voice_not_recognized"));
-                            voiceAnswerLabel.setVisible(true);
-                            voiceAnswerLabel.setManaged(true);
-                            return;
+                                    : LanguageManager.get("voice_not_recognized");
+                            showUnrecognizedPopup(msg, rs.getVoiceB64());
                         }
-
-                        proceedToNext(question.getId(), answerId);
                     }),
                     err -> Platform.runLater(() -> {
                         loadingCtrl.stop();
@@ -459,6 +454,59 @@ public class TellUsMoreVoiceController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void submitVoiceForHighlight(QuestionRS question, String audioB64) {
+        micBtn.setDisable(true);
+        continueBtn.setDisable(true);
+
+        AnswerAudioRQ answerAudioRQ = new AnswerAudioRQ();
+        answerAudioRQ.setAudioB64(audioB64);
+        answerAudioRQ.setQuestionId(question.getId());
+        answerAudioRQ.setLanguage(LanguageManager.isLanguageEnglish()
+                ? AppsConstants.AppLanguage.EN.getShortDescription()
+                : AppsConstants.AppLanguage.WP.getShortDescription());
+
+        ApiService.submitAnswerAudio(
+                answerAudioRQ,
+                rs -> Platform.runLater(() -> {
+                    micBtn.setDisable(false);
+                    continueBtn.setDisable(false);
+
+                    if (rs.isRecognized() && rs.getAnswerId() != null) {
+                        // Highlight the matched option, user can still review before continuing
+                        String answerId = rs.getAnswerId();
+                        resolvedAnswers.put(question.getId(), answerId);
+                        highlightOptionById(answerId);
+                    } else {
+                        // Not recognized, show popup with audio playback
+                        String msg = rs.getMessage() != null
+                                ? rs.getMessage()
+                                : LanguageManager.get("voice_not_recognized");
+                        showUnrecognizedPopup(msg, rs.getVoiceB64());
+                    }
+                }),
+                err -> Platform.runLater(() -> {
+                    micBtn.setDisable(false);
+                    continueBtn.setDisable(false);
+                    DialogManager.errorDialog("Error", "Could not process voice answer", err);
+                })
+        );
+    }
+
+    private void showUnrecognizedPopup(String msg, String voiceB64) {
+        if (voiceB64 != null && !voiceB64.isBlank()) {
+            AudioService.playBase64Wav(voiceB64, err -> {
+            }, () -> {
+            });
+        }
+
+        DialogManager.warningDialogWithOnHidden(
+                LanguageManager.get("voice_not_recognized_title"),
+                LanguageManager.get("voice_not_recognized"),
+                msg,
+                AudioService::stop
+        );
     }
 
     private void proceedToNext(String questionId, String answerId) {
@@ -484,8 +532,10 @@ public class TellUsMoreVoiceController implements Initializable {
     }
 
     private void submitAllAnswers() {
-        VoiceResultRS voiceResultRS = CacheManager.getVoiceResultRS();
-        if (voiceResultRS == null) return;
+        List<String> symptomsEn = resolveSymptomsEn();
+        if (symptomsEn == null || symptomsEn.isEmpty()) {
+            return;
+        }
 
         stage = (Stage) questionCard.getScene().getWindow();
 
@@ -501,7 +551,7 @@ public class TellUsMoreVoiceController implements Initializable {
         CacheManager.setSavedAnswers(answerList);
 
         ClassifyRQ classifyRQ = new ClassifyRQ();
-        classifyRQ.setSymptoms(voiceResultRS.getSymptomsEn());
+        classifyRQ.setSymptoms(symptomsEn);
         classifyRQ.setAnswers(answerList);
         classifyRQ.setLanguage(LanguageManager.isLanguageEnglish()
                 ? AppsConstants.AppLanguage.EN.getShortDescription()
