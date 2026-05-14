@@ -41,7 +41,10 @@
 
                             <HBox alignment="CENTER_LEFT" styleClass="tell-header-bar" maxWidth="680">
 
-                                <Button onAction="#handleBack" styleClass="tell-back-btn">
+                                <Button onAction="#handleBack" styleClass="header-back-btn">
+                                    <tooltip>
+                                        <Tooltip text="%back"/>
+                                    </tooltip>
                                     <graphic>
                                         <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
                                             <image>

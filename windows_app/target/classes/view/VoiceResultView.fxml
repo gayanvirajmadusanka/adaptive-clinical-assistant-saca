@@ -43,7 +43,10 @@
 
                             <HBox alignment="CENTER_LEFT" styleClass="result-header-bar">
 
-                                <Button onAction="#handleBack" styleClass="result-back-btn">
+                                <Button onAction="#handleBack" styleClass="header-back-btn">
+                                    <tooltip>
+                                        <Tooltip text="%back"/>
+                                    </tooltip>
                                     <graphic>
                                         <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
                                             <image>

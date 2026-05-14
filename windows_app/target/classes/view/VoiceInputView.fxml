@@ -41,7 +41,10 @@
 
                             <HBox alignment="CENTER_LEFT" styleClass="speak-header-bar">
 
-                                <Button onAction="#handleBack" styleClass="speak-back-btn">
+                                <Button onAction="#handleBack" styleClass="header-back-btn">
+                                    <tooltip>
+                                        <Tooltip text="%back"/>
+                                    </tooltip>
                                     <graphic>
                                         <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
                                             <image>
@@ -57,7 +60,7 @@
                                        maxWidth="Infinity"
                                        alignment="CENTER"/>
 
-                                <Button styleClass="speak-back-btn">
+                                <Button styleClass="write-pen-icon">
                                     <graphic>
                                         <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
                                             <image>
