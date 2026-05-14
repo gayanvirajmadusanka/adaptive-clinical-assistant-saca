@@ -107,3 +107,11 @@ export function classifySymptoms(symptoms, answers, language = 'en') {
     language,
   });
 }
+
+export async function resolveAnswerAudio(audioBase64, questionId, language) {
+  return postJson('/answer/audio', {
+    audio_b64: audioBase64,
+    question_id: questionId,
+    language: language || 'en',
+  });
+}

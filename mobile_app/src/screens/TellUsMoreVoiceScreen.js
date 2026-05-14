@@ -1,7 +1,4 @@
 // TellUsMoreVoiceScreen.js
-// Purpose: Voice version of Tell Us More screen.
-// It keeps the normal answer options, but also allows the user to record,
-// play, and delete a voice answer for each question.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -17,14 +14,24 @@ import {
   Alert,
   BackHandler,
 } from 'react-native';
+
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreVoiceStyles';
-import { getFollowUpQuestions } from '../services/triageApi';
-import { saveBase64AudioToCache } from '../utils/base64Audio';
+
+import {
+  getFollowUpQuestions,
+  resolveAnswerAudio,
+} from '../services/triageApi';
+
+import {
+  saveBase64AudioToCache,
+  readAudioFileAsBase64,
+} from '../utils/base64Audio';
+
 import { parseJsonParam } from '../utils/routeParams';
 import { buildAnswerList } from '../utils/triagePayloads';
 import { WAV_RECORDING_OPTIONS } from '../utils/audioRecordingOptions';
@@ -40,8 +47,10 @@ export default function TellUsMoreVoiceScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
+
   const [loadingQuestions, setLoadingQuestions] = useState(true);
   const [audioLoading, setAudioLoading] = useState(false);
+  const [questionAudioPlaying, setQuestionAudioPlaying] = useState(false);
 
   const [recording, setRecording] = useState(null);
   const [recordingUri, setRecordingUri] = useState(null);
@@ -49,6 +58,7 @@ export default function TellUsMoreVoiceScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [recordDuration, setRecordDuration] = useState('0.00');
+  const [resolvingVoice, setResolvingVoice] = useState(false);
 
   const [voiceAnswerMap, setVoiceAnswerMap] = useState({});
 
@@ -109,15 +119,20 @@ export default function TellUsMoreVoiceScreen() {
           await sound.unloadAsync();
         }
       }
+
+      setQuestionAudioPlaying(false);
     } catch (error) {
       console.log('Stop audio error:', error);
+      setQuestionAudioPlaying(false);
     }
   };
 
   const playQuestionAudio = async () => {
     try {
-      if (!currentQuestion?.voice_b64) {
-        Alert.alert('Audio Error', 'No audio available.');
+      if (!currentQuestion?.voice_b64) return;
+
+      if (questionAudioPlaying) {
+        await stopCurrentAudio();
         return;
       }
 
@@ -142,22 +157,36 @@ export default function TellUsMoreVoiceScreen() {
       );
 
       soundRef.current = sound;
+      setQuestionAudioPlaying(true);
 
       sound.setOnPlaybackStatusUpdate(async (status) => {
         if (status.isLoaded && status.didJustFinish) {
           if (soundRef.current === sound) {
             soundRef.current = null;
           }
+
+          setQuestionAudioPlaying(false);
           await sound.unloadAsync();
         }
       });
     } catch (error) {
       console.log('Question audio error:', error);
+      setQuestionAudioPlaying(false);
       Alert.alert('Audio Error', 'Cannot play audio.');
     } finally {
       setAudioLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!currentQuestion?.id || !currentQuestion?.voice_b64) return;
+
+    const timer = setTimeout(() => {
+      playQuestionAudio();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentQuestion?.id]);
 
   const startPulse = () => {
     Animated.loop(
@@ -206,7 +235,10 @@ export default function TellUsMoreVoiceScreen() {
   };
 
   const stopBars = () => {
-    [bar1, bar2, bar3, bar4, bar5].forEach((bar) => bar.stopAnimation());
+    [bar1, bar2, bar3, bar4, bar5].forEach((bar) => {
+      bar.stopAnimation();
+    });
+
     bar1.setValue(14);
     bar2.setValue(28);
     bar3.setValue(18);
@@ -255,6 +287,8 @@ export default function TellUsMoreVoiceScreen() {
       return;
     }
 
+    await stopCurrentAudio();
+
     if (recordedSound) {
       await recordedSound.unloadAsync();
       setRecordedSound(null);
@@ -262,6 +296,7 @@ export default function TellUsMoreVoiceScreen() {
 
     setRecordingUri(null);
     setIsPlayingVoice(false);
+    setResolvingVoice(false);
 
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
@@ -290,6 +325,7 @@ export default function TellUsMoreVoiceScreen() {
     await recording.stopAndUnloadAsync();
 
     const uri = recording.getURI();
+    const duration = secondsRef.current.toFixed(2);
 
     if (!uri) {
       Alert.alert('Recording error', 'Audio file was not saved.');
@@ -299,6 +335,7 @@ export default function TellUsMoreVoiceScreen() {
     setRecordingUri(uri);
     setRecording(null);
     setIsRecording(false);
+    setRecordDuration(duration);
 
     stopPulse();
     stopBars();
@@ -309,9 +346,61 @@ export default function TellUsMoreVoiceScreen() {
         ...prev,
         [currentQuestion.id]: {
           uri,
-          duration: recordDuration,
+          duration,
         },
       }));
+    }
+
+    setTimeout(() => {
+      resolveRecordedAnswer(uri, currentQuestion?.id);
+    }, 1000);
+  };
+
+  const resolveRecordedAnswer = async (uri, questionId) => {
+    try {
+      if (!uri || !questionId) return;
+
+      setResolvingVoice(true);
+
+      const audioBase64 = await readAudioFileAsBase64(String(uri));
+
+      const data = await resolveAnswerAudio(
+        audioBase64,
+        questionId,
+        lang || 'en'
+      );
+
+      console.log('ANSWER AUDIO RESULT:', JSON.stringify(data, null, 2));
+
+      if (data?.recognized && data?.answer_id) {
+        setSelectedOption(data.answer_id);
+
+        setAnswers((prev) => ({
+          ...prev,
+          [questionId]: {
+            question_id: questionId,
+            answer_id: data.answer_id,
+            answer_text:
+              currentQuestion?.options?.find(
+                (item) => item.id === data.answer_id
+              )?.text || '',
+          },
+        }));
+      } else {
+        Alert.alert(
+          'Voice not recognised',
+          data?.message || 'Please select the answer manually.'
+        );
+      }
+    } catch (error) {
+      console.log('Resolve answer audio error:', error);
+
+      Alert.alert(
+        'Voice answer error',
+        'Could not check your voice answer. Please select manually.'
+      );
+    } finally {
+      setResolvingVoice(false);
     }
   };
 
@@ -366,6 +455,7 @@ export default function TellUsMoreVoiceScreen() {
       setIsRecording(false);
       setIsPlayingVoice(false);
       setRecordDuration('0.00');
+      setResolvingVoice(false);
 
       stopPulse();
       stopBars();
@@ -402,6 +492,7 @@ export default function TellUsMoreVoiceScreen() {
     setIsRecording(false);
     setIsPlayingVoice(false);
     setRecordDuration('0.00');
+    setResolvingVoice(false);
 
     stopPulse();
     stopBars();
@@ -421,15 +512,27 @@ export default function TellUsMoreVoiceScreen() {
 
     setIsRecording(false);
     setIsPlayingVoice(false);
+    setResolvingVoice(false);
   };
 
   const handleOptionPress = (option) => {
     setSelectedOption(option.id);
+
+    if (currentQuestion?.id) {
+      setAnswers((prev) => ({
+        ...prev,
+        [currentQuestion.id]: {
+          question_id: currentQuestion.id,
+          answer_id: option.id,
+          answer_text: option.text,
+        },
+      }));
+    }
   };
 
   const handleContinue = async () => {
     if (!selectedOption) {
-      Alert.alert('Select answer', 'Please select one option.');
+      Alert.alert('Select answer', 'Please select or speak one answer.');
       return;
     }
 
@@ -447,6 +550,7 @@ export default function TellUsMoreVoiceScreen() {
     };
 
     setAnswers(updatedAnswers);
+
     await stopCurrentAudio();
 
     if (recordedSound) {
@@ -460,7 +564,7 @@ export default function TellUsMoreVoiceScreen() {
       const nextQuestion = questions[nextIndex];
 
       setCurrentIndex(nextIndex);
-      setSelectedOption(answers[nextQuestion.id]?.answer_id || null);
+      setSelectedOption(updatedAnswers[nextQuestion.id]?.answer_id || null);
       restoreVoiceForQuestion(nextQuestion.id);
     } else {
       const finalAnswers = buildAnswerList(updatedAnswers);
@@ -652,7 +756,9 @@ export default function TellUsMoreVoiceScreen() {
                   {recordingUri && (
                     <View style={styles.voiceRecordedBox}>
                       <Text style={styles.voiceRecordedText}>
-                        Voice answer recorded
+                        {resolvingVoice
+                          ? 'Checking voice answer...'
+                          : 'Voice answer recorded'}
                       </Text>
                     </View>
                   )}
