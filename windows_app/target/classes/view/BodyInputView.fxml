@@ -34,10 +34,12 @@
 
                         <padding><Insets top="20" right="30" bottom="30" left="30"/></padding>
 
-                        <!-- HEADER -->
                         <HBox alignment="CENTER" styleClass="body-header-bar">
 
-                            <Button onAction="#handleBack" styleClass="body-back-btn">
+                            <Button onAction="#handleBack" styleClass="header-back-btn">
+                                <tooltip>
+                                    <Tooltip text="%back"/>
+                                </tooltip>
                                 <graphic>
                                     <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
                                         <image><Image url="@/icons/back-arrow.png"/></image>

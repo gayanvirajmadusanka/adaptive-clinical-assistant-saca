@@ -11,21 +11,6 @@
     -fx-pref-height: 80px;
 }
 
-.speak-back-btn {
-    -fx-background-color: transparent;
-    -fx-background-radius: 50;
-    -fx-min-width: 38px;
-    -fx-min-height: 38px;
-    -fx-max-width: 38px;
-    -fx-max-height: 38px;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.speak-back-btn:hover   { -fx-background-color: rgba(0,0,0,0.10); }
-.speak-back-btn:pressed { -fx-background-color: rgba(0,0,0,0.18); }
-
 .speak-header-title {
     -fx-text-fill: #1a0e00;
     -fx-font-size: 28px;
@@ -46,8 +31,13 @@
     -fx-faint-focus-color: transparent;
 }
 
-.speak-playback-btn:hover   { -fx-background-color: rgba(0,0,0,0.10); }
-.speak-playback-btn:pressed { -fx-background-color: rgba(0,0,0,0.18); }
+.speak-playback-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.10);
+}
+
+.speak-playback-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.18);
+}
 
 .speak-mic-card {
     -fx-background-color: #f5ead4;
@@ -75,14 +65,14 @@
 }
 
 .speak-mic-btn:hover {
-    -fx-background-color: rgba(196,122,58,0.10);
-    -fx-effect: dropshadow(gaussian, rgba(196,122,58,0.30), 12, 0, 0, 0);
+    -fx-background-color: rgba(196, 122, 58, 0.10);
+    -fx-effect: dropshadow(gaussian, rgba(196, 122, 58, 0.30), 12, 0, 0, 0);
 }
 
 .speak-mic-btn-recording {
     -fx-border-color: #c0392b;
-    -fx-background-color: rgba(192,57,43,0.08);
-    -fx-effect: dropshadow(gaussian, rgba(192,57,43,0.40), 16, 0, 0, 0);
+    -fx-background-color: rgba(192, 57, 43, 0.08);
+    -fx-effect: dropshadow(gaussian, rgba(192, 57, 43, 0.40), 16, 0, 0, 0);
 }
 
 .speak-hint-label {
@@ -102,7 +92,7 @@
     -fx-min-height: 100px;
     -fx-pref-height: 100px;
     -fx-padding: 16 20 16 20;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 6, 0, 0, 2);
 }
 
 .trash-icon-btn {
@@ -115,11 +105,16 @@
     -fx-cursor: hand;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
-    -fx-effect: dropshadow(gaussian, rgba(139,58,28,0.35), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(139, 58, 28, 0.35), 6, 0, 0, 2);
 }
 
-.trash-icon-btn:hover   { -fx-background-color: #a84520; }
-.trash-icon-btn:pressed { -fx-background-color: #6e2e14; }
+.trash-icon-btn:hover {
+    -fx-background-color: #a84520;
+}
+
+.trash-icon-btn:pressed {
+    -fx-background-color: #6e2e14;
+}
 
 .speak-icon-btn {
     -fx-background-color: #3a7a3a;
@@ -131,11 +126,16 @@
     -fx-cursor: hand;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
-    -fx-effect: dropshadow(gaussian, rgba(58,122,58,0.35), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(58, 122, 58, 0.35), 6, 0, 0, 2);
 }
 
-.speak-icon-btn:hover   { -fx-background-color: #4a8f4a; }
-.speak-icon-btn:pressed { -fx-background-color: #2d602d; }
+.speak-icon-btn:hover {
+    -fx-background-color: #4a8f4a;
+}
+
+.speak-icon-btn:pressed {
+    -fx-background-color: #2d602d;
+}
 
 .speak-duration-label {
     -fx-font-family: "Kreon", "Georgia", serif;
@@ -152,7 +152,7 @@
 
 .speak-submit-btn:hover {
     -fx-background-color: #d4894a;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 6, 0, 0, 2);
 }
 
 .speak-submit-btn:pressed {

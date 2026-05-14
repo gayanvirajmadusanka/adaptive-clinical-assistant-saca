@@ -8,12 +8,13 @@ import webrtcvad
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA_DIR = os.path.join(_BASE_DIR, "data", "warlpiri")
 
-SAMPLE_RATE         = 16000
-N_MFCC              = 13
-VAD_AGGRESSIVENESS  = 2   # 0-3, higher = more aggressive filtering
-VAD_FRAME_DURATION  = 30  # ms
-MIN_SEGMENT_DURATION = 0.15  # seconds
-DTW_THRESHOLD       = 150.0
+SAMPLE_RATE          = 16000
+N_MFCC               = 13      # base MFCC coefficients
+VAD_AGGRESSIVENESS   = 2       # 0-3, higher = more aggressive silence filtering
+VAD_FRAME_DURATION   = 30      # ms per VAD frame
+MIN_SEGMENT_DURATION = 0.15    # seconds - discard segments shorter than this
+DTW_THRESHOLD        = 200.0   # increased to account for 39-feature vectors
+FRAME_RATIO_LIMIT    = 3.0     # skip DTW if frame counts differ by more than this ratio
 
 
 def _load(filename: str) -> dict:
@@ -26,24 +27,37 @@ def _load(filename: str) -> dict:
 KEYWORD_MFCC        = _load("keyword_mfcc.json")
 KEYWORD_SYMPTOM_MAP = _load("keyword_symptom_map.json")
 
-# convert MFCC lists to numpy arrays once at load time
-_KEYWORD_REFS = {
-    keyword: np.array(mfcc_list)
-    for keyword, mfcc_list in KEYWORD_MFCC.items()
-}
+# convert to numpy arrays once at load time
+# supports both single reference (list of lists) and
+# multi-reference (list of list of lists) formats
+_KEYWORD_REFS: dict[str, list[np.ndarray]] = {}
+for keyword, data in KEYWORD_MFCC.items():
+    arr = np.array(data)
+    if arr.ndim == 2:
+        # single reference stored as (n_features, frames)
+        _KEYWORD_REFS[keyword] = [arr]
+    elif arr.ndim == 3:
+        # multiple references stored as (n_refs, n_features, frames)
+        _KEYWORD_REFS[keyword] = [arr[i] for i in range(arr.shape[0])]
 
 
 def _extract_mfcc(audio: np.ndarray, sr: int = SAMPLE_RATE) -> np.ndarray | None:
     """
-    Extract MFCC matrix from an audio array.
+    Extract 39-dimensional MFCC feature matrix from audio.
+    Combines 13 MFCC + 13 delta + 13 delta-delta coefficients.
+    Delta features capture temporal dynamics improving DTW accuracy
+    over static MFCC alone for keyword spotting tasks.
     :param audio: float32 audio array
     :param sr: sample rate
-    :return: (n_mfcc, frames) MFCC matrix or None on failure
+    :return: (39, frames) feature matrix or None on failure
     """
     if len(audio) == 0:
         return None
     try:
-        return librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=N_MFCC)
+        mfcc  = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=N_MFCC)
+        delta = librosa.feature.delta(mfcc)
+        delta2 = librosa.feature.delta(mfcc, order=2)
+        return np.vstack([mfcc, delta, delta2])  # (39, frames)
     except Exception as e:
         print(f"mfcc extraction failed: {e}")
         return None
@@ -51,15 +65,15 @@ def _extract_mfcc(audio: np.ndarray, sr: int = SAMPLE_RATE) -> np.ndarray | None
 
 def _dtw_distance(seq1: np.ndarray, seq2: np.ndarray) -> float:
     """
-    Compute normalised DTW distance between two MFCC matrices.
+    Compute normalised DTW distance between two feature matrices.
     Normalised by (n+m) to be independent of sequence length.
-    seq1, seq2 are (n_mfcc, frames) matrices.
-    :param seq1: reference MFCC matrix
-    :param seq2: query MFCC matrix
+    Uses Euclidean frame distance as the local cost function.
+    :param seq1: (n_features, frames_1) reference matrix
+    :param seq2: (n_features, frames_2) query matrix
     :return: normalised DTW distance
     """
-    s1 = seq1.T  # (frames, n_mfcc)
-    s2 = seq2.T
+    s1 = seq1.T  # (frames_1, n_features)
+    s2 = seq2.T  # (frames_2, n_features)
     n, m = len(s1), len(s2)
 
     cost = np.full((n, m), np.inf)
@@ -77,17 +91,17 @@ def _dtw_distance(seq1: np.ndarray, seq2: np.ndarray) -> float:
                 cost[i - 1, j - 1]
             )
 
-    # normalise by path length to handle variable duration recordings
     return cost[n - 1, m - 1] / (n + m)
 
 
 def _segment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list:
     """
     Use WebRTC VAD to split continuous speech into word/phrase segments.
-    Filters out silence and background noise before DTW matching.
+    Processes audio in 30ms frames, grouping consecutive speech frames
+    into segments and discarding segments below minimum duration.
     :param audio: float32 audio array
     :param sr: sample rate
-    :return: list of audio segment arrays
+    :return: list of float32 audio segment arrays
     """
     vad          = webrtcvad.Vad(VAD_AGGRESSIVENESS)
     frame_length = int(sr * VAD_FRAME_DURATION / 1000)
@@ -116,39 +130,55 @@ def _segment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list:
     return segments
 
 
-def _match_segment(segment: np.ndarray) -> tuple | None:
+def _match_segment(query_mfcc: np.ndarray) -> tuple[str, float] | None:
     """
-    Match one audio segment against all keyword references using DTW.
-    :param segment: float32 audio array for one speech segment
-    :return: (keyword, distance) tuple if match found, None otherwise
+    Match a query MFCC matrix against all keyword references using DTW.
+    Supports multiple references per keyword - takes minimum distance.
+    Applies frame ratio pre-filter to skip obviously mismatched keywords
+    before running expensive O(n*m) DTW computation.
+    :param query_mfcc: (n_features, frames) query feature matrix
+    :return: (keyword, distance) tuple if best match is below threshold, else None
     """
-    mfcc = _extract_mfcc(segment)
-    if mfcc is None:
-        return None
-
+    query_frames  = query_mfcc.shape[1]
     best_keyword  = None
     best_distance = float("inf")
 
-    for keyword, ref_mfcc in _KEYWORD_REFS.items():
-        dist = _dtw_distance(mfcc, ref_mfcc)
-        if dist < best_distance:
-            best_distance = dist
-            best_keyword  = keyword
+    for keyword, ref_list in _KEYWORD_REFS.items():
+        for ref_mfcc in ref_list:
+            ref_frames = ref_mfcc.shape[1]
+
+            # fast pre-filter: skip DTW if frame counts are too different
+            # a word spoken twice as slowly should still match, but
+            # a 0.2s segment cannot match a 2.0s reference
+            ratio = max(query_frames, ref_frames) / max(min(query_frames, ref_frames), 1)
+            if ratio > FRAME_RATIO_LIMIT:
+                continue
+
+            dist = _dtw_distance(query_mfcc, ref_mfcc)
+            if dist < best_distance:
+                best_distance = dist
+                best_keyword  = keyword
 
     if best_distance <= DTW_THRESHOLD:
         return best_keyword, best_distance
     return None
 
 
-def _keyword_to_symptom(keyword: str) -> str | None:
+def _distance_to_confidence(distance: float) -> float:
     """
-    Map a matched Warlpiri keyword to its English symptom string.
-    Uses keyword_symptom_map.json which maps directly to the 33
-    symptom vocabulary expected by the ML classifier.
-    :param keyword: matched Warlpiri keyword string
-    :return: English symptom string or None
+    Convert DTW distance to a confidence score in [0, 1].
+    Uses sigmoid normalisation centred at half the threshold,
+    giving a meaningful probability-like score rather than
+    linear scaling which is sensitive to threshold choice.
+    :param distance: raw DTW distance
+    :return: confidence score
     """
-    return KEYWORD_SYMPTOM_MAP.get(keyword)
+    # sigmoid: score approaches 1 as distance approaches 0,
+    # approaches 0 as distance approaches threshold
+    centre = DTW_THRESHOLD / 2.0
+    scale  = DTW_THRESHOLD / 8.0
+    score  = 1.0 / (1.0 + np.exp((distance - centre) / scale))
+    return round(float(score), 3)
 
 
 def recognize(audio_path: str) -> dict:
@@ -156,14 +186,16 @@ def recognize(audio_path: str) -> dict:
     Recognise Warlpiri symptom keywords from continuous speech audio.
 
     Pipeline:
-        1. Load and trim silence from audio
-        2. WebRTC VAD segments speech into word units
-        3. MFCC extracted per segment
-        4. DTW distance against pre-computed keyword references
-        5. Matched keywords mapped to English symptom strings
+        1. Load WAV and trim leading/trailing silence
+        2. WebRTC VAD segments speech into isolated word units
+        3. 39-dim MFCC + delta + delta-delta features extracted per segment
+        4. DTW matching against pre-computed keyword references
+           with frame ratio pre-filter and multi-reference support
+        5. Best matching keywords mapped to English symptom strings
+           via keyword_symptom_map.json
 
     :param audio_path: path to WAV audio file
-    :return: dict with recognized flag, symptoms list, and confidence score
+    :return: dict with recognized flag, symptoms list, confidence, and debug info
     """
     base = {"input_type": "audio_warlpiri", "audio_path": audio_path}
 
@@ -189,10 +221,14 @@ def recognize(audio_path: str) -> dict:
         return {**base, "recognized": False,
                 "error": "no speech detected - please speak clearly and try again"}
 
-    # match each segment and keep best distance per keyword
-    matched_keywords = {}
+    # extract features and match each segment
+    # keep best distance per keyword across all segments
+    matched_keywords: dict[str, float] = {}
     for segment in segments:
-        result = _match_segment(segment)
+        mfcc = _extract_mfcc(segment)
+        if mfcc is None:
+            continue
+        result = _match_segment(mfcc)
         if result:
             keyword, distance = result
             if keyword not in matched_keywords or distance < matched_keywords[keyword]:
@@ -201,31 +237,31 @@ def recognize(audio_path: str) -> dict:
     if not matched_keywords:
         return {
             **base,
-            "recognized":      False,
+            "recognized":       False,
             "matched_keywords": {},
-            "symptoms":        [],
-            "confidence":      0.0,
-            "message":         "could not recognise any Warlpiri keywords - please try again"
+            "symptoms":         [],
+            "confidence":       0.0,
+            "message":          "could not recognise any Warlpiri keywords - please try again"
         }
 
-    # map keywords to English symptoms
+    # map matched keywords to English symptom strings
     symptoms       = []
     keyword_scores = {}
     for keyword, distance in matched_keywords.items():
-        symptom = _keyword_to_symptom(keyword)
+        symptom = KEYWORD_SYMPTOM_MAP.get(keyword)
         if symptom and symptom not in symptoms:
             symptoms.append(symptom)
         keyword_scores[keyword] = round(distance, 3)
 
     best_distance = min(matched_keywords.values())
-    confidence    = round(max(0.0, 1.0 - (best_distance / DTW_THRESHOLD)), 3)
+    confidence    = _distance_to_confidence(best_distance)
 
     return {
         **base,
-        "recognized":       True,
-        "matched_keywords": keyword_scores,
-        "symptoms":         symptoms,
-        "confidence":       confidence,
+        "recognized":        True,
+        "matched_keywords":  keyword_scores,
+        "symptoms":          symptoms,
+        "confidence":        confidence,
         "segments_detected": len(segments),
         "segments_matched":  len(matched_keywords)
     }

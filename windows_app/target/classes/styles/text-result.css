@@ -18,29 +18,6 @@
     -fx-pref-height: 80px;
 }
 
-.result-back-btn {
-    -fx-background-color: transparent;
-    -fx-background-radius: 50;
-    -fx-text-fill: #2e3d35;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-min-width: 38px;
-    -fx-min-height: 38px;
-    -fx-max-width: 38px;
-    -fx-max-height: 38px;
-    -fx-cursor: hand;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
-}
-
-.result-back-btn:hover {
-    -fx-background-color: rgba(0, 0, 0, 0.10);
-}
-
-.result-back-btn:pressed {
-    -fx-background-color: rgba(0, 0, 0, 0.18);
-}
-
 .result-header-title {
     -fx-text-fill: #1a0e00;
     -fx-font-size: 28px;
@@ -162,4 +139,43 @@
     -fx-scale-y: 1.0;
     -fx-background-color: #a88040;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 4, 0, 0, 1);
+}
+
+.result-voice-mic-btn {
+    -fx-background-color: #C47A3A;
+    -fx-background-radius: 50;
+    -fx-border-color: #1a1000;
+    -fx-border-radius: 50;
+    -fx-border-width: 2;
+    -fx-min-width: 52px;
+    -fx-min-height: 52px;
+    -fx-max-width: 52px;
+    -fx-max-height: 52px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.22), 6, 0, 0, 2);
+}
+
+.result-voice-mic-btn:hover {
+    -fx-background-color: #d4874a;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.32), 10, 0, 0, 3);
+}
+
+.result-voice-mic-btn:pressed {
+    -fx-background-color: #a85a20;
+}
+
+.result-voice-mic-btn-recording {
+    -fx-background-color: #B5523B;
+    -fx-border-color: #8a3020;
+    -fx-effect: dropshadow(gaussian, rgba(181, 82, 59, 0.50), 10, 0, 0, 3);
+}
+
+.result-voice-mic-hint {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 11px;
+    -fx-text-fill: #7a6a52;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
 }
