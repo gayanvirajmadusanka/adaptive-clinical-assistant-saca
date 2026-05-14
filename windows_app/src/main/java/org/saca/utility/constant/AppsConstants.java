@@ -2,6 +2,12 @@ package org.saca.utility.constant;
 
 public class AppsConstants {
 
+    public static final String CONFIRM_SYMPTOMS_QUESTION_ID = "confirm_symptoms";
+
+    public static final String CONFIRM_SYMPTOMS_ANSWER_YES = "confirm_symptomsy";
+
+    public static final String CONFIRM_SYMPTOMS_ANSWER_NO = "confirm_symptomsn";
+
     public enum AppLanguage {
         EN("en", "English"), WP("wp", "Warlpiri");
 
