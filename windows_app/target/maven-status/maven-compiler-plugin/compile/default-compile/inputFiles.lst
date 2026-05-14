@@ -1,27 +1,46 @@
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\TellUsMoreTextController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\utility\constant\AppsConstants.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\AboutController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\response\OptionRS.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\DashboardController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\request\CommonRQ.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\LoadingController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\utility\manager\TTSManager.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\service\ApiService.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\utility\manager\LanguageManager.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\utility\manager\DialogManager.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\response\QuestionsRS.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\TextInput.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\MainApp.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\TextInputController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\response\CommonRS.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\WelcomeController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\MainController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\response\QuestionRS.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\response\TextResultRS.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\utility\util\CommonUtil.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\SelectLanguageController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\request\TextInputRQ.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\utility\manager\NavBarManager.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\model\request\QuestionFetchRQ.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\TextResultController.java
-C:\Swinburne\2nd Year\1st Semister\TIR\adaptive-clinical-assistant-saca\windows_app\src\main\java\org\saca\controller\SidebarController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/MainApp.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/manager/LanguageManager.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/TextResultRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/VoiceResultController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/ClassifyRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/AnswerAudioRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/LoadingController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/body/BodyPart.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/TextInputRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/AboutController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/body/BodySymptom.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/SidebarController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/QuestionsRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/TextInputController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/DashboardController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/CommonRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/CommonRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/ClassifyRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/TellUsMoreVoiceController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/AnswerAudioRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/TextResultController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/manager/TTSManager.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/AnswerRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/manager/CacheManager.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/TellUsMoreTextController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/service/AudioRecorderService.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/manager/NavBarManager.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/SelectLanguageController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/VoiceInputRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/WelcomeController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/constant/AppsConstants.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/BodySymptomsController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/MainController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/FinalResultController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/BodyInputController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/body/BodyPartsData.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/QuestionRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/VoiceInputController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/service/AudioService.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/VoiceResultRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/manager/DialogManager.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/utility/util/CommonUtil.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/controller/AudioOverlayController.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/response/OptionRS.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/model/request/QuestionFetchRQ.java
+/Users/gayan/Personal/Academics/Swinburne/Second_Year/COS70008_TIRP_Project/Final_Project/adaptive-clinical-assistant-saca/windows_app/src/main/java/org/saca/service/ApiService.java
