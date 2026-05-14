@@ -34,11 +34,14 @@ public class DialogManager {
         alert.showAndWait();
     }
 
-    /**
-     * Show exit confirmation using bundle keys.
-     *
-     * @return true if user confirmed exit.
-     */
+    public static void warningDialogWithOnHidden(String title, String header, String content, Runnable onHidden) {
+        Alert alert = build(Alert.AlertType.WARNING, title, header, content, false);
+        alert.setOnHidden(e -> {
+            if (onHidden != null) onHidden.run();
+        });
+        alert.showAndWait();
+    }
+
     public static boolean confirmExit() {
         return confirmDialog(
                 LanguageManager.get("close_saca"),
@@ -86,17 +89,15 @@ public class DialogManager {
     private static Alert build(Alert.AlertType type,
                                String title,
                                String header,
-                               String content, boolean needCancel) {
+                               String content,
+                               boolean needCancel) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
 
-        // Apply shared CSS styling
         alert.getDialogPane().getStylesheets().add(
-                DialogManager.class
-                        .getResource(CSS_PATH)
-                        .toExternalForm()
+                DialogManager.class.getResource(CSS_PATH).toExternalForm()
         );
         alert.getDialogPane().getStyleClass().add(CSS_CLASS);
 
