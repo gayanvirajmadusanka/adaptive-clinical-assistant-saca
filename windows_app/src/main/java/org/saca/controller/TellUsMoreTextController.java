@@ -353,7 +353,7 @@ public class TellUsMoreTextController implements Initializable {
         }
 
         if (total == 2) {
-            return index == 0 ? "option-level-0" : "option-level-1";
+            return "option-level-1";
         }
 
         int level = Math.round((float) index / (total - 1) * 4);
