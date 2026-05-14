@@ -78,7 +78,6 @@
                                maxWidth="Infinity"
                                wrapText="true"/>
 
-                        <!-- BODY IMAGE (LEFT) + PARTS LIST (RIGHT) -->
                         <HBox spacing="24" maxWidth="Infinity" alignment="TOP_CENTER">
 
                             <!-- Image with transparent zone overlay -->

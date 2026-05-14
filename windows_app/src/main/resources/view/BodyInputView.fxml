@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.saca.controller.BodyInputController"
-            stylesheets="@/styles/style.css, @/styles/body-input.css"
+            stylesheets="@/styles/style.css"
             styleClass="root">
 
     <top>
@@ -78,7 +78,6 @@
                                maxWidth="Infinity"
                                wrapText="true"/>
 
-                        <!-- BODY IMAGE (LEFT) + PARTS LIST (RIGHT) -->
                         <HBox spacing="24" maxWidth="Infinity" alignment="TOP_CENTER">
 
                             <!-- Image with transparent zone overlay -->
