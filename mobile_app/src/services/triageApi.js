@@ -115,3 +115,15 @@ export async function resolveAnswerAudio(audioBase64, questionId, language) {
     language: language || 'en',
   });
 }
+
+export async function extractSymptomsFromBody(symptoms, language = 'en') {
+  const response = await postJson(
+    API_ENDPOINTS.EXTRACT_IMAGE,
+    {
+      symptoms,
+      language,
+    }
+  );
+
+  return response;
+}

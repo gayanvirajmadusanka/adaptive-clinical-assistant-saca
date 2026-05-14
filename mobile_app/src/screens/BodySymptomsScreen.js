@@ -1,6 +1,6 @@
 // BodySymptomsScreen.js
 // Purpose: Shows symptoms for selected body part with both image and text.
-// User can select multiple symptoms and confirm.
+// User can select multiple symptoms and continue to loading screen.
 
 import React, { useMemo, useRef, useState } from 'react';
 import {
@@ -16,6 +16,7 @@ import {
   Modal,
   Animated,
 } from 'react-native';
+
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLanguage } from '../context/LanguageContext';
 import bodyMap from '../../assets/data/body_map.json';
@@ -26,36 +27,26 @@ const SYMPTOM_IMAGES = {
     headache: require('../../assets/images/Body_Parts/Head/Headache_male.png'),
     dizziness: require('../../assets/images/Body_Parts/Head/Dizziness_male.png'),
     loss_of_consciousness: require('../../assets/images/Body_Parts/Head/Loss of consciousness_male.png'),
-
     neck_stiffness: require('../../assets/images/Body_Parts/Neck/Neck_stiffness_male.png'),
     jaw_pain: require('../../assets/images/Body_Parts/Jaw/jaw_pain_male.png'),
-
     runny_nose: require('../../assets/images/Body_Parts/Nose/runny_nose_male.png'),
     sneezing: require('../../assets/images/Body_Parts/Nose/sneezing_male.png'),
-
     sore_throat: require('../../assets/images/Body_Parts/Throat/sore_throat_male.png'),
-
     chest_pain: require('../../assets/images/Body_Parts/Chest/chest_pain_male.png'),
     cough: require('../../assets/images/Body_Parts/Chest/cough_male.png'),
     shortness_breath: require('../../assets/images/Body_Parts/Chest/shortness_breath_male.png'),
-
     arm_pain: require('../../assets/images/Body_Parts/Arm/arm_pain_male.png'),
     arm_weakness: require('../../assets/images/Body_Parts/Arm/arm_weakness_male.png'),
     arm_swelling: require('../../assets/images/Body_Parts/Arm/swelling_arms_male.png'),
-
     back_pain: require('../../assets/images/Body_Parts/Back/back_pain_male.png'),
-
     stomach_pain: require('../../assets/images/Body_Parts/Stomach/stomach_pain_male.png'),
     nausea: require('../../assets/images/Body_Parts/Stomach/nausea_male.png'),
     vomiting: require('../../assets/images/Body_Parts/Stomach/vomiting_male.png'),
     diarrhoea: require('../../assets/images/Body_Parts/Stomach/diarrhoea_male.png'),
     blood_stool: require('../../assets/images/Body_Parts/Stomach/blood_stool_male.png'),
-
     ear_pain: require('../../assets/images/Body_Parts/Ear/ear_pain_male.png'),
-
     eye_pain: require('../../assets/images/Body_Parts/Eye/eye_pain_male.png'),
     eye_itchy: require('../../assets/images/Body_Parts/Eye/eye_itchy_male.png'),
-
     fever: require('../../assets/images/Body_Parts/Whole_Body/fever_male.png'),
     shivering: require('../../assets/images/Body_Parts/Whole_Body/shivering_male.png'),
     fatigue: require('../../assets/images/Body_Parts/Whole_Body/fatigue_male.png'),
@@ -73,36 +64,26 @@ const SYMPTOM_IMAGES = {
     headache: require('../../assets/images/Body_Parts/Head/Headache_female.png'),
     dizziness: require('../../assets/images/Body_Parts/Head/Dizziness_female.png'),
     loss_of_consciousness: require('../../assets/images/Body_Parts/Head/Loss of consciousness_female.png'),
-
     neck_stiffness: require('../../assets/images/Body_Parts/Neck/Neck_stiffness_female.png'),
     jaw_pain: require('../../assets/images/Body_Parts/Jaw/jaw_pain_female.png'),
-
     runny_nose: require('../../assets/images/Body_Parts/Nose/runny_nose_female.png'),
     sneezing: require('../../assets/images/Body_Parts/Nose/sneezing_female.png'),
-
     sore_throat: require('../../assets/images/Body_Parts/Throat/sore_throat_female.png'),
-
     chest_pain: require('../../assets/images/Body_Parts/Chest/chest_pain_female.png'),
     cough: require('../../assets/images/Body_Parts/Chest/cough_female.png'),
     shortness_breath: require('../../assets/images/Body_Parts/Chest/shortness_breath_female.png'),
-
     arm_pain: require('../../assets/images/Body_Parts/Arm/arm_pain_female.png'),
     arm_weakness: require('../../assets/images/Body_Parts/Arm/arm_weakness_female.png'),
     arm_swelling: require('../../assets/images/Body_Parts/Arm/swelling_arms_female.png'),
-
     back_pain: require('../../assets/images/Body_Parts/Back/back_pain_female.png'),
-
     stomach_pain: require('../../assets/images/Body_Parts/Stomach/stomach_pain_female.png'),
     nausea: require('../../assets/images/Body_Parts/Stomach/nausea_female.png'),
     vomiting: require('../../assets/images/Body_Parts/Stomach/vomiting_female.png'),
     diarrhoea: require('../../assets/images/Body_Parts/Stomach/diarrhoea_female.png'),
     blood_stool: require('../../assets/images/Body_Parts/Stomach/blood_stool_female.png'),
-
     ear_pain: require('../../assets/images/Body_Parts/Ear/ear_pain_female.png'),
-
     eye_pain: require('../../assets/images/Body_Parts/Eye/eye_pain_female.png'),
     eye_itchy: require('../../assets/images/Body_Parts/Eye/eye_itchy_female.png'),
-
     fever: require('../../assets/images/Body_Parts/Whole_Body/fever_female.png'),
     shivering: require('../../assets/images/Body_Parts/Whole_Body/shivering_female.png'),
     fatigue: require('../../assets/images/Body_Parts/Whole_Body/fatigue_female.png'),
@@ -145,12 +126,9 @@ function getImageKey(symptom, partKey) {
 
     stiff_neck: 'neck_stiffness',
     neck_stiffness: 'neck_stiffness',
-
     jaw_pain: 'jaw_pain',
-
     runny_nose: 'runny_nose',
     sneezing: 'sneezing',
-
     sore_throat: 'sore_throat',
 
     chest_pain: 'chest_pain',
@@ -166,7 +144,6 @@ function getImageKey(symptom, partKey) {
     arm_swelling: 'arm_swelling',
 
     back_pain: 'back_pain',
-
     stomachache: 'stomach_pain',
     stomach_pain: 'stomach_pain',
     nausea: 'nausea',
@@ -177,7 +154,6 @@ function getImageKey(symptom, partKey) {
     blood_stool: 'blood_stool',
 
     ear_pain: 'ear_pain',
-
     eye_pain: 'eye_pain',
     itchy: partKey === 'eye' ? 'eye_itchy' : 'itchy',
     itchy_eye: 'eye_itchy',
@@ -187,17 +163,14 @@ function getImageKey(symptom, partKey) {
     shivering: 'shivering',
     shiver: 'shivering',
     chills: 'shivering',
-
     tired: 'fatigue',
     fatigue: 'fatigue',
     weakness: 'weakness',
     rash: 'rash',
     dehydration: 'dehydration',
     bleeding: 'bleeding',
-
     blood_in_urine: 'blood_urine',
     blood_urine: 'blood_urine',
-
     swelling_body: 'swelling_parts_of_body',
     swelling_parts_of_body: 'swelling_parts_of_body',
   };
@@ -234,7 +207,11 @@ export default function BodySymptomsScreen() {
 
   const getSymptomImage = (symptom) => {
     const imageKey = getImageKey(symptom, partKey);
-    return SYMPTOM_IMAGES[gender]?.[imageKey] || SYMPTOM_IMAGES.male?.[imageKey];
+
+    return (
+      SYMPTOM_IMAGES[gender]?.[imageKey] ||
+      SYMPTOM_IMAGES.male?.[imageKey]
+    );
   };
 
   const toggleSymptom = (symptom) => {
@@ -264,6 +241,7 @@ export default function BodySymptomsScreen() {
         text: symptomText,
         language: lang || 'en',
         source: 'body',
+        gender: gender,
       },
     });
   };
@@ -416,7 +394,8 @@ export default function BodySymptomsScreen() {
                   <Text
                     style={[
                       styles.languageOptionText,
-                      selectedLang === 'en' && styles.languageOptionTextSelected,
+                      selectedLang === 'en' &&
+                        styles.languageOptionTextSelected,
                     ]}
                   >
                     {t('english')}
@@ -433,7 +412,8 @@ export default function BodySymptomsScreen() {
                   <Text
                     style={[
                       styles.languageOptionText,
-                      selectedLang === 'wp' && styles.languageOptionTextSelected,
+                      selectedLang === 'wp' &&
+                        styles.languageOptionTextSelected,
                     ]}
                   >
                     {t('warlpiri')}

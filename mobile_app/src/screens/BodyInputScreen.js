@@ -36,19 +36,18 @@ export default function BodyInputScreen() {
   };
 
   const changeGender = (selectedGender) => {
-    console.log('SELECTED GENDER:', selectedGender);
     setGender(selectedGender);
   };
 
   const openSymptoms = (partKey) => {
     router.push({
-        pathname: '/bodysymptoms',
-        params: {
+      pathname: '/bodysymptoms',
+      params: {
         part_key: partKey,
         gender: gender,
-        },
+      },
     });
-};
+  };
 
   const openModal = () => {
     setSelectedLang(null);
