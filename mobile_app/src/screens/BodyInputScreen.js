@@ -42,12 +42,13 @@ export default function BodyInputScreen() {
 
   const openSymptoms = (partKey) => {
     router.push({
-      pathname: '/bodysymptoms',
-      params: {
+        pathname: '/bodysymptoms',
+        params: {
         part_key: partKey,
-      },
+        gender: gender,
+        },
     });
-  };
+};
 
   const openModal = () => {
     setSelectedLang(null);

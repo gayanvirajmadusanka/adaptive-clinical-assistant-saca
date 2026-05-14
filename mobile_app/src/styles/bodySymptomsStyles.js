@@ -83,33 +83,59 @@ export default StyleSheet.create({
 
   symptomsScroll: {
     flexGrow: 0,
-    maxHeight: 330,
+    maxHeight: 430,
   },
 
   symptomsList: {
-    paddingBottom: 4,
+    paddingBottom: 8,
   },
 
-  symptomButton: {
+  symptomCard: {
     width: '100%',
-    minHeight: 58,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 250, 238, 0.85)',
+    minHeight: 92,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 250, 238, 0.92)',
     borderWidth: 1.5,
     borderColor: '#E0CDB0',
-    justifyContent: 'center',
-    paddingHorizontal: 22,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     marginBottom: 12,
-    elevation: 1,
+    elevation: 2,
   },
 
-  symptomButtonActive: {
+  symptomCardActive: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
   },
 
+  symptomImage: {
+    width: 72,
+    height: 72,
+    marginRight: 14,
+  },
+
+  symptomImagePlaceholder: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    backgroundColor: '#EADCC4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+
+  placeholderText: {
+    fontSize: 28,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#8B3A1C',
+  },
+
   symptomText: {
-    fontSize: 17,
+    flex: 1,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
@@ -128,7 +154,7 @@ export default StyleSheet.create({
     borderColor: '#111',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 10,
     marginBottom: 16,
   },
 
