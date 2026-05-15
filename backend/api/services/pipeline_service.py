@@ -19,13 +19,6 @@ from backend.api.schemas.request_response import ClassifyResponse
 from backend.constants import Language
 from backend.ml.predictor import TriagePredictor
 
-import tempfile
-from backend.nlp.preprocessor import preprocess_text
-from backend.nlp.symptom_extractor import extract_symptoms
-from backend.translation.warlpiri_text import translate as translate_warlpiri
-from backend.speech.audio_english import transcribe
-from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
-
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _symptom_map_path = os.path.join(_BASE_DIR, '../data/warlpiri/symptom_map.json')
 with open(_symptom_map_path, encoding='utf-8') as f:
@@ -35,11 +28,9 @@ with open(_symptom_map_path, encoding='utf-8') as f:
 _ID_TO_WP = {key: value[Language.WP] for key, value in _SYMPTOM_MAP.items()}
 _EN_TO_ID = {value['en']: key for key, value in _SYMPTOM_MAP.items()}
 _EN_TO_WP = {value['en']: value['wp'] for value in _SYMPTOM_MAP.values()}
-_EN_TO_ID = {value['en']: key for key, value in _SYMPTOM_MAP.items()}
-_EN_TO_WP = {value['en']: value['wp'] for value in _SYMPTOM_MAP.values()}
 
 predictor = TriagePredictor(
-    model_path=os.path.join(_BASE_DIR, '../models', 'stacking_mlp_et_xgb.pkl'),
+    model_path=os.path.join(_BASE_DIR, '../models', 'stacking_mlp_xgb.pkl'),
     tfidf_path=os.path.join(_BASE_DIR, '../models', 'tfidf_vectorizer.pkl'),
     le_path=os.path.join(_BASE_DIR, '../models', 'label_encoder.pkl')
 )
@@ -94,7 +85,7 @@ def process_text(text: str, language: str) -> dict:
     :param language: 'en' or 'wp'
     :return: dict with symptoms_en, symptoms_wp, confidence
     """
-    if language == 'wp':
+    if language == Language.WP:
         translation  = translate_warlpiri(text)
         english_text = translation.get("translated_text") or ""
     else:
@@ -106,7 +97,7 @@ def process_text(text: str, language: str) -> dict:
     preprocessed = preprocess_text(english_text)
     symptoms_en  = extract_symptoms(preprocessed["clean_text"], raw_text=english_text)
     confidence   = 0.99 if symptoms_en else 0.0
-    symptoms_wp  = [_EN_TO_WP.get(s, s) for s in symptoms_en] if language == 'wp' else []
+    symptoms_wp  = [_EN_TO_WP.get(s, s) for s in symptoms_en] if language == Language.WP else []
 
     return {"symptoms_en": symptoms_en, "symptoms_wp": symptoms_wp, "confidence": confidence}
 
@@ -121,7 +112,7 @@ def process_audio(audio_bytes: bytes, language: str) -> dict:
     tmp_path = None
     try:
         tmp_path = convert_to_wav(audio_bytes)
-        if language == 'en':
+        if language == Language.EN:
             asr          = transcribe(tmp_path)
             english_text = asr.get("text", "") or ""
             if not english_text.strip():
@@ -134,7 +125,7 @@ def process_audio(audio_bytes: bytes, language: str) -> dict:
                 "confidence":  asr.get("confidence") or (0.99 if symptoms_en else 0.0)
             }
 
-        elif language == 'wp':
+        elif language == Language.WP:
             wp_result = recognize_warlpiri(tmp_path)
             if not wp_result.get("recognized") or not wp_result.get("symptoms"):
                 return {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}
