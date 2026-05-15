@@ -12,8 +12,10 @@ import {
   Alert,
   Animated,
 } from 'react-native';
+
 import Svg, { Circle } from 'react-native-svg';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+
 import styles from '../styles/loadingStyles';
 
 import {
@@ -46,41 +48,64 @@ export default function LoadingScreen() {
   const strokeWidth = 15;
   const circumference = 2 * Math.PI * radius;
 
+  // Animate progress circle
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: percent,
-      duration: percent >= 100 ? 0 : 200,
+      duration: percent >= 100 ? 0 : 120,
       useNativeDriver: false,
     }).start();
   }, [percent]);
 
+  // Faster loading animation
   useEffect(() => {
     const timer = setInterval(() => {
       setPercent((prev) => {
-        if (!apiFinished && prev >= 90) return 90;
-        if (prev >= 100) return 100;
-        return prev + 1;
+        // Stop at 90% until API finishes
+        if (!apiFinished && prev >= 90) {
+          return 90;
+        }
+
+        // Stop at 100%
+        if (prev >= 100) {
+          return 100;
+        }
+
+        // Faster increase
+        return prev + 2;
       });
-    }, 35);
+    }, 25);
 
     return () => clearInterval(timer);
   }, [apiFinished]);
 
+  // Send symptoms to FastAPI
   async function loadDetectedSymptoms() {
     try {
       let data;
 
+      // BODY FLOW
       if (source === 'body') {
         const symptomsArray = String(text)
           .split(',')
           .map((item) => item.trim())
           .filter(Boolean);
 
-        data = await extractSymptomsFromBody(symptomsArray, language || 'en');
-      } else {
-        data = await extractSymptomsFromText(text, language || 'en');
+        data = await extractSymptomsFromBody(
+          symptomsArray,
+          language || 'en'
+        );
       }
 
+      // TEXT FLOW
+      else {
+        data = await extractSymptomsFromText(
+          text,
+          language || 'en'
+        );
+      }
+
+      // Save backend audio locally
       const voiceFileUri = await saveBase64AudioToCache(
         data?.voice_b64,
         'saca_detected_voice.wav'
@@ -91,11 +116,15 @@ export default function LoadingScreen() {
         voice_file_uri: voiceFileUri,
       });
 
+      // API finished
       setApiFinished(true);
     } catch (error) {
       console.log('Symptoms API error:', error);
 
-      Alert.alert('Connection Error', 'Could not connect to FastAPI.');
+      Alert.alert(
+        'Connection Error',
+        'Could not connect to FastAPI.'
+      );
 
       if (source === 'body') {
         router.replace('/bodyinput');
@@ -105,12 +134,19 @@ export default function LoadingScreen() {
     }
   }
 
+  // Load symptoms on screen start
   useEffect(() => {
     loadDetectedSymptoms();
   }, []);
 
+  // Navigate when loading reaches 100
   useEffect(() => {
-    if (apiFinished && percent >= 100 && apiData && !navigatedRef.current) {
+    if (
+      apiFinished &&
+      percent >= 100 &&
+      apiData &&
+      !navigatedRef.current
+    ) {
       navigatedRef.current = true;
 
       router.replace({
@@ -121,6 +157,7 @@ export default function LoadingScreen() {
             language,
             apiData.voice_file_uri
           ),
+
           source: source || 'text',
           gender: gender || 'male',
         },
@@ -128,6 +165,7 @@ export default function LoadingScreen() {
     }
   }, [apiFinished, percent, apiData]);
 
+  // Circular progress animation
   const strokeDashoffset = progressAnim.interpolate({
     inputRange: [0, 100],
     outputRange: [circumference, 0],
@@ -135,7 +173,10 @@ export default function LoadingScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#F5EAD8"
+      />
 
       <View style={styles.wrapper}>
         <ImageBackground
@@ -144,10 +185,15 @@ export default function LoadingScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-            <Text style={styles.topText}>Checking your Symptoms...</Text>
+            {/* TOP TITLE */}
+            <Text style={styles.topText}>
+              Checking your Symptoms...
+            </Text>
 
+            {/* PROGRESS CIRCLE */}
             <View style={styles.circleWrapper}>
               <Svg width={190} height={190}>
+                {/* BACKGROUND CIRCLE */}
                 <Circle
                   cx="95"
                   cy="95"
@@ -157,6 +203,7 @@ export default function LoadingScreen() {
                   fill="transparent"
                 />
 
+                {/* PROGRESS CIRCLE */}
                 {percent >= 100 ? (
                   <Circle
                     cx="95"
@@ -183,15 +230,21 @@ export default function LoadingScreen() {
                 )}
               </Svg>
 
+              {/* PERCENT TEXT */}
               <View style={styles.circleContent}>
-                <Text style={styles.percent}>{percent}%</Text>
+                <Text style={styles.percent}>
+                  {percent}%
+                </Text>
 
                 <Text style={styles.loadingText}>
-                  {percent >= 100 ? 'DONE' : 'LOADING'}
+                  {percent >= 100
+                    ? 'DONE'
+                    : 'LOADING'}
                 </Text>
               </View>
             </View>
 
+            {/* BOTTOM TEXT */}
             <Text style={styles.bottomText}>
               {percent >= 100
                 ? 'Preparing your results...'
