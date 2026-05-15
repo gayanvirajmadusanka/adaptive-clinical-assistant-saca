@@ -1,78 +1,38 @@
-// Styles for TellUsMoreScreen.
-// Defines follow-up question card, progress bar, answer options, footer, and language modal.
+// tellUsMoreStyles.js
 
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-    // Main safe area background.
-safeArea: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-    // Wrapper with status bar spacing.
-wrapper: {
+  wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-    // Background image area.
-background: {
+  background: {
     flex: 1,
   },
 
-   // Main question screen container.
-container: {
-  flex: 1,
-  alignItems: 'center',
-  justifyContent: 'flex-start',
-  paddingHorizontal: 25,
-  paddingTop: 80, // 
-},
-
-    // Loading state container.
-loadingContainer: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingTop: 80,
   },
 
-  loadingText: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2B1B12',
-  },
-
-  
-    // Header bar for question screen.
-headerBar: {
+  headerBar: {
     width: '92%',
     height: 60,
     backgroundColor: '#C87936',
     borderRadius: 10,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 35,
-  },
-
-    // Back arrow touch area.
-backCircle: {
-    position: 'absolute',
-    left: 18,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  backArrow: {
-    fontSize: 28,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#1E160F',
+    marginBottom: 18,
   },
 
   headerText: {
@@ -82,149 +42,191 @@ backCircle: {
     color: '#000',
   },
 
-    // Question count text.
-questionNumber: {
-    textAlign: 'center',
-    fontSize: 16,
+  progressText: {
+    fontSize: 19,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#7A180E',
-    marginBottom: 28,
+    color: '#7A1F00',
+    marginBottom: 16,
   },
 
-    // Progress bar background.
-progressTrack: {
-    width: '100%',
-    height: 9,
+  progressBarBackground: {
+    width: '92%',
+    height: 12,
     borderRadius: 10,
-    backgroundColor: '#E8D5A8',
+    backgroundColor: '#DDD0A8',
     overflow: 'hidden',
-    marginBottom: 34,
-  },
-
-    // Filled progress bar.
-progressFill: {
-    height: '100%',
-    borderRadius: 10,
-    backgroundColor: '#C8661F',
-  },
-
-    // Question and answer box.
-questionBox: {
-    width: '100%',
-    borderWidth: 1.5,
-    borderColor: '#B8A37D',
-    backgroundColor: 'rgba(246, 232, 203, 0.90)',
-    borderRadius: 14,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 18,
-    minHeight: 205,
-  },
-
-    // Row for question text and speaker.
-questionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
     marginBottom: 18,
   },
 
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#C87936',
+    borderRadius: 10,
+  },
+
+  questionBox: {
+    width: '92%',
+    backgroundColor: '#E6D7BF',
+    borderRadius: 25,
+    padding: 18,
+    marginBottom: 18,
+    position: 'relative',
+    borderWidth: 2,
+    borderColor: '#BCA67A',
+  },
+
   questionText: {
-    flex: 1,
-    fontSize: 18,
+    fontSize: 18, // SMALLER
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#111',
-    paddingRight: 12,
+    color: '#000',
+    marginBottom: 14,
+    paddingRight: 55,
+    lineHeight: 26,
   },
 
   speakerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#B8A37D',
-    backgroundColor: '#F7E9C8',
-    justifyContent: 'center',
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#E3AD35',
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+
+  speakerPressed: {
+    backgroundColor: '#8B3A1C',
+    borderColor: '#5C2E0A',
   },
 
   speakerIcon: {
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
   },
 
-  optionsWrapper: {
-    gap: 10,
-  },
-
-    // Base answer option style.
-optionItem: {
-    minHeight: 42,
-    borderRadius: 10,
-    paddingHorizontal: 16,
+  optionButton: {
+    width: '100%',
+    minHeight: 48, // SMALLER
+    borderRadius: 16,
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 250, 238, 0.75)',
+    paddingHorizontal: 18,
+    marginBottom: 10,
   },
 
-  optionLight: {
-    backgroundColor: '#F2C483',
+  // TWO OPTION QUESTIONS
+  twoOptionStyle: {
+    backgroundColor: '#E6C37D',
   },
 
-  optionMedium: {
-    backgroundColor: '#E59A3D',
+  // MULTI OPTION COLORS
+  optionColor1: {
+    backgroundColor: '#F2EEE4',
   },
 
-  optionDark: {
-    backgroundColor: '#C8661F',
+  optionColor2: {
+    backgroundColor: '#E5C48A',
   },
 
-    // Selected answer style.
-optionSelected: {
-    backgroundColor: '#8B1E0D',
-    borderWidth: 1.5,
-    borderColor: '#5F1207',
+  optionColor3: {
+    backgroundColor: '#D8A95C',
   },
 
-  optionText: {
-    fontSize: 16,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#111',
+  optionColor4: {
+    backgroundColor: '#BC7A3E',
   },
 
-  optionTextSelected: {
-    color: '#FFF',
+  optionColor5: {
+    backgroundColor: '#8D360F',
   },
 
-    // Continue/Submit button.
-continueButton: {
-  width: '100%',
-  height: 64,
-  borderRadius: 32,
-  backgroundColor: '#D99000',
+  selectedOption: {
+  backgroundColor: '#8B1E0D',
+  borderColor: '#5F1207',
   borderWidth: 2,
-  borderColor: '#111',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginTop: 34,
 },
 
+selectedOptionText: {
+  color: '#FFF',
+},
+
+  optionText: {
+    fontSize: 16, // SMALLER
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  continueButton: {
+    width: '92%',
+    height: 64,
+    backgroundColor: '#E3AD35',
+    borderRadius: 34,
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    marginBottom: 14,
+  },
+
   continuePressed: {
-    opacity: 0.85,
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.96 }],
   },
 
   continueText: {
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#111',
+    color: '#000',
   },
 
-    // Bottom footer navigation.
-footer: {
-    height: 72,
+  backButton: {
+    width: 140,
+    height: 55,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    marginBottom: 12,
+  },
+
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
+  },
+
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  backText: {
+    fontSize: 22,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  footer: {
+    height: 55,
     backgroundColor: '#000',
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -233,108 +235,108 @@ footer: {
 
   footerItem: {
     alignItems: 'center',
-    justifyContent: 'center',
   },
 
   footerIcon: {
-    fontSize: 24,
-    fontFamily: FONTS.regular,
+    fontSize: 22,
+    color: '#fff',
   },
 
   footerText: {
-    color: '#777',
-    fontSize: 13,
+    color: '#fff',
+    fontSize: 10,
     fontFamily: FONTS.regular,
-    marginTop: 3,
+    marginTop: 2,
   },
 
-    // Language modal overlay.
-modalOverlay: {
+  modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 25,
   },
 
-    // Language modal box.
-languageModal: {
-    width: '82%',
-    backgroundColor: '#FFF7E8',
-    borderRadius: 18,
+  languageModal: {
+    width: '90%',
+    backgroundColor: '#F5E6C8',
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#8B3A1C',
     padding: 22,
+    alignItems: 'center',
   },
 
   modalTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    color: '#2B1B12',
+    color: '#2C1A0E',
+    marginBottom: 20,
   },
 
   languageOption: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#F3E0BF',
-    marginBottom: 12,
+    width: '100%',
+    height: 55,
+    backgroundColor: '#E8D5A0',
+    borderWidth: 2,
+    borderRadius: 18,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
   },
 
   languageOptionSelected: {
-    backgroundColor: '#C8661F',
+    backgroundColor: '#8B3A1C',
   },
 
   languageOptionText: {
-    fontSize: 17,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#111',
-  },
-
-  languageOptionTextSelected: {
-    color: '#FFF',
-  },
-
-  confirmText: {
-    textAlign: 'center',
-    color: '#5C4A3A',
-    marginVertical: 10,
+    color: '#000',
   },
 
   modalButtonRow: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    marginTop: 12,
   },
 
   cancelButton: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: '#DDD',
+    width: '45%',
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
     alignItems: 'center',
-  },
-
-  cancelText: {
-    fontWeight: 'bold',
-    color: '#111',
+    justifyContent: 'center',
   },
 
   confirmButton: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: '#C8661F',
+    width: '45%',
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  disabledButton: {
-    opacity: 0.5,
+  cancelText: {
+    fontSize: 17,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
   },
 
   confirmButtonText: {
+    fontSize: 17,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#FFF',
+    color: '#000',
   },
 });

@@ -1,48 +1,46 @@
 // TellUsMoreScreen.js
-// Purpose: Loads dynamic follow-up questions from FastAPI and collects user answers.
-// It supports question audio, progress tracking, back navigation, and language switching.
+// Purpose: Loads follow-up questions from FastAPI after detected symptoms.
+// Shows one question at a time, collects answers, then sends user to severity loading screen.
 
-// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   ImageBackground,
   Pressable,
   StatusBar,
   SafeAreaView,
-  Image,
   Modal,
   Animated,
   Alert,
-  BackHandler
+  BackHandler,
 } from 'react-native';
+
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
+
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreStyles';
+
 import { getFollowUpQuestions } from '../services/triageApi';
 import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam } from '../utils/routeParams';
 import { buildAnswerList } from '../utils/triagePayloads';
 
-
-// Main screen component: TellUsMoreScreen
 export default function TellUsMoreScreen() {
-    // Router handles navigation to severity loading and back screens.
   const router = useRouter();
   const params = useLocalSearchParams();
   const { t, lang, setLang } = useLanguage();
 
-    // Read detected symptoms passed from DetectedSymptomsScreen.
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
+  const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
-  const [audioLoading, setAudioLoading] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLang, setSelectedLang] = useState(null);
@@ -50,36 +48,46 @@ export default function TellUsMoreScreen() {
   const soundRef = useRef(null);
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
-    // Current question based on question index.
   const currentQuestion = questions[currentIndex];
-  const totalQuestions = questions.length || 6;
-  const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+  const totalQuestions = questions.length || 1;
 
-  // Loads follow-up questions from FastAPI for the selected language.
-    // Fetches follow-up questions from FastAPI based on detected symptoms and language.
+  const optionCount = currentQuestion?.options?.length || 0;
+  const isTwoOptionQuestion = optionCount === 2;
+
+  const multiOptionColors = [
+    styles.optionColor1,
+    styles.optionColor2,
+    styles.optionColor3,
+    styles.optionColor4,
+    styles.optionColor5,
+  ];
+
   async function fetchQuestions(languageCode) {
     try {
       setLoadingQuestions(true);
 
       const data = await getFollowUpQuestions(symptomsEn, languageCode);
 
-      setQuestions(data?.questions || []);
+      const backendQuestions = Array.isArray(data)
+        ? data
+        : data?.questions || [];
+
+      setQuestions(backendQuestions);
       setCurrentIndex(0);
       setAnswers({});
       setSelectedOption(null);
     } catch (error) {
-      console.log('Questions API error:', error);
-      Alert.alert('Error', 'Could not load questions.');
+      console.log('Follow-up question error:', error);
+      Alert.alert('Error', 'Could not load follow-up questions.');
     } finally {
       setLoadingQuestions(false);
     }
   }
 
   useEffect(() => {
-    fetchQuestions(lang || 'en');
+    fetchQuestions(lang || params.language || 'en');
   }, []);
 
-    // Stops currently playing question audio and unloads it from memory.
   const stopCurrentAudio = async () => {
     try {
       if (soundRef.current) {
@@ -98,17 +106,12 @@ export default function TellUsMoreScreen() {
     }
   };
 
-    // Plays audio for the current question using the backend voice_b64 response.
   const playQuestionAudio = async () => {
     try {
       if (!currentQuestion?.voice_b64) {
         Alert.alert('Audio Error', 'No audio available.');
         return;
       }
-
-      if (audioLoading) return;
-
-      setAudioLoading(true);
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
@@ -133,14 +136,13 @@ export default function TellUsMoreScreen() {
           if (soundRef.current === sound) {
             soundRef.current = null;
           }
+
           await sound.unloadAsync();
         }
       });
     } catch (error) {
-      console.log('Audio error:', error);
+      console.log('Question audio error:', error);
       Alert.alert('Audio Error', 'Cannot play audio.');
-    } finally {
-      setAudioLoading(false);
     }
   };
 
@@ -165,12 +167,10 @@ export default function TellUsMoreScreen() {
     };
   }, []);
 
-    // Saves the selected answer option for the current question.
   const handleOptionPress = (option) => {
     setSelectedOption(option.id);
   };
 
-    // Saves current answer, moves to next question, or submits all answers to severity loading screen.
   const handleContinue = async () => {
     if (!selectedOption) {
       Alert.alert('Select answer', 'Please select one option.');
@@ -203,15 +203,15 @@ export default function TellUsMoreScreen() {
         pathname: '/loadingseverity',
         params: {
           symptoms_en: JSON.stringify(symptomsEn),
-          symptoms_wp: params.symptoms_wp || JSON.stringify([]),
+          symptoms_wp: JSON.stringify(symptomsWp),
           answers: JSON.stringify(finalAnswers),
           language: params.language || lang || 'en',
+          source: params.source || 'text',
         },
       });
     }
   };
 
-    // Moves back to previous question, or previous screen if already on first question.
   const handleBack = async () => {
     await stopCurrentAudio();
 
@@ -228,20 +228,19 @@ export default function TellUsMoreScreen() {
   };
 
   useEffect(() => {
-  const backAction = () => {
-    handleBack();
-    return true;
-  };
+    const backAction = () => {
+      handleBack();
+      return true;
+    };
 
-  const backHandler = BackHandler.addEventListener(
-    'hardwareBackPress',
-    backAction
-  );
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
 
-  return () => backHandler.remove();
-}, [currentIndex, questions, answers]);
+    return () => backHandler.remove();
+  }, [currentIndex, questions, answers]);
 
-    // Opens language selection modal.
   const openModal = () => {
     setSelectedLang(null);
     setModalVisible(true);
@@ -261,7 +260,6 @@ export default function TellUsMoreScreen() {
     }).start(() => setModalVisible(false));
   };
 
-    // Changes language and reloads follow-up questions from backend.
   const confirmLanguage = async () => {
     if (!selectedLang) return;
 
@@ -273,21 +271,106 @@ export default function TellUsMoreScreen() {
     await fetchQuestions(selectedLang);
   };
 
-    // Show loading UI while follow-up questions are being fetched.
   if (loadingQuestions) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
 
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading questions...</Text>
-          </View>
-        </ImageBackground>
+        <View style={styles.wrapper}>
+          <ImageBackground
+            source={require('../../assets/images/background.png')}
+            style={styles.background}
+            resizeMode="cover"
+          >
+            <View style={styles.container}>
+              <View style={styles.headerBar}>
+                <Text style={styles.headerText}>Tell us more</Text>
+              </View>
+
+              <Text style={styles.progressText}>Loading questions...</Text>
+
+              <View style={styles.questionBox}>
+                <Text style={styles.questionText}>Please wait...</Text>
+              </View>
+            </View>
+
+            <View style={styles.footer}>
+              <Pressable
+                style={styles.footerItem}
+                onPress={() => router.replace('/input')}
+              >
+                <Text style={styles.footerIcon}>🏠</Text>
+                <Text style={styles.footerText}>{t('home')}</Text>
+              </Pressable>
+
+              <Pressable style={styles.footerItem} onPress={openModal}>
+                <Text style={styles.footerIcon}>🌐</Text>
+                <Text style={styles.footerText}>{t('language')}</Text>
+              </Pressable>
+            </View>
+          </ImageBackground>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+
+        <View style={styles.wrapper}>
+          <ImageBackground
+            source={require('../../assets/images/background.png')}
+            style={styles.background}
+            resizeMode="cover"
+          >
+            <View style={styles.container}>
+              <View style={styles.headerBar}>
+                <Text style={styles.headerText}>Tell us more</Text>
+              </View>
+
+              <View style={styles.questionBox}>
+                <Text style={styles.questionText}>
+                  No follow-up questions found.
+                </Text>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.backButton,
+                  pressed && styles.backPressedGrey,
+                ]}
+                onPress={() => router.back()}
+              >
+                <View style={styles.backButtonContent}>
+                  <Image
+                    source={require('../../assets/images/back-arrow.png')}
+                    style={styles.backArrowImage}
+                    resizeMode="contain"
+                  />
+
+                  <Text style={styles.backText}>{t('back')}</Text>
+                </View>
+              </Pressable>
+            </View>
+
+            <View style={styles.footer}>
+              <Pressable
+                style={styles.footerItem}
+                onPress={() => router.replace('/input')}
+              >
+                <Text style={styles.footerIcon}>🏠</Text>
+                <Text style={styles.footerText}>{t('home')}</Text>
+              </Pressable>
+
+              <Pressable style={styles.footerItem} onPress={openModal}>
+                <Text style={styles.footerIcon}>🌐</Text>
+                <Text style={styles.footerText}>{t('language')}</Text>
+              </Pressable>
+            </View>
+          </ImageBackground>
+        </View>
       </SafeAreaView>
     );
   }
@@ -303,78 +386,75 @@ export default function TellUsMoreScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
+            {/* HEADER */}
             <View style={styles.headerBar}>
-              <Pressable onPress={handleBack} style={styles.backCircle}>
-                <Text style={styles.backArrow}>←</Text>
-              </Pressable>
-
               <Text style={styles.headerText}>Tell us more</Text>
             </View>
 
-            <Text style={styles.questionNumber}>
+            {/* QUESTION COUNT */}
+            <Text style={styles.progressText}>
               Question {currentIndex + 1} of {totalQuestions}
             </Text>
 
-                        {/* Progress bar shows current question progress. */}
-            <View style={styles.progressTrack}>
+            {/* PROGRESS BAR */}
+            <View style={styles.progressBarBackground}>
               <View
                 style={[
-                  styles.progressFill,
-                  { width: `${progressPercent}%` },
+                  styles.progressBarFill,
+                  {
+                    width: `${((currentIndex + 1) / totalQuestions) * 100}%`,
+                  },
                 ]}
               />
             </View>
 
+            {/* QUESTION BOX */}
             <View style={styles.questionBox}>
-              <View style={styles.questionHeader}>
-                <Text style={styles.questionText}>
-                  {currentQuestion?.text}
-                </Text>
+              <Text style={styles.questionText}>{currentQuestion.text}</Text>
 
-                <Pressable
-                  style={styles.speakerButton}
-                  onPress={playQuestionAudio}
-                  disabled={audioLoading}
-                >
-                  <Image
-                    source={require('../../assets/images/speaker.png')}
-                    style={styles.speakerIcon}
-                    resizeMode="contain"
-                  />
-                </Pressable>
-              </View>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.speakerButton,
+                  pressed && styles.speakerPressed,
+                ]}
+                onPress={playQuestionAudio}
+              >
+                <Image
+                  source={require('../../assets/images/speaker.png')}
+                  style={styles.speakerIcon}
+                  resizeMode="contain"
+                />
+              </Pressable>
 
-              <View style={styles.optionsWrapper}>
-                                {/* Render answer options dynamically from backend. */}
-                {currentQuestion?.options?.map((option, index) => {
-                  const isSelected = selectedOption === option.id;
+              {currentQuestion.options?.map((option, index) => {
+                const isSelected = selectedOption === option.id;
 
-                  return (
-                    <Pressable
-                      key={option.id}
+                return (
+                  <Pressable
+                    key={option.id || index}
+                    style={[
+                      styles.optionButton,
+                      isTwoOptionQuestion
+                        ? styles.twoOptionStyle
+                        : multiOptionColors[index],
+                      isSelected && styles.selectedOption,
+                    ]}
+                    onPress={() => handleOptionPress(option)}
+                  >
+                    <Text
                       style={[
-                        styles.optionItem,
-                        index === 1 && styles.optionLight,
-                        index === 2 && styles.optionMedium,
-                        index === 3 && styles.optionDark,
-                        isSelected && styles.optionSelected,
+                        styles.optionText,
+                        isSelected && styles.selectedOptionText,
                       ]}
-                      onPress={() => handleOptionPress(option)}
                     >
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.optionTextSelected,
-                        ]}
-                      >
-                        • {option.text}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
+                      • {option.text}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
+            {/* CONTINUE BUTTON */}
             <Pressable
               style={({ pressed }) => [
                 styles.continueButton,
@@ -386,8 +466,28 @@ export default function TellUsMoreScreen() {
                 {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
               </Text>
             </Pressable>
+
+            {/* BACK BUTTON */}
+            <Pressable
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backPressedGrey,
+              ]}
+              onPress={handleBack}
+            >
+              <View style={styles.backButtonContent}>
+                <Image
+                  source={require('../../assets/images/back-arrow.png')}
+                  style={styles.backArrowImage}
+                  resizeMode="contain"
+                />
+
+                <Text style={styles.backText}>{t('back')}</Text>
+              </View>
+            </Pressable>
           </View>
 
+          {/* FOOTER */}
           <View style={styles.footer}>
             <Pressable
               style={styles.footerItem}
@@ -406,6 +506,7 @@ export default function TellUsMoreScreen() {
             </Pressable>
           </View>
 
+          {/* LANGUAGE MODAL */}
           <Modal transparent visible={modalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <Animated.View
@@ -455,13 +556,20 @@ export default function TellUsMoreScreen() {
                 <Text style={styles.confirmText}>{t('change_language')}</Text>
 
                 <View style={styles.modalButtonRow}>
-                  <Pressable style={styles.cancelButton} onPress={closeModal}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.cancelButton,
+                      pressed && styles.modalButtonPressed,
+                    ]}
+                    onPress={closeModal}
+                  >
                     <Text style={styles.cancelText}>{t('no')}</Text>
                   </Pressable>
 
                   <Pressable
-                    style={[
+                    style={({ pressed }) => [
                       styles.confirmButton,
+                      pressed && styles.modalButtonPressed,
                       !selectedLang && styles.disabledButton,
                     ]}
                     disabled={!selectedLang}

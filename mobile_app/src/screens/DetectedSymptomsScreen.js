@@ -111,10 +111,7 @@ export default function DetectedSymptomsScreen() {
     } catch (error) {
       console.log('Audio update error:', error);
 
-      Alert.alert(
-        'Audio Error',
-        'Could not update audio.'
-      );
+      Alert.alert('Audio Error', 'Could not update audio.');
     } finally {
       setAudioLoading(false);
     }
@@ -123,18 +120,12 @@ export default function DetectedSymptomsScreen() {
   const playVoiceAudio = async () => {
     try {
       if (!voiceFileUri) {
-        Alert.alert(
-          'Audio Error',
-          'No audio file found.'
-        );
+        Alert.alert('Audio Error', 'No audio file found.');
         return;
       }
 
       if (audioLoading) {
-        Alert.alert(
-          'Please wait',
-          'Updating audio...'
-        );
+        Alert.alert('Please wait', 'Updating audio...');
         return;
       }
 
@@ -170,10 +161,7 @@ export default function DetectedSymptomsScreen() {
     } catch (error) {
       console.log('Play error:', error);
 
-      Alert.alert(
-        'Audio Error',
-        'Unable to play audio.'
-      );
+      Alert.alert('Audio Error', 'Unable to play audio.');
     }
   };
 
@@ -275,10 +263,7 @@ export default function DetectedSymptomsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#F5EAD8"
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
 
       <View style={styles.wrapper}>
         <ImageBackground
@@ -288,15 +273,11 @@ export default function DetectedSymptomsScreen() {
         >
           <View style={styles.container}>
             <View style={styles.headerBar}>
-              <Text style={styles.headerText}>
-                {t('detected_title')}
-              </Text>
+              <Text style={styles.headerText}>{t('detected_title')}</Text>
             </View>
 
             <View style={styles.symptomBox}>
-              <Text style={styles.symptomText}>
-                {symptomText}
-              </Text>
+              <Text style={styles.symptomText}>{symptomText}</Text>
 
               <Pressable
                 style={({ pressed }) => [
@@ -313,9 +294,7 @@ export default function DetectedSymptomsScreen() {
               </Pressable>
             </View>
 
-            <Text style={styles.questionText}>
-              {t('detected_question')}
-            </Text>
+            <Text style={styles.questionText}>{t('detected_question')}</Text>
 
             <View style={styles.buttonRow}>
               <Pressable
@@ -325,9 +304,7 @@ export default function DetectedSymptomsScreen() {
                 ]}
                 onPress={handleYesPress}
               >
-                <Text style={styles.choiceText}>
-                  {t('yes')}
-                </Text>
+                <Text style={styles.choiceText}>{t('yes')}</Text>
               </Pressable>
 
               <Pressable
@@ -337,12 +314,11 @@ export default function DetectedSymptomsScreen() {
                 ]}
                 onPress={handleNoPress}
               >
-                <Text style={styles.choiceText}>
-                  {t('no')}
-                </Text>
+                <Text style={styles.choiceText}>{t('no')}</Text>
               </Pressable>
             </View>
 
+            {/* BACK BUTTON */}
             <Pressable
               style={({ pressed }) => [
                 styles.backButton,
@@ -353,9 +329,15 @@ export default function DetectedSymptomsScreen() {
                 router.back();
               }}
             >
-              <Text style={styles.backText}>
-                {t('back')}
-              </Text>
+              <View style={styles.backButtonContent}>
+                <Image
+                  source={require('../../assets/images/back-arrow.png')}
+                  style={styles.backArrowImage}
+                  resizeMode="contain"
+                />
+
+                <Text style={styles.backText}>{t('back')}</Text>
+              </View>
             </Pressable>
           </View>
 
@@ -368,15 +350,10 @@ export default function DetectedSymptomsScreen() {
               }}
             >
               <Text style={styles.footerIcon}>🏠</Text>
-              <Text style={styles.footerText}>
-                {t('home')}
-              </Text>
+              <Text style={styles.footerText}>{t('home')}</Text>
             </Pressable>
 
-            <Pressable
-              style={styles.footerItem}
-              onPress={openModal}
-            >
+            <Pressable style={styles.footerItem} onPress={openModal}>
               <Text style={styles.footerIcon}>🌐</Text>
               <Text style={styles.footerText}>
                 {audioLoading ? 'Updating...' : t('language')}
@@ -384,11 +361,7 @@ export default function DetectedSymptomsScreen() {
             </Pressable>
           </View>
 
-          <Modal
-            transparent
-            visible={modalVisible}
-            animationType="fade"
-          >
+          <Modal transparent visible={modalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <Animated.View
                 style={[
@@ -396,9 +369,7 @@ export default function DetectedSymptomsScreen() {
                   { transform: [{ scale: scaleAnim }] },
                 ]}
               >
-                <Text style={styles.modalTitle}>
-                  {t('select_language')}
-                </Text>
+                <Text style={styles.modalTitle}>{t('select_language')}</Text>
 
                 <Pressable
                   style={[
@@ -436,23 +407,23 @@ export default function DetectedSymptomsScreen() {
                   </Text>
                 </Pressable>
 
-                <Text style={styles.confirmText}>
-                  {t('change_language')}
-                </Text>
+                <Text style={styles.confirmText}>{t('change_language')}</Text>
 
                 <View style={styles.modalButtonRow}>
                   <Pressable
-                    style={styles.cancelButton}
+                    style={({ pressed }) => [
+                      styles.cancelButton,
+                      pressed && styles.modalButtonPressed,
+                    ]}
                     onPress={closeModal}
                   >
-                    <Text style={styles.cancelText}>
-                      {t('no')}
-                    </Text>
+                    <Text style={styles.cancelText}>{t('no')}</Text>
                   </Pressable>
 
                   <Pressable
-                    style={[
+                    style={({ pressed }) => [
                       styles.confirmButton,
+                      pressed && styles.modalButtonPressed,
                       !selectedLang && styles.disabledButton,
                     ]}
                     disabled={!selectedLang || audioLoading}
@@ -555,18 +526,27 @@ export default function DetectedSymptomsScreen() {
                   </Text>
 
                   <Pressable
-                    style={{
-                      alignSelf: 'flex-end',
-                      backgroundColor: '#8B2E0A',
-                      paddingHorizontal: 28,
-                      paddingVertical: 10,
-                      borderRadius: 22,
-                    }}
+                    style={({ pressed }) => [
+                      {
+                        alignSelf: 'flex-end',
+                        backgroundColor: '#E3AD35',
+                        borderWidth: 2,
+                        borderColor: '#000',
+                        paddingHorizontal: 28,
+                        paddingVertical: 10,
+                        borderRadius: 22,
+                      },
+                      pressed && {
+                        backgroundColor: '#8B3A1C',
+                        borderColor: '#5C2E0A',
+                        transform: [{ scale: 0.96 }],
+                      },
+                    ]}
                     onPress={() => setErrorModalVisible(false)}
                   >
                     <Text
                       style={{
-                        color: '#FFF',
+                        color: '#000',
                         fontWeight: 'bold',
                         fontSize: 15,
                       }}

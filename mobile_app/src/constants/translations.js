@@ -8,6 +8,9 @@ export const translations = {
     voice: 'VOICE',
     body: 'BODY',
     show:'SHOW',
+    ok: 'OK',
+    cancel: 'Cancel',
+
 
     home: 'Home',
     language: 'Language',
@@ -29,12 +32,11 @@ export const translations = {
     text_input_question: 'What can I help with?',
     text_placeholder: 'Describe your symptoms and press Continue',
     continue: 'Continue',
-    back: '← Back',
+    back: 'Back',
 
     detected_title: 'Detected Symptoms',
     detected_question: 'Does this match you?',
-    detected_speak:
-      'Detected symptoms are headache, fever, body pain, and tiredness.',
+    detected_speak: 'Detected symptoms are headache, fever, body pain, and tiredness.',
 
     tell_us_more: 'Tell Us More',
     pain_level: 'PAIN LEVEL',
@@ -100,29 +102,27 @@ export const translations = {
     severe_recommendation_2: 'Call emergency services if needed.',
     severe_recommendation_3: 'Do not wait if symptoms are serious.',
 
-    mild_speak:
-      'Your result is mild. Please rest, drink water, and monitor your symptoms.',
-    moderate_speak:
-      'Your result is moderate. Please book a health check soon and get medical advice if symptoms continue.',
-    severe_speak:
-      'Your result is severe. Please seek urgent medical help now.',
+    mild_speak: 'Your result is mild. Please rest, drink water, and monitor your symptoms.',
+    moderate_speak: 'Your result is moderate. Please book a health check soon and get medical advice if symptoms continue.',
+    severe_speak: 'Your result is severe. Please seek urgent medical help now.',
   },
 
   wp: {
     input_title: 'Nyuntu nyampu yimi',
-    input_subtitle:
-      'Nyuntu wangka, yimi, manu body map-kurlu symptoms yimi.',
+    input_subtitle: 'Nyuntu wangka, yimi, manu body map-kurlu symptoms yimi.',
 
     text: 'YIMI',
     voice: 'WANGKA',
     body: 'BODY',
     show: 'Milkikarriya',
+    ok: 'Yuwayi',
+    cancel: 'Lawa',
 
     home: 'Ngurra',
     language: 'Wangka',
 
     select_language: 'Wangka ngurrju',
-    english: 'English',
+    english: 'Ingliji',
     warlpiri: 'Warlpiri',
 
     confirm: 'Kurlarda',
@@ -138,12 +138,11 @@ export const translations = {
     text_input_question: 'Nyiya ka nyuntu nyampuju?',
     text_placeholder: 'Nyuntu symptoms yimi manu yangka',
     continue: 'Yangka',
-    back: '← Yankirri',
+    back: 'Yankirri',
 
     detected_title: 'Symptoms nyangu',
     detected_question: 'Nyampu nyuntu-kurra?',
-    detected_speak:
-      'Symptoms nyangu Walpawalpa, Rdurrurlpu, body pain, manu tiredness.',
+    detected_speak: 'Symptoms nyangu Walpawalpa, Rdurrurlpu, body pain, manu tiredness.',
 
     tell_us_more: 'Yimi More',
     pain_level: 'Pina Level',
@@ -209,11 +208,8 @@ export const translations = {
     severe_recommendation_2: 'Emergency services call if needed.',
     severe_recommendation_3: 'Symptoms serious-jangka wait lawa.',
 
-    mild_speak:
-      'Nyuntu result mild. Rest manu water nyinyi.',
-    moderate_speak:
-      'Nyuntu result moderate. Health check book soon.',
-    severe_speak:
-      'Nyuntu result severe. Urgent medical help japirli now.',
+    mild_speak: 'Nyuntu result mild. Rest manu water nyinyi.',
+    moderate_speak: 'Nyuntu result moderate. Health check book soon.',
+    severe_speak: 'Nyuntu result severe. Urgent medical help japirli now.',
   },
 };

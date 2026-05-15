@@ -5,33 +5,28 @@ import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-    // Main safe area background.
-safeArea: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-    // Wrapper with status bar spacing.
-wrapper: {
+  wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-    // Background image area.
-background: {
+  background: {
     flex: 1,
   },
 
-    // Text input screen container.
-container: {
+  container: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 25,
     paddingTop: 80,
   },
 
-    // Header bar containing title and icon.
-headerBar: {
+  headerBar: {
     width: '92%',
     height: 60,
     backgroundColor: '#6F8F83',
@@ -42,24 +37,21 @@ headerBar: {
     marginBottom: 25,
   },
 
-    // Header title text.
-headerText: {
+  headerText: {
     fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-    // Header icon image.
-headerIcon: {
+  headerIcon: {
     position: 'absolute',
     right: 25,
     width: 30,
     height: 30,
   },
 
-    // Text input outer box.
-inputBox: {
+  inputBox: {
     width: '88%',
     height: 250,
     backgroundColor: '#E6D7BF',
@@ -68,8 +60,7 @@ inputBox: {
     marginBottom: 45,
   },
 
-    // Prompt above text input.
-questionText: {
+  questionText: {
     fontSize: 16,
     fontFamily: FONTS.bold,
     fontWeight: '600',
@@ -77,8 +68,7 @@ questionText: {
     marginBottom: 18,
   },
 
-    // Multiline input field.
-textInput: {
+  textInput: {
     flex: 1,
     fontSize: 16,
     fontFamily: FONTS.regular,
@@ -86,15 +76,13 @@ textInput: {
     textAlignVertical: 'top',
   },
 
-    // Continue button.
-continueButton: {
+  continueButton: {
     width: 230,
     height: 65,
     backgroundColor: '#E3AD35',
     borderRadius: 30,
     borderWidth: 2,
     borderColor: '#000',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
@@ -102,28 +90,19 @@ continueButton: {
   },
 
   continuePressedGreen: {
-    backgroundColor: '#8B3A1C', 
-    borderColor: '#5C2E0A',     
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
-  }, 
+  },
 
   continueText: {
     fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
-    marginRight: 12,
   },
 
-  arrow: {
-    fontSize: 42,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-    // Back button.
-backButton: {
+  backButton: {
     width: 140,
     height: 55,
     borderRadius: 28,
@@ -133,6 +112,18 @@ backButton: {
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
+  },
+
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
   },
 
   backPressedGrey: {
@@ -147,8 +138,7 @@ backButton: {
     color: '#000',
   },
 
-    // Bottom footer navigation.
-footer: {
+  footer: {
     height: 55,
     backgroundColor: '#000',
     flexDirection: 'row',
@@ -173,8 +163,7 @@ footer: {
     marginTop: 2,
   },
 
-    // Language modal overlay.
-modalOverlay: {
+  modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
@@ -182,8 +171,7 @@ modalOverlay: {
     paddingHorizontal: 25,
   },
 
-    // Language modal box.
-languageModal: {
+  languageModal: {
     width: '90%',
     backgroundColor: '#F5E6C8',
     borderRadius: 22,
@@ -215,8 +203,8 @@ languageModal: {
   },
 
   languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
     transform: [{ scale: 0.97 }],
   },
 
@@ -250,9 +238,9 @@ languageModal: {
     width: '45%',
     height: 48,
     borderRadius: 24,
+    backgroundColor: '#E3AD35',
     borderWidth: 2,
     borderColor: '#000',
-    backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -282,7 +270,13 @@ languageModal: {
     color: '#000',
   },
 
-  disabledButton: {
-    opacity: 0.45,
+  modalButtonPressed: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.96 }],
   },
+
+  //disabledButton: {
+    //opacity: 0.45,
+  //},
 });
