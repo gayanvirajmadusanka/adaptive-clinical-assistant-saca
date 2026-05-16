@@ -77,7 +77,6 @@
                                maxWidth="Infinity"
                                wrapText="true"/>
 
-                        <!-- Symptom cards: image + button, built in controller -->
                         <FlowPane fx:id="symptomCardsBox"
                                   hgap="12" vgap="12"
                                   maxWidth="Infinity"
