@@ -183,8 +183,8 @@ class TestExtractEndpointAudio:
         assert response.status_code == 200
         data = response.json()
         print(f'\n  Detected: {data["symptoms_en"]}')
-        assert 'voice_b64' in data
-        _assert_valid_audio(data['voice_b64'], 'extract_text_en')
+        assert 'voice_b64_en' in data
+        _assert_valid_audio(data['voice_b64_en'], 'extract_text_en')
 
     def test_extract_text_warlpiri_audio(self):
         """Extract text endpoint Warlpiri should return Warlpiri audio."""
@@ -194,8 +194,8 @@ class TestExtractEndpointAudio:
         })
         assert response.status_code == 200
         data = response.json()
-        assert 'voice_b64' in data
-        _assert_valid_audio(data['voice_b64'], 'extract_text_wp')
+        assert 'voice_b64_wp' in data
+        _assert_valid_audio(data['voice_b64_wp'], 'extract_text_wp')
 
     def test_extract_audio_english(self):
         """Extract audio endpoint should return stitched detected symptoms audio."""
@@ -215,8 +215,8 @@ class TestExtractEndpointAudio:
         })
         assert response.status_code == 200
         data = response.json()
-        assert 'voice_b64' in data
-        _assert_valid_audio(data['voice_b64'], 'extract_audio_en')
+        assert 'voice_b64_en' in data
+        _assert_valid_audio(data['voice_b64_en'], 'extract_audio_en')
 
 
 class TestAnswerAudioEndpointOutput:
