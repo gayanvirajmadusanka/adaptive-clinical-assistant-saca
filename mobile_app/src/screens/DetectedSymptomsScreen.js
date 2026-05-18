@@ -58,13 +58,16 @@ export default function DetectedSymptomsScreen() {
     }, [])
   );
 
-  const symptomsToShow =
-    lang === 'wp'
-      ? symptomsWp
-      : symptomsEn.map((item) => {
-          const key = item.toLowerCase().replaceAll(' ', '_');
-          return t(key);
-        });
+  // FIX:
+  // Always translate from English symptom keys using translations.js.
+  // Example:
+  // symptomsEn = ['fever']
+  // lang = 'en' -> t('fever') returns 'Fever'
+  // lang = 'wp' -> t('fever') returns Warlpiri translation
+  const symptomsToShow = symptomsEn.map((item) => {
+    const key = String(item).toLowerCase().replaceAll(' ', '_');
+    return t(key);
+  });
 
   const symptomText =
     symptomsToShow.length > 0
@@ -110,7 +113,6 @@ export default function DetectedSymptomsScreen() {
       }
     } catch (error) {
       console.log('Audio update error:', error);
-
       Alert.alert('Audio Error', 'Could not update audio.');
     } finally {
       setAudioLoading(false);
@@ -160,7 +162,6 @@ export default function DetectedSymptomsScreen() {
       });
     } catch (error) {
       console.log('Play error:', error);
-
       Alert.alert('Audio Error', 'Unable to play audio.');
     }
   };
@@ -213,7 +214,9 @@ export default function DetectedSymptomsScreen() {
     setLang(selectedLang);
     closeModal();
 
-    if (selectedLang === 'wp' && symptomsWp.length === 0) {
+    // Keep this check for backend Warlpiri audio / flow safety.
+    // Display translation does not depend on symptomsWp anymore.
+    if (selectedLang === 'wp' && symptomsEn.length === 0) {
       setErrorModalVisible(true);
       return;
     }
@@ -224,7 +227,7 @@ export default function DetectedSymptomsScreen() {
   const handleYesPress = async () => {
     if (loading) return;
 
-    if (lang === 'wp' && symptomsWp.length === 0) {
+    if (lang === 'wp' && symptomsEn.length === 0) {
       setErrorModalVisible(true);
       return;
     }
@@ -318,7 +321,6 @@ export default function DetectedSymptomsScreen() {
               </Pressable>
             </View>
 
-            {/* BACK BUTTON */}
             <Pressable
               style={({ pressed }) => [
                 styles.backButton,
@@ -438,11 +440,7 @@ export default function DetectedSymptomsScreen() {
             </View>
           </Modal>
 
-          <Modal
-            transparent
-            visible={errorModalVisible}
-            animationType="fade"
-          >
+          <Modal transparent visible={errorModalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <View
                 style={{
