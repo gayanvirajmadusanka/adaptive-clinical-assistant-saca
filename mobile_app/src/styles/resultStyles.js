@@ -1,230 +1,249 @@
 // resultStyles.js
 // Purpose: Screen-specific styles for ResultScreen.
-// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export const resultTheme = {
   severe: {
-    cardBackground: '#8B3A1C',
-    header: '#4A0A04',
+    header: '#6E0000',
     headerText: '#F5E6C8',
-    severityFill: '#4A0A04',
-    severityText: '#F5E6C8',
-    startAgain: '#F5E6C8',
-    boxBackground: '#F5E6C8',
-    boxBorder: '#F5E6C8',
-    boxText: '#2C1A0E',
+
+    screenBackground: '#9A3F18',
+    severityFill: '#A41206',
+
+    cardBackground: '#F3E4C3',
+    boxBorder: '#D2B07B',
   },
 
   moderate: {
-    cardBackground: '#F5E6C8',
-    header: '#8B3A1C',
-    headerText: '#F5E6C8',
-    severityFill: '#C47A3A',
-    severityText: '#F5E6C8',
-    startAgain: '#8B3A1C',
-    boxBackground: '#F5E6C8',
-    boxBorder: '#D4A96A',
-    boxText: '#2C1A0E',
+    header: '#6E0000',
+    headerText: '#FFFFFF',
+
+    screenBackground: '#F3E4C3',
+    severityFill: 'rgb(252, 189, 0)',
+
+    cardBackground: '#F3E4C3',
+    boxBorder: '#D9B27C',
   },
 
   mild: {
-    cardBackground: '#F5E6C8',
-    header: '#C47A3A',
-    headerText: '#2C1A0E',
+    header: '#6E0000',
+    headerText: '#FFFFFF',
+
+    // Same background as recommendation/symptom card
+    screenBackground: '#F3E4C3',
     severityFill: '#5C8A3C',
-    severityText: '#F5E6C8',
-    startAgain: '#C47A3A',
-    boxBackground: '#F5E6C8',
-    boxBorder: '#D4A96A',
-    boxText: '#2C1A0E',
+
+    cardBackground: '#F3E4C3',
+    boxBorder: '#D9B27C',
   },
 };
 
 export default StyleSheet.create({
   contentWrapper: {
     flex: 1,
-    justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 95,
+    paddingHorizontal: 14,
+    paddingTop: 82,
   },
 
   resultCard: {
-    width: '95%',
-    borderRadius: 16,
+    width: '100%',
+    flex: 1,
+    borderRadius: 22,
     overflow: 'hidden',
-    elevation: 6,
+    elevation: 5,
   },
 
   headerBar: {
-    height: 75,
+    height: 72,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   headerText: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
   },
 
-  // Main card content area
-  // Extra top padding added so speaker button has clean spacing.
   content: {
-    padding: 22,
-    paddingTop: 42,
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingTop: 52,
+    paddingBottom: 0,
     position: 'relative',
   },
 
-  // Speaker button
-  // Same style as DetectedSymptomsScreen.
+  scrollContent: {
+    paddingBottom: 32,
+  },
+
   speakerButton: {
     position: 'absolute',
-    right: 12,
-    top: 12,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#E3AD35',
+    right: 22,
+    top: 2,
+    width: 50,
+    height: 50,
+    borderRadius: 26,
+    backgroundColor: '#ffdf3e',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#000',
-    zIndex: 10,
+    elevation: 8,
+    zIndex: 50,
   },
 
-  // Speaker pressed effect
   speakerPressed: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
+    opacity: 0.8,
     transform: [{ scale: 0.95 }],
   },
 
   speakerIcon: {
-    width: 24,
-    height: 24,
+    width: 25,
+    height: 25,
   },
 
-  // Severity result badge
-  severityBadge: {
+  severityCard: {
     width: '100%',
-    minHeight: 55,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-
-  severeBadge: {
-    backgroundColor: '#5A0500',
-    borderWidth: 1.5,
-    borderColor: '#1E0000',
-    shadowColor: '#5A0500',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.45,
-    shadowRadius: 5,
-    elevation: 7,
-  },
-
-  severeBadgeRow: {
+    minHeight: 104,
+    borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginBottom: 16,
+    elevation: 5,
+  },
+
+  severityIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#FFF8EA',
+    alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 18,
   },
 
-  warningIcon: {
-    fontSize: 19,
-    fontFamily: FONTS.bold,
-    marginRight: 10,
-    color: '#F5E6C8',
+  severityImage: {
+    width: 52,
+    height: 52,
   },
 
-  severityText: {
-    fontSize: 20,
+  severityTextBox: {
+    flex: 1,
+  },
+
+  severityTitle: {
+    fontSize: 34,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#FFFFFF',
+    lineHeight: 38,
   },
 
-  // Emergency call button
+  severitySubtitle: {
+    fontSize: 15,
+    fontFamily: FONTS.regular,
+    color: '#FFFFFF',
+    marginTop: 4,
+  },
+
   callButton: {
     width: '100%',
-    height: 54,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: '#F5E6C8',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 18,
     borderWidth: 2,
-    borderColor: '#4A0A04',
-  },
-
-  callButtonContent: {
-    flexDirection: 'row',
+    borderColor: '#6E0000',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-
-  callIcon: {
-    fontSize: 22,
-    fontFamily: FONTS.bold,
-    marginRight: 10,
+    marginBottom: 16,
   },
 
   callButtonText: {
-    fontSize: 18,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#4A0A04',
-  },
-
-  // Information boxes
-  infoBox: {
-    width: '100%',
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 18,
-    marginBottom: 18,
-    minHeight: 125,
-  },
-
-  infoTitle: {
     fontSize: 17,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
+    color: '#6E0000',
+  },
+
+  infoCard: {
+    width: '100%',
+    minHeight: 150,
+    borderRadius: 24,
+    borderWidth: 1.4,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: 18,
+    paddingVertical: 20,
+    marginBottom: 18,
+    elevation: 5,
+  },
+
+  symptomCard: {
+    minHeight: 116,
+  },
+
+  infoIconLarge: {
+    width: 78,
+    height: 78,
+    marginRight: 16,
+    marginTop: 2,
+  },
+
+  infoContent: {
+    flex: 1,
+  },
+
+  infoTitle: {
+    fontSize: 22,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#111111',
     marginBottom: 12,
   },
 
   infoText: {
     fontSize: 15,
     fontFamily: FONTS.bold,
-    marginBottom: 7,
-    lineHeight: 20,
+    color: '#111111',
+    marginBottom: 8,
+    lineHeight: 22,
   },
 
-  // Start again button
   startAgainButton: {
-    alignSelf: 'flex-end',
+    width: '100%',
+    height: 58,
+    borderRadius: 18,
+    backgroundColor: '#E3AD35',
     borderWidth: 2,
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    borderColor: '#C8911F',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+    elevation: 4,
+  },
+
+  startAgainPressed: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.96 }],
   },
 
   startAgainText: {
-    fontSize: 15,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
+    color: '#2C1A0E',
   },
 
-  // General pressed effect
   pressedButton: {
-    opacity: 0.75,
-    transform: [{ scale: 0.96 }],
+    opacity: 0.8,
+    transform: [{ scale: 0.97 }],
   },
 });

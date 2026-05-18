@@ -22,7 +22,6 @@ import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
-import { extractSymptomsFromText } from '../services/triageApi';
 import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
@@ -34,11 +33,15 @@ export default function DetectedSymptomsScreen() {
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
   const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
+  const voiceB64En = params.voice_b64_en || '';
+  const voiceB64Wp = params.voice_b64_wp || '';
+
   const isVoiceFlow = params.source === 'voice';
   const isBodyFlow = params.source === 'body';
-  const initialVoiceFileUri = params.voice_file_uri || null;
 
-  const [voiceFileUri, setVoiceFileUri] = useState(initialVoiceFileUri);
+  const [voiceFileUriEn, setVoiceFileUriEn] = useState(null);
+  const [voiceFileUriWp, setVoiceFileUriWp] = useState(null);
+
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
@@ -51,12 +54,13 @@ export default function DetectedSymptomsScreen() {
     }, [])
   );
 
-  // Translate symptom display from English symptom keys using translations.js.
-  // Example: fever -> t('fever') -> English or Warlpiri depending on current language.
-  const symptomsToShow = symptomsEn.map((item) => {
-    const key = String(item).toLowerCase().replaceAll(' ', '_');
-    return t(key);
-  });
+  const symptomsToShow =
+    lang === 'wp' && symptomsWp.length > 0
+      ? symptomsWp
+      : symptomsEn.map((item) => {
+          const key = String(item).toLowerCase().replaceAll(' ', '_');
+          return t(key);
+        });
 
   const symptomText =
     symptomsToShow.length > 0
@@ -81,53 +85,54 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
-  async function fetchAudioForLanguage(languageCode) {
+  const getAudioFileForLanguage = async (languageCode) => {
     try {
       setAudioLoading(true);
 
-      // Prefer backend-provided Warlpiri symptoms for Warlpiri audio.
-      // If symptoms_wp is empty, use the translated text currently shown on screen.
-      const translatedText = symptomsEn
-        .map((item) => {
-          const key = String(item).toLowerCase().replaceAll(' ', '_');
-          return t(key);
-        })
-        .join(' ');
+      if (languageCode === 'wp') {
+        if (voiceFileUriWp) return voiceFileUriWp;
 
-      const textToSend =
-        languageCode === 'wp'
-          ? symptomsWp.length > 0
-            ? symptomsWp.join(' ')
-            : translatedText
-          : symptomsEn.join(' ');
+        if (!voiceB64Wp) {
+          Alert.alert('Audio Error', 'No Warlpiri audio found.');
+          return null;
+        }
 
-      const data = await extractSymptomsFromText(textToSend, languageCode);
+        const fileUri = await saveBase64AudioToCache(
+          voiceB64Wp,
+          'saca_detected_voice_wp.wav'
+        );
 
-      const newFile = await saveBase64AudioToCache(
-        data?.voice_b64,
-        `voice_${languageCode}.wav`
+        setVoiceFileUriWp(fileUri);
+        return fileUri;
+      }
+
+      if (voiceFileUriEn) return voiceFileUriEn;
+
+      if (!voiceB64En) {
+        Alert.alert('Audio Error', 'No English audio found.');
+        return null;
+      }
+
+      const fileUri = await saveBase64AudioToCache(
+        voiceB64En,
+        'saca_detected_voice_en.wav'
       );
 
-      if (newFile) {
-        setVoiceFileUri(newFile);
-      }
+      setVoiceFileUriEn(fileUri);
+      return fileUri;
     } catch (error) {
-      console.log('Audio update error:', error);
-      Alert.alert('Audio Error', 'Could not update audio.');
+      console.log('Save audio error:', error);
+      Alert.alert('Audio Error', 'Could not prepare audio.');
+      return null;
     } finally {
       setAudioLoading(false);
     }
-  }
+  };
 
   const playVoiceAudio = async () => {
     try {
-      if (!voiceFileUri) {
-        Alert.alert('Audio Error', 'No audio file found.');
-        return;
-      }
-
       if (audioLoading) {
-        Alert.alert('Please wait', 'Updating audio...');
+        Alert.alert('Please wait', 'Preparing audio...');
         return;
       }
 
@@ -137,8 +142,12 @@ export default function DetectedSymptomsScreen() {
 
       await stopCurrentAudio();
 
+      const fileUri = await getAudioFileForLanguage(lang);
+
+      if (!fileUri) return;
+
       const { sound } = await Audio.Sound.createAsync(
-        { uri: voiceFileUri },
+        { uri: fileUri },
         {
           shouldPlay: true,
           volume: 1.0,
@@ -187,25 +196,22 @@ export default function DetectedSymptomsScreen() {
     };
   }, []);
 
-  // Called by AppScreen before changing language from the footer modal.
   const beforeLanguageChange = async () => {
     await stopCurrentAudio();
   };
 
-  // Called by AppScreen after changing language from the footer modal.
   const afterLanguageChange = async (selectedLang) => {
-    if (selectedLang === 'wp' && symptomsEn.length === 0) {
-      setErrorModalVisible(true);
-      return;
-    }
+    await stopCurrentAudio();
 
-    await fetchAudioForLanguage(selectedLang);
+    if (selectedLang === 'wp' && !voiceB64Wp) {
+      Alert.alert('Audio Error', 'No Warlpiri audio found.');
+    }
   };
 
   const handleYesPress = async () => {
     if (loading) return;
 
-    if (lang === 'wp' && symptomsEn.length === 0) {
+    if (symptomsEn.length === 0 && symptomsWp.length === 0) {
       setErrorModalVisible(true);
       return;
     }

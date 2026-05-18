@@ -64,15 +64,10 @@ export const translations = {
     result: 'Final Results',
     recommendations: 'Recommendations',
     symptoms: 'Symptoms',
-
     severity: 'Severity',
-    mild: 'Mild',
-    moderate_result: 'Moderate',
-    severe: 'Severe',
-
     mild_label: 'Severity: Mild',
     moderate_label: 'Severity: Moderate',
-    severe_label: '⚠ SEVERE — Seek help now',
+    severe_label: 'Severity: Severe',
 
     headache: 'Headache',
     fever: 'Fever',
@@ -104,6 +99,9 @@ export const translations = {
     mild_speak: 'Your result is mild. Please rest, drink water, and monitor your symptoms.',
     moderate_speak: 'Your result is moderate. Please book a health check soon and get medical advice if symptoms continue.',
     severe_speak: 'Your result is severe. Please seek urgent medical help now.',
+    you_can_treat_this_at_home:'You can treat this at home.',
+    medical_attention_recommended:'Medical attention is recommended.',
+    seek_emergency_help_now:'Seek emergency help now.',
 
     about_title: 'Welcome to SACA...',
     about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
@@ -178,15 +176,13 @@ export const translations = {
     result: 'Purrkunypa Nyangu',
     recommendations: 'Ngurrju yimi',
     symptoms: 'Purrkunypa',
-
-    severity: 'Wiri',
-    mild: 'Witapardu',
-    moderate_result: 'Pina Marda (Moderate)',
-    severe: 'Wirinyayirni',
-
-    mild_label: 'Pina Wangu (Mild)',
-    moderate_label: 'Pina Marda (Moderate)',
-    severe_label: '⚠ Jalangu yardajirri warrirni',
+    severity: 'Wiri',    
+    mild_label: 'Wiri: Witapardu',
+    moderate_label: 'Wiri: Wiriwiri',
+    severe_label: 'Wiri: Wirinyayirni',
+    you_can_treat_this_at_home:'You can treat this at home.',
+    medical_attention_recommended:'Medical attention is recommended.',
+    seek_emergency_help_now:'Seek emergency help now.',
 
     headache: 'Jangka marda',
     fever: 'ngaju rdurrurlpu',
@@ -200,8 +196,8 @@ export const translations = {
     vomiting: 'Vomiting',
     breathing_problem: 'Breathing problem',
 
-    call_emergency: 'Emergency Call',
-    start_again: 'Start Again',
+    call_emergency: 'Kapanku ngangkayikurra yanta.',
+    start_again: 'Pina Yangka',
 
     mild_recommendation_1: 'Rest manu water nyinyi.',
     mild_recommendation_2: 'Purrkunypa nyanyi.',

@@ -1,6 +1,6 @@
 // TextInputScreen.js
 // Purpose: Lets the user manually type symptoms.
-// The shared AppScreen component now handles SafeArea, background, footer, and language modal.
+// AppScreen handles SafeArea, background, footer, and language modal.
 
 import React, { useState } from 'react';
 import {
@@ -23,7 +23,6 @@ export default function TextInputScreen() {
 
   const [description, setDescription] = useState('');
 
-  // Validates the typed symptom description before sending it to the loading screen.
   const handleContinue = () => {
     if (!description.trim()) {
       Alert.alert('Missing information', 'Please describe your symptoms first.');
@@ -33,8 +32,9 @@ export default function TextInputScreen() {
     router.push({
       pathname: '/loading',
       params: {
-        text: description,
+        text: description.trim(),
         language: lang || 'en',
+        source: 'text',
       },
     });
   };
@@ -42,7 +42,6 @@ export default function TextInputScreen() {
   return (
     <AppScreen>
       <View style={styles.container}>
-        {/* HEADER SECTION */}
         <View style={styles.headerBar}>
           <Text style={styles.headerText}>{t('text_input_title')}</Text>
 
@@ -53,7 +52,6 @@ export default function TextInputScreen() {
           />
         </View>
 
-        {/* INPUT BOX */}
         <View style={styles.inputBox}>
           <Text style={styles.questionText}>{t('text_input_question')}</Text>
 
@@ -67,7 +65,6 @@ export default function TextInputScreen() {
           />
         </View>
 
-        {/* CONTINUE BUTTON */}
         <Pressable
           style={({ pressed }) => [
             styles.continueButton,
@@ -78,7 +75,6 @@ export default function TextInputScreen() {
           <Text style={styles.continueText}>{t('continue')}</Text>
         </Pressable>
 
-        {/* BACK BUTTON */}
         <Pressable
           style={({ pressed }) => [
             styles.backButton,

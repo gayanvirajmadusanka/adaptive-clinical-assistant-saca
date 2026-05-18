@@ -1,6 +1,7 @@
 // LoadingScreen.js
 // Purpose: Sends text/body symptoms to FastAPI, shows circular progress,
 // and navigates to DetectedSymptomsScreen.
+// Important: Audio is NOT saved here anymore, so loading does not wait after 100%.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -22,9 +23,6 @@ import {
   extractSymptomsFromText,
   extractSymptomsFromBody,
 } from '../services/triageApi';
-
-import { saveBase64AudioToCache } from '../utils/base64Audio';
-import { buildDetectedSymptomsParams } from '../utils/routeParams';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -48,7 +46,6 @@ export default function LoadingScreen() {
   const strokeWidth = 15;
   const circumference = 2 * Math.PI * radius;
 
-  // Animate progress circle
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: percent,
@@ -57,21 +54,11 @@ export default function LoadingScreen() {
     }).start();
   }, [percent]);
 
-  // Faster loading animation
   useEffect(() => {
     const timer = setInterval(() => {
       setPercent((prev) => {
-        // Stop at 90% until API finishes
-        if (!apiFinished && prev >= 90) {
-          return 90;
-        }
-
-        // Stop at 100%
-        if (prev >= 100) {
-          return 100;
-        }
-
-        // Faster increase
+        if (!apiFinished && prev >= 90) return 90;
+        if (prev >= 100) return 100;
         return prev + 2;
       });
     }, 25);
@@ -79,45 +66,24 @@ export default function LoadingScreen() {
     return () => clearInterval(timer);
   }, [apiFinished]);
 
-  // Send symptoms to FastAPI
   async function loadDetectedSymptoms() {
     try {
       let data;
 
-      // BODY FLOW
       if (source === 'body') {
         const symptomsArray = String(text)
           .split(',')
           .map((item) => item.trim())
           .filter(Boolean);
 
-        data = await extractSymptomsFromBody(
-          symptomsArray,
-          language || 'en'
-        );
+        data = await extractSymptomsFromBody(symptomsArray, language || 'en');
+      } else {
+        data = await extractSymptomsFromText(text, language || 'en');
       }
 
-      // TEXT FLOW
-      else {
-        data = await extractSymptomsFromText(
-          text,
-          language || 'en'
-        );
-      }
-
-      // Save backend audio locally
-      const voiceFileUri = await saveBase64AudioToCache(
-        data?.voice_b64,
-        'saca_detected_voice.wav'
-      );
-
-      setApiData({
-        ...data,
-        voice_file_uri: voiceFileUri,
-      });
-
-      // API finished
+      setApiData(data);
       setApiFinished(true);
+      setPercent(100);
     } catch (error) {
       console.log('Symptoms API error:', error);
 
@@ -134,12 +100,10 @@ export default function LoadingScreen() {
     }
   }
 
-  // Load symptoms on screen start
   useEffect(() => {
     loadDetectedSymptoms();
   }, []);
 
-  // Navigate when loading reaches 100
   useEffect(() => {
     if (
       apiFinished &&
@@ -152,12 +116,17 @@ export default function LoadingScreen() {
       router.replace({
         pathname: '/detectedsymptoms',
         params: {
-          ...buildDetectedSymptomsParams(
-            apiData,
-            language,
-            apiData.voice_file_uri
-          ),
+          symptoms_en: JSON.stringify(apiData?.symptoms_en || []),
+          symptoms_wp: JSON.stringify(apiData?.symptoms_wp || []),
 
+          confidence: String(apiData?.confidence ?? 0),
+          input_type: apiData?.input_type || source || 'text',
+          language: apiData?.language || language || 'en',
+
+          voice_b64_en: apiData?.voice_b64_en || '',
+          voice_b64_wp: apiData?.voice_b64_wp || '',
+
+          original_text: text || '',
           source: source || 'text',
           gender: gender || 'male',
         },
@@ -165,7 +134,6 @@ export default function LoadingScreen() {
     }
   }, [apiFinished, percent, apiData]);
 
-  // Circular progress animation
   const strokeDashoffset = progressAnim.interpolate({
     inputRange: [0, 100],
     outputRange: [circumference, 0],
@@ -185,15 +153,12 @@ export default function LoadingScreen() {
           resizeMode="cover"
         >
           <View style={styles.container}>
-            {/* TOP TITLE */}
             <Text style={styles.topText}>
               Checking your Symptoms...
             </Text>
 
-            {/* PROGRESS CIRCLE */}
             <View style={styles.circleWrapper}>
               <Svg width={190} height={190}>
-                {/* BACKGROUND CIRCLE */}
                 <Circle
                   cx="95"
                   cy="95"
@@ -203,7 +168,6 @@ export default function LoadingScreen() {
                   fill="transparent"
                 />
 
-                {/* PROGRESS CIRCLE */}
                 {percent >= 100 ? (
                   <Circle
                     cx="95"
@@ -230,21 +194,17 @@ export default function LoadingScreen() {
                 )}
               </Svg>
 
-              {/* PERCENT TEXT */}
               <View style={styles.circleContent}>
                 <Text style={styles.percent}>
                   {percent}%
                 </Text>
 
                 <Text style={styles.loadingText}>
-                  {percent >= 100
-                    ? 'DONE'
-                    : 'LOADING'}
+                  {percent >= 100 ? 'DONE' : 'LOADING'}
                 </Text>
               </View>
             </View>
 
-            {/* BOTTOM TEXT */}
             <Text style={styles.bottomText}>
               {percent >= 100
                 ? 'Preparing your results...'

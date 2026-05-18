@@ -1,7 +1,5 @@
 // ResultScreen.js
-// Purpose: Displays final triage severity, symptoms, recommendation, confidence,
-// and emergency action if severe.
-// AppScreen handles SafeArea, background, footer, and language modal.
+// Purpose: Displays final triage result using local audio and local icons.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -13,6 +11,7 @@ import {
   Linking,
   Alert,
   BackHandler,
+  ScrollView,
 } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -24,13 +23,45 @@ import { useLanguage } from '../context/LanguageContext';
 import styles, { resultTheme } from '../styles/resultStyles';
 
 import { classifySymptoms } from '../services/triageApi';
-import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam } from '../utils/routeParams';
+
+const severityAudioMap = {
+  mild: {
+    en: require('../../assets/audio/ui/severity_mild_en.wav'),
+    wp: require('../../assets/audio/ui/severity_mild_wp.wav'),
+  },
+  moderate: {
+    en: require('../../assets/audio/ui/severity_moderate_en.wav'),
+    wp: require('../../assets/audio/ui/severity_moderate_wp.wav'),
+  },
+  severe: {
+    en: require('../../assets/audio/ui/severity_severe_en.wav'),
+    wp: require('../../assets/audio/ui/severity_severe_wp.wav'),
+  },
+};
+
+const severityIcons = {
+  mild: require('../../assets/images/result_icons/smiley_mild.png'),
+  moderate: require('../../assets/images/result_icons/smiley_moderate.png'),
+  severe: require('../../assets/images/result_icons/severity_icon.png'),
+};
+
+const recommendationIcons = {
+  mild: require('../../assets/images/result_icons/recommendation_mild.png'),
+  moderate: require('../../assets/images/result_icons/recommendation_moderate.png'),
+  severe: require('../../assets/images/result_icons/recommendation_severe.png'),
+};
+
+const symptomIcons = {
+  mild: require('../../assets/images/result_icons/symptom_mild.png'),
+  moderate: require('../../assets/images/result_icons/symptom_moderate.png'),
+  severe: require('../../assets/images/result_icons/symptom_severe.png'),
+};
 
 export default function ResultScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const initialResultData = parseJsonParam(params.result_data, null);
   const classifyPayload = parseJsonParam(params.classify_payload, null);
@@ -41,17 +72,60 @@ export default function ResultScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const soundRef = useRef(null);
 
-  const severity = resultData?.severity_mode
-    ? resultData.severity_mode.toLowerCase()
-    : 'mild';
+  const getSeverityKey = () => {
+    const rawSeverity =
+      resultData?.severity_mode ||
+      resultData?.severity ||
+      'mild';
 
+    const value = String(rawSeverity).toLowerCase();
+
+    if (value.includes('severe') || value.includes('wirinyayirni')) {
+      return 'severe';
+    }
+
+    if (value.includes('moderate') || value.includes('wiriwiri')) {
+      return 'moderate';
+    }
+
+    return 'mild';
+  };
+
+  const severity = getSeverityKey();
   const theme = resultTheme[severity] || resultTheme.mild;
 
   const symptoms = resultData?.symptoms || [];
   const recommendation = resultData?.recommendation || '';
   const recommendedAction = resultData?.recommended_action || '';
-  const confidence = resultData?.confidence || 0;
   const hasCritical = resultData?.has_critical || false;
+
+  const translatedSymptoms = symptoms.map((item) => {
+    const key = String(item).toLowerCase().replaceAll(' ', '_');
+    return t(key);
+  });
+
+  const getSeverityText = () => {
+    if (severity === 'severe') return t('severe_label');
+    if (severity === 'moderate') return t('moderate_label');
+    return t('mild_label');
+  };
+
+  const getSeveritySubtitle = () => {
+    if (severity === 'severe') {
+      return t('seek_emergency_help_now') || 'Seek emergency help now';
+    }
+
+    if (severity === 'moderate') {
+      return t('medical_attention_recommended') || 'Medical attention recommended';
+    }
+
+    return t('you_can_treat_this_at_home') || 'You can treat this at home';
+  };
+
+  const getTranslationSafe = (key, fallback) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   useEffect(() => {
     const backAction = () => {
@@ -110,29 +184,40 @@ export default function ResultScreen() {
     try {
       await stopAudio();
 
-      if (resultData?.voice_b64 && resultData.voice_b64.length > 10000) {
-        const fileUri = await saveBase64AudioToCache(
-          resultData.voice_b64,
-          'saca_result_voice.wav'
-        );
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
 
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: fileUri },
-          { shouldPlay: true, volume: 1.0 }
-        );
+      const selectedLang = lang === 'wp' ? 'wp' : 'en';
+      const audioSource = severityAudioMap?.[severity]?.[selectedLang];
 
-        soundRef.current = sound;
+      if (!audioSource) {
+        Alert.alert('Audio Error', 'No local result audio found.');
         return;
       }
 
-      const textToSpeak = `
-        Severity is ${resultData?.severity || severity}.
-        ${recommendedAction}
-      `;
+      const { sound } = await Audio.Sound.createAsync(audioSource, {
+        shouldPlay: true,
+        volume: 1.0,
+      });
 
-      Speech.speak(textToSpeak, {
-        language: 'en-AU',
-        rate: 0.9,
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          try {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
+            }
+
+            await sound.unloadAsync();
+          } catch (error) {
+            console.log('Unload result audio error:', error);
+          }
+        }
       });
     } catch (error) {
       console.log('Result audio error:', error);
@@ -158,6 +243,7 @@ export default function ResultScreen() {
 
     try {
       setChangingLanguage(true);
+      await stopAudio();
 
       const data = await classifySymptoms(
         classifyPayload.symptoms,
@@ -193,7 +279,7 @@ export default function ResultScreen() {
         <View
           style={[
             styles.resultCard,
-            { backgroundColor: theme.cardBackground },
+            { backgroundColor: theme.screenBackground },
           ]}
         >
           <View style={[styles.headerBar, { backgroundColor: theme.header }]}>
@@ -217,137 +303,143 @@ export default function ResultScreen() {
               />
             </Pressable>
 
-            <View
-              style={[
-                styles.severityBadge,
-                { backgroundColor: theme.severityFill },
-                severity === 'severe' && styles.severeBadge,
-              ]}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
             >
-              {severity === 'severe' ? (
-                <View style={styles.severeBadgeRow}>
-                  <Text style={styles.warningIcon}>⚠</Text>
-                  <Text
-                    style={[
-                      styles.severityText,
-                      { color: theme.severityText },
-                    ]}
-                  >
-                    Severe - Seek help now
-                  </Text>
-                </View>
-              ) : (
-                <Text
-                  style={[
-                    styles.severityText,
-                    { color: theme.severityText },
-                  ]}
-                >
-                  {resultData?.severity || severity.toUpperCase()}
-                </Text>
-              )}
-            </View>
-
-            {severity === 'severe' && (
-              <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.callButton,
-                    pressed && styles.pressedButton,
-                  ]}
-                  onPress={callEmergency}
-                >
-                  <View style={styles.callButtonContent}>
-                    <Text style={styles.callIcon}>📞</Text>
-                    <Text style={styles.callButtonText}>
-                      {t('call_emergency')}
-                    </Text>
-                  </View>
-                </Pressable>
-              </Animated.View>
-            )}
-
-            <View
-              style={[
-                styles.infoBox,
-                {
-                  backgroundColor: theme.boxBackground,
-                  borderColor: theme.boxBorder,
-                },
-              ]}
-            >
-              <Text style={[styles.infoTitle, { color: theme.boxText }]}>
-                Symptoms
-              </Text>
-
-              {symptoms.length > 0 ? (
-                symptoms.map((item, index) => (
-                  <Text
-                    key={`${item}-${index}`}
-                    style={[styles.infoText, { color: theme.boxText }]}
-                  >
-                    • {item}
-                  </Text>
-                ))
-              ) : (
-                <Text style={[styles.infoText, { color: theme.boxText }]}>
-                  No symptoms found
-                </Text>
-              )}
-            </View>
-
-            <View
-              style={[
-                styles.infoBox,
-                {
-                  backgroundColor: theme.boxBackground,
-                  borderColor: theme.boxBorder,
-                },
-              ]}
-            >
-              <Text style={[styles.infoTitle, { color: theme.boxText }]}>
-                Recommendation
-              </Text>
-
-              <Text style={[styles.infoText, { color: theme.boxText }]}>
-                • {recommendation}
-              </Text>
-
-              <Text style={[styles.infoText, { color: theme.boxText }]}>
-                • {recommendedAction}
-              </Text>
-
-              <Text style={[styles.infoText, { color: theme.boxText }]}>
-                • Confidence: {Math.round(confidence * 100)}%
-              </Text>
-
-              {hasCritical && (
-                <Text style={[styles.infoText, { color: theme.boxText }]}>
-                  • Critical symptoms detected
-                </Text>
-              )}
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.startAgainButton,
-                { borderColor: theme.startAgain },
-                pressed && styles.pressedButton,
-              ]}
-              onPress={async () => {
-                await stopAudio();
-                router.replace('/input');
-              }}
-            >
-              <Text
+              <View
                 style={[
-                  styles.startAgainText,
-                  { color: theme.startAgain },
+                  styles.severityCard,
+                  { backgroundColor: theme.severityFill },
                 ]}
               >
-                {t('start_again')}
-              </Text>
-            </Pressable>
+                <View style={styles.severityIconCircle}>
+                  <Image
+                    source={severityIcons[severity]}
+                    style={styles.severityImage}
+                    resizeMode="contain"
+                  />
+                </View>
+
+                <View style={styles.severityTextBox}>
+                  <Text style={styles.severityTitle}>
+                    {getSeverityText()}
+                  </Text>
+
+                  <Text style={styles.severitySubtitle}>
+                    {getSeveritySubtitle()}
+                  </Text>
+                </View>
+              </View>
+
+              {severity === 'severe' && (
+                <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.callButton,
+                      pressed && styles.pressedButton,
+                    ]}
+                    onPress={callEmergency}
+                  >
+                    <Text style={styles.callButtonText}>
+                      📞 {t('call_emergency')}
+                    </Text>
+                  </Pressable>
+                </Animated.View>
+              )}
+
+              <View
+                style={[
+                  styles.infoCard,
+                  {
+                    borderColor: theme.boxBorder,
+                    backgroundColor: theme.cardBackground,
+                  },
+                ]}
+              >
+                <Image
+                  source={recommendationIcons[severity]}
+                  style={styles.infoIconLarge}
+                  resizeMode="contain"
+                />
+
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoTitle}>
+                    {t('recommendations')}
+                  </Text>
+
+                  {recommendation ? (
+                    <Text style={styles.infoText}>• {recommendation}</Text>
+                  ) : null}
+
+                  {recommendedAction ? (
+                    <Text style={styles.infoText}>• {recommendedAction}</Text>
+                  ) : null}
+
+                  {hasCritical && (
+                    <Text style={styles.infoText}>
+                      • {getTranslationSafe(
+                        'critical_symptoms_detected',
+                        'Critical symptoms detected'
+                      )}
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.infoCard,
+                  styles.symptomCard,
+                  {
+                    borderColor: theme.boxBorder,
+                    backgroundColor: theme.cardBackground,
+                  },
+                ]}
+              >
+                <Image
+                  source={symptomIcons[severity]}
+                  style={styles.infoIconLarge}
+                  resizeMode="contain"
+                />
+
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoTitle}>
+                    {t('symptoms')}
+                  </Text>
+
+                  {translatedSymptoms.length > 0 ? (
+                    translatedSymptoms.map((item, index) => (
+                      <Text key={`${item}-${index}`} style={styles.infoText}>
+                        • {item}
+                      </Text>
+                    ))
+                  ) : (
+                    <Text style={styles.infoText}>
+                      {getTranslationSafe(
+                        'no_symptoms_found',
+                        'No symptoms found'
+                      )}
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.startAgainButton,
+                  pressed && styles.startAgainPressed,
+                ]}
+                onPress={async () => {
+                  await stopAudio();
+                  router.replace('/input');
+                }}
+              >
+                <Text style={styles.startAgainText}>
+                  ⟳ {t('start_again')}
+                </Text>
+              </Pressable>
+            </ScrollView>
           </View>
         </View>
       </View>
