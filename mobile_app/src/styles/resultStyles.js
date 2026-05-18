@@ -1,22 +1,18 @@
-// Styles for ResultScreen.
-// Includes severity-based result themes, result card layout, emergency button, footer, and modal styling.
+// resultStyles.js
+// Purpose: Screen-specific styles for ResultScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
-// Severity theme colors used by ResultScreen.
 export const resultTheme = {
   severe: {
     cardBackground: '#8B3A1C',
     header: '#4A0A04',
-      // Result title text.
-headerText: '#F5E6C8',
-
+    headerText: '#F5E6C8',
     severityFill: '#4A0A04',
     severityText: '#F5E6C8',
-
     startAgain: '#F5E6C8',
-
     boxBackground: '#F5E6C8',
     boxBorder: '#F5E6C8',
     boxText: '#2C1A0E',
@@ -26,12 +22,9 @@ headerText: '#F5E6C8',
     cardBackground: '#F5E6C8',
     header: '#8B3A1C',
     headerText: '#F5E6C8',
-
     severityFill: '#C47A3A',
     severityText: '#F5E6C8',
-
     startAgain: '#8B3A1C',
-
     boxBackground: '#F5E6C8',
     boxBorder: '#D4A96A',
     boxText: '#2C1A0E',
@@ -41,12 +34,9 @@ headerText: '#F5E6C8',
     cardBackground: '#F5E6C8',
     header: '#C47A3A',
     headerText: '#2C1A0E',
-
     severityFill: '#5C8A3C',
     severityText: '#F5E6C8',
-
     startAgain: '#C47A3A',
-
     boxBackground: '#F5E6C8',
     boxBorder: '#D4A96A',
     boxText: '#2C1A0E',
@@ -54,25 +44,7 @@ headerText: '#F5E6C8',
 };
 
 export default StyleSheet.create({
-    // Main safe area background.
-safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-    // Wrapper with status bar spacing.
-wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-    // Background image area.
-background: {
-    flex: 1,
-  },
-
-    // Main result screen content wrapper.
-contentWrapper: {
+  contentWrapper: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -80,16 +52,14 @@ contentWrapper: {
     paddingTop: 95,
   },
 
-    // Main result card container.
-resultCard: {
+  resultCard: {
     width: '95%',
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 6,
   },
 
-    // Result header bar.
-headerBar: {
+  headerBar: {
     height: 75,
     justifyContent: 'center',
     alignItems: 'center',
@@ -101,34 +71,56 @@ headerBar: {
     fontWeight: 'bold',
   },
 
+  // Main card content area
+  // Extra top padding added so speaker button has clean spacing.
   content: {
     padding: 22,
+    paddingTop: 42,
+    position: 'relative',
   },
 
-    // Speaker button for result audio.
-speakerButton: {
-    alignSelf: 'flex-end',
-    marginBottom: 10,
+  // Speaker button
+  // Same style as DetectedSymptomsScreen.
+  speakerButton: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#E3AD35',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#000',
+    zIndex: 10,
+  },
+
+  // Speaker pressed effect
+  speakerPressed: {
+    backgroundColor: '#8B3A1C',
+    borderColor: '#5C2E0A',
+    transform: [{ scale: 0.95 }],
   },
 
   speakerIcon: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
   },
 
-    // Severity label badge.
-severityBadge: {
+  // Severity result badge
+  severityBadge: {
     width: '100%',
     minHeight: 55,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 24,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
 
-    // Extra styling for severe cases.
-severeBadge: {
+  severeBadge: {
     backgroundColor: '#5A0500',
     borderWidth: 1.5,
     borderColor: '#1E0000',
@@ -159,8 +151,8 @@ severeBadge: {
     textAlign: 'center',
   },
 
-    // Emergency call button.
-callButton: {
+  // Emergency call button
+  callButton: {
     width: '100%',
     height: 54,
     backgroundColor: '#F5E6C8',
@@ -191,8 +183,8 @@ callButton: {
     color: '#4A0A04',
   },
 
-    // Information box for symptoms/recommendations.
-infoBox: {
+  // Information boxes
+  infoBox: {
     width: '100%',
     borderRadius: 10,
     borderWidth: 1,
@@ -215,8 +207,8 @@ infoBox: {
     lineHeight: 20,
   },
 
-    // Restart app flow button.
-startAgainButton: {
+  // Start again button
+  startAgainButton: {
     alignSelf: 'flex-end',
     borderWidth: 2,
     borderRadius: 8,
@@ -230,147 +222,9 @@ startAgainButton: {
     fontWeight: 'bold',
   },
 
-    // Bottom navigation footer.
-footer: {
-    height: 55,
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  footerItem: {
-    alignItems: 'center',
-  },
-
-  footerIcon: {
-    fontSize: 22,
-    fontFamily: FONTS.regular,
-    color: '#fff',
-  },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
-  },
-
+  // General pressed effect
   pressedButton: {
     opacity: 0.75,
     transform: [{ scale: 0.96 }],
-  },
-
-    // Overlay behind language modal.
-modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 25,
-  },
-
-    // Language modal box.
-languageModal: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
-    padding: 22,
-    alignItems: 'center',
-    elevation: 8,
-  },
-
-  modalTitle: {
-    fontSize: 24,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2C1A0E',
-    marginBottom: 20,
-  },
-
-  languageOption: {
-    width: '100%',
-    height: 55,
-    backgroundColor: '#E8D5A0',
-    borderColor: '#D4A96A',
-    borderWidth: 2,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-
-  languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
-    transform: [{ scale: 0.97 }],
-  },
-
-  languageOptionText: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#5C2E0A',
-  },
-
-  languageOptionTextSelected: {
-    color: '#F5E6C8',
-  },
-
-  confirmText: {
-    fontSize: 15,
-    fontFamily: FONTS.regular,
-    color: '#2C1A0E',
-    marginTop: 8,
-    marginBottom: 18,
-    textAlign: 'center',
-  },
-
-  modalButtonRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  cancelButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: '#000',
-    backgroundColor: '#F5EAD8',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cancelText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  confirmButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  confirmButtonText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  disabledButton: {
-    opacity: 0.45,
   },
 });

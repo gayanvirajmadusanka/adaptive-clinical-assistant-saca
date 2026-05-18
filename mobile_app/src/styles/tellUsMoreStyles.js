@@ -1,23 +1,11 @@
 // tellUsMoreStyles.js
+// Purpose: Screen-specific styles for TellUsMoreScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-  background: {
-    flex: 1,
-  },
-
   container: {
     flex: 1,
     alignItems: 'center',
@@ -77,7 +65,7 @@ export default StyleSheet.create({
   },
 
   questionText: {
-    fontSize: 18, // SMALLER
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
@@ -103,6 +91,7 @@ export default StyleSheet.create({
   speakerPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
+    transform: [{ scale: 0.95 }],
   },
 
   speakerIcon: {
@@ -112,19 +101,17 @@ export default StyleSheet.create({
 
   optionButton: {
     width: '100%',
-    minHeight: 48, // SMALLER
+    minHeight: 48,
     borderRadius: 16,
     justifyContent: 'center',
     paddingHorizontal: 18,
     marginBottom: 10,
   },
 
-  // TWO OPTION QUESTIONS
   twoOptionStyle: {
     backgroundColor: '#E6C37D',
   },
 
-  // MULTI OPTION COLORS
   optionColor1: {
     backgroundColor: '#F2EEE4',
   },
@@ -146,17 +133,17 @@ export default StyleSheet.create({
   },
 
   selectedOption: {
-  backgroundColor: '#8B1E0D',
-  borderColor: '#5F1207',
-  borderWidth: 2,
-},
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    borderWidth: 2,
+  },
 
-selectedOptionText: {
-  color: '#FFF',
-},
+  selectedOptionText: {
+    color: '#FFF',
+  },
 
   optionText: {
-    fontSize: 16, // SMALLER
+    fontSize: 16,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
@@ -220,121 +207,6 @@ selectedOptionText: {
 
   backText: {
     fontSize: 22,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  footer: {
-    height: 55,
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  footerItem: {
-    alignItems: 'center',
-  },
-
-  footerIcon: {
-    fontSize: 22,
-    color: '#fff',
-  },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 25,
-  },
-
-  languageModal: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
-    padding: 22,
-    alignItems: 'center',
-  },
-
-  modalTitle: {
-    fontSize: 24,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2C1A0E',
-    marginBottom: 20,
-  },
-
-  languageOption: {
-    width: '100%',
-    height: 55,
-    backgroundColor: '#E8D5A0',
-    borderWidth: 2,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-
-  languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
-  },
-
-  languageOptionText: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  modalButtonRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-
-  cancelButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  confirmButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cancelText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  confirmButtonText: {
-    fontSize: 17,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',

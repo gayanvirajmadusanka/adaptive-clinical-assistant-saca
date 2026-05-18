@@ -1,78 +1,63 @@
-// Styles for AboutScreen UI layout and typography
-// Defines spacing, logo layout, paragraph text, and back button appearance.
+// aboutStyles.js
+// Purpose: Screen-specific styles for AboutScreen.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  // Main safe area to avoid notch/status bar overlap.
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  // Wrapper for full screen layout and Android status bar spacing.
-  wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-  // Background image should cover the full screen.
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-
-  // Main scroll content container.
+  // Main scroll container
   container: {
     alignItems: 'center',
-    paddingHorizontal: 35,
-    paddingTop: 55,
-    paddingBottom: 40,
+    paddingHorizontal: 32,
+    paddingTop: 95,
+    paddingBottom: 50,
   },
 
-  // Main About screen heading.
+  // Main heading
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    lineHeight: 30,
-    marginBottom: 12,
+    lineHeight: 36,
+    marginBottom: 16,
   },
 
-  // SACA logo display style.
+  // SACA logo
   logo: {
-    width: 120,
-    height: 120,
+    width: 130,
+    height: 130,
     borderRadius: 18,
-    marginBottom: 18,
+    marginBottom: 22,
   },
 
-  // App name subtitle text.
+  // Subtitle text
   subTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    marginBottom: 15,
+    lineHeight: 26,
+    marginBottom: 22,
   },
 
-  // English and Warlpiri description paragraph text.
+  // Main about paragraph
+  // Justified and aligned evenly on both sides.
   paragraph: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     color: '#111',
-    textAlign: 'left',
-    lineHeight: 22,
-    marginBottom: 18,
+    textAlign: 'justify',
+    lineHeight: 30,
+    marginBottom: 28,
     fontWeight: '500',
+    width: '100%',
   },
 
-  // Back button container.
+  // Back button
+  // Same style as TextInputScreen.
   backButton: {
     width: 170,
     height: 58,
@@ -86,13 +71,27 @@ export default StyleSheet.create({
     elevation: 3,
   },
 
-  // Back button pressed state.
+  // Back button pressed state
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
-  // Back button label.
+  // Back button content row
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Back arrow image
+  backArrowImage: {
+    width: 26,
+    height: 26,
+    marginRight: 8,
+  },
+
+  // Back button text
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,

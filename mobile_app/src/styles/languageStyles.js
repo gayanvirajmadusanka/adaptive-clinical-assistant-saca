@@ -66,12 +66,12 @@ defaultText: {
   /* SELECTED → WARLPIRI STYLE */
     // Selected language button state.
 selectedButton: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
-  },
+  }, 
 
-    // Selected language text color.
+// Selected language text color.
 selectedText: {
     color: '#F5E6C8',
   },

@@ -1,23 +1,11 @@
 // detectedSymptomsStyles.js
+// Purpose: Screen-specific styles for DetectedSymptomsScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-  background: {
-    flex: 1,
-  },
-
   container: {
     flex: 1,
     alignItems: 'center',
@@ -25,8 +13,7 @@ export default StyleSheet.create({
     paddingTop: 80,
   },
 
-  // HEADER 
-   headerBar: {
+  headerBar: {
     width: '92%',
     height: 60,
     backgroundColor: '#C87936',
@@ -44,7 +31,6 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // DETECTED SYMPTOMS BOX
   symptomBox: {
     width: '92%',
     minHeight: 270,
@@ -56,14 +42,13 @@ export default StyleSheet.create({
   },
 
   symptomText: {
-    fontSize: 22, // BIGGER
+    fontSize: 22,
     lineHeight: 34,
     fontFamily: FONTS.bold,
     color: '#4B3A2A',
     paddingRight: 55,
   },
 
-  // SPEAKER BUTTON
   speakerButton: {
     position: 'absolute',
     right: 16,
@@ -89,9 +74,8 @@ export default StyleSheet.create({
     height: 24,
   },
 
-  // QUESTION TEXT
   questionText: {
-    fontSize: 24, // BIGGER
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#3D2A1A',
@@ -99,7 +83,6 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
 
-  // YES NO BUTTON ROW
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -107,10 +90,9 @@ export default StyleSheet.create({
     marginBottom: 30,
   },
 
-  // YES / NO BUTTON
   choiceButton: {
-    width: 130, // BIGGER
-    height: 50, // BIGGER
+    width: 130,
+    height: 50,
     borderRadius: 34,
     backgroundColor: '#E3AD35',
     borderWidth: 2,
@@ -127,13 +109,12 @@ export default StyleSheet.create({
   },
 
   choiceText: {
-    fontSize: 21, 
-    fontFamily: FONTS.re,
+    fontSize: 21,
+    fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // BACK BUTTON
   backButton: {
     width: 140,
     height: 55,
@@ -170,146 +151,99 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // FOOTER
-  footer: {
-    height: 55,
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  footerItem: {
-    alignItems: 'center',
-  },
-
-  footerIcon: {
-    fontSize: 22,
-    color: '#fff',
-  },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
-  },
-
-  // MODAL
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 25,
   },
 
-  languageModal: {
+  errorModalBox: {
     width: '90%',
     backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
-    padding: 22,
-    alignItems: 'center',
-    elevation: 8,
-  },
-
-  modalTitle: {
-    fontSize: 24,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2C1A0E',
-    marginBottom: 20,
-  },
-
-  languageOption: {
-    width: '100%',
-    height: 55,
-    backgroundColor: '#E8D5A0',
-    borderColor: '#D4A96A',
-    borderWidth: 2,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-
-  languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
     borderColor: '#5C2E0A',
-    transform: [{ scale: 0.97 }],
   },
 
-  languageOptionText: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#5C2E0A',
-  },
-
-  languageOptionTextSelected: {
-    color: '#F5E6C8',
-  },
-
-  confirmText: {
-    fontSize: 15,
-    fontFamily: FONTS.regular,
-    color: '#2C1A0E',
-    marginTop: 8,
-    marginBottom: 18,
-    textAlign: 'center',
-  },
-
-  modalButtonRow: {
-    width: '100%',
+  errorHeader: {
+    backgroundColor: '#8B2E0A',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
 
-  cancelButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
+  errorTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    flex: 1,
+    paddingRight: 12,
+  },
+
+  errorCloseButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: '#FFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  cancelText: {
-    fontSize: 17,
+  errorCloseText: {
+    color: '#FFF',
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#000',
+    lineHeight: 30,
   },
 
-  confirmButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
+  errorBody: {
+    padding: 22,
+  },
+
+  errorMessageBold: {
+    color: '#5C2E0A',
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 18,
+    lineHeight: 22,
+  },
+
+  errorMessage: {
+    color: '#5C2E0A',
+    fontSize: 15,
+    fontFamily: FONTS.regular,
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+
+  errorOkButton: {
+    alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',
     borderWidth: 2,
     borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 22,
   },
 
-  confirmButtonText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  modalButtonPressed: {
+  errorOkButtonPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
     transform: [{ scale: 0.96 }],
   },
 
-  disabledButton: {
-    opacity: 0.45,
+  errorOkText: {
+    color: '#000',
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });
