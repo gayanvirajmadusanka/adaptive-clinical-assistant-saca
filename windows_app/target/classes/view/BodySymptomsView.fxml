@@ -7,12 +7,14 @@
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.saca.controller.BodySymptomsController"
-            stylesheets="@/styles/style.css, @/styles/body-input.css"
+            stylesheets="@/styles/style.css"
             styleClass="root">
 
     <top>
         <HBox alignment="CENTER_LEFT" styleClass="top-bar">
-            <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
             <Region HBox.hgrow="ALWAYS"/>
         </HBox>
     </top>
@@ -27,22 +29,22 @@
             <content>
                 <StackPane styleClass="body-bg">
 
-                    <VBox alignment="TOP_CENTER"
-                          spacing="20"
-                          maxWidth="680"
+                    <VBox alignment="TOP_CENTER" spacing="18" maxWidth="680"
                           styleClass="body-card-container">
 
-                        <padding><Insets top="30" right="36" bottom="60" left="36"/></padding>
+                        <padding>
+                            <Insets top="30" right="36" bottom="60" left="36"/>
+                        </padding>
 
+                        <!-- HEADER -->
                         <HBox alignment="CENTER" styleClass="body-header-bar">
 
                             <Button onAction="#handleBack" styleClass="header-back-btn">
-                                <tooltip>
-                                    <Tooltip text="%back"/>
-                                </tooltip>
                                 <graphic>
                                     <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
-                                        <image><Image url="@/icons/back-arrow.png"/></image>
+                                        <image>
+                                            <Image url="@/icons/back-arrow.png"/>
+                                        </image>
                                     </ImageView>
                                 </graphic>
                             </Button>
@@ -60,7 +62,9 @@
                                     <ImageView fx:id="partSpeakerIcon"
                                                fitWidth="26" fitHeight="26"
                                                preserveRatio="true">
-                                        <image><Image url="@/icons/speaker.png"/></image>
+                                        <image>
+                                            <Image url="@/icons/speaker.png"/>
+                                        </image>
                                     </ImageView>
                                 </graphic>
                             </Button>
@@ -73,7 +77,11 @@
                                maxWidth="Infinity"
                                wrapText="true"/>
 
-                        <VBox fx:id="symptomsListBox" spacing="10" maxWidth="Infinity"/>
+                        <FlowPane fx:id="symptomCardsBox"
+                                  hgap="12" vgap="12"
+                                  maxWidth="Infinity"
+                                  prefWrapLength="680"
+                                  alignment="CENTER"/>
 
                         <Button fx:id="confirmBtn"
                                 text="%confirm"

@@ -82,6 +82,7 @@ public class VoiceResultController implements Initializable {
             reFetchSymptoms();
         } else {
             setSymptomResult(saved);
+            handleSpeak();
         }
     }
 
@@ -245,7 +246,9 @@ public class VoiceResultController implements Initializable {
 
     @FXML
     private void handleSpeak() {
-        if (symptomResult == null) return;
+        if (symptomResult == null) {
+            return;
+        }
 
         if (AudioService.isPlaying()) {
             AudioService.stop();
