@@ -1,15 +1,13 @@
 // TellUsMoreVoiceScreen.js
+// Purpose: Voice version of Tell Us More.
+// AppScreen handles SafeArea, background, footer, and language modal.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  ImageBackground,
   Pressable,
-  StatusBar,
-  SafeAreaView,
   Image,
-  Modal,
   Animated,
   Alert,
   BackHandler,
@@ -19,6 +17,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
+import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreVoiceStyles';
 
@@ -39,16 +38,17 @@ import { WAV_RECORDING_OPTIONS } from '../utils/audioRecordingOptions';
 export default function TellUsMoreVoiceScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { t, lang, setLang } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
+  const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
-
   const [loadingQuestions, setLoadingQuestions] = useState(true);
+
   const [audioLoading, setAudioLoading] = useState(false);
   const [questionAudioPlaying, setQuestionAudioPlaying] = useState(false);
 
@@ -59,19 +59,13 @@ export default function TellUsMoreVoiceScreen() {
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [recordDuration, setRecordDuration] = useState('0.00');
   const [resolvingVoice, setResolvingVoice] = useState(false);
-
   const [voiceAnswerMap, setVoiceAnswerMap] = useState({});
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(null);
 
   const soundRef = useRef(null);
   const timerRef = useRef(null);
   const secondsRef = useRef(0);
 
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-
   const bar1 = useRef(new Animated.Value(14)).current;
   const bar2 = useRef(new Animated.Value(28)).current;
   const bar3 = useRef(new Animated.Value(18)).current;
@@ -79,8 +73,19 @@ export default function TellUsMoreVoiceScreen() {
   const bar5 = useRef(new Animated.Value(20)).current;
 
   const currentQuestion = questions[currentIndex];
-  const totalQuestions = questions.length || 6;
+  const totalQuestions = questions.length || 1;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+
+  const optionCount = currentQuestion?.options?.length || 0;
+  const isTwoOptionQuestion = optionCount === 2;
+
+  const multiOptionColors = [
+    styles.optionColor1,
+    styles.optionColor2,
+    styles.optionColor3,
+    styles.optionColor4,
+    styles.optionColor5,
+  ];
 
   async function fetchQuestions(languageCode) {
     try {
@@ -88,12 +93,16 @@ export default function TellUsMoreVoiceScreen() {
 
       const data = await getFollowUpQuestions(symptomsEn, languageCode);
 
-      setQuestions(data?.questions || []);
+      const backendQuestions = Array.isArray(data)
+        ? data
+        : data?.questions || [];
+
+      setQuestions(backendQuestions);
       setCurrentIndex(0);
       setAnswers({});
       setSelectedOption(null);
       setVoiceAnswerMap({});
-      resetVoiceAnswer();
+      await resetVoiceAnswer();
     } catch (error) {
       console.log('Questions API error:', error);
       Alert.alert('Error', 'Could not load questions.');
@@ -103,7 +112,7 @@ export default function TellUsMoreVoiceScreen() {
   }
 
   useEffect(() => {
-    fetchQuestions(lang || 'en');
+    fetchQuestions(lang || params.language || 'en');
   }, []);
 
   const stopCurrentAudio = async () => {
@@ -235,9 +244,7 @@ export default function TellUsMoreVoiceScreen() {
   };
 
   const stopBars = () => {
-    [bar1, bar2, bar3, bar4, bar5].forEach((bar) => {
-      bar.stopAnimation();
-    });
+    [bar1, bar2, bar3, bar4, bar5].forEach((bar) => bar.stopAnimation());
 
     bar1.setValue(14);
     bar2.setValue(28);
@@ -369,8 +376,6 @@ export default function TellUsMoreVoiceScreen() {
         questionId,
         lang || 'en'
       );
-
-      console.log('ANSWER AUDIO RESULT:', JSON.stringify(data, null, 2));
 
       if (data?.recognized && data?.answer_id) {
         setSelectedOption(data.answer_id);
@@ -550,7 +555,6 @@ export default function TellUsMoreVoiceScreen() {
     };
 
     setAnswers(updatedAnswers);
-
     await stopCurrentAudio();
 
     if (recordedSound) {
@@ -573,9 +577,10 @@ export default function TellUsMoreVoiceScreen() {
         pathname: '/loadingseverity',
         params: {
           symptoms_en: JSON.stringify(symptomsEn),
-          symptoms_wp: params.symptoms_wp || JSON.stringify([]),
+          symptoms_wp: JSON.stringify(symptomsWp),
           answers: JSON.stringify(finalAnswers),
-          language: params.language || lang || 'en',
+          language: lang || params.language || 'en',
+          source: 'voice',
         },
       });
     }
@@ -624,315 +629,217 @@ export default function TellUsMoreVoiceScreen() {
     };
   }, []);
 
-  const openModal = () => {
-    setSelectedLang(null);
-    setModalVisible(true);
-
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 5,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const closeModal = () => {
-    Animated.timing(scaleAnim, {
-      toValue: 0.8,
-      duration: 120,
-      useNativeDriver: true,
-    }).start(() => setModalVisible(false));
-  };
-
-  const confirmLanguage = async () => {
-    if (!selectedLang) return;
-
+  const beforeLanguageChange = async () => {
     await stopCurrentAudio();
     await resetVoiceAnswer();
+  };
 
-    setLang(selectedLang);
-    closeModal();
-
+  const afterLanguageChange = async (selectedLang) => {
     await fetchQuestions(selectedLang);
   };
 
   if (loadingQuestions) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
-
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading questions...</Text>
-          </View>
-        </ImageBackground>
-      </SafeAreaView>
+      <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
+        afterLanguageChange={afterLanguageChange}
+        onHomePress={async () => {
+          await stopCurrentAudio();
+          await resetVoiceAnswer();
+          router.replace('/input');
+        }}
+      >
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading questions...</Text>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+    <AppScreen
+      beforeLanguageChange={beforeLanguageChange}
+      afterLanguageChange={afterLanguageChange}
+      onHomePress={async () => {
+        await stopCurrentAudio();
+        await resetVoiceAnswer();
+        router.replace('/input');
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>Tell us more</Text>
+        </View>
 
-      <View style={styles.wrapper}>
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.container}>
-            <View style={styles.headerBar}>
-              <Pressable onPress={handleBack} style={styles.backCircle}>
-                <Text style={styles.backArrow}>←</Text>
+        <Text style={styles.questionNumber}>
+          Question {currentIndex + 1} of {totalQuestions}
+        </Text>
+
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${progressPercent}%` },
+            ]}
+          />
+        </View>
+
+        <View style={styles.contentRow}>
+          <View style={styles.questionBox}>
+            <View style={styles.questionHeader}>
+              <Text style={styles.questionText}>{currentQuestion?.text}</Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.speakerButton,
+                  pressed && styles.speakerPressed,
+                ]}
+                onPress={playQuestionAudio}
+                disabled={audioLoading}
+              >
+                <Image
+                  source={require('../../assets/images/speaker.png')}
+                  style={styles.speakerIcon}
+                  resizeMode="contain"
+                />
               </Pressable>
-
-              <Text style={styles.headerText}>Tell us more</Text>
             </View>
 
-            <Text style={styles.questionNumber}>
-              Question {currentIndex + 1} of {totalQuestions}
+            <View style={styles.optionsWrapper}>
+              {currentQuestion?.options?.map((option, index) => {
+                const isSelected = selectedOption === option.id;
+
+                return (
+                  <Pressable
+                    key={option.id}
+                    style={[
+                      styles.optionButton,
+                      isTwoOptionQuestion
+                        ? styles.twoOptionStyle
+                        : multiOptionColors[index],
+                      isSelected && styles.selectedOption,
+                    ]}
+                    onPress={() => handleOptionPress(option)}
+                  >
+                    <Text
+                      style={[
+                        styles.optionText,
+                        isSelected && styles.selectedOptionText,
+                      ]}
+                    >
+                      • {option.text}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+
+              {recordingUri && (
+                <View style={styles.voiceRecordedBox}>
+                  <Text style={styles.voiceRecordedText}>
+                    {resolvingVoice
+                      ? 'Checking voice answer...'
+                      : 'Voice answer recorded'}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.voiceBox}>
+            <Text style={styles.voiceTitle}>Speak your answer</Text>
+
+            <Animated.View
+              style={[
+                styles.pulseCircle,
+                isRecording && styles.recordingBorder,
+                { transform: [{ scale: pulseAnim }] },
+              ]}
+            >
+              <Pressable onPress={handleMicPress} style={styles.micCircle}>
+                <Image
+                  source={require('../../assets/images/microphone.png')}
+                  style={styles.micImage}
+                  resizeMode="contain"
+                />
+              </Pressable>
+            </Animated.View>
+
+            {isRecording && (
+              <View style={styles.waveformContainer}>
+                <Animated.View style={[styles.waveBar, { height: bar1 }]} />
+                <Animated.View style={[styles.waveBar, { height: bar2 }]} />
+                <Animated.View style={[styles.waveBar, { height: bar3 }]} />
+                <Animated.View style={[styles.waveBar, { height: bar4 }]} />
+                <Animated.View style={[styles.waveBar, { height: bar5 }]} />
+              </View>
+            )}
+
+            <Text style={styles.voiceHint}>
+              {isRecording
+                ? 'Recording... tap mic to stop'
+                : 'Click on mic to record voice'}
             </Text>
 
-            <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${progressPercent}%` },
-                ]}
-              />
-            </View>
-
-            <View style={styles.contentRow}>
-              <View style={styles.questionBox}>
-                <View style={styles.questionHeader}>
-                  <Text style={styles.questionText}>
-                    {currentQuestion?.text}
-                  </Text>
-
-                  <Pressable
-                    style={styles.speakerButton}
-                    onPress={playQuestionAudio}
-                    disabled={audioLoading}
-                  >
-                    <Image
-                      source={require('../../assets/images/speaker.png')}
-                      style={styles.speakerIcon}
-                      resizeMode="contain"
-                    />
-                  </Pressable>
-                </View>
-
-                <View style={styles.optionsWrapper}>
-                  {currentQuestion?.options?.map((option, index) => {
-                    const isSelected = selectedOption === option.id;
-
-                    return (
-                      <Pressable
-                        key={option.id}
-                        style={[
-                          styles.optionItem,
-                          index === 1 && styles.optionLight,
-                          index === 2 && styles.optionMedium,
-                          index === 3 && styles.optionDark,
-                          isSelected && styles.optionSelected,
-                        ]}
-                        onPress={() => handleOptionPress(option)}
-                      >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            isSelected && styles.optionTextSelected,
-                          ]}
-                        >
-                          • {option.text}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-
-                  {recordingUri && (
-                    <View style={styles.voiceRecordedBox}>
-                      <Text style={styles.voiceRecordedText}>
-                        {resolvingVoice
-                          ? 'Checking voice answer...'
-                          : 'Voice answer recorded'}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-
-              <View style={styles.voiceBox}>
-                <Text style={styles.voiceTitle}>Speak your answer</Text>
-
-                <Animated.View
-                  style={[
-                    styles.pulseCircle,
-                    isRecording && styles.recordingBorder,
-                    { transform: [{ scale: pulseAnim }] },
-                  ]}
-                >
-                  <Pressable onPress={handleMicPress} style={styles.micCircle}>
-                    <Image
-                      source={require('../../assets/images/microphone.png')}
-                      style={styles.micImage}
-                      resizeMode="contain"
-                    />
-                  </Pressable>
-                </Animated.View>
-
-                {isRecording && (
-                  <View style={styles.waveformContainer}>
-                    <Animated.View style={[styles.waveBar, { height: bar1 }]} />
-                    <Animated.View style={[styles.waveBar, { height: bar2 }]} />
-                    <Animated.View style={[styles.waveBar, { height: bar3 }]} />
-                    <Animated.View style={[styles.waveBar, { height: bar4 }]} />
-                    <Animated.View style={[styles.waveBar, { height: bar5 }]} />
-                  </View>
-                )}
-
-                <Text style={styles.voiceHint}>
-                  {isRecording
-                    ? 'Recording... tap mic to stop'
-                    : 'Click on mic to record voice'}
-                </Text>
-
-                {recordingUri && (
-                  <View style={styles.voicePlaybackBar}>
-                    <Pressable
-                      onPress={handlePlayVoice}
-                      style={styles.voicePlayButton}
-                    >
-                      <Ionicons
-                        name={isPlayingVoice ? 'stop' : 'play'}
-                        size={28}
-                        color="#000"
-                      />
-                    </Pressable>
-
-                    <Text style={styles.voiceDurationText}>
-                      {recordDuration}
-                    </Text>
-
-                    <Pressable
-                      onPress={handleDeleteVoice}
-                      style={styles.voiceDeleteButton}
-                    >
-                      <MaterialIcons
-                        name="delete-outline"
-                        size={23}
-                        color="#000"
-                      />
-                    </Pressable>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.continueButton,
-                pressed && styles.continuePressed,
-              ]}
-              onPress={handleContinue}
-            >
-              <Text style={styles.continueText}>
-                {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={async () => {
-                await stopCurrentAudio();
-                await resetVoiceAnswer();
-                router.replace('/input');
-              }}
-            >
-              <Text style={styles.footerIcon}>🏠</Text>
-              <Text style={styles.footerText}>{t('home')}</Text>
-            </Pressable>
-
-            <Pressable style={styles.footerItem} onPress={openModal}>
-              <Text style={styles.footerIcon}>🌐</Text>
-              <Text style={styles.footerText}>{t('language')}</Text>
-            </Pressable>
-          </View>
-
-          <Modal transparent visible={modalVisible} animationType="fade">
-            <View style={styles.modalOverlay}>
-              <Animated.View
-                style={[
-                  styles.languageModal,
-                  { transform: [{ scale: scaleAnim }] },
-                ]}
-              >
-                <Text style={styles.modalTitle}>{t('select_language')}</Text>
-
+            {recordingUri && (
+              <View style={styles.voicePlaybackBar}>
                 <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'en' && styles.languageOptionSelected,
-                  ]}
-                  onPress={() => setSelectedLang('en')}
+                  onPress={handlePlayVoice}
+                  style={styles.voicePlayButton}
                 >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'en' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('english')}
-                  </Text>
+                  <Ionicons
+                    name={isPlayingVoice ? 'stop' : 'play'}
+                    size={28}
+                    color="#000"
+                  />
                 </Pressable>
 
+                <Text style={styles.voiceDurationText}>{recordDuration}</Text>
+
                 <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'wp' && styles.languageOptionSelected,
-                  ]}
-                  onPress={() => setSelectedLang('wp')}
+                  onPress={handleDeleteVoice}
+                  style={styles.voiceDeleteButton}
                 >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'wp' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('warlpiri')}
-                  </Text>
+                  <MaterialIcons
+                    name="delete-outline"
+                    size={23}
+                    color="#000"
+                  />
                 </Pressable>
+              </View>
+            )}
+          </View>
+        </View>
 
-                <Text style={styles.confirmText}>{t('change_language')}</Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.continueButton,
+            pressed && styles.continuePressed,
+          ]}
+          onPress={handleContinue}
+        >
+          <Text style={styles.continueText}>
+            {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
+          </Text>
+        </Pressable>
 
-                <View style={styles.modalButtonRow}>
-                  <Pressable style={styles.cancelButton} onPress={closeModal}>
-                    <Text style={styles.cancelText}>{t('no')}</Text>
-                  </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backPressedGrey,
+          ]}
+          onPress={handleBack}
+        >
+          <View style={styles.backButtonContent}>
+            <Image
+              source={require('../../assets/images/back-arrow.png')}
+              style={styles.backArrowImage}
+              resizeMode="contain"
+            />
 
-                  <Pressable
-                    style={[
-                      styles.confirmButton,
-                      !selectedLang && styles.disabledButton,
-                    ]}
-                    disabled={!selectedLang}
-                    onPress={confirmLanguage}
-                  >
-                    <Text style={styles.confirmButtonText}>{t('yes')}</Text>
-                  </Pressable>
-                </View>
-              </Animated.View>
-            </View>
-          </Modal>
-        </ImageBackground>
+            <Text style={styles.backText}>{t('back')}</Text>
+          </View>
+        </Pressable>
       </View>
-    </SafeAreaView>
+    </AppScreen>
   );
 }

@@ -1,23 +1,23 @@
 // VoiceInputScreen.js
-// Purpose: Records the user's symptom description by voice, saves the recording URI,
-// lets the user preview/delete it, and sends it to VoiceLoadingScreen for API processing.
+// Purpose: Records the user's symptom description by voice.
+// AppScreen handles SafeArea, background, footer, and language modal.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  ImageBackground,
   Pressable,
-  SafeAreaView,
-  StatusBar,
   Animated,
   Alert,
   Image,
 } from 'react-native';
+
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
+import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import { WAV_RECORDING_OPTIONS } from '../utils/audioRecordingOptions';
 import styles from '../styles/voiceInputStyles';
@@ -40,6 +40,7 @@ export default function VoiceInputScreen() {
   const bar3 = useRef(new Animated.Value(18)).current;
   const bar4 = useRef(new Animated.Value(34)).current;
   const bar5 = useRef(new Animated.Value(20)).current;
+
   const timerRef = useRef(null);
   const secondsRef = useRef(0);
 
@@ -115,6 +116,7 @@ export default function VoiceInputScreen() {
 
   const stopBars = () => {
     [bar1, bar2, bar3, bar4, bar5].forEach((bar) => bar.stopAnimation());
+
     bar1.setValue(14);
     bar2.setValue(28);
     bar3.setValue(18);
@@ -157,8 +159,6 @@ export default function VoiceInputScreen() {
       to: safeUri,
     });
 
-    console.log('SAFE COPIED AUDIO URI:', safeUri);
-
     return safeUri;
   };
 
@@ -172,7 +172,10 @@ export default function VoiceInputScreen() {
       await startRecording();
     } catch (error) {
       console.log('Recording error:', error);
-      Alert.alert('Recording error', 'Could not record your voice. Please try again.');
+      Alert.alert(
+        'Recording error',
+        'Could not record your voice. Please try again.'
+      );
     }
   };
 
@@ -180,7 +183,10 @@ export default function VoiceInputScreen() {
     const permission = await Audio.requestPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permission required', 'Please allow microphone permission to record your symptoms.');
+      Alert.alert(
+        'Permission required',
+        'Please allow microphone permission to record your symptoms.'
+      );
       return;
     }
 
@@ -222,12 +228,15 @@ export default function VoiceInputScreen() {
 
       const uri = recording.getURI();
 
-      console.log('RECORDED AUDIO URI:', uri);
-
       if (!uri) {
-        Alert.alert('Recording error', 'Audio file was not saved. Please record again.');
+        Alert.alert(
+          'Recording error',
+          'Audio file was not saved. Please record again.'
+        );
+
         setRecording(null);
         setIsRecording(false);
+
         stopPulse();
         stopBars();
         stopTimer();
@@ -256,7 +265,10 @@ export default function VoiceInputScreen() {
       stopBars();
       stopTimer();
 
-      Alert.alert('Recording error', 'Could not save your recording. Please try again.');
+      Alert.alert(
+        'Recording error',
+        'Could not save your recording. Please try again.'
+      );
     }
   };
 
@@ -336,7 +348,10 @@ export default function VoiceInputScreen() {
     }
 
     if (isRecording) {
-      Alert.alert('Recording still active', 'Please stop recording before continuing.');
+      Alert.alert(
+        'Recording still active',
+        'Please stop recording before continuing.'
+      );
       return;
     }
 
@@ -345,9 +360,6 @@ export default function VoiceInputScreen() {
       setRecordedSound(null);
       setIsPlaying(false);
     }
-
-    console.log('SENDING SAFE AUDIO URI TO LOADING:', finalAudioUri);
-    console.log('VOICE LANGUAGE:', lang || 'en');
 
     router.push({
       pathname: '/voiceloading',
@@ -359,96 +371,112 @@ export default function VoiceInputScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+    <AppScreen>
+      <View style={styles.container}>
+        {/* HEADER SECTION - same position as TextInputScreen */}
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>{t('speak_option') || 'Speak'}</Text>
 
-      <ImageBackground
-        source={require('../../assets/images/background.png')}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Pressable onPress={() => router.back()} style={styles.headerButton}>
+          <Image
+            source={require('../../assets/images/voice.png')}
+            style={styles.headerIcon}
+            resizeMode="contain"
+          />
+        </View>
+
+        {/* RECORDING BOX */}
+        <View style={styles.recordBox}>
+          <Animated.View
+            style={[
+              styles.pulseCircle,
+              isRecording && styles.recordingBorder,
+              { transform: [{ scale: pulseAnim }] },
+            ]}
+          >
+            <Pressable onPress={handleMicPress} style={styles.micCircle}>
               <Image
-                source={require('../../assets/images/back-arrow.png')}
-                style={styles.headerButtonIcon}
+                source={require('../../assets/images/microphone.png')}
+                style={styles.micImage}
                 resizeMode="contain"
               />
             </Pressable>
+          </Animated.View>
 
-            <Text style={styles.headerTitle}>{t('speak_option') || 'Speak'}</Text>
-
-            <View style={styles.headerButton}>
-              <Image
-                source={require('../../assets/images/voice.png')}
-                style={styles.headerButtonIcon}
-                resizeMode="contain"
-              />
-            </View>
+          <View style={styles.waveformContainer}>
+            <Animated.View style={[styles.waveBar, { height: bar1 }]} />
+            <Animated.View style={[styles.waveBar, { height: bar2 }]} />
+            <Animated.View style={[styles.waveBar, { height: bar3 }]} />
+            <Animated.View style={[styles.waveBar, { height: bar4 }]} />
+            <Animated.View style={[styles.waveBar, { height: bar5 }]} />
           </View>
 
-          <View style={styles.recordBox}>
-            <Animated.View
+          <Text style={styles.recordText}>
+            {isRecording
+              ? t('recording_hint') || 'Recording... tap to stop'
+              : t('speak_hint') || 'Click on mic to record voice'}
+          </Text>
+        </View>
+
+        {/* PLAYBACK / DELETE / CONTINUE BAR */}
+        <View style={styles.bottomBox}>
+          <View style={styles.leftControls}>
+            <Pressable
+              onPress={handleDelete}
+              disabled={!recordingUri && !isRecording}
               style={[
-                styles.pulseCircle,
-                isRecording && styles.recordingBorder,
-                { transform: [{ scale: pulseAnim }] },
+                styles.deleteButton,
+                !recordingUri && !isRecording && styles.disabledControl,
               ]}
             >
-              <Pressable onPress={handleMicPress} style={styles.micCircle}>
-                <Image
-                  source={require('../../assets/images/microphone.png')}
-                  style={styles.micImage}
-                  resizeMode="contain"
-                />
-              </Pressable>
-            </Animated.View>
+              <MaterialIcons name="delete-outline" size={28} color="#000" />
+            </Pressable>
 
-            <View style={styles.waveformContainer}>
-              <Animated.View style={[styles.waveBar, { height: bar1 }]} />
-              <Animated.View style={[styles.waveBar, { height: bar2 }]} />
-              <Animated.View style={[styles.waveBar, { height: bar3 }]} />
-              <Animated.View style={[styles.waveBar, { height: bar4 }]} />
-              <Animated.View style={[styles.waveBar, { height: bar5 }]} />
-            </View>
+            <Pressable
+              onPress={handlePlay}
+              disabled={!recordingUri}
+              style={[
+                styles.playButton,
+                !recordingUri && styles.disabledControl,
+              ]}
+            >
+              <Ionicons
+                name={isPlaying ? 'stop' : 'play'}
+                size={34}
+                color="#000"
+              />
+            </Pressable>
 
-            <Text style={styles.recordText}>
-              {isRecording
-                ? t('recording_hint') || 'Recording... tap to stop'
-                : t('speak_hint') || 'Click on mic to record voice'}
-            </Text>
+            <Text style={styles.timeText}>{recordTime}</Text>
           </View>
 
-          <View style={styles.bottomBox}>
-            <View style={styles.leftControls}>
-              <Pressable
-                onPress={handleDelete}
-                disabled={!recordingUri && !isRecording}
-                style={[styles.deleteButton, !recordingUri && !isRecording && styles.disabledControl]}
-              >
-                <MaterialIcons name="delete-outline" size={28} color="#000" />
-              </Pressable>
-
-              <Pressable
-                onPress={handlePlay}
-                disabled={!recordingUri}
-                style={[styles.playButton, !recordingUri && styles.disabledControl]}
-              >
-                <Ionicons name={isPlaying ? 'stop' : 'play'} size={34} color="#000" />
-              </Pressable>
-
-              <Text style={styles.timeText}>{recordTime}</Text>
-            </View>
-
-            {recordingUri && (
-              <Pressable onPress={handleContinue} style={styles.continueButton}>
-                <Text style={styles.continueText}>{t('continue') || 'Continue'}</Text>
-              </Pressable>
-            )}
-          </View>
+          {recordingUri && (
+            <Pressable onPress={handleContinue} style={styles.continueButton}>
+              <Text style={styles.continueText}>
+                {t('continue') || 'Continue'}
+              </Text>
+            </Pressable>
+          )}
         </View>
-      </ImageBackground>
-    </SafeAreaView>
+
+        {/* BACK BUTTON - same style as TextInputScreen */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backPressedGrey,
+          ]}
+          onPress={() => router.back()}
+        >
+          <View style={styles.backButtonContent}>
+            <Image
+              source={require('../../assets/images/back-arrow.png')}
+              style={styles.backArrowImage}
+              resizeMode="contain"
+            />
+
+            <Text style={styles.backText}>{t('back')}</Text>
+          </View>
+        </Pressable>
+      </View>
+    </AppScreen>
   );
 }

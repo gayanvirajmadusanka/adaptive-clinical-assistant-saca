@@ -1,5 +1,5 @@
 // detectedSymptomsStyles.js
-// Purpose: Screen-specific styles for DetectedSymptomsScreen.
+// Purpose: Screen-specific styles for DetectedSymptomsScreen and DetectedSymptomsVoiceScreen.
 // Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
 import { StyleSheet } from 'react-native';
@@ -245,5 +245,92 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     fontSize: 15,
+  },
+
+  voiceAnswerContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+
+  voiceQuestionTitle: {
+    fontSize: 20,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#3D2A1A',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+
+  voiceAnswerRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  voiceYesNoButton: {
+    width: 120,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#D4A64D',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 7,
+    elevation: 4,
+  },
+
+  voiceYesNoText: {
+    fontSize: 14,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  voiceAnswerSelected: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.96 }],
+  },
+
+  voiceAnswerSelectedText: {
+    color: '#FFF',
+  },
+
+  voiceMicWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+
+  detectedMicButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#C87936',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  detectedMicRecording: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+  },
+
+  detectedMicIcon: {
+    width: 30,
+    height: 30,
+  },
+
+  tapToAnswerText: {
+    marginTop: 4,
+    fontSize: 9,
+    fontFamily: FONTS.regular,
+    color: '#5C2E0A',
+    textAlign: 'center',
   },
 });

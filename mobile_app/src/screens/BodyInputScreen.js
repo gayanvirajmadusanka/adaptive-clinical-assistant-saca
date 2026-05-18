@@ -1,78 +1,66 @@
 // BodyInputScreen.js
-// Purpose: Lets user choose a body part by tapping body image or body part list.
+// Purpose: Lets user choose a body part using visible red dots or the body part list.
+// AppScreen handles SafeArea, background, footer, and language modal.
+// Speaker icon plays local body part audio from assets/audio/body_parts.
 
-import React, { useMemo, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ImageBackground,
-  Pressable,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  Modal,
-  Animated,
-} from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, Image, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+
+import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import bodyMap from '../../assets/data/body_map.json';
 import styles from '../styles/bodyInputStyles';
 
+import {
+  playLocalAudio,
+  getBodyPartAudio,
+  stopLocalAudio,
+} from '../utils/localAudio';
+
 export default function BodyInputScreen() {
   const router = useRouter();
-  const { t, lang, setLang } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const [gender, setGender] = useState('male');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(null);
-
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const [selectedDot, setSelectedDot] = useState(null);
 
   const bodyParts = useMemo(() => Object.values(bodyMap), []);
+
+  useEffect(() => {
+    return () => {
+      stopLocalAudio();
+    };
+  }, []);
 
   const getLabel = (part) => {
     return lang === 'wp' ? part.label_wp : part.label_en;
   };
 
-  const changeGender = (selectedGender) => {
-    setGender(selectedGender);
+  const playBodyPartAudio = async (partKey) => {
+    const audioKey = partKey === 'general' ? 'whole_body' : partKey;
+    const audioSource = getBodyPartAudio(audioKey, lang);
+    await playLocalAudio(audioSource);
   };
 
-  const openSymptoms = (partKey) => {
+  const openSymptoms = async (partKey) => {
+    await stopLocalAudio();
+
     router.push({
       pathname: '/bodysymptoms',
       params: {
         part_key: partKey,
-        gender: gender,
+        gender,
       },
     });
   };
 
-  const openModal = () => {
-    setSelectedLang(null);
-    setModalVisible(true);
+  const handleDotPress = (partKey) => {
+    setSelectedDot(partKey);
 
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 5,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const closeModal = () => {
-    Animated.timing(scaleAnim, {
-      toValue: 0.8,
-      duration: 120,
-      useNativeDriver: true,
-    }).start(() => setModalVisible(false));
-  };
-
-  const confirmLanguage = () => {
-    if (selectedLang) {
-      setLang(selectedLang);
-      closeModal();
-    }
+    setTimeout(() => {
+      openSymptoms(partKey);
+    }, 700);
   };
 
   const bodyImage =
@@ -81,228 +69,254 @@ export default function BodyInputScreen() {
       : require('../../assets/images/female_image.png');
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+    <AppScreen
+      onHomePress={async () => {
+        await stopLocalAudio();
+        router.replace('/input');
+      }}
+      beforeLanguageChange={async () => {
+        await stopLocalAudio();
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>{t('show')}</Text>
+        </View>
 
-      <View style={styles.wrapper}>
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.container}>
-            <View style={styles.headerBar}>
-              <Pressable onPress={() => router.back()} style={styles.backCircle}>
-                <Text style={styles.backArrow}>←</Text>
-              </Pressable>
+        <View style={styles.genderToggle}>
+          <Pressable
+            hitSlop={10}
+            style={[
+              styles.genderButton,
+              gender === 'male' && styles.genderButtonActive,
+            ]}
+            onPress={() => setGender('male')}
+          >
+            <Text
+              style={[
+                styles.genderText,
+                gender === 'male' && styles.genderTextActive,
+              ]}
+            >
+              {t('male') || 'Male'}
+            </Text>
+          </Pressable>
 
-              <Text style={styles.headerText}>SHOW</Text>
-            </View>
+          <Pressable
+            hitSlop={10}
+            style={[
+              styles.genderButton,
+              gender === 'female' && styles.genderButtonActive,
+            ]}
+            onPress={() => setGender('female')}
+          >
+            <Text
+              style={[
+                styles.genderText,
+                gender === 'female' && styles.genderTextActive,
+              ]}
+            >
+              {t('female') || 'Female'}
+            </Text>
+          </Pressable>
+        </View>
 
-            <View style={styles.genderToggle}>
-              <Pressable
-                hitSlop={10}
+        <Text style={styles.hintText}>
+          Tap a red dot or choose from the list
+        </Text>
+
+        <View style={styles.mainCard}>
+          <View style={styles.bodyPanel}>
+            <Image
+              key={gender}
+              source={bodyImage}
+              style={styles.bodyImage}
+              resizeMode="contain"
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotHead,
+                selectedDot === 'head' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('head')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotEye,
+                selectedDot === 'eye' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('eye')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotEar,
+                selectedDot === 'ear' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('ear')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotJaw,
+                selectedDot === 'jaw' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('jaw')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotNeck,
+                selectedDot === 'neck' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('neck')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotChest,
+                selectedDot === 'chest' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('chest')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotStomach,
+                selectedDot === 'stomach' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('stomach')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotArm,
+                selectedDot === 'arm' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('arm')}
+            />
+
+            <Pressable
+              style={[
+                styles.bodyDot,
+                styles.dotWholeBody,
+                selectedDot === 'general' && styles.dotPressed,
+              ]}
+              onPress={() => handleDotPress('general')}
+            />
+
+            {selectedDot && (
+              <View
+                pointerEvents="none"
                 style={[
-                  styles.genderButton,
-                  gender === 'male' && styles.genderButtonActive,
+                  styles.tooltip,
+                  selectedDot === 'head' && styles.tooltipHead,
+                  selectedDot === 'eye' && styles.tooltipEye,
+                  selectedDot === 'ear' && styles.tooltipEar,
+                  selectedDot === 'jaw' && styles.tooltipJaw,
+                  selectedDot === 'neck' && styles.tooltipNeck,
+                  selectedDot === 'chest' && styles.tooltipChest,
+                  selectedDot === 'stomach' && styles.tooltipStomach,
+                  selectedDot === 'arm' && styles.tooltipArm,
+                  selectedDot === 'general' && styles.tooltipWholeBody,
                 ]}
-                onPress={() => changeGender('male')}
               >
-                <Text
-                  style={[
-                    styles.genderText,
-                    gender === 'male' && styles.genderTextActive,
-                  ]}
-                >
-                  Male
+                <Text style={styles.tooltipText}>
+                  {selectedDot === 'head' && 'Head'}
+                  {selectedDot === 'eye' && 'Eye'}
+                  {selectedDot === 'ear' && 'Ear'}
+                  {selectedDot === 'jaw' && 'Jaw'}
+                  {selectedDot === 'neck' && 'Neck'}
+                  {selectedDot === 'chest' && 'Chest'}
+                  {selectedDot === 'stomach' && 'Stomach'}
+                  {selectedDot === 'arm' && 'Arm'}
+                  {selectedDot === 'general' && 'Whole Body'}
                 </Text>
-              </Pressable>
+              </View>
+            )}
+          </View>
 
-              <Pressable
-                hitSlop={10}
-                style={[
-                  styles.genderButton,
-                  gender === 'female' && styles.genderButtonActive,
-                ]}
-                onPress={() => changeGender('female')}
-              >
-                <Text
-                  style={[
-                    styles.genderText,
-                    gender === 'female' && styles.genderTextActive,
-                  ]}
-                >
-                  Female
-                </Text>
-              </Pressable>
-            </View>
-
-            <Text style={styles.hintText}>
-              Tap on the body or choose from the list
+          <View style={styles.partsPanel}>
+            <Text style={styles.partsTitle}>
+              {t('body_parts') || 'Body Parts'}
             </Text>
 
-            <View style={styles.mainCard}>
-              <View style={styles.bodyPanel}>
-                <Image
-                  key={gender}
-                  source={bodyImage}
-                  style={styles.bodyImage}
-                  resizeMode="contain"
-                />
-
-                <Pressable
-                  style={[styles.bodyZone, styles.zoneHead]}
-                  onPress={() => openSymptoms('head')}
-                />
-
-                <Pressable
-                  style={[styles.bodyZone, styles.zoneChest]}
-                  onPress={() => openSymptoms('chest')}
-                />
-
-                <Pressable
-                  style={[styles.bodyZone, styles.zoneStomach]}
-                  onPress={() => openSymptoms('stomach')}
-                />
-
-                <Pressable
-                  style={[styles.bodyZone, styles.zoneLeftArm]}
-                  onPress={() => openSymptoms('arm')}
-                />
-
-                <Pressable
-                  style={[styles.bodyZone, styles.zoneRightArm]}
-                  onPress={() => openSymptoms('arm')}
-                />
-
-                <Pressable
-                  style={[styles.bodyZone, styles.zoneGeneral]}
-                  onPress={() => openSymptoms('general')}
-                />
-              </View>
-
-              <View style={styles.partsPanel}>
-                <Text style={styles.partsTitle}>Body Parts</Text>
-
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={styles.partsList}
-                >
-                  {bodyParts.map((part) => {
-                    const partKey = part.id === 'whole_body' ? 'general' : part.id;
-
-                    return (
-                      <Pressable
-                        key={partKey}
-                        style={({ pressed }) => [
-                          styles.partCard,
-                          pressed && styles.partCardPressed,
-                        ]}
-                        onPress={() => openSymptoms(partKey)}
-                      >
-                        <Text style={styles.partText} numberOfLines={1}>
-                          {getLabel(part)}
-                        </Text>
-
-                        <View style={styles.speakerCircle}>
-                          <Image
-                            source={require('../../assets/images/speaker.png')}
-                            style={styles.speakerIcon}
-                            resizeMode="contain"
-                          />
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/input')}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.partsList}
             >
-              <Text style={styles.footerIcon}>🏠</Text>
-              <Text style={styles.footerText}>{t('home')}</Text>
-            </Pressable>
+              {bodyParts.map((part) => {
+                const partKey = part.id === 'whole_body' ? 'general' : part.id;
+                const audioKey =
+                  part.id === 'whole_body' ? 'whole_body' : part.id;
 
-            <Pressable style={styles.footerItem} onPress={openModal}>
-              <Text style={styles.footerIcon}>🌐</Text>
-              <Text style={styles.footerText}>{t('language')}</Text>
-            </Pressable>
-          </View>
-
-          <Modal transparent visible={modalVisible} animationType="fade">
-            <View style={styles.modalOverlay}>
-              <Animated.View
-                style={[
-                  styles.languageModal,
-                  { transform: [{ scale: scaleAnim }] },
-                ]}
-              >
-                <Text style={styles.modalTitle}>{t('select_language')}</Text>
-
-                <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'en' && styles.languageOptionSelected,
-                  ]}
-                  onPress={() => setSelectedLang('en')}
-                >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'en' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('english')}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'wp' && styles.languageOptionSelected,
-                  ]}
-                  onPress={() => setSelectedLang('wp')}
-                >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'wp' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('warlpiri')}
-                  </Text>
-                </Pressable>
-
-                <Text style={styles.confirmText}>{t('change_language')}</Text>
-
-                <View style={styles.modalButtonRow}>
-                  <Pressable style={styles.cancelButton} onPress={closeModal}>
-                    <Text style={styles.cancelText}>{t('no')}</Text>
-                  </Pressable>
-
+                return (
                   <Pressable
-                    style={[
-                      styles.confirmButton,
-                      !selectedLang && styles.disabledButton,
+                    key={partKey}
+                    style={({ pressed }) => [
+                      styles.partCard,
+                      pressed && styles.partCardPressed,
                     ]}
-                    disabled={!selectedLang}
-                    onPress={confirmLanguage}
+                    onPress={() => openSymptoms(partKey)}
                   >
-                    <Text style={styles.confirmButtonText}>{t('yes')}</Text>
+                    <Text style={styles.partText} numberOfLines={1}>
+                      {getLabel(part)}
+                    </Text>
+
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.speakerCircle,
+                        pressed && styles.speakerPressed,
+                      ]}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        playBodyPartAudio(audioKey);
+                      }}
+                    >
+                      <Image
+                        source={require('../../assets/images/speaker.png')}
+                        style={styles.speakerIcon}
+                        resizeMode="contain"
+                      />
+                    </Pressable>
                   </Pressable>
-                </View>
-              </Animated.View>
-            </View>
-          </Modal>
-        </ImageBackground>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backPressedGrey,
+          ]}
+          onPress={async () => {
+            await stopLocalAudio();
+            router.back();
+          }}
+        >
+          <View style={styles.backButtonContent}>
+            <Image
+              source={require('../../assets/images/back-arrow.png')}
+              style={styles.backArrowImage}
+              resizeMode="contain"
+            />
+
+            <Text style={styles.backText}>{t('back')}</Text>
+          </View>
+        </Pressable>
       </View>
-    </SafeAreaView>
+    </AppScreen>
   );
 }

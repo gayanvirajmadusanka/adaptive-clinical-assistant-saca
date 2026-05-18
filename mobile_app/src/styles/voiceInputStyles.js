@@ -1,63 +1,48 @@
 // voiceInputStyles.js
-// Purpose: Styles the mobile voice input screen to match the Windows voice flow:
-// header bar, microphone card, playback bar, record/play/delete/continue controls.
+// Purpose: Screen-specific styles for VoiceInputScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  background: {
-    flex: 1,
-  },
-
+  // Same main layout position as TextInputScreen.
   container: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight || 20,
-    paddingHorizontal: 18,
-    justifyContent: 'center',
-    transform: [{ translateY: -24 }],
+    alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingTop: 80,
   },
 
-  header: {
-    height: 76,
+  // Header copied/aligned with TextInputScreen style.
+  headerBar: {
+    width: '92%',
+    height: 60,
     backgroundColor: '#D2B767',
-    borderRadius: 15,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 18,
-    marginBottom: 22,
-  },
-
-  headerButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 25,
   },
 
-  headerButtonIcon: {
-    width: 24,
-    height: 24,
-  },
-
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 28,
+  headerText: {
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#1A0E00',
+    color: '#000',
+  },
+
+  headerIcon: {
+    position: 'absolute',
+    right: 25,
+    width: 30,
+    height: 30,
   },
 
   recordBox: {
-    minHeight: 245,
+    width: '92%',
+    minHeight: 270,
     borderWidth: 1.5,
     borderColor: '#C8B99A',
     borderRadius: 16,
@@ -124,6 +109,7 @@ export default StyleSheet.create({
   },
 
   bottomBox: {
+    width: '92%',
     minHeight: 94,
     borderRadius: 50,
     borderWidth: 1.5,
@@ -134,6 +120,7 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     paddingVertical: 10,
+    marginBottom: 26,
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -151,7 +138,7 @@ export default StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#8B3A1C',
+    backgroundColor: '#C8A18C',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -160,7 +147,7 @@ export default StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#3A7A3A',
+    backgroundColor: '#A8C89A',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -181,9 +168,9 @@ export default StyleSheet.create({
     minWidth: 118,
     height: 54,
     borderRadius: 27,
-    backgroundColor: '#C8902A',
-    borderWidth: 1.5,
-    borderColor: '#1A1000',
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 18,
@@ -193,6 +180,43 @@ export default StyleSheet.create({
     fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#1A1000',
+    color: '#000',
+  },
+
+  // Back button same as TextInputScreen.
+  backButton: {
+    width: 140,
+    height: 55,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+  },
+
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
+  },
+
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  backText: {
+    fontSize: 22,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
   },
 });

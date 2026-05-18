@@ -108,6 +108,10 @@ export const translations = {
     about_title: 'Welcome to SACA...',
     about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
     about_paragraph: 'SACA is a smart Mobile app that helps you understand symptoms using AI. Describe issues via text, voice, or body map and get quick insights. It supports early health awareness and is not a replacement for medical advice.',
+
+    body_parts: 'Body Parts',
+    male: 'Male',
+    female:'Female',
   },
 
   wp: {
@@ -218,5 +222,9 @@ export const translations = {
     about_title: 'Nyampu nyinami SACA-kurra...',
     about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
     about_paragraph: 'SACA ka smart mobile app nyuntu-kurra. Ngula nyuntu symptoms yimi (text), wangka (voice), manu body map-kurlu nyampu yimi. AI ka nyampu nyanyi manu nyuntu quick kulini symptoms. Ngula health early kuju-kuju manu nyuntu ngurrju kulini. Ngula doctor manu medical advice replacement nyampuju lawa.',
+
+    body_parts: 'Palka Yimi',
+    male: 'Wati',
+    female:'Karnta',
   },
 };

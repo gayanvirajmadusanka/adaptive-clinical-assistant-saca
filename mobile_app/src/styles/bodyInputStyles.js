@@ -1,28 +1,15 @@
 // bodyInputStyles.js
-// Purpose: Styles for body map input screen.
+// Purpose: Styles for BodyInputScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-  background: {
-    flex: 1,
-  },
-
   container: {
     flex: 1,
     paddingHorizontal: 18,
-    paddingTop: 55,
+    paddingTop: 70,
   },
 
   headerBar: {
@@ -34,22 +21,6 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-  },
-
-  backCircle: {
-    position: 'absolute',
-    left: 16,
-    width: 34,
-    height: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  backArrow: {
-    fontSize: 28,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
   },
 
   headerText: {
@@ -70,8 +41,7 @@ export default StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     padding: 4,
-    marginBottom: 12,
-
+    marginBottom: 8,
     zIndex: 20,
     elevation: 20,
   },
@@ -82,7 +52,6 @@ export default StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-
     zIndex: 30,
     elevation: 30,
   },
@@ -107,7 +76,10 @@ export default StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.regular,
     color: '#6E5C49',
-    marginBottom: 2,
+    marginBottom: 10,
+    marginTop: 4,
+    paddingHorizontal: 12,
+    zIndex: 20,
   },
 
   mainCard: {
@@ -115,7 +87,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'transparent',
     marginBottom: 8,
-
     zIndex: 1,
   },
 
@@ -125,6 +96,7 @@ export default StyleSheet.create({
     justifyContent: 'flex-end',
     backgroundColor: 'transparent',
     position: 'relative',
+    overflow: 'visible',
   },
 
   bodyImage: {
@@ -133,57 +105,130 @@ export default StyleSheet.create({
     marginBottom: -20,
   },
 
-  bodyZone: {
+  bodyDot: {
     position: 'absolute',
-    backgroundColor: 'transparent',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#D6001C',
+    borderWidth: 3,
+    borderColor: '#FFF',
+    zIndex: 50,
+    elevation: 50,
   },
 
-  zoneHead: {
-    top: '12%',
-    left: '39%',
-    width: '22%',
-    height: '10%',
-    borderRadius: 50,
+  dotPressed: {
+    transform: [{ scale: 1.18 }],
+    backgroundColor: '#FF304F',
+    borderColor: '#FFF',
   },
 
-  zoneChest: {
-    top: '29%',
-    left: '31%',
-    width: '38%',
-    height: '13%',
-    borderRadius: 50,
+  // Dot positions matched to the current large body image.
+  dotHead: {
+    top: '9%',
+    left: '44%',
   },
 
-  zoneStomach: {
-    top: '42%',
-    left: '32%',
-    width: '36%',
-    height: '12%',
-    borderRadius: 50,
+  dotEye: {
+    top: '14%',
+    left: '47%',
   },
 
-  zoneLeftArm: {
-    top: '31%',
-    left: '15%',
-    width: '17%',
-    height: '28%',
-    borderRadius: 50,
+  dotEar: {
+    top: '16%',
+    left: '55%',
   },
 
-  zoneRightArm: {
-    top: '31%',
-    right: '15%',
-    width: '17%',
-    height: '28%',
-    borderRadius: 50,
+  dotJaw: {
+    top: '21%',
+    left: '49%',
   },
 
-  zoneGeneral: {
-    bottom: '10%',
-    left: '25%',
-    width: '50%',
-    height: '30%',
-    borderRadius: 50,
+  dotNeck: {
+    top: '27%',
+    left: '49%',
+  },
+
+  dotChest: {
+    top: '37%',
+    left: '49%',
+  },
+
+  dotStomach: {
+    top: '50%',
+    left: '49%',
+  },
+
+  dotArm: {
+    top: '48%',
+    left: '66%',
+  },
+
+  dotWholeBody: {
+    top: '70%',
+    left: '49%',
+  },
+
+  tooltip: {
+    position: 'absolute',
+    backgroundColor: '#1F1F1F',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    zIndex: 100,
+    elevation: 100,
+  },
+
+  tooltipText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+  },
+
+  tooltipHead: {
+    top: '8%',
+    left: '58%',
+  },
+
+  tooltipEye: {
+    top: '13%',
+    left: '60%',
+  },
+
+  tooltipEar: {
+    top: '15%',
+    left: '68%',
+  },
+
+  tooltipJaw: {
+    top: '20%',
+    left: '62%',
+  },
+
+  tooltipNeck: {
+    top: '26%',
+    left: '62%',
+  },
+
+  tooltipChest: {
+    top: '36%',
+    left: '62%',
+  },
+
+  tooltipStomach: {
+    top: '49%',
+    left: '62%',
+  },
+
+  tooltipArm: {
+    top: '47%',
+    left: '76%',
+  },
+
+  tooltipWholeBody: {
+    top: '69%',
+    left: '62%',
   },
 
   partsPanel: {
@@ -244,132 +289,53 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  speakerPressed: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.95 }],
+  },
+
   speakerIcon: {
     width: 22,
     height: 22,
   },
 
-  footer: {
-    height: 58,
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  footerItem: {
-    alignItems: 'center',
-  },
-
-  footerIcon: {
-    fontSize: 22,
-    fontFamily: FONTS.regular,
-    color: '#fff',
-  },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 25,
-  },
-
-  languageModal: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
-    padding: 22,
-    alignItems: 'center',
-    elevation: 8,
-  },
-
-  modalTitle: {
-    fontSize: 24,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2C1A0E',
-    marginBottom: 20,
-  },
-
-  languageOption: {
-    width: '100%',
+  backButton: {
+    width: 140,
     height: 55,
-    backgroundColor: '#E8D5A0',
-    borderColor: '#D4A96A',
+    borderRadius: 28,
     borderWidth: 2,
-    borderRadius: 18,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    elevation: 3,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 12,
   },
 
-  languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
-    transform: [{ scale: 0.97 }],
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  languageOptionText: {
-    fontSize: 18,
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
+  },
+
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  backText: {
+    fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#5C2E0A',
-  },
-
-  languageOptionTextSelected: {
-    color: '#F5E6C8',
-  },
-
-  confirmText: {
-    textAlign: 'center',
-    color: '#5C4A3A',
-    marginVertical: 10,
-  },
-
-  modalButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-    width: '100%',
-  },
-
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: '#DDD',
-    alignItems: 'center',
-  },
-
-  cancelText: {
-    fontWeight: 'bold',
-    color: '#111',
-  },
-
-  confirmButton: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: '#C8661F',
-    alignItems: 'center',
-  },
-
-  disabledButton: {
-    opacity: 0.5,
-  },
-
-  confirmButtonText: {
-    fontWeight: 'bold',
-    color: '#FFF',
+    color: '#000',
   },
 });

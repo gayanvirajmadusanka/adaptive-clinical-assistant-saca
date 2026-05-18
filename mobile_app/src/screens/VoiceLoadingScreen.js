@@ -98,7 +98,7 @@ export default function VoiceLoadingScreen() {
       navigatedRef.current = true;
 
       router.replace({
-        pathname: '/detectedsymptoms',
+        pathname: '/detectedsymptomsvoice',
 
         // UPDATED:
         // Send source='voice'
