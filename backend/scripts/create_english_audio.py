@@ -9,7 +9,6 @@ from pydub import AudioSegment
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '../data/audio/output')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 PHRASES = {
     # questions
     "q_gender_en": "What is your gender?",
@@ -61,6 +60,7 @@ PHRASES = {
     "severity_severe_en": "Your symptoms are severe. Get help right now.",
 
     # ui
+    "describe_symptoms_en": "What can I help with? Describe your symptoms",
     "detected_symptoms_en": "Detected Symptoms",
     "does_this_match_en": "Does this match you?",
     "tap_yes_or_no_en": "Tap yes or no",

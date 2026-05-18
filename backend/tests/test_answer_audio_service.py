@@ -9,8 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from backend.api.services.answer_audio_service import (
-    _match_keywords,
-    resolve_answer_audio, _resolve_keyword, KEYWORD_TO_ANSWER,
+    _match_keywords, resolve_answer_audio, _resolve_keyword, KEYWORD_TO_ANSWER,
 )
 
 # dummy WAV bytes - minimal valid base64 audio for temp file creation
@@ -115,7 +114,7 @@ class TestMatchKeywords(unittest.TestCase):
         self.assertEqual(score, 0.85)
 
     def test_no_match_returns_none(self):
-        result = _match_keywords('blah blah blah', '0a')
+        result = _match_keywords('random', '0a')
         self.assertIsNone(result)
 
     def test_yes_no_question_matches_yes(self):
@@ -227,7 +226,7 @@ class TestResolveAnswerAudioEnglish(unittest.TestCase):
 
     @patch('backend.api.services.answer_audio_service.transcribe_english')
     def test_unknown_question_id_still_resolves_if_keyword_matches(self, mock_transcribe):
-        # with flat map, yes still resolves even for unknown question
+        # with flat map, still resolves even for unknown question
         # but since 999 not in YES_NO_QUESTION_IDS it returns 'yes' not '999y'
         mock_transcribe.return_value = _mock_transcribe('male')
         result = resolve_answer_audio(_DUMMY_WAV_B64, '999', language='en')
