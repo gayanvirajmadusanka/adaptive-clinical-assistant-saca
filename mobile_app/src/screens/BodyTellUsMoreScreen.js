@@ -1,6 +1,5 @@
 // BodyTellUsMoreScreen.js
-// Purpose: Body-input follow-up questions from FastAPI.
-// Uses common AppScreen for SafeArea, background, footer, and language modal.
+// Purpose: Body follow-up questions using backend option IDs and question type.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -15,10 +14,11 @@ import {
 } from 'react-native';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
+
+import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import { getFollowUpQuestions } from '../services/triageApi';
 import { parseJsonParam } from '../utils/routeParams';
-import AppScreen from '../components/AppScreen';
 import styles from '../styles/bodyTellUsMoreStyles';
 
 const OPTION_IMAGES = {
@@ -34,27 +34,52 @@ const OPTION_IMAGES = {
   elder_male: require('../../assets/images/Age_Group/elder_male.png'),
   elder_female: require('../../assets/images/Age_Group/elder_female.png'),
 
+  today: require('../../assets/images/Duration/today.png'),
+  yesterday: require('../../assets/images/Duration/yesterday.png'),
+  two_three_days: require('../../assets/images/Duration/2_3_days.png'),
+  about_week: require('../../assets/images/Duration/about_a_week.png'),
+  more_week: require('../../assets/images/Duration/more_than_a_week.png'),
+
   pain_none: require('../../assets/images/Pain_Level/none.png'),
   pain_little: require('../../assets/images/Pain_Level/a_little.png'),
   pain_moderate: require('../../assets/images/Pain_Level/moderate.png'),
   pain_very_bad: require('../../assets/images/Pain_Level/very_bad.png'),
   pain_unbearable: require('../../assets/images/Pain_Level/unbearable.png'),
 
-  today: require('../../assets/images/Duration/today.png'),
-  yesterday: require('../../assets/images/Duration/yesterday.png'),
-  two_three_days: require('../../assets/images/Duration/2_3_days.png'),
-  about_week: require('../../assets/images/Duration/about_a_week.png'),
-  more_week: require('../../assets/images/Duration/more_than_a_week.png'),
+  yes: require('../../assets/images/yes_icon.png'),
+  no: require('../../assets/images/no_icon.png'),
+};
+
+const OPTION_CONFIG = {
+  // Gender
+  '0a1': { gender: 'male', image: 'male' },
+  '0a2': { gender: 'female', image: 'female' },
+
+  // Age
+  '0b1': { imageMale: 'child_male', imageFemale: 'child_female' },
+  '0b2': { imageMale: 'youth_male', imageFemale: 'youth_female' },
+  '0b3': { imageMale: 'adult_male', imageFemale: 'adult_female' },
+  '0b4': { imageMale: 'elder_male', imageFemale: 'elder_female' },
+
+  // Duration
+  '1a': { image: 'today', large: true },
+  '1b': { image: 'yesterday', large: true },
+  '1c': { image: 'two_three_days', large: true },
+  '1d': { image: 'about_week', large: true },
+  '1e': { image: 'more_week', large: true },
+
+  // Pain
+  '2a': { image: 'pain_none', large: true },
+  '2b': { image: 'pain_little', large: true },
+  '2c': { image: 'pain_moderate', large: true },
+  '2d': { image: 'pain_very_bad', large: true },
+  '2e': { image: 'pain_unbearable', large: true },
 };
 
 function normalizeText(value = '') {
   return String(value)
     .toLowerCase()
     .trim()
-    .replace(/–/g, '-')
-    .replace(/—/g, '-')
-    .replace(/\+/g, ' plus ')
-    .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
 }
@@ -73,98 +98,48 @@ function getOptionId(option) {
   return String(option?.id || getOptionText(option));
 }
 
-function genderImageKey(selectedGender, maleKey, femaleKey) {
-  return selectedGender === 'female' ? femaleKey : maleKey;
+function isYesOption(option) {
+  const text = normalizeText(getOptionText(option));
+  const id = normalizeText(getOptionId(option));
+
+  return (
+    id === 'yes' ||
+    text === 'yes' ||
+    text === 'yuwai' ||
+    text === 'yuwayi'
+  );
 }
 
-function getOptionImage(option, selectedGender = 'male') {
-  const optionText = getOptionText(option);
-  const optionId = getOptionId(option);
+function getOptionImage(option, question, selectedGender) {
+  if (question?.type === 'yes_no') {
+    return isYesOption(option) ? OPTION_IMAGES.yes : OPTION_IMAGES.no;
+  }
 
-  const textKey = normalizeText(optionText);
-  const idKey = normalizeText(optionId);
+  const config = OPTION_CONFIG[getOptionId(option)];
 
-  const aliases = {
-    male: 'male',
-    man: 'male',
-    boy: 'male',
+  if (!config) {
+    return null;
+  }
 
-    female: 'female',
-    woman: 'female',
-    girl: 'female',
+  if (config.imageMale || config.imageFemale) {
+    const imageKey =
+      selectedGender === 'female'
+        ? config.imageFemale
+        : config.imageMale;
 
-    child: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    children: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    child_0_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    children_0_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    age_0_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    '0_12': genderImageKey(selectedGender, 'child_male', 'child_female'),
+    return OPTION_IMAGES[imageKey];
+  }
 
-    youth: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    youth_13_17: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    teen: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    teen_13_17: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    age_13_17: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    '13_17': genderImageKey(selectedGender, 'youth_male', 'youth_female'),
+  return OPTION_IMAGES[config.image];
+}
 
-    adult: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    adult_18_59: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    adult_18_64: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    adult_18_65: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    age_18_59: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    age_18_64: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    age_18_65: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    '18_59': genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    '18_64': genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    '18_65': genderImageKey(selectedGender, 'adult_male', 'adult_female'),
+function shouldUseLargeCard(option, question) {
+  if (question?.type === 'yes_no') {
+    return true;
+  }
 
-    elder: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    elderly: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    senior: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    elder_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    elder_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    elderly_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    elderly_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    senior_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    senior_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    age_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    age_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    '60_plus': genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    '65_plus': genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-
-    none: 'pain_none',
-    no: 'pain_none',
-    no_pain: 'pain_none',
-    little: 'pain_little',
-    a_little: 'pain_little',
-    mild: 'pain_little',
-    moderate: 'pain_moderate',
-    medium: 'pain_moderate',
-    bad: 'pain_very_bad',
-    very_bad: 'pain_very_bad',
-    severe: 'pain_very_bad',
-    unbearable: 'pain_unbearable',
-    worst: 'pain_unbearable',
-    extreme: 'pain_unbearable',
-
-    today: 'today',
-    yesterday: 'yesterday',
-    '2_3_days': 'two_three_days',
-    two_three_days: 'two_three_days',
-    two_to_three_days: 'two_three_days',
-    few_days: 'two_three_days',
-    about_a_week: 'about_week',
-    one_week: 'about_week',
-    week: 'about_week',
-    around_a_week: 'about_week',
-    more_than_a_week: 'more_week',
-    more_week: 'more_week',
-    over_a_week: 'more_week',
-    longer_than_a_week: 'more_week',
-  };
-
-  const imageKey = aliases[textKey] || aliases[idKey];
-  return imageKey ? OPTION_IMAGES[imageKey] : null;
+  const config = OPTION_CONFIG[getOptionId(option)];
+  return Boolean(config?.large);
 }
 
 export default function BodyTellUsMoreScreen() {
@@ -226,22 +201,12 @@ export default function BodyTellUsMoreScreen() {
 
   const handleOptionPress = (option) => {
     const optionId = getOptionId(option);
-    const optionText = getOptionText(option);
+    const config = OPTION_CONFIG[optionId];
 
     setSelectedOption(optionId);
 
-    const normalized = normalizeText(optionText);
-
-    if (normalized === 'male' || normalized === 'man' || normalized === 'boy') {
-      setSelectedGender('male');
-    }
-
-    if (
-      normalized === 'female' ||
-      normalized === 'woman' ||
-      normalized === 'girl'
-    ) {
-      setSelectedGender('female');
+    if (config?.gender) {
+      setSelectedGender(config.gender);
     }
   };
 
@@ -277,23 +242,23 @@ export default function BodyTellUsMoreScreen() {
 
       setCurrentIndex(nextIndex);
       setSelectedOption(updatedAnswers[nextQuestion?.id]?.answer_id || null);
-
       animateQuestionChange();
-    } else {
-      const finalAnswers = Object.values(updatedAnswers);
-
-      router.push({
-        pathname: '/loadingseverity',
-        params: {
-          symptoms_en: JSON.stringify(symptomsEn),
-          symptoms_wp: JSON.stringify(symptomsWp),
-          answers: JSON.stringify(finalAnswers),
-          language: lang || params.language || 'en',
-          source: 'body',
-          gender: selectedGender,
-        },
-      });
+      return;
     }
+
+    const finalAnswers = Object.values(updatedAnswers);
+
+    router.push({
+      pathname: '/loadingseverity',
+      params: {
+        symptoms_en: JSON.stringify(symptomsEn),
+        symptoms_wp: JSON.stringify(symptomsWp),
+        answers: JSON.stringify(finalAnswers),
+        language: lang || params.language || 'en',
+        source: 'body',
+        gender: selectedGender,
+      },
+    });
   };
 
   const handleBack = () => {
@@ -303,7 +268,6 @@ export default function BodyTellUsMoreScreen() {
 
       setCurrentIndex(previousIndex);
       setSelectedOption(answers[previousQuestion?.id]?.answer_id || null);
-
       animateQuestionChange();
     } else {
       router.back();
@@ -324,8 +288,6 @@ export default function BodyTellUsMoreScreen() {
     return () => backHandler.remove();
   }, [currentIndex, questions, answers]);
 
-  const beforeLanguageChange = async () => {};
-
   const afterLanguageChange = async (selectedLang) => {
     await fetchQuestions(selectedLang);
   };
@@ -333,7 +295,6 @@ export default function BodyTellUsMoreScreen() {
   if (loadingQuestions) {
     return (
       <AppScreen
-        beforeLanguageChange={beforeLanguageChange}
         afterLanguageChange={afterLanguageChange}
         onHomePress={() => router.replace('/input')}
       >
@@ -355,7 +316,6 @@ export default function BodyTellUsMoreScreen() {
   if (!currentQuestion) {
     return (
       <AppScreen
-        beforeLanguageChange={beforeLanguageChange}
         afterLanguageChange={afterLanguageChange}
         onHomePress={() => router.replace('/input')}
       >
@@ -394,7 +354,6 @@ export default function BodyTellUsMoreScreen() {
 
   return (
     <AppScreen
-      beforeLanguageChange={beforeLanguageChange}
       afterLanguageChange={afterLanguageChange}
       onHomePress={() => router.replace('/input')}
     >
@@ -426,14 +385,21 @@ export default function BodyTellUsMoreScreen() {
             {currentQuestion.options?.map((option) => {
               const optionId = getOptionId(option);
               const optionText = getOptionText(option);
-              const optionImage = getOptionImage(option, selectedGender);
+              const useLargeCard = shouldUseLargeCard(option, currentQuestion);
+              const optionImage = getOptionImage(
+                option,
+                currentQuestion,
+                selectedGender
+              );
               const isSelected = selectedOption === optionId;
 
               return (
                 <Pressable
                   key={optionId}
                   style={[
-                    styles.optionCard,
+                    useLargeCard
+                      ? styles.optionCardVertical
+                      : styles.optionCard,
                     isSelected && styles.optionCardSelected,
                   ]}
                   onPress={() => handleOptionPress(option)}
@@ -441,21 +407,33 @@ export default function BodyTellUsMoreScreen() {
                   {optionImage ? (
                     <Image
                       source={optionImage}
-                      style={styles.optionImage}
+                      style={
+                        useLargeCard
+                          ? styles.optionImageVertical
+                          : styles.optionImage
+                      }
                       resizeMode="contain"
                     />
                   ) : (
-                    <View style={styles.optionImagePlaceholder}>
+                    <View
+                      style={
+                        useLargeCard
+                          ? styles.optionImagePlaceholderVertical
+                          : styles.optionImagePlaceholder
+                      }
+                    >
                       <Text style={styles.placeholderText}>?</Text>
                     </View>
                   )}
 
                   <Text
                     style={[
-                      styles.optionText,
+                      useLargeCard
+                        ? styles.optionTextVertical
+                        : styles.optionText,
                       isSelected && styles.optionTextSelected,
                     ]}
-                    numberOfLines={2}
+                    numberOfLines={3}
                   >
                     {optionText}
                   </Text>

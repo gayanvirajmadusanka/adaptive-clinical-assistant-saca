@@ -98,6 +98,21 @@ export default StyleSheet.create({
     elevation: 3,
   },
 
+  optionCardVertical: {
+    width: '100%',
+    minHeight: 210,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 250, 238, 0.95)',
+    borderWidth: 1.8,
+    borderColor: '#E0CDB0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    marginBottom: 14,
+    elevation: 3,
+  },
+
   optionCardSelected: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
@@ -109,6 +124,12 @@ export default StyleSheet.create({
     marginRight: 16,
   },
 
+  optionImageVertical: {
+    width: 260,
+    height: 135,
+    marginBottom: 10,
+  },
+
   optionImagePlaceholder: {
     width: 92,
     height: 92,
@@ -117,6 +138,16 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
+  },
+
+  optionImagePlaceholderVertical: {
+    width: 260,
+    height: 135,
+    borderRadius: 18,
+    backgroundColor: '#EADCC4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
   },
 
   placeholderText: {
@@ -132,6 +163,17 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
+  },
+
+  optionTextVertical: {
+    fontSize: 21,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#111',
+    textAlign: 'center',
+    lineHeight: 28,
+    width: '100%',
+    paddingHorizontal: 10,
   },
 
   optionTextSelected: {
