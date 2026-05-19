@@ -1,25 +1,24 @@
 // BodyTellUsMoreScreen.js
 // Purpose: Body-input follow-up questions from FastAPI.
-// Shows dynamic backend questions and adds images to matching answer options.
+// Uses common AppScreen for SafeArea, background, footer, and language modal.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   Image,
-  ImageBackground,
   Pressable,
-  SafeAreaView,
-  StatusBar,
   ScrollView,
   Alert,
   Animated,
+  BackHandler,
 } from 'react-native';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLanguage } from '../context/LanguageContext';
 import { getFollowUpQuestions } from '../services/triageApi';
 import { parseJsonParam } from '../utils/routeParams';
+import AppScreen from '../components/AppScreen';
 import styles from '../styles/bodyTellUsMoreStyles';
 
 const OPTION_IMAGES = {
@@ -86,7 +85,6 @@ function getOptionImage(option, selectedGender = 'male') {
   const idKey = normalizeText(optionId);
 
   const aliases = {
-    // Gender
     male: 'male',
     man: 'male',
     boy: 'male',
@@ -95,98 +93,70 @@ function getOptionImage(option, selectedGender = 'male') {
     woman: 'female',
     girl: 'female',
 
-    // Child age group
     child: genderImageKey(selectedGender, 'child_male', 'child_female'),
     children: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    kid: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    kids: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    baby: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    infant: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    toddler: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    under_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    under_13: genderImageKey(selectedGender, 'child_male', 'child_female'),
+    child_0_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
+    children_0_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
     age_0_12: genderImageKey(selectedGender, 'child_male', 'child_female'),
-    age_0_13: genderImageKey(selectedGender, 'child_male', 'child_female'),
     '0_12': genderImageKey(selectedGender, 'child_male', 'child_female'),
-    '0_13': genderImageKey(selectedGender, 'child_male', 'child_female'),
 
-    // Youth age group
     youth: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    young: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
+    youth_13_17: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
     teen: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    teens: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    teenager: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    adolescent: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    young_adult: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
+    teen_13_17: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
     age_13_17: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    age_13_18: genderImageKey(selectedGender, 'youth_male', 'youth_female'),
     '13_17': genderImageKey(selectedGender, 'youth_male', 'youth_female'),
-    '13_18': genderImageKey(selectedGender, 'youth_male', 'youth_female'),
 
-    // Adult age group
     adult: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    grown_up: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
-    middle_aged: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
+    adult_18_59: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
+    adult_18_64: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
+    adult_18_65: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
+    age_18_59: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
     age_18_64: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
     age_18_65: genderImageKey(selectedGender, 'adult_male', 'adult_female'),
+    '18_59': genderImageKey(selectedGender, 'adult_male', 'adult_female'),
     '18_64': genderImageKey(selectedGender, 'adult_male', 'adult_female'),
     '18_65': genderImageKey(selectedGender, 'adult_male', 'adult_female'),
 
-    // Elder age group
     elder: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
     elderly: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    old: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    older: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
     senior: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    older_adult: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    senior_adult: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    old_person: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    age_65: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    elder_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    elder_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    elderly_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    elderly_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    senior_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    senior_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    age_60_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
     age_65_plus: genderImageKey(selectedGender, 'elder_male', 'elder_female'),
-    '65': genderImageKey(selectedGender, 'elder_male', 'elder_female'),
+    '60_plus': genderImageKey(selectedGender, 'elder_male', 'elder_female'),
     '65_plus': genderImageKey(selectedGender, 'elder_male', 'elder_female'),
 
-    // Pain level
     none: 'pain_none',
     no: 'pain_none',
     no_pain: 'pain_none',
-
     little: 'pain_little',
     a_little: 'pain_little',
     mild: 'pain_little',
-    mild_pain: 'pain_little',
-    low: 'pain_little',
-
     moderate: 'pain_moderate',
     medium: 'pain_moderate',
-
     bad: 'pain_very_bad',
     very_bad: 'pain_very_bad',
     severe: 'pain_very_bad',
-    severe_pain: 'pain_very_bad',
-    high: 'pain_very_bad',
-
     unbearable: 'pain_unbearable',
     worst: 'pain_unbearable',
     extreme: 'pain_unbearable',
-    very_severe: 'pain_unbearable',
 
-    // Duration
     today: 'today',
-
     yesterday: 'yesterday',
-
     '2_3_days': 'two_three_days',
     two_three_days: 'two_three_days',
     two_to_three_days: 'two_three_days',
     few_days: 'two_three_days',
-    couple_of_days: 'two_three_days',
-
     about_a_week: 'about_week',
     one_week: 'about_week',
     week: 'about_week',
     around_a_week: 'about_week',
-
     more_than_a_week: 'more_week',
     more_week: 'more_week',
     over_a_week: 'more_week',
@@ -194,7 +164,6 @@ function getOptionImage(option, selectedGender = 'male') {
   };
 
   const imageKey = aliases[textKey] || aliases[idKey];
-
   return imageKey ? OPTION_IMAGES[imageKey] : null;
 }
 
@@ -205,8 +174,6 @@ export default function BodyTellUsMoreScreen() {
 
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
   const symptomsWp = parseJsonParam(params.symptoms_wp, []);
-
-  const language = params.language || lang || 'en';
 
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
@@ -221,13 +188,17 @@ export default function BodyTellUsMoreScreen() {
   const totalQuestions = questions.length || 1;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
-  async function fetchQuestions() {
+  async function fetchQuestions(languageCode = lang || params.language || 'en') {
     try {
       setLoadingQuestions(true);
 
-      const data = await getFollowUpQuestions(symptomsEn, language);
+      const data = await getFollowUpQuestions(symptomsEn, languageCode);
 
-      setQuestions(data?.questions || []);
+      const backendQuestions = Array.isArray(data)
+        ? data
+        : data?.questions || [];
+
+      setQuestions(backendQuestions);
       setCurrentIndex(0);
       setAnswers({});
       setSelectedOption(null);
@@ -317,7 +288,7 @@ export default function BodyTellUsMoreScreen() {
           symptoms_en: JSON.stringify(symptomsEn),
           symptoms_wp: JSON.stringify(symptomsWp),
           answers: JSON.stringify(finalAnswers),
-          language: language,
+          language: lang || params.language || 'en',
           source: 'body',
           gender: selectedGender,
         },
@@ -339,149 +310,191 @@ export default function BodyTellUsMoreScreen() {
     }
   };
 
+  useEffect(() => {
+    const backAction = () => {
+      handleBack();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [currentIndex, questions, answers]);
+
+  const beforeLanguageChange = async () => {};
+
+  const afterLanguageChange = async (selectedLang) => {
+    await fetchQuestions(selectedLang);
+  };
+
   if (loadingQuestions) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
-
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.container}>
-            <Text style={styles.questionText}>Loading questions...</Text>
+      <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
+        afterLanguageChange={afterLanguageChange}
+        onHomePress={() => router.replace('/input')}
+      >
+        <View style={styles.container}>
+          <View style={styles.headerBar}>
+            <Text style={styles.headerText}>Tell us more</Text>
           </View>
-        </ImageBackground>
-      </SafeAreaView>
+
+          <Text style={styles.questionNumber}>Loading questions...</Text>
+
+          <View style={styles.questionBox}>
+            <Text style={styles.questionText}>Please wait...</Text>
+          </View>
+        </View>
+      </AppScreen>
     );
   }
 
   if (!currentQuestion) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
-
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.container}>
-            <Text style={styles.questionText}>No questions found.</Text>
-
-            <Pressable
-              style={styles.continueButton}
-              onPress={() => router.back()}
-            >
-              <Text style={styles.continueText}>Back</Text>
-            </Pressable>
+      <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
+        afterLanguageChange={afterLanguageChange}
+        onHomePress={() => router.replace('/input')}
+      >
+        <View style={styles.container}>
+          <View style={styles.headerBar}>
+            <Text style={styles.headerText}>Tell us more</Text>
           </View>
-        </ImageBackground>
-      </SafeAreaView>
+
+          <View style={styles.questionBox}>
+            <Text style={styles.questionText}>
+              No follow-up questions found.
+            </Text>
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.backPressedGrey,
+            ]}
+            onPress={handleBack}
+          >
+            <View style={styles.backButtonContent}>
+              <Image
+                source={require('../../assets/images/back-arrow.png')}
+                style={styles.backArrowImage}
+                resizeMode="contain"
+              />
+
+              <Text style={styles.backText}>{t('back')}</Text>
+            </View>
+          </Pressable>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+    <AppScreen
+      beforeLanguageChange={beforeLanguageChange}
+      afterLanguageChange={afterLanguageChange}
+      onHomePress={() => router.replace('/input')}
+    >
+      <View style={styles.container}>
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>Tell us more</Text>
+        </View>
 
-      <View style={styles.wrapper}>
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
+        <Text style={styles.questionNumber}>
+          Question {currentIndex + 1} of {questions.length}
+        </Text>
+
+        <View style={styles.progressTrack}>
+          <View
+            style={[styles.progressFill, { width: `${progressPercent}%` }]}
+          />
+        </View>
+
+        <Animated.View style={[styles.questionBox, { opacity: fadeAnim }]}>
+          <Text style={styles.questionText}>{currentQuestion.text}</Text>
+
+          <ScrollView
+            style={styles.optionsScroll}
+            showsVerticalScrollIndicator={true}
+            persistentScrollbar={true}
+            indicatorStyle="black"
+            contentContainerStyle={styles.optionsWrapper}
+          >
+            {currentQuestion.options?.map((option) => {
+              const optionId = getOptionId(option);
+              const optionText = getOptionText(option);
+              const optionImage = getOptionImage(option, selectedGender);
+              const isSelected = selectedOption === optionId;
+
+              return (
+                <Pressable
+                  key={optionId}
+                  style={[
+                    styles.optionCard,
+                    isSelected && styles.optionCardSelected,
+                  ]}
+                  onPress={() => handleOptionPress(option)}
+                >
+                  {optionImage ? (
+                    <Image
+                      source={optionImage}
+                      style={styles.optionImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <View style={styles.optionImagePlaceholder}>
+                      <Text style={styles.placeholderText}>?</Text>
+                    </View>
+                  )}
+
+                  <Text
+                    style={[
+                      styles.optionText,
+                      isSelected && styles.optionTextSelected,
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {optionText}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.continueButton,
+            pressed && styles.continuePressed,
+          ]}
+          onPress={handleContinue}
         >
-          <View style={styles.container}>
-            <View style={styles.headerBar}>
-              <Pressable onPress={handleBack} style={styles.backCircle}>
-                <Text style={styles.backArrow}>←</Text>
-              </Pressable>
+          <Text style={styles.continueText}>
+            {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
+          </Text>
+        </Pressable>
 
-              <Text style={styles.headerText}>Tell us more</Text>
-            </View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backPressedGrey,
+          ]}
+          onPress={handleBack}
+        >
+          <View style={styles.backButtonContent}>
+            <Image
+              source={require('../../assets/images/back-arrow.png')}
+              style={styles.backArrowImage}
+              resizeMode="contain"
+            />
 
-            <Text style={styles.questionNumber}>
-              Question {currentIndex + 1} of {questions.length}
-            </Text>
-
-            <View style={styles.progressTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${progressPercent}%` },
-                ]}
-              />
-            </View>
-
-            <Animated.View style={[styles.questionBox, { opacity: fadeAnim }]}>
-              <Text style={styles.questionText}>{currentQuestion.text}</Text>
-
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.optionsWrapper}
-              >
-                {currentQuestion.options?.map((option) => {
-                  const optionId = getOptionId(option);
-                  const optionText = getOptionText(option);
-                  const optionImage = getOptionImage(option, selectedGender);
-
-                  const isSelected = selectedOption === optionId;
-
-                  return (
-                    <Pressable
-                      key={optionId}
-                      style={[
-                        styles.optionCard,
-                        isSelected && styles.optionCardSelected,
-                      ]}
-                      onPress={() => handleOptionPress(option)}
-                    >
-                      {optionImage && (
-                        <Image
-                          source={optionImage}
-                          style={styles.optionImage}
-                          resizeMode="contain"
-                        />
-                      )}
-
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.optionTextSelected,
-                        ]}
-                      >
-                        {optionText}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </Animated.View>
-
-            <Pressable style={styles.continueButton} onPress={handleContinue}>
-              <Text style={styles.continueText}>
-                {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
-              </Text>
-            </Pressable>
+            <Text style={styles.backText}>{t('back')}</Text>
           </View>
-
-          <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={() => router.replace('/input')}
-            >
-              <Text style={styles.footerIcon}>🏠</Text>
-              <Text style={styles.footerText}>{t('home')}</Text>
-            </Pressable>
-
-            <View style={styles.footerItem}>
-              <Text style={styles.footerIcon}>🌐</Text>
-              <Text style={styles.footerText}>{t('language')}</Text>
-            </View>
-          </View>
-        </ImageBackground>
+        </Pressable>
       </View>
-    </SafeAreaView>
+    </AppScreen>
   );
 }

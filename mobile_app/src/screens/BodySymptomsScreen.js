@@ -26,7 +26,6 @@ const SYMPTOM_IMAGES = {
     loss_of_consciousness: require('../../assets/images/Body_Parts/Head/Loss of consciousness_male.png'),
 
     neck_stiffness: require('../../assets/images/Body_Parts/Neck/Neck_stiffness_male.png'),
-
     jaw_pain: require('../../assets/images/Body_Parts/Jaw/jaw_pain_male.png'),
 
     runny_nose: require('../../assets/images/Body_Parts/Nose/runny_nose_male.png'),
@@ -74,7 +73,6 @@ const SYMPTOM_IMAGES = {
     loss_of_consciousness: require('../../assets/images/Body_Parts/Head/Loss of consciousness_female.png'),
 
     neck_stiffness: require('../../assets/images/Body_Parts/Neck/Neck_stiffness_female.png'),
-
     jaw_pain: require('../../assets/images/Body_Parts/Jaw/jaw_pain_female.png'),
 
     runny_nose: require('../../assets/images/Body_Parts/Nose/runny_nose_female.png'),
@@ -265,12 +263,9 @@ export default function BodySymptomsScreen() {
       (item) => item.label_wp || item.label_en
     );
 
-    const symptomText = selectedEnglishLabels.join(', ');
-
     router.push({
-      pathname: '/loading',
+      pathname: '/detectedsymptomsbody',
       params: {
-        text: symptomText,
         symptoms_en: JSON.stringify(selectedEnglishLabels),
         symptoms_wp: JSON.stringify(selectedWarlpiriLabels),
         language: lang || 'en',
@@ -295,7 +290,9 @@ export default function BodySymptomsScreen() {
 
         <ScrollView
           style={styles.symptomsScroll}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
+          persistentScrollbar={true}
+          indicatorStyle="black"
           contentContainerStyle={styles.symptomsList}
         >
           {symptoms.map((symptom) => {

@@ -1,24 +1,14 @@
-import { StyleSheet, StatusBar } from 'react-native';
+// bodyTellUsMoreStyles.js
+// Purpose: Screen-specific styles for BodyTellUsMoreScreen.
+// Shared SafeArea, background, footer, and language modal styles are handled by AppScreen.
+
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-  background: {
-    flex: 1,
-  },
-
   container: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 25,
     paddingTop: 80,
     alignItems: 'center',
   },
@@ -30,23 +20,7 @@ export default StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 22,
-  },
-
-  backCircle: {
-    position: 'absolute',
-    left: 16,
-    width: 34,
-    height: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  backArrow: {
-    fontSize: 28,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
+    marginBottom: 18,
   },
 
   headerText: {
@@ -57,20 +31,20 @@ export default StyleSheet.create({
   },
 
   questionNumber: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#7A180E',
-    marginBottom: 16,
+    marginBottom: 14,
   },
 
   progressTrack: {
-    width: '100%',
-    height: 9,
+    width: '92%',
+    height: 12,
     borderRadius: 10,
     backgroundColor: '#E8D5A8',
     overflow: 'hidden',
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
   progressFill: {
@@ -80,13 +54,14 @@ export default StyleSheet.create({
   },
 
   questionBox: {
-    width: '100%',
-    maxHeight: 520,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#D9C4A1',
-    backgroundColor: 'rgba(255, 250, 238, 0.9)',
+    width: '92%',
+    maxHeight: 500,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: '#BCA67A',
+    backgroundColor: 'rgba(255, 250, 238, 0.92)',
     padding: 16,
+    marginBottom: 14,
   },
 
   questionText: {
@@ -96,24 +71,31 @@ export default StyleSheet.create({
     color: '#111',
     textAlign: 'center',
     marginBottom: 14,
+    lineHeight: 28,
+  },
+
+  optionsScroll: {
+    maxHeight: 365,
+    paddingRight: 6,
   },
 
   optionsWrapper: {
-    gap: 12,
     paddingBottom: 8,
   },
 
   optionCard: {
-    minHeight: 94,
-    borderRadius: 18,
-    backgroundColor: '#FFFDF8',
-    borderWidth: 1.5,
+    width: '100%',
+    minHeight: 112,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 250, 238, 0.95)',
+    borderWidth: 1.8,
     borderColor: '#E0CDB0',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    elevation: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 14,
+    elevation: 3,
   },
 
   optionCardSelected: {
@@ -122,14 +104,31 @@ export default StyleSheet.create({
   },
 
   optionImage: {
-    width: 76,
-    height: 76,
+    width: 92,
+    height: 92,
     marginRight: 16,
+  },
+
+  optionImagePlaceholder: {
+    width: 92,
+    height: 92,
+    borderRadius: 18,
+    backgroundColor: '#EADCC4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+
+  placeholderText: {
+    fontSize: 32,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#8B3A1C',
   },
 
   optionText: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
@@ -140,46 +139,65 @@ export default StyleSheet.create({
   },
 
   continueButton: {
-    width: '100%',
+    width: '92%',
     height: 64,
-    borderRadius: 32,
-    backgroundColor: '#D99000',
+    borderRadius: 34,
+    backgroundColor: '#E3AD35',
     borderWidth: 2,
     borderColor: '#111',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 18,
+    elevation: 4,
+    marginBottom: 14,
+  },
+
+  continuePressed: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.96 }],
   },
 
   continueText: {
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
   },
 
-  footer: {
+  backButton: {
+    width: 140,
     height: 55,
-    backgroundColor: '#000',
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    marginBottom: 12,
+  },
+
+  backButtonContent: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  footerItem: {
-    alignItems: 'center',
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
   },
 
-  footerIcon: {
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  backText: {
     fontSize: 22,
-    fontFamily: FONTS.regular,
-    color: '#fff',
-  },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
   },
 });

@@ -20,7 +20,7 @@ export default StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
+    marginBottom: 22,
   },
 
   headerText: {
@@ -37,31 +37,32 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#3D2A1A',
-    marginBottom: 18,
+    marginBottom: 14,
   },
 
   symptomsScroll: {
     flexGrow: 0,
-    maxHeight: 430,
+    maxHeight: 455,
+    paddingRight: 6,
   },
 
   symptomsList: {
-    paddingBottom: 8,
+    paddingBottom: 10,
   },
 
   symptomCard: {
     width: '100%',
-    minHeight: 92,
-    borderRadius: 18,
+    minHeight: 112,
+    borderRadius: 22,
     backgroundColor: 'rgba(255, 250, 238, 0.92)',
-    borderWidth: 1.5,
+    borderWidth: 1.8,
     borderColor: '#E0CDB0',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 12,
-    elevation: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 14,
+    elevation: 3,
   },
 
   symptomCardActive: {
@@ -70,23 +71,23 @@ export default StyleSheet.create({
   },
 
   symptomImage: {
-    width: 72,
-    height: 72,
-    marginRight: 14,
+    width: 92,
+    height: 92,
+    marginRight: 16,
   },
 
   symptomImagePlaceholder: {
-    width: 72,
-    height: 72,
-    borderRadius: 16,
+    width: 92,
+    height: 92,
+    borderRadius: 18,
     backgroundColor: '#EADCC4',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 16,
   },
 
   placeholderText: {
-    fontSize: 28,
+    fontSize: 32,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#8B3A1C',
@@ -94,7 +95,7 @@ export default StyleSheet.create({
 
   symptomText: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',

@@ -333,4 +333,31 @@ export default StyleSheet.create({
     color: '#5C2E0A',
     textAlign: 'center',
   },
+
+    iconButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '82%',
+    marginBottom: 30,
+  },
+
+  iconChoiceButton: {
+    width: 125,
+    height: 125,
+    borderRadius: 65,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  iconChoicePressed: {
+    transform: [{ scale: 0.92 }],
+    opacity: 0.75,
+  },
+
+  yesNoIcon: {
+    width: 120,
+    height: 120,
+  },
+
 });
