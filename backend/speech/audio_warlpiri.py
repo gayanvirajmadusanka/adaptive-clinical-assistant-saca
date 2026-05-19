@@ -32,13 +32,18 @@ KEYWORD_SYMPTOM_MAP = _load("keyword_symptom_map.json")
 # multi-reference (list of list of lists) formats
 _KEYWORD_REFS: dict[str, list[np.ndarray]] = {}
 for keyword, data in KEYWORD_MFCC.items():
-    arr = np.array(data)
-    if arr.ndim == 2:
-        # single reference stored as (n_features, frames)
-        _KEYWORD_REFS[keyword] = [arr]
-    elif arr.ndim == 3:
-        # multiple references stored as (n_refs, n_features, frames)
-        _KEYWORD_REFS[keyword] = [arr[i] for i in range(arr.shape[0])]
+    try:
+        arr = np.array(data)
+        if arr.ndim == 2:
+            _KEYWORD_REFS[keyword] = [arr]
+        elif arr.ndim == 3:
+            _KEYWORD_REFS[keyword] = [arr[i] for i in range(arr.shape[0])]
+    except ValueError:
+        # inhomogeneous references (different frame lengths) - load individually
+        if isinstance(data[0][0], list):
+            _KEYWORD_REFS[keyword] = [np.array(ref) for ref in data]
+        else:
+            _KEYWORD_REFS[keyword] = [np.array(data)]
 
 
 def _extract_mfcc(audio: np.ndarray, sr: int = SAMPLE_RATE) -> np.ndarray | None:

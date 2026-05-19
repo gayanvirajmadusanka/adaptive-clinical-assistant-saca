@@ -5,15 +5,18 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.body.BodyPart;
+import org.saca.model.body.BodyPartsData;
 import org.saca.model.body.BodySymptom;
 import org.saca.model.request.TextInputRQ;
 import org.saca.model.response.TextResultRS;
@@ -50,7 +53,7 @@ public class BodySymptomsController implements Initializable {
     private ImageView partSpeakerIcon;
 
     @FXML
-    private VBox symptomsListBox;
+    private FlowPane symptomCardsBox;
 
     @FXML
     private Button confirmBtn;
@@ -61,32 +64,75 @@ public class BodySymptomsController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        String partKey = CacheManager.getCachedBodyPartKey();
+
+        if (partKey != null && !partKey.isEmpty()) {
+            BodyPart cached = BodyPartsData.get(partKey);
+            if (cached != null) {
+                CacheManager.clearCachedBodySymptomIds();
+                CacheManager.clearCachedBodySymptomLabels();
+                setPart(cached);
+            }
+        }
     }
 
     public void setPart(BodyPart part) {
         this.part = part;
+        String key = part.getId().equals("whole_body") ? "general" : part.getId();
+        CacheManager.setCachedBodyPartKey(key);
         partNameLabel.setText(part.getLabel());
-        buildSymptomsList();
+        buildSymptomCards();
     }
 
-    private void buildSymptomsList() {
-        symptomsListBox.getChildren().clear();
+    private void buildSymptomCards() {
+        symptomCardsBox.getChildren().clear();
         selectedIds.clear();
         selectedLabels.clear();
 
         List<String> restoredIds = CacheManager.getCachedBodySymptomIds();
-        List<String> restoredLabels = CacheManager.getCachedBodySymptomLabels();
+        String gender = CacheManager.isSelectedGenderMale() ? "male" : "female";
+        String other = gender.equals("male") ? "female" : "male";
+        String partKey = part.getId().equals("whole_body") ? "general" : part.getId();
 
         for (BodySymptom symptom : part.getSymptoms()) {
+
+            // Card container
+            VBox card = new VBox(8);
+            card.setAlignment(Pos.TOP_CENTER);
+            card.getStyleClass().add("symptom-card");
+            card.setPrefWidth(190);
+            card.setMaxWidth(190);
+
+            // Image
+            String key = part.getId().equals("general") ? "whole_body" : part.getId();
+
+            URL imageUrl = resolveImage(key, symptom.getId(), gender, other);
+            ImageView imageView = new ImageView();
+            imageView.setFitWidth(168);
+            imageView.setFitHeight(140);
+            imageView.setPreserveRatio(true);
+            imageView.getStyleClass().add("symptom-part-image");
+
+            if (imageUrl != null) {
+                imageView.setImage(new Image(imageUrl.toExternalForm(), true));
+            } else {
+                System.out.println("[BodySymptoms] Missing image: /images/body_parts/"
+                        + partKey + "/" + symptom.getId() + "_" + gender + ".png");
+            }
+
+            // Button
             Button btn = new Button(symptom.getLabel());
             btn.getStyleClass().add("symptom-select-btn");
             btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setWrapText(true);
 
-            // Restore selection if coming back from result screen
             if (restoredIds != null && restoredIds.contains(symptom.getId())) {
                 selectedIds.add(symptom.getId());
                 selectedLabels.add(symptom.getLabelEn());
                 btn.getStyleClass().add("symptom-select-btn-active");
+                imageView.setOpacity(1.0);
+            } else {
+                imageView.setOpacity(0.85);
             }
 
             btn.setOnAction(e -> {
@@ -94,15 +140,36 @@ public class BodySymptomsController implements Initializable {
                     selectedIds.remove(symptom.getId());
                     selectedLabels.remove(symptom.getLabelEn());
                     btn.getStyleClass().remove("symptom-select-btn-active");
+                    imageView.setOpacity(0.85);
                 } else {
                     selectedIds.add(symptom.getId());
                     selectedLabels.add(symptom.getLabelEn());
                     btn.getStyleClass().add("symptom-select-btn-active");
+                    imageView.setOpacity(1.0);
                 }
             });
 
-            symptomsListBox.getChildren().add(btn);
+            card.getChildren().addAll(imageView, btn);
+            symptomCardsBox.getChildren().add(card);
         }
+    }
+
+    private URL resolveImage(String partKey, String symptomId, String gender, String other) {
+        String[] paths = {
+                "/images/body_parts/" + partKey + "/" + symptomId + "_" + gender + ".png",
+                "/images/body_parts/" + partKey + "/" + symptomId + "_" + other + ".png",
+                "/images/body_parts/" + partKey + "/" + symptomId + ".png",
+                "/images/body_parts/" + partKey + "/" + partKey + "_" + gender + ".png",
+                "/images/body_parts/" + partKey + "/" + partKey + "_" + other + ".png",
+                "/images/body_parts/" + partKey + "/" + partKey + ".png",
+        };
+        for (String path : paths) {
+            URL url = getClass().getResource(path);
+            if (url != null) {
+                return url;
+            }
+        }
+        return null;
     }
 
     @FXML
@@ -110,7 +177,6 @@ public class BodySymptomsController implements Initializable {
         if (part == null) {
             return;
         }
-
         if (AudioService.isPlaying()) {
             AudioService.stop();
             setIcon("/icons/speaker.png");
@@ -118,11 +184,8 @@ public class BodySymptomsController implements Initializable {
         }
 
         try {
-            URL url = getClass().getResource("/audio/" + part.getAudio());
-            if (url == null) {
-                return;
-            }
-
+            URL url = getClass().getResource("/audio/body_parts/" + part.getAudio());
+            if (url == null) return;
             String b64 = Base64.getEncoder().encodeToString(url.openStream().readAllBytes());
             setIcon("/icons/mute.png");
             AudioService.playBase64Wav(b64,
@@ -143,16 +206,14 @@ public class BodySymptomsController implements Initializable {
             return;
         }
 
-        // Save part key and selections, so they are restored when coming back from result
-        CacheManager.setCachedBodyPartKey(part.getId().equals("whole_body") ? "general" : part.getId());
+        String key = part.getId().equals("whole_body") ? "general" : part.getId();
+        CacheManager.setCachedBodyPartKey(key);
         CacheManager.setCachedBodySymptomIds(new ArrayList<>(selectedIds));
         CacheManager.setCachedBodySymptomLabels(new ArrayList<>(selectedLabels));
 
         stage = (Stage) confirmBtn.getScene().getWindow();
-        String symptomText = String.join(", ", selectedLabels);
-
         TextInputRQ inputRQ = new TextInputRQ();
-        inputRQ.setText(symptomText);
+        inputRQ.setText(String.join(", ", selectedLabels));
 
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -174,7 +235,6 @@ public class BodySymptomsController implements Initializable {
                     }));
 
             stage.getScene().setRoot(loadingView);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -207,11 +267,9 @@ public class BodySymptomsController implements Initializable {
     @FXML
     private void handleBack(ActionEvent event) {
         AudioService.stop();
-
-        // Clear selections
-        CacheManager.setCachedBodyPartKey("");
-        CacheManager.setCachedBodySymptomIds(new ArrayList<>());
-        CacheManager.setCachedBodySymptomLabels(new ArrayList<>());
+        CacheManager.clearCachedBodyPartKey();
+        CacheManager.clearCachedBodySymptomIds();
+        CacheManager.clearCachedBodySymptomLabels();
 
         try {
             NavBarManager.setCurrentView("/view/BodyInputView.fxml");

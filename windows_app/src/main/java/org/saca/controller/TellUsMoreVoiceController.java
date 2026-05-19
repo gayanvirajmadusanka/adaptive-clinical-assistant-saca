@@ -118,6 +118,7 @@ public class TellUsMoreVoiceController implements Initializable {
 
     private Stage stage;
 
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         QuestionsRS saved = CacheManager.getQuestionsRS();
@@ -169,7 +170,9 @@ public class TellUsMoreVoiceController implements Initializable {
     }
 
     private void showQuestion(int index) {
-        if (questions == null || questions.isEmpty()) return;
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
 
         stopRecordingIfActive();
         AudioService.stop();
@@ -228,6 +231,16 @@ public class TellUsMoreVoiceController implements Initializable {
         continueBtn.setText(isLast
                 ? LanguageManager.get("submit")
                 : LanguageManager.get("continue"));
+
+        if (hasAudio) {
+            final String voiceB64 = question.getVoiceB64();
+            setQuestionMuteIcon();
+            Platform.runLater(() -> AudioService.playBase64Wav(
+                    voiceB64,
+                    err -> Platform.runLater(this::resetQuestionSpeakerIcon),
+                    () -> Platform.runLater(this::resetQuestionSpeakerIcon)
+            ));
+        }
     }
 
     private Button buildOptionButton(OptionRS option, int index, int total, String questionId) {
@@ -247,10 +260,16 @@ public class TellUsMoreVoiceController implements Initializable {
 
     @FXML
     private void handleQuestionSpeak() {
-        if (questions == null || questions.isEmpty()) return;
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
+
         QuestionRS current = questions.get(currentIndex);
         String voiceB64 = current.getVoiceB64();
-        if (voiceB64 == null || voiceB64.isBlank()) return;
+
+        if (voiceB64 == null || voiceB64.isBlank()) {
+            return;
+        }
 
         if (AudioService.isPlaying()) {
             AudioService.stop();
@@ -384,6 +403,8 @@ public class TellUsMoreVoiceController implements Initializable {
             return;
         }
 
+        handleQuestionSpeak();
+
         if (voiceAudio != null && resolvedId == null) {
             submitVoiceAndProceed(current, voiceAudio, selectedId);
         } else {
@@ -474,12 +495,10 @@ public class TellUsMoreVoiceController implements Initializable {
                     continueBtn.setDisable(false);
 
                     if (rs.isRecognized() && rs.getAnswerId() != null) {
-                        // Highlight the matched option, user can still review before continuing
                         String answerId = rs.getAnswerId();
                         resolvedAnswers.put(question.getId(), answerId);
                         highlightOptionById(answerId);
                     } else {
-                        // Not recognized, show popup with audio playback
                         String msg = rs.getMessage() != null
                                 ? rs.getMessage()
                                 : LanguageManager.get("voice_not_recognized");
@@ -690,6 +709,7 @@ public class TellUsMoreVoiceController implements Initializable {
                 getClass().getResource("/icons/mute.png").toExternalForm()
         ));
     }
+
 
     private void resetQuestionSpeakerIcon() {
         questionSpeakerIcon.setImage(new Image(
