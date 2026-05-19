@@ -17,21 +17,20 @@ export const resultTheme = {
   },
 
   moderate: {
-    header: '#6E0000',
+    header: '#B86B00',
     headerText: '#FFFFFF',
 
     screenBackground: '#F3E4C3',
-    severityFill: 'rgb(252, 189, 0)',
+    severityFill: '#ff7700',
 
     cardBackground: '#F3E4C3',
     boxBorder: '#D9B27C',
   },
 
   mild: {
-    header: '#6E0000',
+    header: '#B85C00',
     headerText: '#FFFFFF',
 
-    // Same background as recommendation/symptom card
     screenBackground: '#F3E4C3',
     severityFill: '#5C8A3C',
 
@@ -77,17 +76,17 @@ export default StyleSheet.create({
   },
 
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: 34,
   },
 
   speakerButton: {
     position: 'absolute',
     right: 22,
     top: 2,
-    width: 50,
-    height: 50,
+    width: 52,
+    height: 52,
     borderRadius: 26,
-    backgroundColor: '#ffdf3e',
+    backgroundColor: '#F2B233',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -108,7 +107,7 @@ export default StyleSheet.create({
 
   severityCard: {
     width: '100%',
-    minHeight: 104,
+    minHeight: 118,
     borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,19 +117,10 @@ export default StyleSheet.create({
     elevation: 5,
   },
 
-  severityIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#FFF8EA',
-    alignItems: 'center',
-    justifyContent: 'center',
+  severityIconLarge: {
+    width: 92,
+    height: 92,
     marginRight: 18,
-  },
-
-  severityImage: {
-    width: 52,
-    height: 52,
   },
 
   severityTextBox: {
@@ -154,21 +144,30 @@ export default StyleSheet.create({
 
   callButton: {
     width: '100%',
-    height: 52,
+    height: 54,
     borderRadius: 14,
-    backgroundColor: '#F5E6C8',
-    borderWidth: 2,
-    borderColor: '#6E0000',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+  },
+
+  callButtonSevere: {
+    backgroundColor: '#FFF4F4',
+    borderColor: '#8B0000',
+    borderWidth: 3,
+  },
+
+  callButtonModerate: {
+    backgroundColor: '#FFF8F0',
+    borderColor: '#C62828',
+    borderWidth: 3,
   },
 
   callButtonText: {
     fontSize: 17,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#6E0000',
+    color: '#8B0000',
   },
 
   infoCard: {
@@ -217,16 +216,17 @@ export default StyleSheet.create({
 
   startAgainButton: {
     width: '100%',
-    height: 58,
-    borderRadius: 18,
+    minHeight: 72,
+    borderRadius: 20,
     backgroundColor: '#E3AD35',
     borderWidth: 2,
     borderColor: '#C8911F',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 4,
-    marginBottom: 8,
-    elevation: 4,
+    marginTop: 8,
+    marginBottom: 10,
+    paddingVertical: 18,
+    elevation: 5,
   },
 
   startAgainPressed: {
@@ -236,10 +236,14 @@ export default StyleSheet.create({
   },
 
   startAgainText: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2C1A0E',
+  },
+
+  startAgainTextPressed: {
+    color: '#FFFFFF',
   },
 
   pressedButton: {

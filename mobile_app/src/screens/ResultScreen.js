@@ -70,6 +70,7 @@ export default function ResultScreen() {
   const [changingLanguage, setChangingLanguage] = useState(false);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const emergencyPulseAnim = useRef(new Animated.Value(1)).current;
   const soundRef = useRef(null);
 
   const getSeverityKey = () => {
@@ -153,6 +154,23 @@ export default function ResultScreen() {
           Animated.timing(pulseAnim, {
             toValue: 1,
             duration: 650,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+
+    if (severity === 'severe' || severity === 'moderate') {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(emergencyPulseAnim, {
+            toValue: 1.04,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+          Animated.timing(emergencyPulseAnim, {
+            toValue: 1,
+            duration: 700,
             useNativeDriver: true,
           }),
         ])
@@ -313,13 +331,11 @@ export default function ResultScreen() {
                   { backgroundColor: theme.severityFill },
                 ]}
               >
-                <View style={styles.severityIconCircle}>
-                  <Image
-                    source={severityIcons[severity]}
-                    style={styles.severityImage}
-                    resizeMode="contain"
-                  />
-                </View>
+                <Image
+                  source={severityIcons[severity]}
+                  style={styles.severityIconLarge}
+                  resizeMode="contain"
+                />
 
                 <View style={styles.severityTextBox}>
                   <Text style={styles.severityTitle}>
@@ -332,11 +348,18 @@ export default function ResultScreen() {
                 </View>
               </View>
 
-              {severity === 'severe' && (
-                <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              {(severity === 'severe' || severity === 'moderate') && (
+                <Animated.View
+                  style={{
+                    transform: [{ scale: emergencyPulseAnim }],
+                  }}
+                >
                   <Pressable
                     style={({ pressed }) => [
                       styles.callButton,
+                      severity === 'severe'
+                        ? styles.callButtonSevere
+                        : styles.callButtonModerate,
                       pressed && styles.pressedButton,
                     ]}
                     onPress={callEmergency}
@@ -435,9 +458,16 @@ export default function ResultScreen() {
                   router.replace('/input');
                 }}
               >
-                <Text style={styles.startAgainText}>
-                  ⟳ {t('start_again')}
-                </Text>
+                {({ pressed }) => (
+                  <Text
+                    style={[
+                      styles.startAgainText,
+                      pressed && styles.startAgainTextPressed,
+                    ]}
+                  >
+                    ⟳ {t('start_again')}
+                  </Text>
+                )}
               </Pressable>
             </ScrollView>
           </View>
