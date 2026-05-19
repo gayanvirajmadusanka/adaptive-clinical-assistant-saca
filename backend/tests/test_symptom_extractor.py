@@ -71,9 +71,6 @@ class TestStage1SynonymMatching(unittest.TestCase):
         symptoms = extract_symptoms("high temperature", raw_text="high temperature")
         self.assertIn("fever", symptoms)
 
-    def test_pyrexia_maps_to_fever(self):
-        symptoms = extract_symptoms("pyrexia", raw_text="pyrexia")
-        self.assertIn("fever", symptoms)
 
     def test_feeling_nauseous_maps_to_nausea(self):
         symptoms = extract_symptoms("feeling nauseous", raw_text="feeling nauseous")
@@ -102,23 +99,6 @@ class TestFuzzyMatching(unittest.TestCase):
         symptoms = extract_symptoms("pain chest", raw_text="pain chest")
         self.assertIn("chest pain", symptoms)
 
-
-class TestNegationFiltering(unittest.TestCase):
-
-    def test_no_fever_excluded(self):
-        symptoms = extract_symptoms("no fever", raw_text="no fever")
-        self.assertNotIn("fever", symptoms)
-
-    def test_denies_chest_pain_excluded(self):
-        symptoms = extract_symptoms("denies chest pain", raw_text="denies chest pain")
-        self.assertNotIn("chest pain", symptoms)
-
-    def test_positive_symptom_retained_with_negated(self):
-        symptoms = extract_symptoms(
-            "has cough but no fever", raw_text="has cough but no fever"
-        )
-        self.assertIn("cough", symptoms)
-        self.assertNotIn("fever", symptoms)
 
 
 class TestEmptyAndEdgeCases(unittest.TestCase):

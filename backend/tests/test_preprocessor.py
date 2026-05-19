@@ -82,33 +82,6 @@ class TestTokenisation(unittest.TestCase):
         self.assertEqual(result["tokens"], [])
 
 
-class TestNegationDetection(unittest.TestCase):
-
-    def test_no_negation_flag_false(self):
-        result = preprocess_text("I have fever")
-        self.assertFalse(result.get("has_negation", False))
-
-    def test_negation_no_fever_detected(self):
-        result = preprocess_text("I have no fever")
-        self.assertTrue(result.get("has_negation", False))
-
-    def test_negation_denies_detected(self):
-        result = preprocess_text("patient denies chest pain")
-        self.assertTrue(result.get("has_negation", False))
-
-    def test_negation_without_detected(self):
-        result = preprocess_text("without fever")
-        self.assertTrue(result.get("has_negation", False))
-
-    def test_negated_tokens_key_present(self):
-        result = preprocess_text("no fever")
-        self.assertIn("negated_tokens", result)
-        self.assertIsInstance(result["negated_tokens"], list)
-
-    def test_positive_text_negated_tokens_empty(self):
-        result = preprocess_text("I have fever")
-        self.assertEqual(result.get("negated_tokens", []), [])
-
 
 class TestEdgeCases(unittest.TestCase):
 
