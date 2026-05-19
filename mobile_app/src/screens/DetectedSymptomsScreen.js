@@ -1,9 +1,6 @@
 // DetectedSymptomsScreen.js
 // Purpose: Displays symptoms detected by the FastAPI backend.
-// AppScreen handles SafeArea, background, footer, and language modal.
-// Text flow  -> TellUsMoreScreen
-// Voice flow -> TellUsMoreVoiceScreen
-// Body flow  -> BodyTellUsMoreScreen
+// Supports text, voice, and body flow audio using voice_b64_en / voice_b64_wp.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -22,6 +19,7 @@ import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
+import { extractSymptomsFromText } from '../services/triageApi';
 import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
@@ -33,12 +31,10 @@ export default function DetectedSymptomsScreen() {
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
   const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
-  const voiceB64En = params.voice_b64_en || '';
-  const voiceB64Wp = params.voice_b64_wp || '';
-
   const isVoiceFlow = params.source === 'voice';
   const isBodyFlow = params.source === 'body';
 
+  const [voiceFileUri, setVoiceFileUri] = useState(null);
   const [voiceFileUriEn, setVoiceFileUriEn] = useState(null);
   const [voiceFileUriWp, setVoiceFileUriWp] = useState(null);
 
@@ -54,6 +50,14 @@ export default function DetectedSymptomsScreen() {
     }, [])
   );
 
+  useEffect(() => {
+    fetchInitialAudio();
+  }, []);
+
+  useEffect(() => {
+    updateAudioForCurrentLanguage();
+  }, [lang]);
+
   const symptomsToShow =
     lang === 'wp' && symptomsWp.length > 0
       ? symptomsWp
@@ -66,6 +70,90 @@ export default function DetectedSymptomsScreen() {
     symptomsToShow.length > 0
       ? symptomsToShow.map((item) => `• ${item}`).join('\n')
       : 'No symptoms detected';
+
+  async function fetchInitialAudio() {
+    try {
+      const voiceB64En = params.voice_b64_en || '';
+      const voiceB64Wp = params.voice_b64_wp || '';
+
+      if (voiceB64En) {
+        const fileEn = await saveBase64AudioToCache(
+          voiceB64En,
+          'detected_symptoms_en.wav'
+        );
+
+        if (fileEn) {
+          setVoiceFileUriEn(fileEn);
+
+          if (lang !== 'wp') {
+            setVoiceFileUri(fileEn);
+          }
+        }
+      }
+
+      if (voiceB64Wp) {
+        const fileWp = await saveBase64AudioToCache(
+          voiceB64Wp,
+          'detected_symptoms_wp.wav'
+        );
+
+        if (fileWp) {
+          setVoiceFileUriWp(fileWp);
+
+          if (lang === 'wp') {
+            setVoiceFileUri(fileWp);
+          }
+        }
+      }
+
+      if (!voiceB64En && !voiceB64Wp) {
+        console.log('No initial detected symptoms audio found.');
+      }
+    } catch (error) {
+      console.log('Initial audio load error:', error);
+    }
+  }
+
+  const updateAudioForCurrentLanguage = async () => {
+    try {
+      await stopCurrentAudio();
+
+      if (lang === 'wp') {
+        if (voiceFileUriWp) {
+          setVoiceFileUri(voiceFileUriWp);
+          return;
+        }
+
+        if (params.voice_b64_wp) {
+          const fileWp = await saveBase64AudioToCache(
+            params.voice_b64_wp,
+            'detected_symptoms_wp.wav'
+          );
+
+          setVoiceFileUriWp(fileWp);
+          setVoiceFileUri(fileWp);
+          return;
+        }
+      }
+
+      if (voiceFileUriEn) {
+        setVoiceFileUri(voiceFileUriEn);
+        return;
+      }
+
+      if (params.voice_b64_en) {
+        const fileEn = await saveBase64AudioToCache(
+          params.voice_b64_en,
+          'detected_symptoms_en.wav'
+        );
+
+        setVoiceFileUriEn(fileEn);
+        setVoiceFileUri(fileEn);
+      }
+    } catch (error) {
+      console.log('Update current language audio error:', error);
+    }
+  };
 
   const stopCurrentAudio = async () => {
     try {
@@ -85,49 +173,89 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
-  const getAudioFileForLanguage = async (languageCode) => {
+  async function fetchAudioForLanguage(languageCode) {
     try {
       setAudioLoading(true);
+      await stopCurrentAudio();
 
-      if (languageCode === 'wp') {
-        if (voiceFileUriWp) return voiceFileUriWp;
+      if (languageCode === 'en' && voiceFileUriEn) {
+        setVoiceFileUri(voiceFileUriEn);
+        return;
+      }
 
-        if (!voiceB64Wp) {
-          Alert.alert('Audio Error', 'No Warlpiri audio found.');
-          return null;
-        }
+      if (languageCode === 'wp' && voiceFileUriWp) {
+        setVoiceFileUri(voiceFileUriWp);
+        return;
+      }
 
-        const fileUri = await saveBase64AudioToCache(
-          voiceB64Wp,
-          'saca_detected_voice_wp.wav'
+      const directAudio =
+        languageCode === 'wp'
+          ? params.voice_b64_wp || ''
+          : params.voice_b64_en || '';
+
+      if (directAudio) {
+        const newFile = await saveBase64AudioToCache(
+          directAudio,
+          `detected_symptoms_${languageCode}.wav`
         );
 
-        setVoiceFileUriWp(fileUri);
-        return fileUri;
+        if (languageCode === 'wp') {
+          setVoiceFileUriWp(newFile);
+        } else {
+          setVoiceFileUriEn(newFile);
+        }
+
+        setVoiceFileUri(newFile);
+        return;
       }
 
-      if (voiceFileUriEn) return voiceFileUriEn;
+      const textToSend =
+        languageCode === 'wp'
+          ? symptomsWp.length > 0
+            ? symptomsWp.join(' ')
+            : symptomsEn.join(' ')
+          : symptomsEn.join(' ');
 
-      if (!voiceB64En) {
-        Alert.alert('Audio Error', 'No English audio found.');
-        return null;
+      if (!textToSend) {
+        console.log('No text available to generate detected audio.');
+        return;
       }
 
-      const fileUri = await saveBase64AudioToCache(
-        voiceB64En,
-        'saca_detected_voice_en.wav'
+      const data = await extractSymptomsFromText(textToSend, languageCode);
+
+      const audioBase64 =
+        languageCode === 'wp'
+          ? data?.voice_b64_wp || ''
+          : data?.voice_b64_en || '';
+
+      if (!audioBase64) {
+        console.log('No audio returned from backend.');
+        return;
+      }
+
+      const newFile = await saveBase64AudioToCache(
+        audioBase64,
+        `detected_symptoms_${languageCode}.wav`
       );
 
-      setVoiceFileUriEn(fileUri);
-      return fileUri;
+      if (languageCode === 'wp') {
+        setVoiceFileUriWp(newFile);
+      } else {
+        setVoiceFileUriEn(newFile);
+      }
+
+      setVoiceFileUri(newFile);
     } catch (error) {
-      console.log('Save audio error:', error);
-      Alert.alert('Audio Error', 'Could not prepare audio.');
-      return null;
+      console.log('Audio update error:', error);
+
+      Alert.alert(
+        'Audio Error',
+        'Could not update audio.'
+      );
     } finally {
       setAudioLoading(false);
     }
-  };
+  }
 
   const playVoiceAudio = async () => {
     try {
@@ -138,13 +266,24 @@ export default function DetectedSymptomsScreen() {
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
       });
 
       await stopCurrentAudio();
 
-      const fileUri = await getAudioFileForLanguage(lang);
+      let fileUri = voiceFileUri;
 
-      if (!fileUri) return;
+      if (!fileUri) {
+        await fetchAudioForLanguage(lang);
+        fileUri = lang === 'wp' ? voiceFileUriWp : voiceFileUriEn;
+      }
+
+      if (!fileUri) {
+        Alert.alert('Audio Error', 'No audio file found.');
+        return;
+      }
 
       const { sound } = await Audio.Sound.createAsync(
         { uri: fileUri },
@@ -201,11 +340,7 @@ export default function DetectedSymptomsScreen() {
   };
 
   const afterLanguageChange = async (selectedLang) => {
-    await stopCurrentAudio();
-
-    if (selectedLang === 'wp' && !voiceB64Wp) {
-      Alert.alert('Audio Error', 'No Warlpiri audio found.');
-    }
+    await fetchAudioForLanguage(selectedLang);
   };
 
   const handleYesPress = async () => {

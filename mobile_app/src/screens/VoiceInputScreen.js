@@ -1,5 +1,6 @@
 // VoiceInputScreen.js
 // Purpose: Records the user's symptom description by voice.
+// Auto-plays describe_symptoms_en/wp audio when this screen opens.
 // AppScreen handles SafeArea, background, footer, and language modal.
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -22,6 +23,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { WAV_RECORDING_OPTIONS } from '../utils/audioRecordingOptions';
 import styles from '../styles/voiceInputStyles';
 
+const describeSymptomsAudio = {
+  en: require('../../assets/audio/ui/describe_symptoms_en.wav'),
+  wp: require('../../assets/audio/ui/describe_symptoms_wp.wav'),
+};
+
 export default function VoiceInputScreen() {
   const router = useRouter();
   const { t, lang } = useLanguage();
@@ -43,18 +49,86 @@ export default function VoiceInputScreen() {
 
   const timerRef = useRef(null);
   const secondsRef = useRef(0);
+  const instructionSoundRef = useRef(null);
 
   useEffect(() => {
+    playDescribeSymptomsAudio(lang);
+
     return () => {
       cleanupAudio();
     };
   }, []);
+
+  const stopInstructionAudio = async () => {
+    try {
+      if (instructionSoundRef.current) {
+        const sound = instructionSoundRef.current;
+        instructionSoundRef.current = null;
+
+        const status = await sound.getStatusAsync();
+
+        if (status.isLoaded) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop instruction audio error:', error);
+    }
+  };
+
+  const playDescribeSymptomsAudio = async (languageCode) => {
+    try {
+      await stopInstructionAudio();
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
+
+      const selectedAudio =
+        languageCode === 'wp'
+          ? describeSymptomsAudio.wp
+          : describeSymptomsAudio.en;
+
+      const { sound } = await Audio.Sound.createAsync(
+        selectedAudio,
+        {
+          shouldPlay: true,
+          volume: 1.0,
+        }
+      );
+
+      instructionSoundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          try {
+            if (instructionSoundRef.current === sound) {
+              instructionSoundRef.current = null;
+            }
+
+            await sound.unloadAsync();
+          } catch (error) {
+            console.log('Describe audio unload error:', error);
+          }
+        }
+      });
+    } catch (error) {
+      console.log('Describe symptoms audio error:', error);
+    }
+  };
 
   const cleanupAudio = async () => {
     try {
       stopTimer();
       stopPulse();
       stopBars();
+
+      await stopInstructionAudio();
 
       if (recording) {
         await recording.stopAndUnloadAsync();
@@ -111,11 +185,15 @@ export default function VoiceInputScreen() {
     loopBar(bar2, 58, 390).start();
     loopBar(bar3, 44, 350).start();
     loopBar(bar4, 62, 410).start();
-    loopBar(bar5, 38, 360).start();
+    loopBar(bar5, 40, 370).start();
   };
 
   const stopBars = () => {
-    [bar1, bar2, bar3, bar4, bar5].forEach((bar) => bar.stopAnimation());
+    bar1.stopAnimation();
+    bar2.stopAnimation();
+    bar3.stopAnimation();
+    bar4.stopAnimation();
+    bar5.stopAnimation();
 
     bar1.setValue(14);
     bar2.setValue(28);
@@ -129,9 +207,9 @@ export default function VoiceInputScreen() {
     setRecordTime('0.00');
 
     timerRef.current = setInterval(() => {
-      secondsRef.current += 0.1;
+      secondsRef.current += 0.01;
       setRecordTime(secondsRef.current.toFixed(2));
-    }, 100);
+    }, 10);
   };
 
   const stopTimer = () => {
@@ -142,11 +220,7 @@ export default function VoiceInputScreen() {
   };
 
   const getAudioExtension = (uri) => {
-    if (!uri) return '3gp';
-
-    const cleanUri = uri.split('?')[0];
-    const extension = cleanUri.split('.').pop();
-
+    const extension = String(uri || '').split('.').pop();
     return extension || '3gp';
   };
 
@@ -172,6 +246,7 @@ export default function VoiceInputScreen() {
       await startRecording();
     } catch (error) {
       console.log('Recording error:', error);
+
       Alert.alert(
         'Recording error',
         'Could not record your voice. Please try again.'
@@ -189,6 +264,8 @@ export default function VoiceInputScreen() {
       );
       return;
     }
+
+    await stopInstructionAudio();
 
     if (recordedSound) {
       await recordedSound.unloadAsync();
@@ -274,6 +351,8 @@ export default function VoiceInputScreen() {
 
   const handlePlay = async () => {
     try {
+      await stopInstructionAudio();
+
       const playableUri = safeRecordingUri || recordingUri;
 
       if (!playableUri) {
@@ -292,7 +371,20 @@ export default function VoiceInputScreen() {
         setRecordedSound(null);
       }
 
-      const { sound } = await Audio.Sound.createAsync({ uri: playableUri });
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: playableUri },
+        {
+          shouldPlay: true,
+          volume: 1.0,
+        }
+      );
 
       setRecordedSound(sound);
       setIsPlaying(true);
@@ -304,8 +396,6 @@ export default function VoiceInputScreen() {
           setRecordedSound(null);
         }
       });
-
-      await sound.playAsync();
     } catch (error) {
       console.log('Playback error:', error);
       Alert.alert('Playback error', 'Could not play the recorded voice.');
@@ -315,6 +405,8 @@ export default function VoiceInputScreen() {
 
   const handleDelete = async () => {
     try {
+      await stopInstructionAudio();
+
       if (recording) {
         await recording.stopAndUnloadAsync();
       }
@@ -355,6 +447,8 @@ export default function VoiceInputScreen() {
       return;
     }
 
+    await stopInstructionAudio();
+
     if (recordedSound) {
       await recordedSound.unloadAsync();
       setRecordedSound(null);
@@ -370,12 +464,30 @@ export default function VoiceInputScreen() {
     });
   };
 
+  const beforeLanguageChange = async () => {
+    await stopInstructionAudio();
+  };
+
+  const afterLanguageChange = async (selectedLang) => {
+    if (!isRecording) {
+      await playDescribeSymptomsAudio(selectedLang);
+    }
+  };
+
   return (
-    <AppScreen>
+    <AppScreen
+      beforeLanguageChange={beforeLanguageChange}
+      afterLanguageChange={afterLanguageChange}
+      onHomePress={async () => {
+        await cleanupAudio();
+        router.replace('/input');
+      }}
+    >
       <View style={styles.container}>
-        {/* HEADER SECTION - same position as TextInputScreen */}
         <View style={styles.headerBar}>
-          <Text style={styles.headerText}>{t('speak_option') || 'Speak'}</Text>
+          <Text style={styles.headerText}>
+            {t('speak_option') || 'Speak'}
+          </Text>
 
           <Image
             source={require('../../assets/images/voice.png')}
@@ -384,7 +496,6 @@ export default function VoiceInputScreen() {
           />
         </View>
 
-        {/* RECORDING BOX */}
         <View style={styles.recordBox}>
           <Animated.View
             style={[
@@ -417,7 +528,6 @@ export default function VoiceInputScreen() {
           </Text>
         </View>
 
-        {/* PLAYBACK / DELETE / CONTINUE BAR */}
         <View style={styles.bottomBox}>
           <View style={styles.leftControls}>
             <Pressable
@@ -458,13 +568,15 @@ export default function VoiceInputScreen() {
           )}
         </View>
 
-        {/* BACK BUTTON - same style as TextInputScreen */}
         <Pressable
           style={({ pressed }) => [
             styles.backButton,
             pressed && styles.backPressedGrey,
           ]}
-          onPress={() => router.back()}
+          onPress={async () => {
+            await cleanupAudio();
+            router.back();
+          }}
         >
           <View style={styles.backButtonContent}>
             <Image
