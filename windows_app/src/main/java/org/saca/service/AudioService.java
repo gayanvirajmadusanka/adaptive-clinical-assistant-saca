@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioService {
 
@@ -14,6 +15,8 @@ public class AudioService {
     private static Thread playThread;
 
     private static Path tempFile;
+
+    private static AtomicBoolean stopping = new AtomicBoolean(false);
 
     public static void playBase64Wav(String base64Wav,
                                      ErrorCallback onError,
@@ -25,7 +28,18 @@ public class AudioService {
 
         stop();
 
+        if (playThread != null) {
+            try {
+                playThread.join(500);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        stopping.set(false);
+
         playThread = new Thread(() -> {
+            Path localTemp = null;
+
             try {
                 String clean = base64Wav
                         .replaceAll("\\s", "")
@@ -33,20 +47,23 @@ public class AudioService {
 
                 byte[] wavBytes = Base64.getDecoder().decode(clean);
 
-                tempFile = Files.createTempFile("saca_audio_", ".wav");
-                Files.write(tempFile, wavBytes);
-                tempFile.toFile().deleteOnExit();
+                localTemp = Files.createTempFile("saca_audio_", ".wav");
+                Files.write(localTemp, wavBytes);
+                localTemp.toFile().deleteOnExit();
+                tempFile = localTemp;
+
+                if (stopping.get()) return;
 
                 String os = System.getProperty("os.name").toLowerCase();
                 ProcessBuilder pb;
 
                 if (os.contains("mac")) {
-                    pb = new ProcessBuilder("afplay", tempFile.toString());
+                    pb = new ProcessBuilder("afplay", localTemp.toString());
                 } else if (os.contains("win")) {
                     pb = new ProcessBuilder("powershell", "-c",
-                            "(New-Object Media.SoundPlayer '" + tempFile + "').PlaySync()");
+                            "(New-Object Media.SoundPlayer '" + localTemp + "').PlaySync()");
                 } else {
-                    pb = new ProcessBuilder("aplay", tempFile.toString());
+                    pb = new ProcessBuilder("aplay", localTemp.toString());
                 }
 
                 pb.inheritIO();
@@ -55,15 +72,18 @@ public class AudioService {
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } catch (IllegalArgumentException e) {
+                Platform.runLater(() -> onError.onError("Invalid audio data"));
             } catch (IOException e) {
                 Platform.runLater(() -> onError.onError("IO error: " + e.getMessage()));
             } catch (Exception e) {
                 Platform.runLater(() -> onError.onError("Unexpected error: " + e.getMessage()));
             } finally {
-                deleteTempFile();
+                deleteTempFile(localTemp);
                 currentProcess = null;
-                // Fire onComplete on JavaFX thread
-                Platform.runLater(onComplete::onComplete);
+                if (!stopping.get()) {
+                    Platform.runLater(onComplete::onComplete);
+                }
             }
         });
 
@@ -72,26 +92,27 @@ public class AudioService {
     }
 
     public static void stop() {
+        stopping.set(true);
+
         if (currentProcess != null && currentProcess.isAlive()) {
             currentProcess.destroyForcibly();
             currentProcess = null;
         }
         if (playThread != null && playThread.isAlive()) {
             playThread.interrupt();
-            playThread = null;
         }
-        deleteTempFile();
+        deleteTempFile(tempFile);
+        tempFile = null;
     }
 
     public static boolean isPlaying() {
         return currentProcess != null && currentProcess.isAlive();
     }
 
-    private static void deleteTempFile() {
+    private static void deleteTempFile(Path file) {
         try {
-            if (tempFile != null && Files.exists(tempFile)) {
-                Files.deleteIfExists(tempFile);
-                tempFile = null;
+            if (file != null && Files.exists(file)) {
+                Files.deleteIfExists(file);
             }
         } catch (IOException ignored) {
         }

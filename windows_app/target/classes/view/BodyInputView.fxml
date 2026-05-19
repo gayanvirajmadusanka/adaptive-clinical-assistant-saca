@@ -7,12 +7,14 @@
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.saca.controller.BodyInputController"
-            stylesheets="@/styles/style.css, @/styles/body-input.css"
+            stylesheets="@/styles/style.css"
             styleClass="root">
 
     <top>
         <HBox alignment="CENTER_LEFT" styleClass="top-bar">
-            <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
             <Region HBox.hgrow="ALWAYS"/>
         </HBox>
     </top>
@@ -32,15 +34,21 @@
                           maxWidth="680"
                           styleClass="body-card-container">
 
-                        <padding><Insets top="20" right="30" bottom="30" left="30"/></padding>
+                        <padding>
+                            <Insets top="20" right="30" bottom="30" left="30"/>
+                        </padding>
 
-                        <!-- HEADER -->
                         <HBox alignment="CENTER" styleClass="body-header-bar">
 
-                            <Button onAction="#handleBack" styleClass="body-back-btn">
+                            <Button onAction="#handleBack" styleClass="header-back-btn">
+                                <tooltip>
+                                    <Tooltip text="%back"/>
+                                </tooltip>
                                 <graphic>
                                     <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
-                                        <image><Image url="@/icons/back-arrow.png"/></image>
+                                        <image>
+                                            <Image url="@/icons/back-arrow.png"/>
+                                        </image>
                                     </ImageView>
                                 </graphic>
                             </Button>
@@ -70,7 +78,6 @@
                                maxWidth="Infinity"
                                wrapText="true"/>
 
-                        <!-- BODY IMAGE (LEFT) + PARTS LIST (RIGHT) -->
                         <HBox spacing="24" maxWidth="Infinity" alignment="TOP_CENTER">
 
                             <!-- Image with transparent zone overlay -->
@@ -80,7 +87,9 @@
                                 <ImageView fx:id="bodyImage"
                                            fitWidth="360" fitHeight="640"
                                            preserveRatio="true">
-                                    <image><Image url="@/images/male_image.png"/></image>
+                                    <image>
+                                        <Image url="@/images/male_image.png"/>
+                                    </image>
                                 </ImageView>
 
                                 <!-- Invisible clickable zones drawn in controller -->

@@ -2,7 +2,6 @@
 API routes module. Defines all API endpoints supported.
 """
 import base64
-import io
 
 from fastapi import APIRouter
 
@@ -12,18 +11,13 @@ from backend.api.schemas.request_response import QuestionsRequest, QuestionsResp
     AnswerAudioRequest
 from backend.api.services.answer_audio_service import resolve_answer_audio
 from backend.api.services.audio_service import get_detected_symptoms_audio
-from backend.constants import InputType, Language
-from backend.nlp.preprocessor import preprocess_text
-from backend.nlp.symptom_extractor import extract_symptoms
-from backend.translation.warlpiri_text import translate as translate_warlpiri
-from backend.speech.audio_english import transcribe
-from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
 from backend.api.services.pipeline_service import (
     classify as run_classify,
     process_text,
     process_audio,
     symptoms_to_ids
 )
+from backend.constants import InputType, Language
 
 LANG_WP = "wp"
 LANG_EN = "en"
@@ -32,46 +26,40 @@ router = APIRouter()
 
 
 @router.post('/extract/text', response_model=ExtractResponse)
-def extract_text(req: ExtractTextRequest) -> dict:
+def extract_text(req: ExtractTextRequest) -> ExtractResponse:
     """
     Extract symptoms from typed text input.
     :param req: ExtractTextRequest
     :return: ExtractResponse with symptoms and stitched audio
     """
-    result      = process_text(req.text, req.language)
+    result = process_text(req.text, req.language)
     symptom_ids = symptoms_to_ids(result["symptoms_en"])
-    voice_b64   = get_detected_symptoms_audio(symptom_ids, req.language)
+    voice_b64_en = get_detected_symptoms_audio(symptom_ids, Language.EN)
+    voice_b64_wp = get_detected_symptoms_audio(symptom_ids, Language.WP)
 
-    return {
-        'symptoms_en': result["symptoms_en"],
-        'symptoms_wp': result["symptoms_wp"],
-        'confidence':  result["confidence"],
-        'input_type':  'text',
-        'language':    req.language,
-        'voice_b64':   voice_b64
-    }
+    return ExtractResponse(symptoms_en=result["symptoms_en"], symptoms_wp=result["symptoms_wp"],
+                           confidence=result["confidence"],
+                           language=req.language, input_type=InputType.TEXT,
+                           voice_b64_en=voice_b64_en, voice_b64_wp=voice_b64_wp)
 
 
 @router.post('/extract/audio', response_model=ExtractResponse)
-def extract_audio(req: ExtractAudioRequest) -> dict:
+def extract_audio(req: ExtractAudioRequest) -> ExtractResponse:
     """
     Extract symptoms from audio input.
     :param req: ExtractAudioRequest
     :return: ExtractResponse with symptoms and stitched audio
     """
     audio_bytes = base64.b64decode(req.audio_b64)
-    result      = process_audio(audio_bytes, req.language)
+    result = process_audio(audio_bytes, req.language)
     symptom_ids = symptoms_to_ids(result["symptoms_en"])
-    voice_b64   = get_detected_symptoms_audio(symptom_ids, req.language)
+    voice_b64_en = get_detected_symptoms_audio(symptom_ids, Language.EN)
+    voice_b64_wp = get_detected_symptoms_audio(symptom_ids, Language.WP)
 
-    return {
-        'symptoms_en': result["symptoms_en"],
-        'symptoms_wp': result["symptoms_wp"],
-        'confidence':  result["confidence"],
-        'input_type':  'audio',
-        'language':    req.language,
-        'voice_b64':   voice_b64
-    }
+    return ExtractResponse(symptoms_en=result["symptoms_en"], symptoms_wp=result["symptoms_wp"],
+                           confidence=result["confidence"],
+                           language=req.language, input_type=InputType.AUDIO,
+                           voice_b64_en=voice_b64_en, voice_b64_wp=voice_b64_wp)
 
 
 @router.post('/extract/image', response_model=ExtractResponse)
@@ -82,9 +70,12 @@ def extract_image(req: ExtractImageRequest) -> ExtractResponse:
     :param req: ExtractImageRequest
     :return: ExtractResponse dict with the provided symptoms and audio
     """
-    voice_b64 = get_detected_symptoms_audio(req.symptoms, req.language)
+    voice_b64_en = get_detected_symptoms_audio(req.symptoms, Language.EN)
+    voice_b64_wp = get_detected_symptoms_audio(req.symptoms, Language.WP)
+
     return ExtractResponse(symptoms_en=req.symptoms, symptoms_wp=req.symptoms, confidence=1.0,
-                           language=req.language, input_type=InputType.IMAGE, voice_b64=voice_b64)
+                           language=req.language, input_type=InputType.IMAGE,
+                           voice_b64_en=voice_b64_en, voice_b64_wp=voice_b64_wp)
 
 
 @router.post('/questions', response_model=QuestionsResponse)

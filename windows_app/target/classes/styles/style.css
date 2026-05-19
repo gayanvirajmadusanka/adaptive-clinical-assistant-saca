@@ -21,3 +21,34 @@
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
 }
+
+.header-back-btn {
+    -fx-background-color: rgba(0, 0, 0, 0.15);
+    -fx-background-radius: 50;
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-max-width: 38px;
+    -fx-max-height: 38px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.30);
+    -fx-border-radius: 50;
+    -fx-border-width: 1.5;
+    -fx-scale-x: 1.15;
+    -fx-scale-y: 1.15;
+}
+
+.header-back-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.28);
+    -fx-border-color: rgba(255, 255, 255, 0.55);
+    -fx-scale-x: 1.25;
+    -fx-scale-y: 1.25;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.30), 8, 0, 0, 2);
+}
+
+.header-back-btn:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.38);
+    -fx-scale-x: 1.10;
+    -fx-scale-y: 1.10;
+}

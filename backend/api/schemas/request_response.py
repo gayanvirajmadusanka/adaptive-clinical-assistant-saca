@@ -137,4 +137,5 @@ class ExtractResponse(BaseModel):
     confidence: float
     input_type: str
     language: str
-    voice_b64: str
+    voice_b64_en: str
+    voice_b64_wp: str

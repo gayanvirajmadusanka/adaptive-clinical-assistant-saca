@@ -30,7 +30,7 @@ _EN_TO_ID = {value['en']: key for key, value in _SYMPTOM_MAP.items()}
 _EN_TO_WP = {value['en']: value['wp'] for value in _SYMPTOM_MAP.values()}
 
 predictor = TriagePredictor(
-    model_path=os.path.join(_BASE_DIR, '../models', 'stacking_mlp_xgb.pkl'),
+    model_path=os.path.join(_BASE_DIR, '../models', 'mlp.pkl'),
     tfidf_path=os.path.join(_BASE_DIR, '../models', 'tfidf_vectorizer.pkl'),
     le_path=os.path.join(_BASE_DIR, '../models', 'label_encoder.pkl')
 )

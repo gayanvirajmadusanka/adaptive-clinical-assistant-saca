@@ -12,28 +12,21 @@ import java.util.List;
 public class CacheManager {
 
     private static TextResultRS textResultRS = null;
-
     private static VoiceResultRS voiceResultRS = null;
-
     private static QuestionsRS questionsRS = null;
-
     private static ClassifyRS classifyRS = null;
-
     private static String lastSymptomText = "";
-
     private static String lastRecordedAudio = "";
-
     private static List<AnswerRQ> savedAnswers = new ArrayList<>();
-
     private static List<String> cachedSymptomsEn = new ArrayList<>();
 
+    // Body map symptom selection persistence
     private static boolean isTextResultLoadFromShow = false;
-
     private static String cachedBodyPartKey = "";
-
     private static List<String> cachedBodySymptomIds = new ArrayList<>();
-
     private static List<String> cachedBodySymptomLabels = new ArrayList<>();
+
+    private static boolean selectedGenderMale = true;
 
     public static TextResultRS getTextResultRS() {
         return textResultRS;
@@ -165,5 +158,13 @@ public class CacheManager {
 
     public static void clearCachedBodySymptomLabels() {
         cachedBodySymptomLabels = new ArrayList<>();
+    }
+
+    public static boolean isSelectedGenderMale() {
+        return selectedGenderMale;
+    }
+
+    public static void setSelectedGenderMale(boolean male) {
+        selectedGenderMale = male;
     }
 }
