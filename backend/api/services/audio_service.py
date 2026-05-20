@@ -61,7 +61,8 @@ def _load_clip(filename: str, section: str) -> AudioSegment | None:
     """
     if not filename:
         return None
-    path = os.path.join(_AUDIO_DIR, section, filename)
+    subfolder = _SUBFOLDER_MAP.get(section, section)
+    path = os.path.join(_AUDIO_DIR, subfolder, filename)
     if not os.path.exists(path):
         logger.warning(f'Audio file not found: {path}')
         return None

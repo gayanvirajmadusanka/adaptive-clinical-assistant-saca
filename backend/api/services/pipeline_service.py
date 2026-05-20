@@ -4,20 +4,18 @@ Orchestrates answer resolution, ML inference, and symptom translation.
 """
 import json
 import os
-import tempfile
-
-from backend.api.services.audio_service import convert_to_wav
-from backend.nlp.preprocessor import preprocess_text
-from backend.nlp.symptom_extractor import extract_symptoms
-from backend.translation.warlpiri_text import translate as translate_warlpiri
-from backend.speech.audio_english import transcribe
-from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
 from dataclasses import asdict
 
 from backend.api.questions.questions_module import resolve_answers
 from backend.api.schemas.request_response import ClassifyResponse
+from backend.api.services.audio_service import convert_to_wav
 from backend.constants import Language
 from backend.ml.predictor import TriagePredictor
+from backend.nlp.preprocessor import preprocess_text
+from backend.nlp.symptom_extractor import extract_symptoms
+from backend.speech.audio_english import transcribe
+from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
+from backend.translation.warlpiri_text import translate as translate_warlpiri
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _symptom_map_path = os.path.join(_BASE_DIR, '../data/warlpiri/symptom_map.json')
@@ -36,7 +34,7 @@ predictor = TriagePredictor(
 )
 
 
-def classify(symptoms: list, answers: list, language: str = Language.EN) -> ClassifyResponse:
+def classify(symptoms: list, answers: list, language: Language = Language.EN) -> ClassifyResponse:
     """
     Orchestrate the full classification pipeline.
     Resolves answers to signals then runs ML inference.
@@ -66,7 +64,7 @@ def classify(symptoms: list, answers: list, language: str = Language.EN) -> Clas
     )
 
 
-def _translate_symptoms(symptoms: list, language: str) -> list:
+def _translate_symptoms(symptoms: list, language: Language) -> list:
     """
     Translate English symptom strings to Warlpiri when language is 'wp'.
     Returns the original list unchanged for all other languages.
@@ -78,7 +76,8 @@ def _translate_symptoms(symptoms: list, language: str) -> list:
         return symptoms
     return [_ID_TO_WP.get(symptom, symptom) for symptom in symptoms]
 
-def process_text(text: str, language: str) -> dict:
+
+def process_text(text: str, language: Language) -> dict:
     """
     Process typed text input through NLP pipeline.
     :param text: raw text input from user
@@ -86,7 +85,7 @@ def process_text(text: str, language: str) -> dict:
     :return: dict with symptoms_en, symptoms_wp, confidence
     """
     if language == Language.WP:
-        translation  = translate_warlpiri(text)
+        translation = translate_warlpiri(text)
         english_text = translation.get("translated_text") or ""
     else:
         english_text = text
@@ -95,14 +94,14 @@ def process_text(text: str, language: str) -> dict:
         return {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}
 
     preprocessed = preprocess_text(english_text)
-    symptoms_en  = extract_symptoms(preprocessed["clean_text"], raw_text=english_text)
-    confidence   = 0.99 if symptoms_en else 0.0
-    symptoms_wp  = [_EN_TO_WP.get(s, s) for s in symptoms_en] if language == Language.WP else []
+    symptoms_en = extract_symptoms(preprocessed["clean_text"], raw_text=english_text)
+    confidence = 0.99 if symptoms_en else 0.0
+    symptoms_wp = [_EN_TO_WP.get(s, s) for s in symptoms_en] if language == Language.WP else []
 
     return {"symptoms_en": symptoms_en, "symptoms_wp": symptoms_wp, "confidence": confidence}
 
 
-def process_audio(audio_bytes: bytes, language: str) -> dict:
+def process_audio(audio_bytes: bytes, language: Language) -> dict:
     """
     Process audio input through NLP pipeline.
     :param audio_bytes: raw WAV audio bytes
@@ -113,16 +112,16 @@ def process_audio(audio_bytes: bytes, language: str) -> dict:
     try:
         tmp_path = convert_to_wav(audio_bytes)
         if language == Language.EN:
-            asr          = transcribe(tmp_path)
+            asr = transcribe(tmp_path)
             english_text = asr.get("text", "") or ""
             if not english_text.strip():
                 return {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}
             preprocessed = preprocess_text(english_text)
-            symptoms_en  = extract_symptoms(preprocessed["clean_text"], raw_text=english_text)
+            symptoms_en = extract_symptoms(preprocessed["clean_text"], raw_text=english_text)
             return {
                 "symptoms_en": symptoms_en,
                 "symptoms_wp": [],
-                "confidence":  asr.get("confidence") or (0.99 if symptoms_en else 0.0)
+                "confidence": asr.get("confidence") or (0.99 if symptoms_en else 0.0)
             }
 
         elif language == Language.WP:
@@ -134,7 +133,7 @@ def process_audio(audio_bytes: bytes, language: str) -> dict:
             return {
                 "symptoms_en": symptoms_en,
                 "symptoms_wp": symptoms_wp,
-                "confidence":  wp_result.get("confidence", 0.0)
+                "confidence": wp_result.get("confidence", 0.0)
             }
 
         return {"symptoms_en": [], "symptoms_wp": [], "confidence": 0.0}

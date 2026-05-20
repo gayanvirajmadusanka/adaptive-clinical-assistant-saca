@@ -19,9 +19,6 @@ from backend.api.services.pipeline_service import (
 )
 from backend.constants import InputType, Language
 
-LANG_WP = "wp"
-LANG_EN = "en"
-
 router = APIRouter()
 
 
