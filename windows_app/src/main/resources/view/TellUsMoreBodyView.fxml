@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.saca.controller.TellUsMoreBodyController"
+           stylesheets="@/styles/style.css"
+           styleClass="root">
+
+    <BorderPane>
+
+        <top>
+            <HBox alignment="CENTER_LEFT" styleClass="top-bar">
+                <padding>
+                    <Insets top="10" right="20" bottom="10" left="20"/>
+                </padding>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </top>
+
+        <left>
+            <fx:include fx:id="sidebar" source="SidebarView.fxml"/>
+        </left>
+
+        <center>
+            <ScrollPane fitToWidth="true"
+                        fitToHeight="true"
+                        pannable="false"
+                        styleClass="center-scroll">
+                <content>
+                    <StackPane styleClass="tell-bg">
+
+                        <VBox alignment="CENTER"
+                              spacing="20"
+                              maxWidth="680"
+                              styleClass="tell-container">
+
+                            <padding>
+                                <Insets top="60" right="40" bottom="60" left="40"/>
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT" styleClass="tell-header-bar">
+
+                                <Button onAction="#handleBack" styleClass="header-back-btn">
+                                    <tooltip>
+                                        <Tooltip text="%back"/>
+                                    </tooltip>
+                                    <graphic>
+                                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/back-arrow.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                                <Label text="%tell_us_more"
+                                       styleClass="tell-header-title"
+                                       HBox.hgrow="ALWAYS"
+                                       maxWidth="Infinity"
+                                       alignment="CENTER"/>
+
+                                <Region minWidth="38" maxWidth="38"/>
+
+                            </HBox>
+
+                            <Label fx:id="progressLabel"
+                                   styleClass="question-progress-label"
+                                   alignment="CENTER"
+                                   maxWidth="Infinity"/>
+
+                            <ProgressBar fx:id="progressBar"
+                                         styleClass="question-progress-bar"
+                                         progress="0"
+                                         minHeight="12"
+                                         prefHeight="12"
+                                         maxWidth="Infinity"/>
+
+                            <VBox fx:id="questionCard"
+                                  spacing="12"
+                                  styleClass="question-card"
+                                  maxWidth="Infinity">
+
+                                <HBox alignment="TOP_LEFT" spacing="8">
+
+                                    <Label fx:id="questionText"
+                                           styleClass="question-text"
+                                           wrapText="true"
+                                           maxWidth="Infinity"
+                                           HBox.hgrow="ALWAYS"/>
+
+                                    <Button fx:id="questionSpeakerBtn"
+                                            styleClass="question-speaker-btn"
+                                            onAction="#handleQuestionSpeak">
+                                        <graphic>
+                                            <ImageView fx:id="questionSpeakerIcon"
+                                                       fitWidth="24" fitHeight="24"
+                                                       preserveRatio="true">
+                                                <image>
+                                                    <Image url="@/icons/speaker.png"/>
+                                                </image>
+                                            </ImageView>
+                                        </graphic>
+                                    </Button>
+
+                                </HBox>
+
+                                <VBox fx:id="optionsBox" spacing="10"/>
+
+                            </VBox>
+
+                            <Button fx:id="continueBtn"
+                                    text="%continue"
+                                    styleClass="tell-continue-btn"
+                                    maxWidth="Infinity"
+                                    onAction="#handleContinue"/>
+
+                        </VBox>
+
+                    </StackPane>
+                </content>
+            </ScrollPane>
+        </center>
+
+    </BorderPane>
+
+</StackPane>

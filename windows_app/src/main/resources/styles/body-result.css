@@ -1,0 +1,41 @@
+.body-result-match-label {
+    -fx-text-fill: #3a2a1a;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-alignment: CENTER;
+}
+
+.body-result-choice-card {
+    -fx-background-color: #f5ead4;
+    -fx-background-radius: 20;
+    -fx-border-color: #c8b99a;
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+    -fx-padding: 12 20 12 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 6, 0, 0, 2);
+    -fx-min-width: 100px;
+}
+
+.body-result-choice-card:hover {
+    -fx-background-color: #ede0ce;
+    -fx-border-color: #B5523B;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 10, 0, 0, 3);
+}
+
+.body-result-choice-label-yes {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3a7a3a;
+}
+
+.body-result-choice-label-no {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #B5523B;
+}
