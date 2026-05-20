@@ -128,7 +128,13 @@ public class BodySymptomsController implements Initializable {
 
             if (restoredIds != null && restoredIds.contains(symptom.getId())) {
                 selectedIds.add(symptom.getId());
-                selectedLabels.add(symptom.getLabelEn());
+
+                if (LanguageManager.isLanguageEnglish()) {
+                    selectedLabels.add(symptom.getLabelEn());
+                } else {
+                    selectedLabels.add(symptom.getLabelWp());
+                }
+
                 btn.getStyleClass().add("symptom-select-btn-active");
                 imageView.setOpacity(1.0);
             } else {
@@ -138,12 +144,24 @@ public class BodySymptomsController implements Initializable {
             btn.setOnAction(e -> {
                 if (selectedIds.contains(symptom.getId())) {
                     selectedIds.remove(symptom.getId());
-                    selectedLabels.remove(symptom.getLabelEn());
+
+                    if (LanguageManager.isLanguageEnglish()) {
+                        selectedLabels.remove(symptom.getLabelEn());
+                    } else {
+                        selectedLabels.remove(symptom.getLabelWp());
+                    }
+
                     btn.getStyleClass().remove("symptom-select-btn-active");
                     imageView.setOpacity(0.85);
                 } else {
                     selectedIds.add(symptom.getId());
-                    selectedLabels.add(symptom.getLabelEn());
+
+                    if (LanguageManager.isLanguageEnglish()) {
+                        selectedLabels.add(symptom.getLabelEn());
+                    } else {
+                        selectedLabels.add(symptom.getLabelWp());
+                    }
+
                     btn.getStyleClass().add("symptom-select-btn-active");
                     imageView.setOpacity(1.0);
                 }
@@ -284,16 +302,16 @@ public class BodySymptomsController implements Initializable {
         }
 
         try {
-            NavBarManager.setCurrentView("/view/TextResultView.fxml");
+            NavBarManager.setCurrentView("/view/BodyResultView.fxml");
             CacheManager.setTextResultRS(result);
             CacheManager.setCachedSymptomsEn(result.getSymptomsEn());
             CacheManager.setIsTextResultLoadFromShow(true);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/view/TextResultView.fxml"),
+                    getClass().getResource("/view/BodyResultView.fxml"),
                     LanguageManager.getBundle());
             Parent view = loader.load();
-            ((TextResultController) loader.getController()).setSymptomResult(result);
+            ((BodyResultController) loader.getController()).setSymptomResult(result);
             stage.getScene().setRoot(view);
         } catch (Exception e) {
             e.printStackTrace();
