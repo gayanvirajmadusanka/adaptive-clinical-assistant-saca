@@ -23,9 +23,6 @@ const PIP_PACKAGES = [
   'xgboost',
   'numpy',
   'scipy',
-  'spacy',
-  // spaCy model — version must match whatever spacy version Chaquopy resolves above
-  'https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl',
   'rapidfuzz',
   'faster-whisper',
   'python_speech_features',
@@ -74,7 +71,6 @@ function withChaquopyAppBuild(config) {
             abiFilters "arm64-v8a", "x86_64"
         }
         python {
-            version "3.11"
             pip {
 ${pipLines}
             }

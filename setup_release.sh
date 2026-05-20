@@ -34,11 +34,32 @@ if [[ "${1:-}" == "--android" ]]; then
   done
 
   # copy only the required model files (not the full set of variants)
-  for model in mlp.pkl tfidf_vectorizer.pkl label_encoder.pkl \
-               nlp_symptom_classifier.pkl nlp_tfidf_vectorizer.pkl nlp_label_encoder.pkl; do
+  for model in mlp.pkl tfidf_vectorizer.pkl label_encoder.pkl; do
     if [[ -f "$BACKEND/models/$model" ]]; then
       cp "$BACKEND/models/$model" "$BR/models/"
       echo "  Copied models/$model"
+    fi
+  done
+
+  # use sklearn 1.1.3-compatible NLP pickles for Android; regenerate if missing
+  for src_suffix in nlp_symptom_classifier nlp_tfidf_vectorizer nlp_label_encoder; do
+    src="$BACKEND/models/${src_suffix}_android.pkl"
+    dst="$BR/models/${src_suffix}.pkl"
+    if [[ ! -f "$src" ]]; then
+      echo "  ${src_suffix}_android.pkl not found — regenerating with sklearn 1.1.3..."
+      VENV=/tmp/venv_sklearn113
+      if [[ ! -f "$VENV/bin/python" ]]; then
+        python -m venv "$VENV"
+        "$VENV/bin/pip" install --quiet "numpy<2" scikit-learn==1.1.3 pandas rapidfuzz
+      fi
+      "$VENV/bin/python" "$SCRIPT_DIR/backend/scripts/retrain_nlp_sklearn113.py"
+    fi
+    if [[ -f "$src" ]]; then
+      cp "$src" "$dst"
+      echo "  Copied ${src_suffix}_android.pkl → models/${src_suffix}.pkl"
+    else
+      echo "  WARNING: could not generate ${src_suffix}_android.pkl; copying original"
+      [[ -f "$BACKEND/models/${src_suffix}.pkl" ]] && cp "$BACKEND/models/${src_suffix}.pkl" "$dst"
     fi
   done
 

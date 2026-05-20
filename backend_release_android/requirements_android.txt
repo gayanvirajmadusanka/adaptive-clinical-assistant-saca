@@ -21,7 +21,6 @@ scikit-learn
 xgboost
 numpy
 scipy
-spacy
 rapidfuzz
 faster-whisper
 python_speech_features
