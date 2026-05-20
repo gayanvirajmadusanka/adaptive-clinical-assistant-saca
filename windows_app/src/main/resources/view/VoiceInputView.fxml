@@ -60,6 +60,23 @@
                                        maxWidth="Infinity"
                                        alignment="CENTER"/>
 
+                                <Button fx:id="introSpeakerBtn"
+                                        styleClass="header-back-btn"
+                                        onAction="#handleIntroSpeak">
+                                    <tooltip>
+                                        <Tooltip text="%tooltip_play_intro"/>
+                                    </tooltip>
+                                    <graphic>
+                                        <ImageView fx:id="introSpeakerIcon"
+                                                   fitWidth="24" fitHeight="24"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/speaker.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
                                 <Button styleClass="write-pen-icon">
                                     <graphic>
                                         <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">

@@ -149,7 +149,39 @@ public class BodySymptomsController implements Initializable {
                 }
             });
 
-            card.getChildren().addAll(imageView, btn);
+            String audioFile = symptom.getAudio();
+            ImageView spkIcon = new ImageView(new Image(
+                    getClass().getResource("/icons/speaker.png").toExternalForm()));
+            spkIcon.setFitWidth(16);
+            spkIcon.setFitHeight(16);
+            spkIcon.setPreserveRatio(true);
+            Button spkBtn = new Button();
+            spkBtn.setGraphic(spkIcon);
+            spkBtn.getStyleClass().add("body-speaker-btn");
+            spkBtn.setOnAction(e -> {
+                if (AudioService.isPlaying()) {
+                    AudioService.stop();
+                    spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()));
+                } else {
+                    try {
+                        URL aUrl = getClass().getResource("/audio/symptoms/" + audioFile);
+                        if (aUrl == null) return;
+                        String b64 = Base64.getEncoder().encodeToString(aUrl.openStream().readAllBytes());
+                        spkIcon.setImage(new Image(getClass().getResource("/icons/mute.png").toExternalForm()));
+                        AudioService.playBase64Wav(b64,
+                                err -> Platform.runLater(() -> spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()))),
+                                () -> Platform.runLater(() -> spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()))));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            javafx.scene.layout.HBox btnRow = new javafx.scene.layout.HBox(8);
+            btnRow.setAlignment(Pos.CENTER_LEFT);
+            btn.setMaxWidth(Double.MAX_VALUE);
+            javafx.scene.layout.HBox.setHgrow(btn, javafx.scene.layout.Priority.ALWAYS);
+            btnRow.getChildren().addAll(btn, spkBtn);
+            card.getChildren().addAll(imageView, btnRow);
             symptomCardsBox.getChildren().add(card);
         }
     }
@@ -185,7 +217,11 @@ public class BodySymptomsController implements Initializable {
 
         try {
             URL url = getClass().getResource("/audio/body_parts/" + part.getAudio());
-            if (url == null) return;
+
+            if (url == null) {
+                return;
+            }
+
             String b64 = Base64.getEncoder().encodeToString(url.openStream().readAllBytes());
             setIcon("/icons/mute.png");
             AudioService.playBase64Wav(b64,
