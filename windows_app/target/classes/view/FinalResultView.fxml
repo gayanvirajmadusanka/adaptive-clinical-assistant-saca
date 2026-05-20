@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -39,8 +39,7 @@
                                 <Insets top="40" right="36" bottom="60" left="36"/>
                             </padding>
 
-                            <HBox alignment="CENTER_LEFT" styleClass="final-header-bar">
-
+                            <HBox alignment="CENTER" styleClass="final-header-bar">
                                 <Button onAction="#handleBack" styleClass="header-back-btn">
                                     <tooltip>
                                         <Tooltip text="%back"/>
@@ -53,22 +52,58 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>
-
                                 <Label text="%final_results_title"
                                        styleClass="final-header-title"
                                        HBox.hgrow="ALWAYS"
                                        maxWidth="Infinity"
                                        alignment="CENTER"/>
-
                                 <Region minWidth="38" maxWidth="38"/>
-
                             </HBox>
 
-                            <Label fx:id="severityLabel"
-                                   styleClass="severity-banner"
-                                   maxWidth="Infinity"
-                                   alignment="CENTER"
-                                   wrapText="true"/>
+                            <HBox fx:id="severityCard"
+                                  styleClass="severity-card"
+                                  spacing="12"
+                                  alignment="CENTER_LEFT">
+                                <padding>
+                                    <Insets top="20" right="16" bottom="20" left="20"/>
+                                </padding>
+
+                                <ImageView fx:id="severityIcon"
+                                           fitWidth="64" fitHeight="64"
+                                           preserveRatio="true">
+                                    <image>
+                                        <Image url="@/icons/face_mild.png"/>
+                                    </image>
+                                </ImageView>
+
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="severityLabel"
+                                           styleClass="severity-title"
+                                           wrapText="true"
+                                           maxWidth="Infinity"/>
+                                    <Label fx:id="severitySubLabel"
+                                           styleClass="severity-subtitle"
+                                           wrapText="true"
+                                           maxWidth="Infinity"/>
+                                </VBox>
+
+                                <Button fx:id="recSpeakerBtn"
+                                        styleClass="final-speaker-btn"
+                                        onAction="#handleSpeak"
+                                        visible="false"
+                                        managed="false">
+                                    <graphic>
+                                        <ImageView fx:id="recSpeakerIcon"
+                                                   fitWidth="28" fitHeight="28"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@/icons/speaker.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </Button>
+
+                            </HBox>
 
                             <Button fx:id="callBtn"
                                     text="%call_for_help"
@@ -87,46 +122,46 @@
                                 </graphic>
                             </Button>
 
-                            <VBox styleClass="result-card" spacing="10">
-
-                                <HBox alignment="CENTER_LEFT" spacing="8">
-                                    <Label text="%recommendations_label"
-                                           styleClass="result-card-title"
-                                           HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="recSpeakerBtn"
-                                            styleClass="question-speaker-btn"
-                                            onAction="#handleSpeak">
-                                        <graphic>
-                                            <ImageView fx:id="recSpeakerIcon"
-                                                       fitWidth="22" fitHeight="22"
-                                                       preserveRatio="true">
-                                                <image>
-                                                    <Image url="@/icons/speaker.png"/>
-                                                </image>
-                                            </ImageView>
-                                        </graphic>
-                                    </Button>
+                            <VBox styleClass="result-card" spacing="8">
+                                <padding>
+                                    <Insets top="16" right="16" bottom="16" left="16"/>
+                                </padding>
+                                <HBox spacing="14" alignment="CENTER_LEFT">
+                                    <ImageView fx:id="recIcon"
+                                               fitWidth="64" fitHeight="64"
+                                               preserveRatio="true">
+                                        <image>
+                                            <Image url="@/icons/recommendation_mild.png"/>
+                                        </image>
+                                    </ImageView>
+                                    <Label text="%recommendations_label" styleClass="result-card-title"/>
                                 </HBox>
-
                                 <Label fx:id="recommendationLabel"
                                        styleClass="result-card-body"
                                        wrapText="true"
                                        maxWidth="Infinity"/>
-
                                 <Label fx:id="recommendedActionLabel"
                                        styleClass="result-card-action"
                                        wrapText="true"
                                        maxWidth="Infinity"/>
-
                             </VBox>
 
-                            <VBox fx:id="symptomsCard" styleClass="result-card" spacing="8">
-                                <Label text="%symptoms_label"
-                                       styleClass="result-card-title"/>
-
-                                <VBox fx:id="symptomsBox" spacing="6"/>
-
-                            </VBox>
+                            <HBox styleClass="result-card" spacing="14" alignment="TOP_LEFT">
+                                <padding>
+                                    <Insets top="16" right="16" bottom="16" left="16"/>
+                                </padding>
+                                <ImageView fx:id="sympIcon"
+                                           fitWidth="64" fitHeight="64"
+                                           preserveRatio="true">
+                                    <image>
+                                        <Image url="@/icons/symptom_mild.png"/>
+                                    </image>
+                                </ImageView>
+                                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                    <Label text="%symptoms_label" styleClass="result-card-title"/>
+                                    <VBox fx:id="symptomsBox" spacing="6"/>
+                                </VBox>
+                            </HBox>
 
                             <Button text="%start_again"
                                     styleClass="start-again-btn"
