@@ -9,18 +9,22 @@
 #
 # DROPPED (dev/analysis only):
 #   matplotlib, seaborn, pandas, pytest, gtts
+#   imbalanced-learn: training-only, not used at inference time
+#
+# Native packages (numpy, scipy, sklearn, xgboost, spacy, soundfile, webrtcvad-wheels)
+# are unpinned so Chaquopy resolves the latest available pre-built Android wheel.
+# Pure-Python packages keep version pins for API stability.
 
 fastapi==0.115.0
-uvicorn==0.34.0
-scikit-learn==1.5.2
-xgboost==2.1.1
-imbalanced-learn==0.12.4
-numpy==1.26.4
-scipy==1.13.1
-spacy==3.7.4
-rapidfuzz==3.14.5
+uvicorn==0.33.0
+scikit-learn
+xgboost
+numpy
+scipy
+spacy
+rapidfuzz
 faster-whisper
 python_speech_features
 pydantic==2.9.2
 soundfile
-webrtcvad-wheels==2.0.14
+webrtcvad-wheels

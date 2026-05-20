@@ -13,24 +13,25 @@ const { withAppBuildGradle, withProjectBuildGradle } = require('@expo/config-plu
 
 const CHAQUOPY_VERSION = '15.0.1';
 
-// Packages exactly as listed in backend_release_android/requirements_android.txt
+// Packages exactly as listed in backend_release_android/requirements_android.txt.
+// Native packages (sklearn, xgboost, numpy, scipy, spacy, soundfile, webrtcvad-wheels)
+// are unpinned so Chaquopy resolves the latest available pre-built Android wheel.
 const PIP_PACKAGES = [
   'fastapi==0.115.0',
-  'uvicorn==0.34.0',
-  'scikit-learn==1.5.2',
-  'xgboost==2.1.1',
-  'imbalanced-learn==0.12.4',
-  'numpy==1.26.4',
-  'scipy==1.13.1',
-  'spacy==3.7.4',
-  // spaCy model bundled as a wheel URL
+  'uvicorn==0.33.0',
+  'scikit-learn',
+  'xgboost',
+  'numpy',
+  'scipy',
+  'spacy',
+  // spaCy model — version must match whatever spacy version Chaquopy resolves above
   'https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl',
-  'rapidfuzz==3.14.5',
+  'rapidfuzz',
   'faster-whisper',
   'python_speech_features',
   'pydantic==2.9.2',
   'soundfile',
-  'webrtcvad-wheels==2.0.14',
+  'webrtcvad-wheels',
 ];
 
 function withChaquopyRootBuild(config) {
@@ -73,6 +74,7 @@ function withChaquopyAppBuild(config) {
             abiFilters "arm64-v8a", "x86_64"
         }
         python {
+            version "3.11"
             pip {
 ${pipLines}
             }
