@@ -92,7 +92,7 @@ class TriagePredictor:
     def predict(
             self,
             symptoms: list, age: str, gender: str, duration_value: int, intensity_signal: int, has_critical: int,
-            severity_context: int = 1, language: str = Language.EN) -> PredictorResult:
+            severity_context: int = 1, language: Language = Language.EN) -> PredictorResult:
         """
         Run inference on structured symptom and demographic input.
         :param symptoms: List of extracted English symptom strings

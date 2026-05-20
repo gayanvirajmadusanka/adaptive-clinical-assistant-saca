@@ -30,7 +30,7 @@ _QUESTION_LOOKUP = {
 }
 
 
-def get_questions(symptoms: list, language: str = Language.EN) -> QuestionsResponse:
+def get_questions(symptoms: list, language: Language = Language.EN) -> QuestionsResponse:
     """
     Build the question list for a given set of symptoms.
     Mandatory questions always included first, followed by exactly
@@ -69,7 +69,7 @@ def get_questions(symptoms: list, language: str = Language.EN) -> QuestionsRespo
     return QuestionsResponse(language=language, questions=questions)
 
 
-def _format_question(question: dict, language: str) -> Question:
+def _format_question(question: dict, language: Language) -> Question:
     """
     Format a single question for the API response.
     Falls back to English if Warlpiri text is not available.

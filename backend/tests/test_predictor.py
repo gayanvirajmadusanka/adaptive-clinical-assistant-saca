@@ -8,7 +8,7 @@ from backend.ml.predictor import SEVERITY_MAP, RECOMMENDED_ACTIONS, TriagePredic
 @pytest.fixture
 def predictor():
     return TriagePredictor(
-        model_path='backend/models/stacking_mlp_et_xgb.pkl',
+        model_path='backend/models/mlp.pkl',
         tfidf_path='backend/models/tfidf_vectorizer.pkl',
         le_path='backend/models/label_encoder.pkl'
     )
