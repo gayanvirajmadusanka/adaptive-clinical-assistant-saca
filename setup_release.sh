@@ -8,7 +8,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BR="$SCRIPT_DIR/backend_release"
+BR="$SCRIPT_DIR/backend_release_android"
 BACKEND="$SCRIPT_DIR/backend"
 
 echo "==> Setting up backend_release..."
