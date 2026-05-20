@@ -1,0 +1,177 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [saca_v1]
+    paths:
+      - 'mobile_app/**'
+      - 'backend_release_android/**'
+      - 'backend/data/**'
+      - 'backend/models/**'
+      - 'android_modules/**'
+      - 'server.py'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mobile_app/package-lock.json
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip (MFCC precompute deps)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-android-precompute-${{ hashFiles('backend_release_android/requirements_android.txt') }}
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-android-${{ hashFiles('mobile_app/android/**/*.gradle*', 'mobile_app/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-android-
+
+      - name: Install Python deps for MFCC precompute
+        run: pip install numpy scipy python_speech_features soundfile
+
+      - name: Prepare backend_release_android data and models
+        run: |
+          # Remove local-dev symlinks if present (CI needs real files)
+          rm -rf backend_release_android/data backend_release_android/models
+          mkdir -p backend_release_android/data backend_release_android/models
+
+          for subdir in warlpiri audio frontend; do
+            [ -d "backend/data/$subdir" ] && cp -r "backend/data/$subdir" backend_release_android/data/
+          done
+          for f in questions.json symptom_vocabulary.json; do
+            [ -f "backend/data/$f" ] && cp "backend/data/$f" backend_release_android/data/
+          done
+          for model in mlp.pkl tfidf_vectorizer.pkl label_encoder.pkl \
+                       nlp_symptom_classifier.pkl nlp_tfidf_vectorizer.pkl nlp_label_encoder.pkl; do
+            [ -f "backend/models/$model" ] && cp "backend/models/$model" backend_release_android/models/
+          done
+
+      - name: Recompute keyword MFCCs (python_speech_features)
+        run: python -m backend_release_android.nlp.precompute_mfcc_release
+
+      - name: Install Node dependencies
+        working-directory: mobile_app
+        run: npm ci
+
+      - name: Run Expo prebuild for Android
+        working-directory: mobile_app
+        run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Copy Python source to Android python dir
+        run: |
+          PYTHON_DIR="mobile_app/android/app/src/main/python"
+          mkdir -p "$PYTHON_DIR"
+          cp server.py "$PYTHON_DIR/"
+          cp -r backend_release_android "$PYTHON_DIR/"
+
+      - name: Copy NativeModule Java files
+        run: |
+          JAVA_DIR="mobile_app/android/app/src/main/java/com/ishant/mobile_app"
+          cp android_modules/PythonServerModule.java "$JAVA_DIR/"
+          cp android_modules/PythonServerPackage.java "$JAVA_DIR/"
+
+      - name: Patch MainApplication to register PythonServerPackage
+        run: |
+          python3 - <<'EOF'
+          import os, sys
+
+          base = "mobile_app/android/app/src/main/java/com/ishant/mobile_app"
+          kt_path  = os.path.join(base, "MainApplication.kt")
+          java_path = os.path.join(base, "MainApplication.java")
+
+          if os.path.exists(kt_path):
+              with open(kt_path) as f:
+                  src = f.read()
+              if "PythonServerPackage" in src:
+                  print("MainApplication.kt already patched"); sys.exit(0)
+              # Expo 51+ new-arch pattern: PackageList(this).packages.apply { }
+              if "PackageList(this).packages.apply" in src:
+                  src = src.replace(
+                      "PackageList(this).packages.apply {",
+                      "PackageList(this).packages.apply {\n          add(PythonServerPackage())"
+                  )
+              # Older override fun getPackages() { val packages = ...; return packages }
+              elif "return packages" in src:
+                  src = src.replace(
+                      "return packages",
+                      "packages.add(PythonServerPackage())\n      return packages",
+                      1
+                  )
+              else:
+                  # Append override before the class closing brace
+                  override = (
+                      "\n  override fun getPackages(): List<ReactPackage> {\n"
+                      "    val packages = PackageList(this).packages\n"
+                      "    packages.add(PythonServerPackage())\n"
+                      "    return packages\n"
+                      "  }\n"
+                  )
+                  src = src.rstrip().rstrip("}") + override + "}\n"
+              with open(kt_path, "w") as f:
+                  f.write(src)
+              print("Patched MainApplication.kt")
+
+          elif os.path.exists(java_path):
+              with open(java_path) as f:
+                  src = f.read()
+              if "PythonServerPackage" in src:
+                  print("MainApplication.java already patched"); sys.exit(0)
+              src = src.replace(
+                  "return packages;",
+                  "packages.add(new PythonServerPackage());\n      return packages;",
+                  1
+              )
+              with open(java_path, "w") as f:
+                  f.write(src)
+              print("Patched MainApplication.java")
+
+          else:
+              print("ERROR: MainApplication not found at", base)
+              sys.exit(1)
+          EOF
+
+      - name: Grant Gradle execute permission
+        run: chmod +x mobile_app/android/gradlew
+
+      - name: Build debug APK
+        working-directory: mobile_app/android
+        run: ./gradlew assembleDebug --no-daemon
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m"
+
+      - name: Rename APK
+        run: mv mobile_app/android/app/build/outputs/apk/debug/app-debug.apk mobile_app/android/app/build/outputs/apk/debug/saca-app.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SACA-Android-Debug-APK
+          path: mobile_app/android/app/build/outputs/apk/debug/saca-app.apk
+          retention-days: 30
