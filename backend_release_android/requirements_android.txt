@@ -1,0 +1,26 @@
+# Android APK requirements for backend_release
+# Used by Chaquopy's python { pip { install "..." } } in build.gradle
+#
+# REPLACED from backend/requirements.txt:
+#   openai-whisper  → faster-whisper  (CTranslate2 has Android ARM64 wheels)
+#   librosa         → python_speech_features + scipy  (pure Python/numpy, no C ext issues)
+#   pydub           → stdlib wave + numpy  (no dependency needed)
+#   webrtcvad_wheels stays (has Android wheels)
+#
+# DROPPED (dev/analysis only):
+#   matplotlib, seaborn, pandas, pytest, gtts
+
+fastapi==0.115.0
+uvicorn==0.34.0
+scikit-learn==1.5.2
+xgboost==2.1.1
+imbalanced-learn==0.12.4
+numpy==1.26.4
+scipy==1.13.1
+spacy==3.7.4
+rapidfuzz==3.14.5
+faster-whisper
+python_speech_features
+pydantic==2.9.2
+soundfile
+webrtcvad-wheels==2.0.14

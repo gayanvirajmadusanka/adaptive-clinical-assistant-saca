@@ -17,6 +17,32 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
+
+// Recording options that produce formats the Python backend can decode without ffmpeg:
+//   iOS  → LINEARPCM WAV  (stdlib wave can read directly)
+//   Android → OGG Vorbis  (soundfile can decode on Android 10+)
+const RECORDING_OPTIONS = {
+  android: {
+    extension: '.ogg',
+    outputFormat: Audio.AndroidOutputFormat.OGG,
+    audioEncoder: Audio.AndroidAudioEncoder.VORBIS,
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 128000,
+  },
+  ios: {
+    extension: '.wav',
+    outputFormat: Audio.IOSOutputFormat.LINEARPCM,
+    audioQuality: Audio.IOSAudioQuality.HIGH,
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 256000,
+    linearPCMBitDepth: 16,
+    linearPCMIsBigEndian: false,
+    linearPCMIsFloat: false,
+  },
+  web: { mimeType: 'audio/webm', bitsPerSecond: 128000 },
+};
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import styles from '../styles/voiceInputStyles';
 
@@ -168,7 +194,7 @@ export default function VoiceInputScreen() {
 
     const rec = new Audio.Recording();
 
-    await rec.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+    await rec.prepareToRecordAsync(RECORDING_OPTIONS);
     await rec.startAsync();
 
     setRecording(rec);

@@ -1,6 +1,7 @@
 # Backend generated artifacts
 backend/build/
 backend/dist/
+backend_release_windows/dist/
 
 # IDE
 .idea/
@@ -22,3 +23,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+build/
+.coverage
+test_coverage/

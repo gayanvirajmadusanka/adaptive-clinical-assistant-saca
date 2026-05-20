@@ -28,6 +28,7 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/withChaquopy",
       [
         "expo-splash-screen",
         {

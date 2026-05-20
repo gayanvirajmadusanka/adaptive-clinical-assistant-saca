@@ -1,0 +1,21 @@
+After running 'expo prebuild --platform android', apply this manual patch to
+mobile_app/android/app/src/main/java/com/ishant/mobile_app/MainApplication.java
+(or MainApplication.kt for Kotlin).
+
+Find the line in getPackages() that reads:
+    packages.add(new MainReactPackage());
+  OR in newer Expo:
+    return PackageList(this).packages
+
+For Java, add before the return statement:
+    packages.add(new PythonServerPackage());
+
+For Kotlin, override getPackages():
+    override fun getPackages(): List<ReactPackage> {
+        val packages = PackageList(this).packages
+        packages.add(PythonServerPackage())
+        return packages
+    }
+
+The setup_release.sh --android script copies the Java files automatically and
+prints a reminder. If you use Kotlin, convert PythonServerModule/Package manually.
