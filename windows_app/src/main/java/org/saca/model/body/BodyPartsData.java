@@ -20,14 +20,14 @@ public class BodyPartsData {
         PARTS.put("eye",
                 new BodyPart("eye", "Eye", "Milpa", "eye_en.wav", "eye_wp.wav",
                         Arrays.asList(
-                                new BodySymptom("eye_pain", "Pain", "Purrkunypa", "eye_pain_en.wav", "eye_pain_wp.wav"),
+                                new BodySymptom("eye_pain", "Eye Pain", "Milpa purrkunypa", "eye_pain_en.wav", "eye_pain_wp.wav"),
                                 new BodySymptom("eye_itching", "Itchy", "Yayirri", "eye_itching_en.wav", "eye_itching_wp.wav")
                         )));
 
         PARTS.put("ear",
                 new BodyPart("ear", "Ear", "Langa", "ear_en.wav", "ear_wp.wav",
                         Arrays.asList(
-                                new BodySymptom("ear_pain", "Pain", "Purrkunypa", "ear_pain_en.wav", "ear_pain_wp.wav")
+                                new BodySymptom("ear_pain", "Ear Pain", "Langa purrkunypa", "ear_pain_en.wav", "ear_pain_wp.wav")
                         )));
 
         PARTS.put("nose",
@@ -40,7 +40,7 @@ public class BodyPartsData {
         PARTS.put("jaw",
                 new BodyPart("jaw", "Jaw", "Wirlki", "jaw_en.wav", "jaw_wp.wav",
                         Arrays.asList(
-                                new BodySymptom("jaw_pain", "Pain", "Purrkunypa", "jaw_pain_en.wav", "jaw_pain_wp.wav")
+                                new BodySymptom("jaw_pain", "Jaw Pain", "Wirlki purrkunypa", "jaw_pain_en.wav", "jaw_pain_wp.wav")
                         )));
 
         PARTS.put("throat",
@@ -76,13 +76,13 @@ public class BodyPartsData {
         PARTS.put("back",
                 new BodyPart("back", "Back", "Pawiyi", "back_en.wav", "back_wp.wav",
                         Arrays.asList(
-                                new BodySymptom("back_pain", "Pain", "Purrkunypa", "back_pain_en.wav", "back_pain_wp.wav")
+                                new BodySymptom("back_pain", "Back Pain", "Pawiyi purrkunypa", "back_pain_en.wav", "back_pain_wp.wav")
                         )));
 
         PARTS.put("arm",
                 new BodyPart("arm", "Arm", "Kilpirli", "arm_en.wav", "arm_wp.wav",
                         Arrays.asList(
-                                new BodySymptom("arm_pain", "Pain", "Purrkunypa", "arm_pain_en.wav", "arm_pain_wp.wav"),
+                                new BodySymptom("arm_pain", "Kilpirli Pain", "Purrkunypa", "arm_pain_en.wav", "arm_pain_wp.wav"),
                                 new BodySymptom("arm_weakness", "Weakness", "Rampaku", "arm_weakness_en.wav", "arm_weakness_wp.wav"),
                                 new BodySymptom("swelling_arms", "Swelling", "Kirakarrimi", "swelling_arms_en.wav", "swelling_arms_wp.wav")
                         )));

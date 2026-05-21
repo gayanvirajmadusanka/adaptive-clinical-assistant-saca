@@ -175,7 +175,7 @@ public class FinalResultController implements Initializable {
             }
             default -> {
                 severityLabel.setText(LanguageManager.get("severity") + " : " + LanguageManager.get("mild"));
-                severitySubLabel.setText(LanguageManager.get("treat_at_home"));
+                severitySubLabel.setText(LanguageManager.get("you_can_get_over_the_counter_medicine"));
                 severityCard.getStyleClass().setAll("severity-card", "severity-card-mild");
                 severityLabel.getStyleClass().setAll("severity-title", "severity-title-mild");
                 severitySubLabel.getStyleClass().setAll("severity-subtitle", "severity-subtitle-mild");

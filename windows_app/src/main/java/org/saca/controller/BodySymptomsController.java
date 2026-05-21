@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.body.BodyPart;
@@ -194,7 +195,8 @@ public class BodySymptomsController implements Initializable {
                     }
                 }
             });
-            javafx.scene.layout.HBox btnRow = new javafx.scene.layout.HBox(8);
+
+            HBox btnRow = new javafx.scene.layout.HBox(8);
             btnRow.setAlignment(Pos.CENTER_LEFT);
             btn.setMaxWidth(Double.MAX_VALUE);
             javafx.scene.layout.HBox.setHgrow(btn, javafx.scene.layout.Priority.ALWAYS);
