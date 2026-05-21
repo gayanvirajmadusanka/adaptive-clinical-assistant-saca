@@ -256,7 +256,14 @@ public class VoiceResultController implements Initializable {
             return;
         }
 
-        String voiceB64 = symptomResult.getVoiceB64();
+        String voiceB64;
+
+        if (LanguageManager.isLanguageEnglish()) {
+            voiceB64 = symptomResult.getVoiceB64En();
+        } else {
+            voiceB64 = symptomResult.getVoiceB64Wp();
+        }
+
         if (voiceB64 == null || voiceB64.isBlank()) return;
 
         setSpeakerStopIcon();

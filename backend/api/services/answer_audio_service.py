@@ -10,7 +10,6 @@ from backend.api.schemas.request_response import AnswerAudioResponse
 from backend.api.services.audio_service import get_unrecognized_audio, get_answer_selected_audio, convert_to_wav
 from backend.constants import Language
 from backend.speech.audio_english import transcribe as transcribe_english
-
 from backend.speech.audio_warlpiri import recognize as recognize_warlpiri
 
 _questions_path = os.path.join(os.path.dirname(__file__), '../../data/questions.json')
@@ -173,7 +172,7 @@ def _match_keywords(spoken_text: str, question_id: str) -> tuple | None:
 def resolve_answer_audio(
         audio_b64: str,
         question_id: str,
-        language: str = Language.EN
+        language: Language = Language.EN
 ) -> AnswerAudioResponse:
     """
     Resolve spoken audio to an answer ID for the given question.

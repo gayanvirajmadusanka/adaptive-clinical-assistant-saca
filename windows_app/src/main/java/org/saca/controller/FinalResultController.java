@@ -14,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -63,12 +64,30 @@ public class FinalResultController implements Initializable {
     @FXML
     private ImageView recSpeakerIcon;
 
+    @FXML
+    private HBox severityCard;
+
+    @FXML
+    private ImageView severityIcon;
+
+    @FXML
+    private Label severitySubLabel;
+
+    @FXML
+    private ImageView recIcon;
+
+    @FXML
+    private ImageView sympIcon;
+
     private ClassifyRS result;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         ClassifyRS cached = CacheManager.getClassifyRS();
-        if (cached == null) return;
+
+        if (cached == null) {
+            return;
+        }
 
         String savedLang = cached.getLanguage() != null ? cached.getLanguage() : "";
         String currentLang = LanguageManager.isLanguageEnglish()
@@ -141,33 +160,38 @@ public class FinalResultController implements Initializable {
 
         switch (severityMode) {
             case SEVERE -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append("⚠  ");
-                sb.append(LanguageManager.get("severe"));
-                sb.append(" - ");
-                sb.append(LanguageManager.get("seek_help_now"));
-                severityLabel.setText(sb.toString());
-                severityLabel.getStyleClass().setAll("severity-banner", "severity-severe");
+                severityLabel.setText(LanguageManager.get("severity") + " : " + LanguageManager.get("severe"));
+                severitySubLabel.setText(LanguageManager.get("seek_help_now"));
+                severityCard.getStyleClass().setAll("severity-card", "severity-card-severe");
+                severityLabel.getStyleClass().setAll("severity-title", "severity-title-severe");
+                severitySubLabel.getStyleClass().setAll("severity-subtitle", "severity-subtitle-severe");
+                setSeverityIcon("/icons/severity_icon.png");
+                setCardIcon(recIcon, "/icons/recommendation_severe.png");
+                setCardIcon(sympIcon, "/icons/symptom_severe.png");
             }
             case MODERATE -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append(LanguageManager.get("severity"));
-                sb.append(" : ");
-                sb.append(LanguageManager.get("moderate"));
-                severityLabel.setText(sb.toString());
-                severityLabel.getStyleClass().setAll("severity-banner", "severity-moderate");
+                severityLabel.setText(LanguageManager.get("severity") + " : " + LanguageManager.get("moderate"));
+                severitySubLabel.setText(LanguageManager.get("medical_attention_recommended"));
+                severityCard.getStyleClass().setAll("severity-card", "severity-card-moderate");
+                severityLabel.getStyleClass().setAll("severity-title", "severity-title-moderate");
+                severitySubLabel.getStyleClass().setAll("severity-subtitle", "severity-subtitle-moderate");
+                setSeverityIcon("/icons/face_moderate.png");
+                setCardIcon(recIcon, "/icons/recommendation_moderate.png");
+                setCardIcon(sympIcon, "/icons/symptom_moderate.png");
             }
             default -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append(LanguageManager.get("severity"));
-                sb.append(" : ");
-                sb.append(LanguageManager.get("mild"));
-                severityLabel.setText(sb.toString());
-                severityLabel.getStyleClass().setAll("severity-banner", "severity-mild");
+                severityLabel.setText(LanguageManager.get("severity") + " : " + LanguageManager.get("mild"));
+                severitySubLabel.setText(LanguageManager.get("treat_at_home"));
+                severityCard.getStyleClass().setAll("severity-card", "severity-card-mild");
+                severityLabel.getStyleClass().setAll("severity-title", "severity-title-mild");
+                severitySubLabel.getStyleClass().setAll("severity-subtitle", "severity-subtitle-mild");
+                setSeverityIcon("/icons/face_mild.png");
+                setCardIcon(recIcon, "/icons/recommendation_mild.png");
+                setCardIcon(sympIcon, "/icons/symptom_mild.png");
             }
         }
 
-        boolean showCall = severityMode == AppsConstants.SeverityMode.SEVERE && rs.isHasCritical();
+        boolean showCall = (severityMode == AppsConstants.SeverityMode.SEVERE && rs.isHasCritical());
         callBtn.setVisible(showCall);
         callBtn.setManaged(showCall);
 
@@ -176,7 +200,14 @@ public class FinalResultController implements Initializable {
         }
 
         recommendationLabel.setText(rs.getRecommendation() != null ? rs.getRecommendation() : "");
+        recommendationLabel.setWrapText(true);
+        recommendationLabel.setMaxWidth(Double.MAX_VALUE);
+        recommendationLabel.setMinHeight(javafx.scene.control.Label.USE_PREF_SIZE);
+
         recommendedActionLabel.setText(rs.getRecommendedAction() != null ? rs.getRecommendedAction() : "");
+        recommendedActionLabel.setWrapText(true);
+        recommendedActionLabel.setMaxWidth(Double.MAX_VALUE);
+        recommendedActionLabel.setMinHeight(javafx.scene.control.Label.USE_PREF_SIZE);
 
         boolean hasAudio = rs.getVoiceB64() != null && !rs.getVoiceB64().isBlank();
         recSpeakerBtn.setVisible(hasAudio);
@@ -305,6 +336,26 @@ public class FinalResultController implements Initializable {
         );
         bounce.setCycleCount(Timeline.INDEFINITE);
         bounce.play();
+    }
+
+    private void setSeverityIcon(String path) {
+        try {
+            URL url = getClass().getResource(path);
+            if (url != null) {
+                severityIcon.setImage(new Image(url.toExternalForm()));
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void setCardIcon(ImageView iv, String path) {
+        try {
+            URL url = getClass().getResource(path);
+            if (url != null) {
+                iv.setImage(new Image(url.toExternalForm()));
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private void setMuteIcon() {
