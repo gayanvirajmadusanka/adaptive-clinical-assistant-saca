@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [saca_v1]
+    branches: [release]
     paths:
       - 'mobile_app/**'
       - 'backend_release_android/**'

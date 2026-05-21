@@ -2,7 +2,7 @@ name: Build Windows Installer
 
 on:
   push:
-    branches: [saca_v1]
+    branches: [release]
     paths:
       - 'backend_release_windows/**'
       - 'windows_app/**'
