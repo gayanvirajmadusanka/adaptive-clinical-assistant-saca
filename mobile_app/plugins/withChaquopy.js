@@ -27,7 +27,6 @@ const PIP_PACKAGES = [
   'python_speech_features',
   'pydantic==1.10.21',
   'soundfile',
-  'webrtcvad-wheels',
 ];
 
 function withChaquopyRootBuild(config) {
