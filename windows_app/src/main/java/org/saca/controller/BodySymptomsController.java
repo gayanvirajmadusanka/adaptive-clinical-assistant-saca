@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.body.BodyPart;
@@ -128,7 +129,13 @@ public class BodySymptomsController implements Initializable {
 
             if (restoredIds != null && restoredIds.contains(symptom.getId())) {
                 selectedIds.add(symptom.getId());
-                selectedLabels.add(symptom.getLabelEn());
+
+                if (LanguageManager.isLanguageEnglish()) {
+                    selectedLabels.add(symptom.getLabelEn());
+                } else {
+                    selectedLabels.add(symptom.getLabelWp());
+                }
+
                 btn.getStyleClass().add("symptom-select-btn-active");
                 imageView.setOpacity(1.0);
             } else {
@@ -138,18 +145,63 @@ public class BodySymptomsController implements Initializable {
             btn.setOnAction(e -> {
                 if (selectedIds.contains(symptom.getId())) {
                     selectedIds.remove(symptom.getId());
-                    selectedLabels.remove(symptom.getLabelEn());
+
+                    if (LanguageManager.isLanguageEnglish()) {
+                        selectedLabels.remove(symptom.getLabelEn());
+                    } else {
+                        selectedLabels.remove(symptom.getLabelWp());
+                    }
+
                     btn.getStyleClass().remove("symptom-select-btn-active");
                     imageView.setOpacity(0.85);
                 } else {
                     selectedIds.add(symptom.getId());
-                    selectedLabels.add(symptom.getLabelEn());
+
+                    if (LanguageManager.isLanguageEnglish()) {
+                        selectedLabels.add(symptom.getLabelEn());
+                    } else {
+                        selectedLabels.add(symptom.getLabelWp());
+                    }
+
                     btn.getStyleClass().add("symptom-select-btn-active");
                     imageView.setOpacity(1.0);
                 }
             });
 
-            card.getChildren().addAll(imageView, btn);
+            String audioFile = symptom.getAudio();
+            ImageView spkIcon = new ImageView(new Image(
+                    getClass().getResource("/icons/speaker.png").toExternalForm()));
+            spkIcon.setFitWidth(16);
+            spkIcon.setFitHeight(16);
+            spkIcon.setPreserveRatio(true);
+            Button spkBtn = new Button();
+            spkBtn.setGraphic(spkIcon);
+            spkBtn.getStyleClass().add("body-speaker-btn");
+            spkBtn.setOnAction(e -> {
+                if (AudioService.isPlaying()) {
+                    AudioService.stop();
+                    spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()));
+                } else {
+                    try {
+                        URL aUrl = getClass().getResource("/audio/symptoms/" + audioFile);
+                        if (aUrl == null) return;
+                        String b64 = Base64.getEncoder().encodeToString(aUrl.openStream().readAllBytes());
+                        spkIcon.setImage(new Image(getClass().getResource("/icons/mute.png").toExternalForm()));
+                        AudioService.playBase64Wav(b64,
+                                err -> Platform.runLater(() -> spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()))),
+                                () -> Platform.runLater(() -> spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()))));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            HBox btnRow = new javafx.scene.layout.HBox(8);
+            btnRow.setAlignment(Pos.CENTER_LEFT);
+            btn.setMaxWidth(Double.MAX_VALUE);
+            javafx.scene.layout.HBox.setHgrow(btn, javafx.scene.layout.Priority.ALWAYS);
+            btnRow.getChildren().addAll(btn, spkBtn);
+            card.getChildren().addAll(imageView, btnRow);
             symptomCardsBox.getChildren().add(card);
         }
     }
@@ -185,7 +237,11 @@ public class BodySymptomsController implements Initializable {
 
         try {
             URL url = getClass().getResource("/audio/body_parts/" + part.getAudio());
-            if (url == null) return;
+
+            if (url == null) {
+                return;
+            }
+
             String b64 = Base64.getEncoder().encodeToString(url.openStream().readAllBytes());
             setIcon("/icons/mute.png");
             AudioService.playBase64Wav(b64,
@@ -248,16 +304,16 @@ public class BodySymptomsController implements Initializable {
         }
 
         try {
-            NavBarManager.setCurrentView("/view/TextResultView.fxml");
+            NavBarManager.setCurrentView("/view/BodyResultView.fxml");
             CacheManager.setTextResultRS(result);
             CacheManager.setCachedSymptomsEn(result.getSymptomsEn());
             CacheManager.setIsTextResultLoadFromShow(true);
 
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/view/TextResultView.fxml"),
+                    getClass().getResource("/view/BodyResultView.fxml"),
                     LanguageManager.getBundle());
             Parent view = loader.load();
-            ((TextResultController) loader.getController()).setSymptomResult(result);
+            ((BodyResultController) loader.getController()).setSymptomResult(result);
             stage.getScene().setRoot(view);
         } catch (Exception e) {
             e.printStackTrace();

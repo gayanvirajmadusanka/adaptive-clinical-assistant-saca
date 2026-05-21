@@ -1,6 +1,7 @@
 @import "about.css";
 @import "audio-overlay.css";
 @import "body-input.css";
+@import "body-result.css";
 @import "dashboard.css";
 @import "dialog.css";
 @import "final-result.css";
@@ -8,6 +9,7 @@
 @import "select-language.css";
 @import "sidebar.css";
 @import "voice-input.css";
+@import "tell-us-more-body.css";
 @import "tell-us-more-text.css";
 @import "tell-us-more-voice.css";
 @import "text-input.css";

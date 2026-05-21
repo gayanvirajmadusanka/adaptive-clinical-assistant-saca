@@ -19,8 +19,11 @@ public class VoiceResultRS extends CommonRS {
     @JsonProperty("input_type")
     private String inputType;
 
-    @JsonProperty("voice_b64")
-    private String voiceB64;
+    @JsonProperty("voice_b64_en")
+    private String voiceB64En;
+
+    @JsonProperty("voice_b64_wp")
+    private String voiceB64Wp;
 
     public List<String> getSymptomsEn() {
         return symptomsEn;
@@ -54,12 +57,20 @@ public class VoiceResultRS extends CommonRS {
         this.inputType = inputType;
     }
 
-    public String getVoiceB64() {
-        return voiceB64;
+    public String getVoiceB64En() {
+        return voiceB64En;
     }
 
-    public void setVoiceB64(String voiceB64) {
-        this.voiceB64 = voiceB64;
+    public void setVoiceB64En(String voiceB64En) {
+        this.voiceB64En = voiceB64En;
+    }
+
+    public String getVoiceB64Wp() {
+        return voiceB64Wp;
+    }
+
+    public void setVoiceB64Wp(String voiceB64Wp) {
+        this.voiceB64Wp = voiceB64Wp;
     }
 
     /**

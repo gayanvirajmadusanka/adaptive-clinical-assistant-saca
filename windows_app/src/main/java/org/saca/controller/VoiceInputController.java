@@ -21,6 +21,7 @@ import org.saca.model.request.VoiceInputRQ;
 import org.saca.model.response.VoiceResultRS;
 import org.saca.service.ApiService;
 import org.saca.service.AudioRecorderService;
+import org.saca.service.AudioService;
 import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
@@ -29,6 +30,7 @@ import org.saca.utility.manager.NavBarManager;
 import org.saca.utility.util.CommonUtil;
 
 import java.net.URL;
+import java.util.Base64;
 import java.util.ResourceBundle;
 
 public class VoiceInputController implements Initializable {
@@ -63,17 +65,72 @@ public class VoiceInputController implements Initializable {
     @FXML
     private Button submitBtn;
 
+    @FXML
+    private Button introSpeakerBtn;
+
+    @FXML
+    private ImageView introSpeakerIcon;
+
     private Timeline recordingPulse;
 
     private Timeline durationTimer;
 
     private long recordingStartMillis;
+
     private Stage stage;
+
     private Parent voiceInputView;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         stage = null;
+        playIntroAudio();
+    }
+
+    private void playIntroAudio() {
+        String fileName = LanguageManager.isLanguageEnglish()
+                ? "describe_symptoms_en.wav"
+                : "describe_symptoms_wp.wav";
+
+        URL audioUrl = getClass().getResource("/audio/ui/" + fileName);
+
+        if (audioUrl == null) {
+            return;
+        }
+
+        try {
+            String voiceBase64 = Base64.getEncoder().encodeToString(audioUrl.openStream().readAllBytes());
+            setIntroMuteIcon();
+            AudioService.playBase64Wav(
+                    voiceBase64,
+                    err -> Platform.runLater(this::resetIntroSpeakerIcon),
+                    () -> Platform.runLater(this::resetIntroSpeakerIcon)
+            );
+        } catch (Exception e) {
+            resetIntroSpeakerIcon();
+        }
+    }
+
+    @FXML
+    private void handleIntroSpeak() {
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetIntroSpeakerIcon();
+        } else {
+            playIntroAudio();
+        }
+    }
+
+    private void setIntroMuteIcon() {
+        if (introSpeakerIcon != null)
+            introSpeakerIcon.setImage(new Image(
+                    getClass().getResource("/icons/mute.png").toExternalForm()));
+    }
+
+    private void resetIntroSpeakerIcon() {
+        if (introSpeakerIcon != null)
+            introSpeakerIcon.setImage(new Image(
+                    getClass().getResource("/icons/speaker.png").toExternalForm()));
     }
 
     @FXML
@@ -86,6 +143,9 @@ public class VoiceInputController implements Initializable {
     }
 
     private void startRecording() {
+        AudioService.stop();
+        resetIntroSpeakerIcon();
+
         AudioRecorderService.clearRecording();
         setPlaybackBarEnabled(false);
         durationLabel.setText("0.00");
@@ -255,6 +315,7 @@ public class VoiceInputController implements Initializable {
 
     @FXML
     private void handleBack(ActionEvent event) {
+        AudioService.stop();
         AudioRecorderService.stopPlayback();
         if (AudioRecorderService.isRecording()) {
             AudioRecorderService.stopRecording(err -> {
