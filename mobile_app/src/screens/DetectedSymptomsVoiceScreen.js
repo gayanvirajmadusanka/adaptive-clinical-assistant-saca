@@ -1,27 +1,26 @@
 // DetectedSymptomsVoiceScreen.js
-// Purpose: Displays symptoms detected from voice input.
-// Supports audio playback using voice_b64_en / voice_b64_wp.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  Modal,
-  Alert,
-} from 'react-native';
-
+import { View, Text, Pressable, Image, Modal, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
+import { Ionicons } from '@expo/vector-icons';
 
 import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
-import { extractSymptomsFromText } from '../services/triageApi';
-import { saveBase64AudioToCache } from '../utils/base64Audio';
+import {
+  extractSymptomsFromText,
+  resolveAnswerAudio,
+} from '../services/triageApi';
+
+import {
+  saveBase64AudioToCache,
+  readAudioFileAsBase64,
+} from '../utils/base64Audio';
+
 import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
 export default function DetectedSymptomsVoiceScreen() {
@@ -35,9 +34,18 @@ export default function DetectedSymptomsVoiceScreen() {
   const [voiceFileUriEn, setVoiceFileUriEn] = useState(null);
   const [voiceFileUriWp, setVoiceFileUriWp] = useState(null);
 
-  const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+
+  const [recording, setRecording] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [checkingVoice, setCheckingVoice] = useState(false);
+  const [selectedVoiceAnswer, setSelectedVoiceAnswer] = useState(null);
+  const [voiceStatusText, setVoiceStatusText] = useState('Tap to Answer');
+
+  const [recordedVoiceUri, setRecordedVoiceUri] = useState(null);
+  const [recordedDuration, setRecordedDuration] = useState('0.00');
 
   const soundRef = useRef(null);
 
@@ -62,6 +70,10 @@ export default function DetectedSymptomsVoiceScreen() {
 
   useEffect(() => {
     prepareInitialAudio();
+
+    return () => {
+      stopCurrentAudio();
+    };
   }, []);
 
   async function prepareInitialAudio() {
@@ -69,32 +81,27 @@ export default function DetectedSymptomsVoiceScreen() {
       const voiceB64En = String(params.voice_b64_en || '');
       const voiceB64Wp = String(params.voice_b64_wp || '');
 
-      console.log('VOICE detected EN audio length:', voiceB64En.length);
-      console.log('VOICE detected WP audio length:', voiceB64Wp.length);
-
       if (voiceB64En) {
         const fileEn = await saveBase64AudioToCache(
           voiceB64En,
-          'voice_detected_symptoms_en.wav'
+          'detected_symptoms_voice_en.wav'
         );
-
         setVoiceFileUriEn(fileEn);
       }
 
       if (voiceB64Wp) {
         const fileWp = await saveBase64AudioToCache(
           voiceB64Wp,
-          'voice_detected_symptoms_wp.wav'
+          'detected_symptoms_voice_wp.wav'
         );
-
         setVoiceFileUriWp(fileWp);
       }
     } catch (error) {
-      console.log('Prepare voice initial audio error:', error);
+      console.log('Prepare detected voice audio error:', error);
     }
   }
 
-  const stopCurrentAudio = async () => {
+  async function stopCurrentAudio() {
     try {
       if (soundRef.current) {
         const currentSound = soundRef.current;
@@ -108,20 +115,15 @@ export default function DetectedSymptomsVoiceScreen() {
         }
       }
     } catch (error) {
-      console.log('Stop voice audio error:', error);
+      console.log('Stop audio error:', error);
     }
-  };
+  }
 
   async function getAudioFileForLanguage(languageCode) {
     const selectedLang = languageCode === 'wp' ? 'wp' : 'en';
 
-    if (selectedLang === 'wp' && voiceFileUriWp) {
-      return voiceFileUriWp;
-    }
-
-    if (selectedLang === 'en' && voiceFileUriEn) {
-      return voiceFileUriEn;
-    }
+    if (selectedLang === 'wp' && voiceFileUriWp) return voiceFileUriWp;
+    if (selectedLang === 'en' && voiceFileUriEn) return voiceFileUriEn;
 
     const directAudio =
       selectedLang === 'wp'
@@ -131,7 +133,7 @@ export default function DetectedSymptomsVoiceScreen() {
     if (directAudio) {
       const fileUri = await saveBase64AudioToCache(
         directAudio,
-        `voice_detected_symptoms_${selectedLang}.wav`
+        `detected_symptoms_voice_${selectedLang}.wav`
       );
 
       if (selectedLang === 'wp') {
@@ -150,9 +152,7 @@ export default function DetectedSymptomsVoiceScreen() {
           : symptomsEn.join(' ')
         : symptomsEn.join(' ');
 
-    if (!textToSend) {
-      return null;
-    }
+    if (!textToSend) return null;
 
     const data = await extractSymptomsFromText(textToSend, selectedLang);
 
@@ -161,13 +161,11 @@ export default function DetectedSymptomsVoiceScreen() {
         ? String(data?.voice_b64_wp || '')
         : String(data?.voice_b64_en || '');
 
-    if (!audioBase64) {
-      return null;
-    }
+    if (!audioBase64) return null;
 
     const fileUri = await saveBase64AudioToCache(
       audioBase64,
-      `voice_detected_symptoms_${selectedLang}.wav`
+      `detected_symptoms_voice_${selectedLang}.wav`
     );
 
     if (selectedLang === 'wp') {
@@ -179,7 +177,7 @@ export default function DetectedSymptomsVoiceScreen() {
     return fileUri;
   }
 
-  const playVoiceAudio = async () => {
+  async function playVoiceAudio() {
     try {
       if (audioLoading) {
         Alert.alert('Please wait', 'Preparing audio...');
@@ -199,85 +197,287 @@ export default function DetectedSymptomsVoiceScreen() {
 
       const fileUri = await getAudioFileForLanguage(lang);
 
-      console.log('Playing voice detected audio:', fileUri);
-
       if (!fileUri) {
-        Alert.alert(
-          'Audio Error',
-          'No detected symptoms audio found.'
-        );
+        Alert.alert('Audio Error', 'No detected symptoms audio found.');
         return;
       }
 
       const { sound } = await Audio.Sound.createAsync(
         { uri: fileUri },
-        {
-          shouldPlay: true,
-          volume: 1.0,
-        }
+        { shouldPlay: true, volume: 1.0 }
       );
 
       soundRef.current = sound;
 
       sound.setOnPlaybackStatusUpdate(async (status) => {
         if (status.isLoaded && status.didJustFinish) {
-          try {
-            if (soundRef.current === sound) {
-              soundRef.current = null;
-            }
-
-            await sound.unloadAsync();
-          } catch (error) {
-            console.log('Finished voice audio unload error:', error);
+          if (soundRef.current === sound) {
+            soundRef.current = null;
           }
+
+          await sound.unloadAsync();
         }
       });
     } catch (error) {
-      console.log('Play voice detected audio error:', error);
+      console.log('Play detected voice audio error:', error);
       Alert.alert('Audio Error', 'Unable to play audio.');
     } finally {
       setAudioLoading(false);
     }
-  };
+  }
 
-  useEffect(() => {
-    return () => {
-      if (soundRef.current) {
-        const currentSound = soundRef.current;
-        soundRef.current = null;
+  async function handleVoiceAnswerPress() {
+    if (checkingVoice || loading) return;
 
-        currentSound
-          .getStatusAsync()
-          .then((status) => {
-            if (status.isLoaded) {
-              currentSound.stopAsync();
-              currentSound.unloadAsync();
-            }
-          })
-          .catch((error) => {
-            console.log('Cleanup voice audio error:', error);
-          });
-      }
-    };
-  }, []);
-
-  const beforeLanguageChange = async () => {
-    await stopCurrentAudio();
-  };
-
-  const afterLanguageChange = async (selectedLang) => {
-    try {
-      setAudioLoading(true);
-      await stopCurrentAudio();
-      await getAudioFileForLanguage(selectedLang);
-    } catch (error) {
-      console.log('Voice language audio update error:', error);
-    } finally {
-      setAudioLoading(false);
+    if (isListening) {
+      await stopVoiceRecording();
+    } else {
+      await startVoiceRecording();
     }
-  };
+  }
 
-  const handleYesPress = async () => {
+  async function startVoiceRecording() {
+    try {
+      await stopCurrentAudio();
+
+      const permission = await Audio.requestPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert('Permission required', 'Please allow microphone permission.');
+        return;
+      }
+
+      setSelectedVoiceAnswer(null);
+      setRecordedVoiceUri(null);
+      setRecordedDuration('0.00');
+      setVoiceStatusText('Listening...');
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+
+      const newRecording = new Audio.Recording();
+
+      await newRecording.prepareToRecordAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      await newRecording.startAsync();
+
+      setRecording(newRecording);
+      setIsListening(true);
+
+      console.log('YES/NO RECORDING STARTED');
+    } catch (error) {
+      console.log('Start yes/no recording error:', error);
+
+      setRecording(null);
+      setIsListening(false);
+      setVoiceStatusText('Tap to Answer');
+
+      Alert.alert('Voice Error', 'Could not start recording.');
+    }
+  }
+
+  async function stopVoiceRecording() {
+    try {
+      if (!recording) {
+        setIsListening(false);
+        setVoiceStatusText('Tap to Answer');
+        return;
+      }
+
+      const status = await recording.getStatusAsync();
+
+      const durationSeconds = status.durationMillis
+        ? (status.durationMillis / 1000).toFixed(2)
+        : '0.00';
+
+      await recording.stopAndUnloadAsync();
+
+      const uri = recording.getURI();
+
+      setRecording(null);
+      setIsListening(false);
+      setRecordedVoiceUri(uri);
+      setRecordedDuration(durationSeconds);
+
+      console.log('YES/NO RECORDING URI:', uri);
+      console.log('YES/NO RECORDING DURATION:', durationSeconds);
+
+      if (!uri) {
+        setVoiceStatusText('Tap to Answer');
+        Alert.alert('Voice Error', 'No recording was saved.');
+        return;
+      }
+
+      setVoiceStatusText('Checking answer...');
+      await resolveRecordedYesNo(uri);
+    } catch (error) {
+      console.log('Stop yes/no recording error:', error);
+
+      setRecording(null);
+      setIsListening(false);
+      setCheckingVoice(false);
+      setVoiceStatusText('Tap to Answer');
+
+      Alert.alert('Voice Error', 'Could not stop recording.');
+    }
+  }
+
+  async function resolveRecordedYesNo(uri) {
+    try {
+      setCheckingVoice(true);
+
+      const audioBase64 = await readAudioFileAsBase64(String(uri));
+
+      console.log('YES/NO BASE64 LENGTH:', audioBase64?.length);
+
+      const data = await resolveAnswerAudio(
+        audioBase64,
+        'does_it_match',
+        lang || 'en'
+      );
+
+      console.log('YES/NO RAW BACKEND RESPONSE:', JSON.stringify(data, null, 2));
+
+      const spokenText = String(
+        data?.answer_text ||
+          data?.answer ||
+          data?.transcript ||
+          data?.text ||
+          data?.recognized_text ||
+          data?.speech_text ||
+          ''
+      ).toLowerCase();
+
+      console.log('YES/NO SPOKEN TEXT:', spokenText);
+
+      const isYes =
+        spokenText.includes('yes') ||
+        spokenText.includes('yeah') ||
+        spokenText.includes('correct') ||
+        spokenText.includes('right') ||
+        spokenText.includes('match') ||
+        spokenText.includes('yuwa') ||
+        spokenText.includes('yuwayi');
+
+      const isNo =
+        spokenText.includes('no') ||
+        spokenText.includes('nope') ||
+        spokenText.includes('wrong') ||
+        spokenText.includes('not') ||
+        spokenText.includes('kula');
+
+      console.log('YES/NO MATCH RESULT:', {
+        isYes,
+        isNo,
+        spokenText,
+      });
+
+      if (isYes) {
+        setSelectedVoiceAnswer('yes');
+        setVoiceStatusText('Voice matched: YES');
+
+        setTimeout(() => {
+          handleYesPress();
+        }, 800);
+
+        return;
+      }
+
+      if (isNo) {
+        setSelectedVoiceAnswer('no');
+        setVoiceStatusText('Voice matched: NO');
+
+        setTimeout(() => {
+          handleNoPress();
+        }, 800);
+
+        return;
+      }
+
+      setSelectedVoiceAnswer(null);
+      setVoiceStatusText('Voice not matched');
+
+      Alert.alert(
+        'Voice not recognised',
+        `Detected text: ${spokenText || 'empty'}`
+      );
+
+      setTimeout(() => {
+        setVoiceStatusText('Tap to Answer');
+      }, 1500);
+    } catch (error) {
+      console.log('Resolve yes/no voice error:', error);
+
+      setSelectedVoiceAnswer(null);
+      setVoiceStatusText('Voice not matched');
+
+      Alert.alert('Voice Error', 'Could not recognise your answer.');
+
+      setTimeout(() => {
+        setVoiceStatusText('Tap to Answer');
+      }, 1500);
+    } finally {
+      setCheckingVoice(false);
+    }
+  }
+
+  async function playRecordedVoiceAnswer() {
+    try {
+      if (!recordedVoiceUri) {
+        Alert.alert('No recording', 'Please record your answer first.');
+        return;
+      }
+
+      await stopCurrentAudio();
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recordedVoiceUri },
+        { shouldPlay: true, volume: 1.0 }
+      );
+
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          if (soundRef.current === sound) {
+            soundRef.current = null;
+          }
+
+          await sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log('Play recorded answer error:', error);
+      Alert.alert('Audio Error', 'Could not play recorded answer.');
+    }
+  }
+
+  async function deleteRecordedVoiceAnswer() {
+    await stopCurrentAudio();
+
+    setRecordedVoiceUri(null);
+    setRecordedDuration('0.00');
+    setSelectedVoiceAnswer(null);
+    setVoiceStatusText('Tap to Answer');
+
+    console.log('Deleted recorded Yes/No answer');
+  }
+
+  async function handleYesPress() {
     if (loading) return;
 
     if (symptomsEn.length === 0 && symptomsWp.length === 0) {
@@ -285,7 +485,9 @@ export default function DetectedSymptomsVoiceScreen() {
       return;
     }
 
+    setSelectedVoiceAnswer('yes');
     setLoading(true);
+
     await stopCurrentAudio();
 
     router.push({
@@ -297,12 +499,31 @@ export default function DetectedSymptomsVoiceScreen() {
         source: 'voice',
       },
     });
-  };
+  }
 
-  const handleNoPress = async () => {
+  async function handleNoPress() {
+    setSelectedVoiceAnswer('no');
+
     await stopCurrentAudio();
+
     router.replace('/voiceinput');
-  };
+  }
+
+  async function beforeLanguageChange() {
+    await stopCurrentAudio();
+  }
+
+  async function afterLanguageChange(selectedLang) {
+    try {
+      setAudioLoading(true);
+      await stopCurrentAudio();
+      await getAudioFileForLanguage(selectedLang);
+    } catch (error) {
+      console.log('Detected voice language update error:', error);
+    } finally {
+      setAudioLoading(false);
+    }
+  }
 
   return (
     <AppScreen
@@ -340,26 +561,82 @@ export default function DetectedSymptomsVoiceScreen() {
 
         <Text style={styles.questionText}>{t('detected_question')}</Text>
 
-        <View style={styles.buttonRow}>
+        <View style={styles.voiceAnswerRow}>
           <Pressable
-            style={({ pressed }) => [
-              styles.choiceButton,
-              pressed && styles.choicePressed,
+            style={[
+              styles.voiceYesNoButton,
+              selectedVoiceAnswer === 'yes' && styles.voiceAnswerSelected,
             ]}
             onPress={handleYesPress}
           >
-            <Text style={styles.choiceText}>{t('yes')}</Text>
+            <Text
+              style={[
+                styles.voiceYesNoText,
+                selectedVoiceAnswer === 'yes' &&
+                  styles.voiceAnswerSelectedText,
+              ]}
+            >
+              {t('yes')}
+            </Text>
           </Pressable>
 
           <Pressable
-            style={({ pressed }) => [
-              styles.choiceButton,
-              pressed && styles.choicePressed,
+            style={[
+              styles.voiceYesNoButton,
+              selectedVoiceAnswer === 'no' && styles.voiceAnswerSelected,
             ]}
             onPress={handleNoPress}
           >
-            <Text style={styles.choiceText}>{t('no')}</Text>
+            <Text
+              style={[
+                styles.voiceYesNoText,
+                selectedVoiceAnswer === 'no' &&
+                  styles.voiceAnswerSelectedText,
+              ]}
+            >
+              {t('no')}
+            </Text>
           </Pressable>
+
+          <View style={styles.voiceMicWrapper}>
+            <Pressable
+              style={[
+                styles.detectedMicButton,
+                isListening && styles.detectedMicRecording,
+              ]}
+              onPress={handleVoiceAnswerPress}
+            >
+              <Image
+                source={require('../../assets/images/microphone.png')}
+                style={styles.detectedMicIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text style={styles.tapToAnswerText}>{voiceStatusText}</Text>
+
+            {recordedVoiceUri && (
+              <View style={styles.detectedRecordedBox}>
+                <Pressable
+                  style={styles.detectedPlayButton}
+                  onPress={playRecordedVoiceAnswer}
+                >
+                  <Ionicons name="play" size={17} color="#000" />
+                </Pressable>
+
+                <Text style={styles.detectedDurationText}>
+                  {recordedDuration}
+                </Text>
+
+                <Pressable
+                  style={styles.detectedDeleteButton}
+                  onPress={deleteRecordedVoiceAnswer}
+                >
+                  <Ionicons name="trash" size={17} color="#000" />
+                </Pressable>
+              </View>
+            )}
+          </View>
         </View>
 
         <Pressable
@@ -400,11 +677,11 @@ export default function DetectedSymptomsVoiceScreen() {
 
             <View style={styles.errorBody}>
               <Text style={styles.errorMessageBold}>
-                We could not detect any symptoms from your description.
+                We could not detect any symptoms from your voice.
               </Text>
 
               <Text style={styles.errorMessage}>
-                Please try describing your symptoms in more detail.
+                Please try speaking your symptoms in more detail.
               </Text>
 
               <Pressable

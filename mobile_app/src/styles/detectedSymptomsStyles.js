@@ -1,6 +1,4 @@
 // detectedSymptomsStyles.js
-// Purpose: Screen-specific styles for DetectedSymptomsScreen and DetectedSymptomsVoiceScreen.
-// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
@@ -66,7 +64,6 @@ export default StyleSheet.create({
   speakerPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
-    transform: [{ scale: 0.95 }],
   },
 
   speakerIcon: {
@@ -105,7 +102,6 @@ export default StyleSheet.create({
   choicePressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
-    transform: [{ scale: 0.96 }],
   },
 
   choiceText: {
@@ -113,6 +109,118 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
+  },
+
+  voiceAnswerRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginBottom: 30,
+  },
+
+  voiceYesNoButton: {
+    width: 112,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#D4A64D',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 6,
+    elevation: 4,
+  },
+
+  voiceYesNoText: {
+    fontSize: 16,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  voiceAnswerSelected: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+  },
+
+  voiceAnswerSelectedText: {
+    color: '#FFF',
+  },
+
+  voiceMicWrapper: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginLeft: 8,
+    width: 110,
+  },
+
+  detectedMicButton: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#C87936',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  detectedMicRecording: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+  },
+
+  detectedMicIcon: {
+    width: 31,
+    height: 31,
+  },
+
+  tapToAnswerText: {
+    marginTop: 5,
+    fontSize: 9,
+    fontFamily: FONTS.regular,
+    color: '#5C2E0A',
+    textAlign: 'center',
+    minHeight: 24,
+  },
+
+  detectedRecordedBox: {
+    marginTop: 6,
+    width: 102,
+    height: 36,
+    borderRadius: 20,
+    backgroundColor: '#EFE2CC',
+    borderWidth: 1,
+    borderColor: '#B9A57F',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+
+  detectedPlayButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#3E8B3A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  detectedDurationText: {
+    fontSize: 10,
+    fontFamily: FONTS.bold,
+    color: '#000',
+  },
+
+  detectedDeleteButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#A3361A',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   backButton: {
@@ -141,7 +249,6 @@ export default StyleSheet.create({
 
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
-    transform: [{ scale: 0.96 }],
   },
 
   backText: {
@@ -237,7 +344,6 @@ export default StyleSheet.create({
   errorOkButtonPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
-    transform: [{ scale: 0.96 }],
   },
 
   errorOkText: {
@@ -247,94 +353,7 @@ export default StyleSheet.create({
     fontSize: 15,
   },
 
-  voiceAnswerContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-
-  voiceQuestionTitle: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#3D2A1A',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-
-  voiceAnswerRow: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  voiceYesNoButton: {
-    width: 120,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#D4A64D',
-    borderWidth: 2,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 7,
-    elevation: 4,
-  },
-
-  voiceYesNoText: {
-    fontSize: 14,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  voiceAnswerSelected: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
-    transform: [{ scale: 0.96 }],
-  },
-
-  voiceAnswerSelectedText: {
-    color: '#FFF',
-  },
-
-  voiceMicWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
-  },
-
-  detectedMicButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#C87936',
-    borderWidth: 2,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  detectedMicRecording: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
-  },
-
-  detectedMicIcon: {
-    width: 30,
-    height: 30,
-  },
-
-  tapToAnswerText: {
-    marginTop: 4,
-    fontSize: 9,
-    fontFamily: FONTS.regular,
-    color: '#5C2E0A',
-    textAlign: 'center',
-  },
-
-    iconButtonRow: {
+  iconButtonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '82%',
@@ -351,7 +370,6 @@ export default StyleSheet.create({
   },
 
   iconChoicePressed: {
-    transform: [{ scale: 0.92 }],
     opacity: 0.75,
   },
 
@@ -359,5 +377,4 @@ export default StyleSheet.create({
     width: 120,
     height: 120,
   },
-
 });
