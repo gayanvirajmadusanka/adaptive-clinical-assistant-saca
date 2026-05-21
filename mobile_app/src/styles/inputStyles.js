@@ -10,38 +10,41 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 90,
+    paddingTop: 110,
+    paddingHorizontal: 20,
   },
 
   // Main screen title.
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
     color: '#111',
   },
 
   // Subtitle/instruction text.
   subtitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontFamily: FONTS.regular,
     textAlign: 'center',
-    paddingHorizontal: 30,
-    marginBottom: 30,
+    paddingHorizontal: 20,
+    marginBottom: 45,
     color: '#333',
+    lineHeight: 26,
   },
 
   // Base style for all input method cards.
   card: {
-    width: 160,
-    height: 130,
+    width: 210, // increased button width
+    height: 145, // increased button height
     borderRadius: 20,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
+
+    marginBottom: 38,
 
     elevation: 5,
     shadowColor: '#000',
@@ -52,7 +55,7 @@ export default StyleSheet.create({
 
   // Text input card color.
   textCard: {
-    backgroundColor: '#6F8F83',
+    backgroundColor: '#5F7D6E',
     borderColor: '#2E3D36',
   },
 
@@ -64,7 +67,7 @@ export default StyleSheet.create({
 
   // Body map card color.
   bodyCard: {
-    backgroundColor: '#C85B3A',
+    backgroundColor: '#B5523B',
     borderColor: '#6E1F12',
   },
 
@@ -76,14 +79,14 @@ export default StyleSheet.create({
 
   // Input card icon.
   cardImage: {
-    width: 50,
-    height: 50,
-    marginBottom: 10,
+    width: 65,
+    height: 65,
+    marginBottom: 14,
   },
 
   // Input card label.
   cardText: {
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',

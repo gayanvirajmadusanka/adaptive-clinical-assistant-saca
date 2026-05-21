@@ -342,7 +342,7 @@ export default StyleSheet.create({
   },
 
   errorOkButtonPressed: {
-    backgroundColor: '#8B3A1C',
+    backgroundColor: '#8B1E0D',
     borderColor: '#5C2E0A',
   },
 

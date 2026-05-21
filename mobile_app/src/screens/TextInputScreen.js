@@ -9,8 +9,10 @@ import {
   Image,
   Pressable,
   TextInput,
-  Alert,
+  Modal,
+  ImageBackground,
 } from 'react-native';
+
 import { useRouter } from 'expo-router';
 
 import AppScreen from '../components/AppScreen';
@@ -22,10 +24,11 @@ export default function TextInputScreen() {
   const { t, lang } = useLanguage();
 
   const [description, setDescription] = useState('');
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   const handleContinue = () => {
     if (!description.trim()) {
-      Alert.alert('Missing information', 'Please describe your symptoms first.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -53,7 +56,9 @@ export default function TextInputScreen() {
         </View>
 
         <View style={styles.inputBox}>
-          <Text style={styles.questionText}>{t('text_input_question')}</Text>
+          <Text style={styles.questionText}>
+            {t('text_input_question')}
+          </Text>
 
           <TextInput
             style={styles.textInput}
@@ -93,6 +98,48 @@ export default function TextInputScreen() {
           </View>
         </Pressable>
       </View>
+
+      {/* Custom Error Modal */}
+      <Modal transparent visible={errorModalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalBox}>
+            <View style={styles.errorHeader}>
+              <Text style={styles.errorTitle}>
+                {t('missing_information_title')}
+              </Text>
+
+              <Pressable
+                onPress={() => setErrorModalVisible(false)}
+                style={styles.errorCloseButton}
+              >
+                <Text style={styles.errorCloseText}>×</Text>
+              </Pressable>
+            </View>
+
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
+              <Text style={styles.errorMessageBold}>
+                {t('missing_information_message')}
+              </Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.errorOkButton,
+                  pressed && styles.errorOkButtonPressed,
+                ]}
+                onPress={() => setErrorModalVisible(false)}
+              >
+                <Text style={styles.errorOkText}>
+                  {t('ok')}
+                </Text>
+              </Pressable>
+            </ImageBackground>
+          </View>
+        </View>
+      </Modal>
     </AppScreen>
   );
 }
