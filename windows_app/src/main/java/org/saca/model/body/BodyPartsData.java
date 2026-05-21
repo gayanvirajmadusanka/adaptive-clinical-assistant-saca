@@ -21,7 +21,7 @@ public class BodyPartsData {
                 new BodyPart("eye", "Eye", "Milpa", "eye_en.wav", "eye_wp.wav",
                         Arrays.asList(
                                 new BodySymptom("eye_pain", "Eye Pain", "Milpa purrkunypa", "eye_pain_en.wav", "eye_pain_wp.wav"),
-                                new BodySymptom("eye_itching", "Itchy", "Yayirri", "eye_itching_en.wav", "eye_itching_wp.wav")
+                                new BodySymptom("eye_itching", "Itchy", "Milpa yayirri", "eye_itching_en.wav", "eye_itching_wp.wav")
                         )));
 
         PARTS.put("ear",
@@ -82,9 +82,9 @@ public class BodyPartsData {
         PARTS.put("arm",
                 new BodyPart("arm", "Arm", "Kilpirli", "arm_en.wav", "arm_wp.wav",
                         Arrays.asList(
-                                new BodySymptom("arm_pain", "Kilpirli Pain", "Purrkunypa", "arm_pain_en.wav", "arm_pain_wp.wav"),
-                                new BodySymptom("arm_weakness", "Weakness", "Rampaku", "arm_weakness_en.wav", "arm_weakness_wp.wav"),
-                                new BodySymptom("swelling_arms", "Swelling", "Kirakarrimi", "swelling_arms_en.wav", "swelling_arms_wp.wav")
+                                new BodySymptom("arm_pain", "Arm Pain", "Kilpirli purrkunypa", "arm_pain_en.wav", "arm_pain_wp.wav"),
+                                new BodySymptom("arm_weakness", "Arm Weakness", "Kilpirli rampaku", "arm_weakness_en.wav", "arm_weakness_wp.wav"),
+                                new BodySymptom("swelling_arms", "Arm Swelling", "Kilpirli kirakarrimi", "swelling_arms_en.wav", "swelling_arms_wp.wav")
                         )));
 
         PARTS.put("general", new BodyPart("whole_body", "Whole Body", "Palka", "whole_body_en.wav", "whole_body_wp.wav",
