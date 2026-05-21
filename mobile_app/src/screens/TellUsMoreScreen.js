@@ -262,7 +262,7 @@ export default function TellUsMoreScreen() {
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
-            <Text style={styles.headerText}>Tell us more</Text>
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>            
           </View>
 
           <Text style={styles.progressText}>Loading questions...</Text>
@@ -287,7 +287,7 @@ export default function TellUsMoreScreen() {
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
-            <Text style={styles.headerText}>Tell us more</Text>
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>
           </View>
 
           <View style={styles.questionBox}>
@@ -329,7 +329,7 @@ export default function TellUsMoreScreen() {
     >
       <View style={styles.container}>
         <View style={styles.headerBar}>
-          <Text style={styles.headerText}>Tell us more</Text>
+          <Text style={styles.headerText}>{t('tell_us_more')}</Text>  
         </View>
 
         <Text style={styles.progressText}>
@@ -400,7 +400,7 @@ export default function TellUsMoreScreen() {
           onPress={handleContinue}
         >
           <Text style={styles.continueText}>
-            {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
+            {currentIndex === questions.length - 1 ? t('submit') : t('continue')}
           </Text>
         </Pressable>
 

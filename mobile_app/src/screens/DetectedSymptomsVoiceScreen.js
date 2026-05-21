@@ -5,21 +5,14 @@ import { View, Text, Pressable, Image, Modal, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
-import { Ionicons } from '@expo/vector-icons';
 
 import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
-import {
-  extractSymptomsFromText,
-  resolveAnswerAudio,
-} from '../services/triageApi';
+import { extractSymptomsFromText } from '../services/triageApi';
 
-import {
-  saveBase64AudioToCache,
-  readAudioFileAsBase64,
-} from '../utils/base64Audio';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
 
 import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
@@ -38,14 +31,7 @@ export default function DetectedSymptomsVoiceScreen() {
   const [audioLoading, setAudioLoading] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
 
-  const [recording, setRecording] = useState(null);
-  const [isListening, setIsListening] = useState(false);
-  const [checkingVoice, setCheckingVoice] = useState(false);
   const [selectedVoiceAnswer, setSelectedVoiceAnswer] = useState(null);
-  const [voiceStatusText, setVoiceStatusText] = useState('Tap to Answer');
-
-  const [recordedVoiceUri, setRecordedVoiceUri] = useState(null);
-  const [recordedDuration, setRecordedDuration] = useState('0.00');
 
   const soundRef = useRef(null);
 
@@ -226,257 +212,6 @@ export default function DetectedSymptomsVoiceScreen() {
     }
   }
 
-  async function handleVoiceAnswerPress() {
-    if (checkingVoice || loading) return;
-
-    if (isListening) {
-      await stopVoiceRecording();
-    } else {
-      await startVoiceRecording();
-    }
-  }
-
-  async function startVoiceRecording() {
-    try {
-      await stopCurrentAudio();
-
-      const permission = await Audio.requestPermissionsAsync();
-
-      if (!permission.granted) {
-        Alert.alert('Permission required', 'Please allow microphone permission.');
-        return;
-      }
-
-      setSelectedVoiceAnswer(null);
-      setRecordedVoiceUri(null);
-      setRecordedDuration('0.00');
-      setVoiceStatusText('Listening...');
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
-
-      const newRecording = new Audio.Recording();
-
-      await newRecording.prepareToRecordAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-
-      await newRecording.startAsync();
-
-      setRecording(newRecording);
-      setIsListening(true);
-
-      console.log('YES/NO RECORDING STARTED');
-    } catch (error) {
-      console.log('Start yes/no recording error:', error);
-
-      setRecording(null);
-      setIsListening(false);
-      setVoiceStatusText('Tap to Answer');
-
-      Alert.alert('Voice Error', 'Could not start recording.');
-    }
-  }
-
-  async function stopVoiceRecording() {
-    try {
-      if (!recording) {
-        setIsListening(false);
-        setVoiceStatusText('Tap to Answer');
-        return;
-      }
-
-      const status = await recording.getStatusAsync();
-
-      const durationSeconds = status.durationMillis
-        ? (status.durationMillis / 1000).toFixed(2)
-        : '0.00';
-
-      await recording.stopAndUnloadAsync();
-
-      const uri = recording.getURI();
-
-      setRecording(null);
-      setIsListening(false);
-      setRecordedVoiceUri(uri);
-      setRecordedDuration(durationSeconds);
-
-      console.log('YES/NO RECORDING URI:', uri);
-      console.log('YES/NO RECORDING DURATION:', durationSeconds);
-
-      if (!uri) {
-        setVoiceStatusText('Tap to Answer');
-        Alert.alert('Voice Error', 'No recording was saved.');
-        return;
-      }
-
-      setVoiceStatusText('Checking answer...');
-      await resolveRecordedYesNo(uri);
-    } catch (error) {
-      console.log('Stop yes/no recording error:', error);
-
-      setRecording(null);
-      setIsListening(false);
-      setCheckingVoice(false);
-      setVoiceStatusText('Tap to Answer');
-
-      Alert.alert('Voice Error', 'Could not stop recording.');
-    }
-  }
-
-  async function resolveRecordedYesNo(uri) {
-    try {
-      setCheckingVoice(true);
-
-      const audioBase64 = await readAudioFileAsBase64(String(uri));
-
-      console.log('YES/NO BASE64 LENGTH:', audioBase64?.length);
-
-      const data = await resolveAnswerAudio(
-        audioBase64,
-        'does_it_match',
-        lang || 'en'
-      );
-
-      console.log('YES/NO RAW BACKEND RESPONSE:', JSON.stringify(data, null, 2));
-
-      const spokenText = String(
-        data?.answer_text ||
-          data?.answer ||
-          data?.transcript ||
-          data?.text ||
-          data?.recognized_text ||
-          data?.speech_text ||
-          ''
-      ).toLowerCase();
-
-      console.log('YES/NO SPOKEN TEXT:', spokenText);
-
-      const isYes =
-        spokenText.includes('yes') ||
-        spokenText.includes('yeah') ||
-        spokenText.includes('correct') ||
-        spokenText.includes('right') ||
-        spokenText.includes('match') ||
-        spokenText.includes('yuwa') ||
-        spokenText.includes('yuwayi');
-
-      const isNo =
-        spokenText.includes('no') ||
-        spokenText.includes('nope') ||
-        spokenText.includes('wrong') ||
-        spokenText.includes('not') ||
-        spokenText.includes('kula');
-
-      console.log('YES/NO MATCH RESULT:', {
-        isYes,
-        isNo,
-        spokenText,
-      });
-
-      if (isYes) {
-        setSelectedVoiceAnswer('yes');
-        setVoiceStatusText('Voice matched: YES');
-
-        setTimeout(() => {
-          handleYesPress();
-        }, 800);
-
-        return;
-      }
-
-      if (isNo) {
-        setSelectedVoiceAnswer('no');
-        setVoiceStatusText('Voice matched: NO');
-
-        setTimeout(() => {
-          handleNoPress();
-        }, 800);
-
-        return;
-      }
-
-      setSelectedVoiceAnswer(null);
-      setVoiceStatusText('Voice not matched');
-
-      Alert.alert(
-        'Voice not recognised',
-        `Detected text: ${spokenText || 'empty'}`
-      );
-
-      setTimeout(() => {
-        setVoiceStatusText('Tap to Answer');
-      }, 1500);
-    } catch (error) {
-      console.log('Resolve yes/no voice error:', error);
-
-      setSelectedVoiceAnswer(null);
-      setVoiceStatusText('Voice not matched');
-
-      Alert.alert('Voice Error', 'Could not recognise your answer.');
-
-      setTimeout(() => {
-        setVoiceStatusText('Tap to Answer');
-      }, 1500);
-    } finally {
-      setCheckingVoice(false);
-    }
-  }
-
-  async function playRecordedVoiceAnswer() {
-    try {
-      if (!recordedVoiceUri) {
-        Alert.alert('No recording', 'Please record your answer first.');
-        return;
-      }
-
-      await stopCurrentAudio();
-
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        allowsRecordingIOS: false,
-        shouldDuckAndroid: false,
-        playThroughEarpieceAndroid: false,
-      });
-
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: recordedVoiceUri },
-        { shouldPlay: true, volume: 1.0 }
-      );
-
-      soundRef.current = sound;
-
-      sound.setOnPlaybackStatusUpdate(async (status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          if (soundRef.current === sound) {
-            soundRef.current = null;
-          }
-
-          await sound.unloadAsync();
-        }
-      });
-    } catch (error) {
-      console.log('Play recorded answer error:', error);
-      Alert.alert('Audio Error', 'Could not play recorded answer.');
-    }
-  }
-
-  async function deleteRecordedVoiceAnswer() {
-    await stopCurrentAudio();
-
-    setRecordedVoiceUri(null);
-    setRecordedDuration('0.00');
-    setSelectedVoiceAnswer(null);
-    setVoiceStatusText('Tap to Answer');
-
-    console.log('Deleted recorded Yes/No answer');
-  }
-
   async function handleYesPress() {
     if (loading) return;
 
@@ -597,46 +332,6 @@ export default function DetectedSymptomsVoiceScreen() {
               {t('no')}
             </Text>
           </Pressable>
-
-          <View style={styles.voiceMicWrapper}>
-            <Pressable
-              style={[
-                styles.detectedMicButton,
-                isListening && styles.detectedMicRecording,
-              ]}
-              onPress={handleVoiceAnswerPress}
-            >
-              <Image
-                source={require('../../assets/images/microphone.png')}
-                style={styles.detectedMicIcon}
-                resizeMode="contain"
-              />
-            </Pressable>
-
-            <Text style={styles.tapToAnswerText}>{voiceStatusText}</Text>
-
-            {recordedVoiceUri && (
-              <View style={styles.detectedRecordedBox}>
-                <Pressable
-                  style={styles.detectedPlayButton}
-                  onPress={playRecordedVoiceAnswer}
-                >
-                  <Ionicons name="play" size={17} color="#000" />
-                </Pressable>
-
-                <Text style={styles.detectedDurationText}>
-                  {recordedDuration}
-                </Text>
-
-                <Pressable
-                  style={styles.detectedDeleteButton}
-                  onPress={deleteRecordedVoiceAnswer}
-                >
-                  <Ionicons name="trash" size={17} color="#000" />
-                </Pressable>
-              </View>
-            )}
-          </View>
         </View>
 
         <Pressable

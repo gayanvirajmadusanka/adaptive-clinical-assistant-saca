@@ -32,6 +32,7 @@ export const translations = {
     text_placeholder: 'Describe your symptoms and press Continue',
     continue: 'Continue',
     back: 'Back',
+    submit: 'Submit',
 
     detected_title: 'Detected Symptoms',
     detected_question: 'Does this match you?',
@@ -144,6 +145,7 @@ export const translations = {
     text_placeholder: 'Nyuntu symptoms yimi manu yangka',
     continue: 'Yangka',
     back: 'Yankirri',
+    submit: 'Submit',
 
     detected_title: 'Purrkunypa nyangu',
     detected_question: 'Nyampu nyuntu-kurra?',
