@@ -166,21 +166,69 @@ jobs:
               sys.exit(1)
           EOF
 
+      - name: Generate release keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore mobile_app/android/app/saca-release.keystore \
+            -alias saca \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass sacaRelease123 -keypass sacaRelease123 \
+            -dname "CN=SACA, OU=Research, O=CDU, L=Darwin, S=NT, C=AU"
+
+      - name: Add release signing config to app/build.gradle
+        run: |
+          python3 - <<'EOF'
+          import re
+
+          path = "mobile_app/android/app/build.gradle"
+          with open(path) as f:
+              src = f.read()
+
+          if "signingConfigs" in src:
+              print("Signing config already present"); exit(0)
+
+          signing_block = """
+              signingConfigs {
+                  release {
+                      storeFile file("saca-release.keystore")
+                      storePassword "sacaRelease123"
+                      keyAlias "saca"
+                      keyPassword "sacaRelease123"
+                  }
+              }
+          """
+          # Insert signingConfigs block right before buildTypes {
+          src = re.sub(r'(\s*buildTypes\s*\{)', signing_block + r'\1', src, count=1)
+
+          # Wire signingConfig into the release buildType
+          src = re.sub(
+              r'(buildTypes\s*\{[^}]*release\s*\{)',
+              r'\1\n            signingConfig signingConfigs.release',
+              src,
+              count=1,
+              flags=re.DOTALL,
+          )
+
+          with open(path, "w") as f:
+              f.write(src)
+          print("Patched app/build.gradle with release signing config")
+          EOF
+
       - name: Grant Gradle execute permission
         run: chmod +x mobile_app/android/gradlew
 
-      - name: Build debug APK
+      - name: Build release APK
         working-directory: mobile_app/android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleRelease --no-daemon
         env:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m"
 
       - name: Rename APK
-        run: mv mobile_app/android/app/build/outputs/apk/debug/app-debug.apk mobile_app/android/app/build/outputs/apk/debug/saca-app.apk
+        run: mv mobile_app/android/app/build/outputs/apk/release/app-release.apk mobile_app/android/app/build/outputs/apk/release/saca-app.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SACA-Android-Debug-APK
-          path: mobile_app/android/app/build/outputs/apk/debug/saca-app.apk
+          name: SACA-Android-Release-APK
+          path: mobile_app/android/app/build/outputs/apk/release/saca-app.apk
           retention-days: 30

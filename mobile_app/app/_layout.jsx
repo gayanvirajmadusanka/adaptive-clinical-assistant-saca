@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { useEffect } from 'react';
-import { NativeModules, Platform } from 'react-native';
+import { useEffect, useState } from 'react';
+import { NativeModules, Platform, View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import {
   Kreon_400Regular,
   Kreon_700Bold,
@@ -9,27 +9,62 @@ import {
 
 import { LanguageProvider } from '../src/context/LanguageContext';
 
+const IS_ANDROID_RELEASE = Platform.OS === 'android' && !__DEV__;
+const HEALTH_URL = 'http://127.0.0.1:8000/health';
+const POLL_INTERVAL_MS = 600;
+const POLL_TIMEOUT_MS  = 60000;
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     KreonRegular: Kreon_400Regular,
     KreonBold: Kreon_700Bold,
   });
 
-  // Start the Chaquopy Python server on Android production builds
+  // On Android release builds, wait for the Chaquopy Python server to be ready
+  // before rendering the app. First launch can take 20–30s while Chaquopy unpacks.
+  const [serverReady, setServerReady] = useState(!IS_ANDROID_RELEASE);
+
   useEffect(() => {
-    if (Platform.OS === 'android' && !__DEV__) {
-      try {
-        const { PythonServer } = NativeModules;
-        if (PythonServer) {
-          PythonServer.start();
-        }
-      } catch (e) {
-        console.warn('PythonServer NativeModule not available:', e);
-      }
+    if (!IS_ANDROID_RELEASE) return;
+
+    try {
+      const { PythonServer } = NativeModules;
+      if (PythonServer) PythonServer.start();
+    } catch (e) {
+      console.warn('PythonServer NativeModule not available:', e);
     }
+
+    const startTime = Date.now();
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(HEALTH_URL, { method: 'GET' });
+        if (res.ok) {
+          clearInterval(poll);
+          setServerReady(true);
+        }
+      } catch (_) {
+        // server not up yet — keep polling
+        if (Date.now() - startTime > POLL_TIMEOUT_MS) {
+          clearInterval(poll);
+          setServerReady(true); // unblock UI even if server failed; errors surface naturally
+        }
+      }
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(poll);
   }, []);
 
   if (!fontsLoaded) return null;
+
+  if (!serverReady) {
+    return (
+      <View style={styles.splash}>
+        <ActivityIndicator size="large" color="#8B2E0A" />
+        <Text style={styles.splashText}>Starting SACA…</Text>
+        <Text style={styles.splashSub}>First launch may take up to 30 seconds</Text>
+      </View>
+    );
+  }
 
   return (
     <LanguageProvider>
@@ -37,3 +72,24 @@ export default function RootLayout() {
     </LanguageProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  splash: {
+    flex: 1,
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  splashText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#3B1A08',
+  },
+  splashSub: {
+    fontSize: 13,
+    color: '#7A5C3A',
+    textAlign: 'center',
+    paddingHorizontal: 32,
+  },
+});

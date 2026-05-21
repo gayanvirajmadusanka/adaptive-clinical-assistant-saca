@@ -85,7 +85,13 @@ export default function VoiceInputScreen() {
     if (!IS_ANDROID) return;
     setIsActive(false); stopPulse(); stopBars();
     if (event.error !== 'aborted') {
-      Alert.alert('Speech recognition error', event.message || 'Please try again.');
+      const isOfflineUnavailable = event.error === 'language-not-supported' || event.error === 'client';
+      Alert.alert(
+        'Speech recognition unavailable',
+        isOfflineUnavailable
+          ? 'Offline speech model not installed. Go to Android Settings → General Management → Language → Speech Recognition to download the English offline model, or use the text input instead.'
+          : (event.message || 'Please try again or use the text input.'),
+      );
     }
   });
 
@@ -138,7 +144,12 @@ export default function VoiceInputScreen() {
       return;
     }
     setTranscript('');
-    ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: false });
+    ExpoSpeechRecognitionModule.start({
+      lang: 'en-US',
+      interimResults: true,
+      continuous: false,
+      requiresOnDeviceRecognition: true,   // use downloaded offline model, no Google cloud
+    });
   };
 
   const stopAndroidSTT = () => {
