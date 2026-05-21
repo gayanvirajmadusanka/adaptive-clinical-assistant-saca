@@ -79,6 +79,33 @@ def _build_keyword_to_answer() -> dict:
 KEYWORD_TO_ANSWER = _build_keyword_to_answer()
 
 
+def _build_question_wp_keywords() -> dict:
+    """
+    Map from question_id to the set of valid Warlpiri keywords for that question.
+    Passed to recognize_warlpiri() to restrict DTW matching to only the answer words
+    relevant to the current question.
+    """
+    mapping = {}
+    for question in _QUESTIONS['mandatory']:
+        qid = question['id']
+        kws = {opt.get('text_wp', '').lower().strip()
+               for opt in question.get('options', [])
+               if opt.get('text_wp', '').strip()}
+        if kws:
+            mapping[qid] = kws
+    for qid in YES_NO_QUESTION_IDS:
+        mapping[qid] = {'yuwayi', 'lawa'}
+    return mapping
+
+
+_QUESTION_WP_KEYWORDS = _build_question_wp_keywords()
+
+
+def _get_valid_wp_keywords(question_id: str):
+    """Return the set of valid WP keywords for a question, or None to search all."""
+    return _QUESTION_WP_KEYWORDS.get(question_id)
+
+
 def _resolve_keyword(keyword: str, question_id: str) -> str | None:
     """
     Resolve a single keyword to an answer_id.
@@ -234,7 +261,8 @@ def _resolve_warlpiri(tmp_path: str, question_id: str, base: dict) -> dict:
     :param base: Base dict passed through to _recognised/_unrecognised helpers
     :return: Recognition result dict
     """
-    result = recognize_warlpiri(tmp_path)
+    allowed = _get_valid_wp_keywords(question_id)
+    result = recognize_warlpiri(tmp_path, allowed_keywords=allowed)
 
     if not result.get('recognized') or not result.get('matched_keywords'):
         return _unrecognised(base, 'Lawa nyangu. Milkikarriya.')

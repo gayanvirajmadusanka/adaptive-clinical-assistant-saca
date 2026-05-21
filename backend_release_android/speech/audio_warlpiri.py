@@ -203,13 +203,17 @@ def _segment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list:
     return segments
 
 
-def _match_segment(query_mfcc: np.ndarray) -> tuple[str, float] | None:
-    """DTW match query against all keyword references."""
+def _match_segment(query_mfcc: np.ndarray, allowed_keywords=None) -> tuple[str, float] | None:
+    """DTW match query against keyword references. Pass allowed_keywords to restrict search."""
+    refs = (
+        _KEYWORD_REFS if allowed_keywords is None
+        else {k: v for k, v in _KEYWORD_REFS.items() if k in allowed_keywords}
+    )
     query_frames  = query_mfcc.shape[1]
     best_keyword  = None
     best_distance = float("inf")
 
-    for keyword, ref_list in _KEYWORD_REFS.items():
+    for keyword, ref_list in refs.items():
         for ref_mfcc in ref_list:
             ref_frames = ref_mfcc.shape[1]
             ratio = max(query_frames, ref_frames) / max(min(query_frames, ref_frames), 1)
@@ -232,7 +236,7 @@ def _distance_to_confidence(distance: float) -> float:
     return round(float(score), 3)
 
 
-def recognize(audio_path: str) -> dict:
+def recognize(audio_path: str, allowed_keywords=None) -> dict:
     base = {"input_type": "audio_warlpiri", "audio_path": audio_path}
 
     if not _KEYWORD_REFS:
@@ -261,7 +265,7 @@ def recognize(audio_path: str) -> dict:
         mfcc = _extract_mfcc(segment)
         if mfcc is None:
             continue
-        result = _match_segment(mfcc)
+        result = _match_segment(mfcc, allowed_keywords)
         if result:
             keyword, distance = result
             if keyword not in matched_keywords or distance < matched_keywords[keyword]:
