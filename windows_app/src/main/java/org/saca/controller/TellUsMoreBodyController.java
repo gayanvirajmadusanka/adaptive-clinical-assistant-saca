@@ -8,10 +8,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.request.AnswerRQ;
@@ -104,7 +106,9 @@ public class TellUsMoreBodyController implements Initializable {
     }
 
     private void showQuestion(int index) {
-        if (questions == null || questions.isEmpty()) return;
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
 
         AudioService.stop();
         resetSpeakerIcon();
@@ -112,20 +116,14 @@ public class TellUsMoreBodyController implements Initializable {
         QuestionRS question = questions.get(index);
         int total = questions.size();
 
-        StringBuilder titleBuilder = new StringBuilder();
-        titleBuilder.append(LanguageManager.get("question"));
-        titleBuilder.append(" ");
-        titleBuilder.append((index + 1));
-        titleBuilder.append(" ");
-        titleBuilder.append(LanguageManager.get("of"));
-        titleBuilder.append(" ");
-        titleBuilder.append(total);
+        StringBuilder sb = new StringBuilder();
+        sb.append(LanguageManager.get("question")).append(" ")
+                .append(index + 1).append(" ")
+                .append(LanguageManager.get("of")).append(" ")
+                .append(total);
 
-        progressLabel.setText(titleBuilder.toString());
-
-        progressLabel.setText(titleBuilder.toString());
+        progressLabel.setText(sb.toString());
         progressBar.setProgress((double) (index + 1) / total);
-
         questionText.setText(question.getText());
 
         boolean hasAudio = question.getVoiceB64() != null && !question.getVoiceB64().isBlank();
@@ -136,14 +134,37 @@ public class TellUsMoreBodyController implements Initializable {
         currentOptionButtons.clear();
         currentSelectedId = selectedAnswers.get(question.getId());
 
-        List<OptionRS> options = question.getOptions();
-        for (int i = 0; i < options.size(); i++) {
-            Button btn = buildOptionButton(options.get(i), i, options.size(), question.getId());
-            currentOptionButtons.add(btn);
-            optionsBox.getChildren().add(btn);
+        boolean isYesNo = question.getType().equals(AppsConstants.QUESTION_TYPE_YES_NO);
 
-            if (options.get(i).getId().equals(currentSelectedId)) {
-                btn.getStyleClass().add("option-btn-selected");
+        boolean anyImage = isYesNo || question.getOptions().stream().anyMatch(o ->
+                getClass().getResource("/images/options/" + o.getId().toLowerCase() + ".png") != null);
+
+        if (anyImage) {
+            HBox row = new HBox(12);
+            row.setAlignment(javafx.geometry.Pos.CENTER);
+
+            for (int i = 0; i < question.getOptions().size(); i++) {
+                Button btn = buildOptionButton(question.getOptions().get(i), i,
+                        question.getOptions().size(), question.getId(), true, isYesNo);
+                currentOptionButtons.add(btn);
+                row.getChildren().add(btn);
+            }
+
+            optionsBox.getChildren().add(row);
+        } else {
+            for (int i = 0; i < question.getOptions().size(); i++) {
+                Button btn = buildOptionButton(question.getOptions().get(i), i,
+                        question.getOptions().size(), question.getId(), false, false);
+                currentOptionButtons.add(btn);
+                optionsBox.getChildren().add(btn);
+            }
+        }
+
+        if (currentSelectedId != null) {
+            for (int i = 0; i < question.getOptions().size(); i++) {
+                if (question.getOptions().get(i).getId().equals(currentSelectedId)) {
+                    currentOptionButtons.get(i).getStyleClass().add("option-btn-selected");
+                }
             }
         }
 
@@ -153,37 +174,40 @@ public class TellUsMoreBodyController implements Initializable {
                 : LanguageManager.get("continue"));
     }
 
-    @FXML
-    private void handleQuestionSpeak() {
-        if (questions == null || questions.isEmpty()) {
-            return;
+    private Button buildOptionButton(OptionRS option, int index, int total,
+                                     String questionId, boolean withImage, boolean isYesNo) {
+        Button btn;
+
+        if (withImage) {
+            String optId = option.getId().toLowerCase();
+            URL imageUrl;
+
+            if (isYesNo) {
+                imageUrl = getClass().getResource("/images/options/option_" + option.getText().toLowerCase() + ".png");
+            } else {
+                imageUrl = getClass().getResource("/images/options/" + optId + ".png");
+            }
+
+            btn = new Button(option.getText());
+            btn.getStyleClass().addAll("option-img-btn", getLevelStyle(index, total));
+            btn.setContentDisplay(ContentDisplay.TOP);
+
+            if (imageUrl != null) {
+                ImageView imageView = new ImageView(new Image(imageUrl.toExternalForm(), true));
+                imageView.setFitWidth(90);
+                imageView.setFitHeight(90);
+                imageView.setPreserveRatio(true);
+                btn.setGraphic(imageView);
+            }
+            btn.setPrefWidth(130);
+            btn.setMaxWidth(130);
+            btn.setWrapText(true);
+        } else {
+            btn = new Button("  ●  " + option.getText());
+            btn.getStyleClass().addAll("option-btn", getLevelStyle(index, total));
+            btn.setMaxWidth(Double.MAX_VALUE);
         }
 
-        QuestionRS current = questions.get(currentIndex);
-        String voiceB64 = current.getVoiceB64();
-        if (voiceB64 == null || voiceB64.isBlank()) {
-            return;
-        }
-
-        if (AudioService.isPlaying()) {
-            AudioService.stop();
-            resetSpeakerIcon();
-            return;
-        }
-
-        setMuteIcon();
-
-        AudioService.playBase64Wav(
-                voiceB64,
-                err -> Platform.runLater(this::resetSpeakerIcon),
-                () -> Platform.runLater(this::resetSpeakerIcon)
-        );
-    }
-
-    private Button buildOptionButton(OptionRS option, int index, int total, String questionId) {
-        Button btn = new Button("  ●  " + option.getText());
-        btn.getStyleClass().addAll("option-btn", getLevelStyle(index, total));
-        btn.setMaxWidth(Double.MAX_VALUE);
         btn.setUserData(option.getId());
 
         btn.setOnAction(e -> {
@@ -197,12 +221,38 @@ public class TellUsMoreBodyController implements Initializable {
     }
 
     @FXML
+    private void handleQuestionSpeak() {
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
+
+        QuestionRS current = questions.get(currentIndex);
+        String voiceB64 = current.getVoiceB64();
+
+        if (voiceB64 == null || voiceB64.isBlank()) {
+            return;
+        }
+
+        if (AudioService.isPlaying()) {
+            AudioService.stop();
+            resetSpeakerIcon();
+            return;
+        }
+
+        setMuteIcon();
+        AudioService.playBase64Wav(
+                voiceB64,
+                err -> Platform.runLater(this::resetSpeakerIcon),
+                () -> Platform.runLater(this::resetSpeakerIcon)
+        );
+    }
+
+    @FXML
     private void handleContinue() {
         AudioService.stop();
         resetSpeakerIcon();
 
         QuestionRS current = questions.get(currentIndex);
-
         if (!selectedAnswers.containsKey(current.getId())) {
             DialogManager.warningDialog(
                     LanguageManager.get("no_answer"),
@@ -222,7 +272,10 @@ public class TellUsMoreBodyController implements Initializable {
 
     private void submitAnswers() {
         TextResultRS textResult = CacheManager.getTextResultRS();
-        if (textResult == null) return;
+
+        if (textResult == null) {
+            return;
+        }
 
         stage = (Stage) questionCard.getScene().getWindow();
 
@@ -262,9 +315,8 @@ public class TellUsMoreBodyController implements Initializable {
                                 "Could not submit answers", errorMsg);
                         try {
                             FXMLLoader rl = new FXMLLoader(
-                                    getClass().getResource("/view/TellUsMoreTextView.fxml"),
-                                    LanguageManager.getBundle()
-                            );
+                                    getClass().getResource("/view/TellUsMoreBodyView.fxml"),
+                                    LanguageManager.getBundle());
                             stage.getScene().setRoot(rl.load());
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -281,7 +333,7 @@ public class TellUsMoreBodyController implements Initializable {
 
     private void navigateToFinalResult(ClassifyRS classifyRS) {
         try {
-            NavBarManager.setPreviousView("/view/TellUsMoreTextView.fxml");
+            NavBarManager.setPreviousView("/view/TellUsMoreBodyView.fxml");
             NavBarManager.setCurrentView("/view/FinalResultView.fxml");
             CacheManager.setClassifyRS(classifyRS);
 
@@ -290,10 +342,7 @@ public class TellUsMoreBodyController implements Initializable {
                     LanguageManager.getBundle()
             );
             Parent view = loader.load();
-
-            FinalResultController ctrl = loader.getController();
-            ctrl.setResult(classifyRS);
-
+            ((FinalResultController) loader.getController()).setResult(classifyRS);
             stage.getScene().setRoot(view);
 
         } catch (Exception e) {

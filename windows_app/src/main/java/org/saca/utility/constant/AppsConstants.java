@@ -8,6 +8,8 @@ public class AppsConstants {
 
     public static final String CONFIRM_SYMPTOMS_ANSWER_NO = "confirm_symptomsn";
 
+    public static final String QUESTION_TYPE_YES_NO = "yes_no";
+
     public enum AppLanguage {
         EN("en", "English"), WP("wp", "Warlpiri");
 
