@@ -90,14 +90,14 @@ public class FinalResultController implements Initializable {
         }
 
         String savedLang = cached.getLanguage() != null ? cached.getLanguage() : "";
-        String currentLang = LanguageManager.isLanguageEnglish()
-                ? AppsConstants.AppLanguage.EN.getShortDescription()
-                : AppsConstants.AppLanguage.WP.getShortDescription();
+        String currentLang = LanguageManager.isLanguageEnglish() ? AppsConstants.AppLanguage.EN.getShortDescription() : AppsConstants.AppLanguage.WP.getShortDescription();
 
         if (!savedLang.isEmpty() && !savedLang.equalsIgnoreCase(currentLang)) {
             reFetchClassify(cached);
+            handleSpeak();
         } else {
             setResult(cached);
+            handleSpeak();
         }
     }
 
@@ -139,18 +139,12 @@ public class FinalResultController implements Initializable {
         ClassifyRQ classifyRQ = new ClassifyRQ();
         classifyRQ.setSymptoms(symptomsEn);
         classifyRQ.setAnswers(CacheManager.getSavedAnswers());
-        classifyRQ.setLanguage(LanguageManager.isLanguageEnglish()
-                ? AppsConstants.AppLanguage.EN.getShortDescription()
-                : AppsConstants.AppLanguage.WP.getShortDescription());
+        classifyRQ.setLanguage(LanguageManager.isLanguageEnglish() ? AppsConstants.AppLanguage.EN.getShortDescription() : AppsConstants.AppLanguage.WP.getShortDescription());
 
-        ApiService.classify(
-                classifyRQ,
-                classifyRS -> Platform.runLater(() -> setResult(classifyRS)),
-                errorMsg -> Platform.runLater(() -> {
-                    setResult(cached);
-                    DialogManager.errorDialog("Connection Error", "Could not reload results", errorMsg);
-                })
-        );
+        ApiService.classify(classifyRQ, classifyRS -> Platform.runLater(() -> setResult(classifyRS)), errorMsg -> Platform.runLater(() -> {
+            setResult(cached);
+            DialogManager.errorDialog("Connection Error", "Could not reload results", errorMsg);
+        }));
     }
 
     private void renderResult(ClassifyRS rs) {
@@ -181,7 +175,7 @@ public class FinalResultController implements Initializable {
             }
             default -> {
                 severityLabel.setText(LanguageManager.get("severity") + " : " + LanguageManager.get("mild"));
-                severitySubLabel.setText(LanguageManager.get("treat_at_home"));
+                severitySubLabel.setText(LanguageManager.get("you_can_get_over_the_counter_medicine"));
                 severityCard.getStyleClass().setAll("severity-card", "severity-card-mild");
                 severityLabel.getStyleClass().setAll("severity-title", "severity-title-mild");
                 severitySubLabel.getStyleClass().setAll("severity-subtitle", "severity-subtitle-mild");
@@ -191,7 +185,8 @@ public class FinalResultController implements Initializable {
             }
         }
 
-        boolean showCall = (severityMode == AppsConstants.SeverityMode.SEVERE && rs.isHasCritical());
+        // Show call button if severity is SEVERE or MODERATE
+        boolean showCall = (severityMode == AppsConstants.SeverityMode.SEVERE) || (severityMode == AppsConstants.SeverityMode.MODERATE);
         callBtn.setVisible(showCall);
         callBtn.setManaged(showCall);
 
@@ -259,22 +254,14 @@ public class FinalResultController implements Initializable {
 
         setMuteIcon();
 
-        AudioService.playBase64Wav(
-                voiceB64,
-                err -> Platform.runLater(this::resetSpeakerIcon),
-                () -> Platform.runLater(this::resetSpeakerIcon)
-        );
+        AudioService.playBase64Wav(voiceB64, err -> Platform.runLater(this::resetSpeakerIcon), () -> Platform.runLater(this::resetSpeakerIcon));
     }
 
     @FXML
     private void handleCallForHelp() {
         AudioService.stop();
         resetSpeakerIcon();
-        DialogManager.warningDialog(
-                LanguageManager.get("call_for_help"),
-                LanguageManager.get("call_000"),
-                LanguageManager.get("seek_emergency_medical_attention_immediately_or_call_000")
-        );
+        DialogManager.warningDialog(LanguageManager.get("call_for_help"), LanguageManager.get("call_000"), LanguageManager.get("seek_emergency_medical_attention_immediately_or_call_000"));
     }
 
     @FXML
@@ -287,10 +274,7 @@ public class FinalResultController implements Initializable {
 
         try {
             NavBarManager.setCurrentView("/view/DashboardView.fxml");
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/view/DashboardView.fxml"),
-                    LanguageManager.getBundle()
-            );
+            Parent root = FXMLLoader.load(getClass().getResource("/view/DashboardView.fxml"), LanguageManager.getBundle());
             Stage stage = (Stage) bgPane.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (Exception e) {
@@ -303,15 +287,10 @@ public class FinalResultController implements Initializable {
         AudioService.stop();
         try {
             String prev = NavBarManager.getPreviousView();
-            String target = (prev != null && !prev.isEmpty())
-                    ? prev
-                    : "/view/TellUsMoreTextView.fxml";
+            String target = (prev != null && !prev.isEmpty()) ? prev : "/view/TellUsMoreTextView.fxml";
 
             NavBarManager.setCurrentView(target);
-            Parent root = FXMLLoader.load(
-                    getClass().getResource(target),
-                    LanguageManager.getBundle()
-            );
+            Parent root = FXMLLoader.load(getClass().getResource(target), LanguageManager.getBundle());
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (Exception e) {
@@ -320,20 +299,7 @@ public class FinalResultController implements Initializable {
     }
 
     private void bounceCallButton() {
-        Timeline bounce = new Timeline(
-                new KeyFrame(Duration.ZERO,
-                        new KeyValue(callBtn.scaleYProperty(), 1.0),
-                        new KeyValue(callBtn.scaleXProperty(), 1.0)),
-                new KeyFrame(Duration.millis(300),
-                        new KeyValue(callBtn.scaleYProperty(), 1.07),
-                        new KeyValue(callBtn.scaleXProperty(), 1.07)),
-                new KeyFrame(Duration.millis(600),
-                        new KeyValue(callBtn.scaleYProperty(), 1.0),
-                        new KeyValue(callBtn.scaleXProperty(), 1.0)),
-                new KeyFrame(Duration.millis(800),
-                        new KeyValue(callBtn.scaleYProperty(), 1.0),
-                        new KeyValue(callBtn.scaleXProperty(), 1.0))
-        );
+        Timeline bounce = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(callBtn.scaleYProperty(), 1.0), new KeyValue(callBtn.scaleXProperty(), 1.0)), new KeyFrame(Duration.millis(300), new KeyValue(callBtn.scaleYProperty(), 1.07), new KeyValue(callBtn.scaleXProperty(), 1.07)), new KeyFrame(Duration.millis(600), new KeyValue(callBtn.scaleYProperty(), 1.0), new KeyValue(callBtn.scaleXProperty(), 1.0)), new KeyFrame(Duration.millis(800), new KeyValue(callBtn.scaleYProperty(), 1.0), new KeyValue(callBtn.scaleXProperty(), 1.0)));
         bounce.setCycleCount(Timeline.INDEFINITE);
         bounce.play();
     }
@@ -359,14 +325,10 @@ public class FinalResultController implements Initializable {
     }
 
     private void setMuteIcon() {
-        recSpeakerIcon.setImage(new Image(
-                getClass().getResource("/icons/mute.png").toExternalForm()
-        ));
+        recSpeakerIcon.setImage(new Image(getClass().getResource("/icons/mute.png").toExternalForm()));
     }
 
     private void resetSpeakerIcon() {
-        recSpeakerIcon.setImage(new Image(
-                getClass().getResource("/icons/speaker.png").toExternalForm()
-        ));
+        recSpeakerIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()));
     }
 }

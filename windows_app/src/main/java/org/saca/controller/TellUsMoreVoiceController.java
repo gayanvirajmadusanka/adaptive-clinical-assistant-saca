@@ -286,6 +286,8 @@ public class TellUsMoreVoiceController implements Initializable {
 
     @FXML
     private void handleMic() {
+        AudioService.stop();
+        resetQuestionSpeakerIcon();
         if (AudioRecorderService.isRecording()) {
             stopRecordingAndStore();
         } else {
