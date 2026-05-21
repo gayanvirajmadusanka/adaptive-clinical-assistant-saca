@@ -25,7 +25,7 @@ const PIP_PACKAGES = [
   'scipy',
   'rapidfuzz',
   'python_speech_features',
-  'pydantic==2.9.2',
+  'pydantic==1.10.21',
   'soundfile',
   'webrtcvad-wheels',
 ];

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -6,7 +6,7 @@ from backend_release_android.constants import Language
 
 
 class QuestionsRequest(BaseModel):
-    symptoms: list[str]
+    symptoms: List[str]
     language: Language = Language.EN
 
 
@@ -22,8 +22,8 @@ class AnswerAudioRequest(BaseModel):
 
 
 class ClassifyRequest(BaseModel):
-    symptoms: list[str]
-    answers: list[Answer]
+    symptoms: List[str]
+    answers: List[Answer]
     language: Language = Language.EN
 
 
@@ -38,7 +38,7 @@ class ExtractAudioRequest(BaseModel):
 
 
 class ExtractImageRequest(BaseModel):
-    symptoms: list[str]
+    symptoms: List[str]
     language: Language = Language.EN
 
 
@@ -51,26 +51,26 @@ class Question(BaseModel):
     id: str
     text: str
     type: str
-    options: list[QuestionOption]
+    options: List[QuestionOption]
     voice_b64: str
 
 
 class QuestionsResponse(BaseModel):
     language: str
-    questions: list[Question]
+    questions: List[Question]
 
 
 class AnswerAudioResponse(BaseModel):
     question_id: str
-    answer_id: str | None = None
+    answer_id: Optional[str] = None
     confidence: float
     recognized: bool
-    message: str | None = None
+    message: Optional[str] = None
     voice_b64: str
 
 
 class ClassifyResponse(BaseModel):
-    symptoms: list[str]
+    symptoms: List[str]
     severity: str
     severity_mode: str
     recommendation: str
@@ -84,8 +84,8 @@ class ClassifyResponse(BaseModel):
 
 
 class ExtractResponse(BaseModel):
-    symptoms_en: list[str]
-    symptoms_wp: list[str]
+    symptoms_en: List[str]
+    symptoms_wp: List[str]
     confidence: float
     input_type: str
     language: str
