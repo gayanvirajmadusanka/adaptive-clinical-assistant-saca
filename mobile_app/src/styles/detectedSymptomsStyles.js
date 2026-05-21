@@ -7,57 +7,57 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 25,
-    paddingTop: 80,
+    paddingHorizontal: 22,
+    paddingTop: 85,
   },
 
   headerBar: {
-    width: '92%',
-    height: 60,
+    width: '94%',
+    height: 64,
     backgroundColor: '#C87936',
-    borderRadius: 10,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
+    marginBottom: 28,
   },
 
   headerText: {
-    fontSize: 22,
+    fontSize: 26,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
   symptomBox: {
-    width: '92%',
-    minHeight: 270,
-    backgroundColor: '#E6D7BF',
-    borderRadius: 25,
-    padding: 22,
+    width: '94%',
+    minHeight: 300,
+    backgroundColor: '#E6DCC5',
+    borderRadius: 26,
+    padding: 24,
     marginBottom: 30,
     position: 'relative',
   },
 
   symptomText: {
-    fontSize: 22,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 38,
     fontFamily: FONTS.bold,
     color: '#4B3A2A',
-    paddingRight: 55,
+    paddingRight: 70,
   },
 
   speakerButton: {
     position: 'absolute',
     right: 16,
     top: 16,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#E3AD35',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#000',
   },
 
@@ -67,36 +67,36 @@ export default StyleSheet.create({
   },
 
   speakerIcon: {
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
   },
 
   questionText: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#3D2A1A',
-    marginBottom: 26,
+    marginBottom: 28,
     textAlign: 'center',
   },
 
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
-    marginBottom: 30,
+    width: '84%',
+    marginBottom: 34,
   },
 
   choiceButton: {
-    width: 130,
-    height: 50,
+    width: 145,
+    height: 64,
     borderRadius: 34,
     backgroundColor: '#E3AD35',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
+    elevation: 5,
   },
 
   choicePressed: {
@@ -105,7 +105,7 @@ export default StyleSheet.create({
   },
 
   choiceText: {
-    fontSize: 21,
+    fontSize: 26,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
@@ -121,8 +121,8 @@ export default StyleSheet.create({
 
   voiceYesNoButton: {
     width: 112,
-    height: 50,
-    borderRadius: 25,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: '#D4A64D',
     borderWidth: 2,
     borderColor: '#000',
@@ -133,7 +133,7 @@ export default StyleSheet.create({
   },
 
   voiceYesNoText: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
@@ -156,9 +156,9 @@ export default StyleSheet.create({
   },
 
   detectedMicButton: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#C87936',
     borderWidth: 2,
     borderColor: '#000',
@@ -172,13 +172,13 @@ export default StyleSheet.create({
   },
 
   detectedMicIcon: {
-    width: 31,
-    height: 31,
+    width: 34,
+    height: 34,
   },
 
   tapToAnswerText: {
-    marginTop: 5,
-    fontSize: 9,
+    marginTop: 6,
+    fontSize: 11,
     fontFamily: FONTS.regular,
     color: '#5C2E0A',
     textAlign: 'center',
@@ -186,9 +186,9 @@ export default StyleSheet.create({
   },
 
   detectedRecordedBox: {
-    marginTop: 6,
-    width: 102,
-    height: 36,
+    marginTop: 8,
+    width: 108,
+    height: 40,
     borderRadius: 20,
     backgroundColor: '#EFE2CC',
     borderWidth: 1,
@@ -196,43 +196,43 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 5,
+    paddingHorizontal: 6,
   },
 
   detectedPlayButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: '#3E8B3A',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   detectedDurationText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: FONTS.bold,
     color: '#000',
   },
 
   detectedDeleteButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: '#A3361A',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   backButton: {
-    width: 140,
-    height: 55,
-    borderRadius: 28,
-    borderWidth: 2,
+    width: 190,
+    height: 70,
+    borderRadius: 36,
+    borderWidth: 3,
     borderColor: '#000',
     backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3,
+    elevation: 4,
   },
 
   backButtonContent: {
@@ -242,9 +242,9 @@ export default StyleSheet.create({
   },
 
   backArrowImage: {
-    width: 22,
-    height: 22,
-    marginRight: 8,
+    width: 26,
+    height: 26,
+    marginRight: 10,
   },
 
   backPressedGrey: {
@@ -252,7 +252,7 @@ export default StyleSheet.create({
   },
 
   backText: {
-    fontSize: 22,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
@@ -260,18 +260,19 @@ export default StyleSheet.create({
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   errorModalBox: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
+    width: '92%',
     borderRadius: 12,
     overflow: 'hidden',
+    backgroundColor: '#F5EAD8',
     borderWidth: 1,
-    borderColor: '#5C2E0A',
+    borderColor: '#8B3A1C',
+    elevation: 8,
   },
 
   errorHeader: {
@@ -285,7 +286,7 @@ export default StyleSheet.create({
 
   errorTitle: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 21,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     flex: 1,
@@ -293,9 +294,9 @@ export default StyleSheet.create({
   },
 
   errorCloseButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
+    width: 48,
+    height: 48,
+    borderRadius: 9,
     borderWidth: 3,
     borderColor: '#FFF',
     alignItems: 'center',
@@ -304,53 +305,55 @@ export default StyleSheet.create({
 
   errorCloseText: {
     color: '#FFF',
-    fontSize: 28,
+    fontSize: 34,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    lineHeight: 30,
+    lineHeight: 36,
   },
 
   errorBody: {
-    padding: 22,
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 20,
+    minHeight: 155,
   },
 
   errorMessageBold: {
     color: '#5C2E0A',
-    fontSize: 16,
+    fontSize: 19,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    marginBottom: 18,
-    lineHeight: 22,
+    marginBottom: 22,
+    lineHeight: 26,
   },
 
   errorMessage: {
     color: '#5C2E0A',
-    fontSize: 15,
-    fontFamily: FONTS.regular,
-    marginBottom: 20,
-    lineHeight: 22,
+    fontSize: 17,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 28,
+    lineHeight: 24,
   },
 
   errorOkButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
-    paddingHorizontal: 28,
-    paddingVertical: 10,
-    borderRadius: 22,
+    backgroundColor: '#8B2E0A',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 24,
   },
 
   errorOkButtonPressed: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5C2E0A',
+    backgroundColor: '#5F1207',
+    transform: [{ scale: 0.96 }],
   },
 
   errorOkText: {
-    color: '#000',
+    color: '#FFF',
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 18,
   },
 
   iconButtonRow: {
@@ -361,8 +364,8 @@ export default StyleSheet.create({
   },
 
   iconChoiceButton: {
-    width: 125,
-    height: 125,
+    width: 130,
+    height: 130,
     borderRadius: 65,
     backgroundColor: 'transparent',
     alignItems: 'center',
@@ -374,7 +377,7 @@ export default StyleSheet.create({
   },
 
   yesNoIcon: {
-    width: 120,
-    height: 120,
+    width: 125,
+    height: 125,
   },
 });

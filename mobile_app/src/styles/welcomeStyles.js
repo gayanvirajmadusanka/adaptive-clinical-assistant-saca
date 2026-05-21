@@ -75,7 +75,7 @@ startButton: {
 
     // Start button pressed state.
 startPressedRed: {
-  backgroundColor: '#8B3A1C', 
+  backgroundColor: '#8B1E0D', 
   borderColor: '#5C2E0A',     
   transform: [{ scale: 0.96 }],
 },
