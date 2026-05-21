@@ -2,7 +2,7 @@
 # Used by Chaquopy's python { pip { install "..." } } in build.gradle
 #
 # REPLACED from backend/requirements.txt:
-#   openai-whisper  → faster-whisper  (CTranslate2 has Android ARM64 wheels)
+#   openai-whisper  → Android native STT via React Native (faster-whisper blocked: tokenizers is Rust/maturin, no Android ARM64 wheel)
 #   librosa         → python_speech_features + scipy  (pure Python/numpy, no C ext issues)
 #   pydub           → stdlib wave + numpy  (no dependency needed)
 #   webrtcvad_wheels stays (has Android wheels)
@@ -11,7 +11,7 @@
 #   matplotlib, seaborn, pandas, pytest, gtts
 #   imbalanced-learn: training-only, not used at inference time
 #
-# Native packages (numpy, scipy, sklearn, xgboost, spacy, soundfile, webrtcvad-wheels)
+# Native packages (numpy, scipy, sklearn, xgboost, soundfile, webrtcvad-wheels)
 # are unpinned so Chaquopy resolves the latest available pre-built Android wheel.
 # Pure-Python packages keep version pins for API stability.
 
@@ -22,7 +22,6 @@ xgboost
 numpy
 scipy
 rapidfuzz
-faster-whisper
 python_speech_features
 pydantic==2.9.2
 soundfile

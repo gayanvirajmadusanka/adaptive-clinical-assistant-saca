@@ -1,8 +1,7 @@
 // VoiceInputScreen.js
-// Purpose: Records user voice using Expo AV, allows playback/delete, and sends the recorded audio to VoiceLoadingScreen.
-// It includes pulse and waveform animations during recording.
+// Android: uses native SpeechRecognizer via expo-speech-recognition (no faster-whisper needed).
+// iOS/other: records audio with expo-av and sends to Python /extract/audio.
 
-// React and React Native imports used to build this screen component.
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -14,22 +13,21 @@ import {
   Animated,
   Alert,
   Image,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import styles from '../styles/voiceInputStyles';
 
-// Recording options that produce formats the Python backend can decode without ffmpeg:
-//   iOS  → LINEARPCM WAV  (stdlib wave can read directly)
-//   Android → OGG Vorbis  (soundfile can decode on Android 10+)
+const IS_ANDROID = Platform.OS === 'android';
+
+// Recording options for iOS audio path (Android uses native STT instead)
 const RECORDING_OPTIONS = {
-  android: {
-    extension: '.ogg',
-    outputFormat: Audio.AndroidOutputFormat.OGG,
-    audioEncoder: Audio.AndroidAudioEncoder.VORBIS,
-    sampleRate: 16000,
-    numberOfChannels: 1,
-    bitRate: 128000,
-  },
   ios: {
     extension: '.wav',
     outputFormat: Audio.IOSOutputFormat.LINEARPCM,
@@ -43,214 +41,159 @@ const RECORDING_OPTIONS = {
   },
   web: { mimeType: 'audio/webm', bitsPerSecond: 128000 },
 };
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import styles from '../styles/voiceInputStyles';
 
-// Main screen component: VoiceInputScreen
 export default function VoiceInputScreen() {
-    // Router is used to navigate to the voice loading screen or go back.
   const router = useRouter();
 
-    // Stores the active recording object while recording is in progress.
-  const [recording, setRecording] = useState(null);
-    // Stores the playback sound object after recording is completed.
+  // ── shared state ──────────────────────────────────────────────────────────
+  const [isActive, setIsActive]   = useState(false); // recording (iOS) or listening (Android)
+
+  // ── iOS-only state ────────────────────────────────────────────────────────
+  const [recording, setRecording]       = useState(null);
   const [recordedSound, setRecordedSound] = useState(null);
-    // Stores the local URI/path of the recorded audio file.
   const [recordingUri, setRecordingUri] = useState(null);
+  const [isPlaying, setIsPlaying]       = useState(false);
+  const [recordTime, setRecordTime]     = useState('0.00');
+  const timerRef   = useRef(null);
+  const secondsRef = useRef(0);
 
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [recordTime, setRecordTime] = useState('0.00');
+  // ── Android-only state ────────────────────────────────────────────────────
+  const [transcript, setTranscript] = useState('');
 
+  // ── animation refs ────────────────────────────────────────────────────────
   const pulseAnim = useRef(new Animated.Value(1)).current;
-
   const bar1 = useRef(new Animated.Value(14)).current;
   const bar2 = useRef(new Animated.Value(28)).current;
   const bar3 = useRef(new Animated.Value(18)).current;
   const bar4 = useRef(new Animated.Value(34)).current;
   const bar5 = useRef(new Animated.Value(20)).current;
 
-  const timerRef = useRef(null);
-  const secondsRef = useRef(0);
+  // ── Android STT events (hooks must be at top level regardless of platform) ─
+  useSpeechRecognitionEvent('start', () => {
+    if (IS_ANDROID) { setIsActive(true); startPulse(); animateBars(); }
+  });
+  useSpeechRecognitionEvent('end', () => {
+    if (IS_ANDROID) { setIsActive(false); stopPulse(); stopBars(); }
+  });
+  useSpeechRecognitionEvent('result', (event) => {
+    if (!IS_ANDROID) return;
+    const text = event.results[0]?.transcript || '';
+    setTranscript(text);
+    if (event.isFinal) { setIsActive(false); stopPulse(); stopBars(); }
+  });
+  useSpeechRecognitionEvent('error', (event) => {
+    if (!IS_ANDROID) return;
+    setIsActive(false); stopPulse(); stopBars();
+    if (event.error !== 'aborted') {
+      Alert.alert('Speech recognition error', event.message || 'Please try again.');
+    }
+  });
 
-    // Starts pulsing animation around the microphone while recording.
+  // ── animations ────────────────────────────────────────────────────────────
   const startPulse = () => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.2,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
+        Animated.timing(pulseAnim, { toValue: 1.2, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1,   duration: 600, useNativeDriver: true }),
       ])
     ).start();
   };
+  const stopPulse = () => { pulseAnim.stopAnimation(); pulseAnim.setValue(1); };
 
-    // Stops microphone pulse animation and resets scale.
-  const stopPulse = () => {
-    pulseAnim.stopAnimation();
-    pulseAnim.setValue(1);
-  };
-
-    // Animates waveform bars to give a real recorder visual effect.
   const animateBars = () => {
-    const createAnimation = (bar, height) =>
+    const anim = (bar, h) =>
       Animated.loop(
         Animated.sequence([
-          Animated.timing(bar, {
-            toValue: height,
-            duration: 350,
-            useNativeDriver: false,
-          }),
-          Animated.timing(bar, {
-            toValue: 12,
-            duration: 350,
-            useNativeDriver: false,
-          }),
+          Animated.timing(bar, { toValue: h,  duration: 350, useNativeDriver: false }),
+          Animated.timing(bar, { toValue: 12, duration: 350, useNativeDriver: false }),
         ])
       );
-
-    createAnimation(bar1, 35).start();
-    createAnimation(bar2, 55).start();
-    createAnimation(bar3, 42).start();
-    createAnimation(bar4, 60).start();
-    createAnimation(bar5, 38).start();
+    anim(bar1, 35).start(); anim(bar2, 55).start(); anim(bar3, 42).start();
+    anim(bar4, 60).start(); anim(bar5, 38).start();
   };
-
-    // Stops waveform animation and resets bar heights.
   const stopBars = () => {
-    bar1.stopAnimation();
-    bar2.stopAnimation();
-    bar3.stopAnimation();
-    bar4.stopAnimation();
-    bar5.stopAnimation();
-
-    bar1.setValue(14);
-    bar2.setValue(28);
-    bar3.setValue(18);
-    bar4.setValue(34);
-    bar5.setValue(20);
+    [bar1, bar2, bar3, bar4, bar5].forEach(b => b.stopAnimation());
+    bar1.setValue(14); bar2.setValue(28); bar3.setValue(18);
+    bar4.setValue(34); bar5.setValue(20);
   };
 
-    // Starts timer to display recording duration.
+  // ── timer (iOS only) ──────────────────────────────────────────────────────
   const startTimer = () => {
     secondsRef.current = 0;
     setRecordTime('0.00');
-
     timerRef.current = setInterval(() => {
       secondsRef.current += 0.1;
       setRecordTime(secondsRef.current.toFixed(2));
     }, 100);
   };
-
-    // Stops recording timer.
   const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
   };
 
-    // Handles microphone button: starts recording if not recording, otherwise stops recording.
-  const handleMicPress = async () => {
-    try {
-      if (isRecording) {
-        await stopRecording();
-      } else {
-        await startRecording();
-      }
-    } catch (error) {
-      console.log('Recording error:', error);
-      Alert.alert('Error', 'Recording failed.');
+  // ── Android STT controls ──────────────────────────────────────────────────
+  const startAndroidSTT = async () => {
+    const { granted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+    if (!granted) {
+      Alert.alert('Permission required', 'Please allow microphone permission.');
+      return;
     }
+    setTranscript('');
+    ExpoSpeechRecognitionModule.start({ lang: 'en-US', interimResults: true, continuous: false });
   };
 
-    // Requests microphone permission and starts high-quality audio recording.
+  const stopAndroidSTT = () => {
+    ExpoSpeechRecognitionModule.stop();
+  };
+
+  // ── iOS recording controls ────────────────────────────────────────────────
   const startRecording = async () => {
     const permission = await Audio.requestPermissionsAsync();
-
     if (!permission.granted) {
       Alert.alert('Permission required', 'Please allow microphone permission.');
       return;
     }
-
-    if (recordedSound) {
-      await recordedSound.unloadAsync();
-      setRecordedSound(null);
-    }
-
-    setRecordingUri(null);
-    setIsPlaying(false);
-
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
-
+    if (recordedSound) { await recordedSound.unloadAsync(); setRecordedSound(null); }
+    setRecordingUri(null); setIsPlaying(false);
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
     const rec = new Audio.Recording();
-
     await rec.prepareToRecordAsync(RECORDING_OPTIONS);
     await rec.startAsync();
-
-    setRecording(rec);
-    setIsRecording(true);
-
-    startPulse();
-    animateBars();
-    startTimer();
+    setRecording(rec); setIsActive(true);
+    startPulse(); animateBars(); startTimer();
   };
 
-    // Stops recording, saves audio URI, and stops animations/timer.
   const stopRecording = async () => {
     if (!recording) return;
-
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
-
-    setRecordingUri(uri);
-    setRecording(null);
-    setIsRecording(false);
-
-    stopPulse();
-    stopBars();
-    stopTimer();
+    setRecordingUri(uri); setRecording(null); setIsActive(false);
+    stopPulse(); stopBars(); stopTimer();
   };
 
-    // Plays or stops the recorded audio preview.
-  const handlePlay = async () => {
+  // ── mic button ────────────────────────────────────────────────────────────
+  const handleMicPress = async () => {
     try {
-      if (!recordingUri) {
-        Alert.alert('No recording yet', 'Please record your voice first.');
-        return;
+      if (IS_ANDROID) {
+        isActive ? stopAndroidSTT() : await startAndroidSTT();
+      } else {
+        isActive ? await stopRecording() : await startRecording();
       }
+    } catch (error) {
+      console.log('Mic error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
+  };
 
-      if (recordedSound && isPlaying) {
-        await recordedSound.stopAsync();
-        setIsPlaying(false);
-        return;
-      }
-
-      if (recordedSound) {
-        await recordedSound.unloadAsync();
-        setRecordedSound(null);
-      }
-
+  // ── iOS playback ──────────────────────────────────────────────────────────
+  const handlePlay = async () => {
+    if (IS_ANDROID) return;
+    try {
+      if (!recordingUri) { Alert.alert('No recording yet', 'Please record your voice first.'); return; }
+      if (recordedSound && isPlaying) { await recordedSound.stopAsync(); setIsPlaying(false); return; }
+      if (recordedSound) { await recordedSound.unloadAsync(); setRecordedSound(null); }
       const { sound } = await Audio.Sound.createAsync({ uri: recordingUri });
-
-      setRecordedSound(sound);
-      setIsPlaying(true);
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          setIsPlaying(false);
-        }
-      });
-
+      setRecordedSound(sound); setIsPlaying(true);
+      sound.setOnPlaybackStatusUpdate(s => { if (s.didJustFinish) setIsPlaying(false); });
       await sound.playAsync();
     } catch (error) {
       console.log('Playback error:', error);
@@ -258,58 +201,41 @@ export default function VoiceInputScreen() {
     }
   };
 
-    // Deletes the current recording and resets recording state.
+  // ── delete / reset ────────────────────────────────────────────────────────
   const handleDelete = async () => {
     try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
+      if (IS_ANDROID) {
+        if (isActive) stopAndroidSTT();
+        setTranscript('');
+      } else {
+        if (recording) await recording.stopAndUnloadAsync();
+        if (recordedSound) await recordedSound.unloadAsync();
+        setRecording(null); setRecordedSound(null); setRecordingUri(null);
+        setIsPlaying(false); setRecordTime('0.00');
       }
-
-      if (recordedSound) {
-        await recordedSound.unloadAsync();
-      }
-
-      setRecording(null);
-      setRecordedSound(null);
-      setRecordingUri(null);
-      setIsPlaying(false);
-      setIsRecording(false);
-      setRecordTime('0.00');
-
-      stopPulse();
-      stopBars();
-      stopTimer();
+      setIsActive(false); stopPulse(); stopBars(); stopTimer();
     } catch (error) {
       console.log('Delete error:', error);
     }
   };
 
-    // Sends recorded audio URI to VoiceLoadingScreen for API processing.
+  // ── continue ──────────────────────────────────────────────────────────────
   const handleContinue = async () => {
-    if (!recordingUri) {
-      Alert.alert('No recording', 'Please record your voice first.');
-      return;
+    if (IS_ANDROID) {
+      if (!transcript.trim()) { Alert.alert('Nothing recorded', 'Please speak before continuing.'); return; }
+      router.push({ pathname: '/voiceloading', params: { transcribed_text: transcript, language: 'en' } });
+    } else {
+      if (!recordingUri) { Alert.alert('No recording', 'Please record your voice first.'); return; }
+      if (recordedSound) { await recordedSound.unloadAsync(); setRecordedSound(null); setIsPlaying(false); }
+      router.push({ pathname: '/voiceloading', params: { audio_uri: recordingUri, language: 'en' } });
     }
-
-    if (recordedSound) {
-      await recordedSound.unloadAsync();
-      setRecordedSound(null);
-      setIsPlaying(false);
-    }
-
-    router.push({
-      pathname: '/voiceloading',
-      params: {
-        audio_uri: recordingUri,
-        language: 'en',
-      },
-    });
   };
+
+  const hasResult = IS_ANDROID ? transcript.trim().length > 0 : !!recordingUri;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
-
       <ImageBackground
         source={require('../../assets/images/background.png')}
         style={styles.background}
@@ -320,9 +246,7 @@ export default function VoiceInputScreen() {
             <Pressable onPress={() => router.back()}>
               <Ionicons name="arrow-back-circle-outline" size={26} />
             </Pressable>
-
             <Text style={styles.headerTitle}>SPEAK</Text>
-
             <Image
               source={require('../../assets/images/voice.png')}
               style={styles.headerIcon}
@@ -331,24 +255,22 @@ export default function VoiceInputScreen() {
           </View>
 
           <View style={styles.recordBox}>
-                        {/* Animated microphone circle shows pulse effect while recording. */}
             <Animated.View
               style={[
                 styles.pulseCircle,
-                isRecording && styles.recordingBorder,
+                isActive && styles.recordingBorder,
                 { transform: [{ scale: pulseAnim }] },
               ]}
             >
               <Pressable onPress={handleMicPress} style={styles.micCircle}>
                 <Ionicons
-                  name={isRecording ? 'mic' : 'mic-outline'}
+                  name={isActive ? 'mic' : 'mic-outline'}
                   size={70}
                   color="#000"
                 />
               </Pressable>
             </Animated.View>
 
-                        {/* Waveform bars animate during recording. */}
             <View style={styles.waveformContainer}>
               <Animated.View style={[styles.waveBar, { height: bar1 }]} />
               <Animated.View style={[styles.waveBar, { height: bar2 }]} />
@@ -357,11 +279,15 @@ export default function VoiceInputScreen() {
               <Animated.View style={[styles.waveBar, { height: bar5 }]} />
             </View>
 
-            <Text style={styles.recordText}>
-              {isRecording
-                ? 'Recording... tap to stop'
-                : 'Click on mic to record voice'}
-            </Text>
+            {IS_ANDROID && transcript ? (
+              <Text style={[styles.recordText, { fontStyle: 'italic' }]}>"{transcript}"</Text>
+            ) : (
+              <Text style={styles.recordText}>
+                {isActive
+                  ? IS_ANDROID ? 'Listening... tap to stop' : 'Recording... tap to stop'
+                  : IS_ANDROID ? 'Tap mic and speak clearly' : 'Click on mic to record voice'}
+              </Text>
+            )}
           </View>
 
           <View style={styles.bottomBox}>
@@ -370,19 +296,17 @@ export default function VoiceInputScreen() {
                 <MaterialIcons name="delete-outline" size={28} color="#000" />
               </Pressable>
 
-              <Pressable onPress={handlePlay} style={styles.playButton}>
-                <Ionicons
-                  name={isPlaying ? 'stop' : 'play'}
-                  size={34}
-                  color="#000"
-                />
-              </Pressable>
-
-              <Text style={styles.timeText}>{recordTime}</Text>
+              {!IS_ANDROID && (
+                <>
+                  <Pressable onPress={handlePlay} style={styles.playButton}>
+                    <Ionicons name={isPlaying ? 'stop' : 'play'} size={34} color="#000" />
+                  </Pressable>
+                  <Text style={styles.timeText}>{recordTime}</Text>
+                </>
+              )}
             </View>
 
-                        {/* Continue button only appears after audio has been recorded. */}
-            {recordingUri && (
+            {hasResult && (
               <Pressable onPress={handleContinue} style={styles.continueButton}>
                 <Text style={styles.continueText}>Continue</Text>
               </Pressable>

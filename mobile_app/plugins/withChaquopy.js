@@ -24,7 +24,6 @@ const PIP_PACKAGES = [
   'numpy',
   'scipy',
   'rapidfuzz',
-  'faster-whisper',
   'python_speech_features',
   'pydantic==2.9.2',
   'soundfile',
