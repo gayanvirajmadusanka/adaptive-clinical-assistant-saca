@@ -44,7 +44,7 @@
 
 .parts-list-title {
     -fx-font-family: "Kreon", "Georgia", serif;
-    -fx-font-size: 20px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #3a2a1a;
     -fx-padding: 0 0 6 2;
@@ -76,10 +76,9 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.14), 7, 0, 0, 2);
 }
 
-
 .body-part-name {
     -fx-font-family: "Kreon", "Georgia", serif;
-    -fx-font-size: 14px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
     -fx-text-fill: #3a2a1a;
 }
