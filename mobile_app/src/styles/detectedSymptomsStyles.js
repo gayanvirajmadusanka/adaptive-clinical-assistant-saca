@@ -336,16 +336,18 @@ export default StyleSheet.create({
     lineHeight: 24,
   },
 
-  errorOkButton: {
+ errorOkButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#8B2E0A',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 24,
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 22,
   },
 
   errorOkButtonPressed: {
-    backgroundColor: '#5F1207',
+    backgroundColor: '#8B1E0D',
     transform: [{ scale: 0.96 }],
   },
 

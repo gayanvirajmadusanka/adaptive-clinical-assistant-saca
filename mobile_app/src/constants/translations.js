@@ -32,6 +32,7 @@ export const translations = {
     continue: 'Continue',
     back: 'Back',
     submit: 'Submit',
+    question: 'Question',
 
     detected_title: 'Detected Symptoms',
     detected_question: 'Does this match you?',
@@ -129,9 +130,9 @@ export const translations = {
     moderate_speak: 'Your result is moderate. Please book a health check soon and get medical advice if symptoms continue.',
     severe_speak: 'Your result is severe. Please seek urgent medical help now.',
 
-    you_can_treat_this_at_home: 'You can treat this at home.',
+    you_can_treat_this_at_home: 'You can get over the counter medicine.',
     medical_attention_recommended: 'Medical attention is recommended.',
-    seek_emergency_help_now: 'Seek emergency help now.',
+    seek_emergency_help_now: 'Seek help now.',
 
     about_title: 'Welcome to SACA...',
     about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
@@ -152,6 +153,20 @@ export const translations = {
     no_symptoms_detected: 'No Symptoms Detected',
     no_symptoms_message_1:'We could not detect any symptoms from your description.',
     no_symptoms_message_2:'Please try describing your symptoms in more detail.',
+
+    // English
+    no_answer_title: 'No Answer',
+    no_answer_message_1: 'Please select an answer',
+    no_answer_message_2: 'Choose one of the options before continuing.',
+    question: 'Question',
+    of: 'of',
+    no_follow_up_questions: 'No follow-up questions found.',
+
+    // English
+    done: 'DONE',
+    please_wait_severity: 'Please wait while we analyze your severity...',
+    error: 'Error',
+    severity_error_message: 'Could not get result.',
   },
 
   wp: {
@@ -186,7 +201,8 @@ export const translations = {
     text_placeholder: 'Ngarrirni nyuntu purrkunypa.',
     continue: 'Yangka',
     back: 'Yankirri',
-    submit: 'Submit',
+    submit: 'Yungkurlu',
+    question: 'Japi',
 
     detected_title: 'Purrkunypa nyangu',
     detected_question: 'Nyampu nyuntu-kurra?',
@@ -265,7 +281,7 @@ export const translations = {
     stomach_pain: 'Miyalu purrkunypa',
     breathing_problem: 'Nguurlnguurlpa',
 
-    call_emergency: 'Kapanku ngangkayikurra yanta.',
+    call_emergency: 'Jalangu yardajirri warrirni.',
     start_again: 'Pina Yangka',
 
     mild_recommendation_1: 'Rest manu water nyinyi.',
@@ -284,9 +300,9 @@ export const translations = {
     moderate_speak: 'Nyuntu result moderate. Health check book soon.',
     severe_speak: 'Nyuntu result severe. Urgent medical help japirli now.',
 
-    you_can_treat_this_at_home: 'You can treat this at home.',
-    medical_attention_recommended: 'Medical attention is recommended.',
-    seek_emergency_help_now: 'Seek emergency help now.',
+    you_can_treat_this_at_home: 'Mirrijini nyuntu payi-ma-ni.',
+    medical_attention_recommended: 'Ngangkayikurra yanta.',
+    seek_emergency_help_now: 'Jalangu yardajirri warrirni.',
 
     about_title: 'Nyampu nyinami SACA-kurra...',
     about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
@@ -308,5 +324,19 @@ export const translations = {
     no_symptoms_detected: 'Purrkunypa lawa nyangu',
     no_symptoms_message_1:'Ngula purrkunypa lawa nyangu nyuntu yimi-jangka.',
     no_symptoms_message_2:'Nyuntu purrkunypa yimi panu-piya ngarrirni.',
+
+    // Warlpiri
+    no_answer_title: 'Japi lawa',
+    no_answer_message_1: 'Yuwayi manu lawa milkikariya',
+    no_answer_message_2: 'Jinta milarni, yantarla-wangu',
+    question: 'Japi',
+    of: 'of',
+    no_follow_up_questions: 'Japi-kari lawa.',
+
+    // Warlpiri
+    done: 'Palya',
+    please_wait_severity: 'Wait-ki. Ngula nyuntu purrkunypa wiri nyanganyi.',
+    error: 'Error',
+    severity_error_message: 'Result lawa nyangu.',
   },
 };

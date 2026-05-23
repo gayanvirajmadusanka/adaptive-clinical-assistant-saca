@@ -69,7 +69,6 @@ export default function ResultScreen() {
   const [resultData, setResultData] = useState(initialResultData);
   const [changingLanguage, setChangingLanguage] = useState(false);
 
-  const pulseAnim = useRef(new Animated.Value(1)).current;
   const emergencyPulseAnim = useRef(new Animated.Value(1)).current;
   const soundRef = useRef(null);
 
@@ -112,15 +111,9 @@ export default function ResultScreen() {
   };
 
   const getSeveritySubtitle = () => {
-    if (severity === 'severe') {
-      return t('seek_emergency_help_now') || 'Seek emergency help now';
-    }
-
-    if (severity === 'moderate') {
-      return t('medical_attention_recommended') || 'Medical attention recommended';
-    }
-
-    return t('you_can_treat_this_at_home') || 'You can treat this at home';
+    if (severity === 'severe') return t('seek_emergency_help_now');
+    if (severity === 'moderate') return t('medical_attention_recommended');
+    return t('you_can_treat_this_at_home');
   };
 
   const getTranslationSafe = (key, fallback) => {
@@ -143,28 +136,11 @@ export default function ResultScreen() {
   }, []);
 
   useEffect(() => {
-    if (severity === 'severe') {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.06,
-            duration: 650,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 650,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-
     if (severity === 'severe' || severity === 'moderate') {
       Animated.loop(
         Animated.sequence([
           Animated.timing(emergencyPulseAnim, {
-            toValue: 1.04,
+            toValue: 1.03,
             duration: 700,
             useNativeDriver: true,
           }),
@@ -226,15 +202,11 @@ export default function ResultScreen() {
 
       sound.setOnPlaybackStatusUpdate(async (status) => {
         if (status.isLoaded && status.didJustFinish) {
-          try {
-            if (soundRef.current === sound) {
-              soundRef.current = null;
-            }
-
-            await sound.unloadAsync();
-          } catch (error) {
-            console.log('Unload result audio error:', error);
+          if (soundRef.current === sound) {
+            soundRef.current = null;
           }
+
+          await sound.unloadAsync();
         }
       });
     } catch (error) {
@@ -294,19 +266,36 @@ export default function ResultScreen() {
       }}
     >
       <View style={styles.contentWrapper}>
-        <View
-          style={[
-            styles.resultCard,
-            { backgroundColor: theme.screenBackground },
-          ]}
-        >
-          <View style={[styles.headerBar, { backgroundColor: theme.header }]}>
-            <Text style={[styles.headerText, { color: theme.headerText }]}>
-              {t('result')}
-            </Text>
-          </View>
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>{t('result')}</Text>
+        </View>
 
-          <View style={styles.content}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View
+            style={[
+              styles.severityCard,
+              { backgroundColor: theme.severityFill },
+            ]}
+          >
+            <Image
+              source={severityIcons[severity]}
+              style={styles.severityIconLarge}
+              resizeMode="contain"
+            />
+
+            <View style={styles.severityTextBox}>
+              <Text style={styles.severityTitle}>
+                {getSeverityText()}
+              </Text>
+
+              <Text style={styles.severitySubtitle}>
+                {getSeveritySubtitle()}
+              </Text>
+            </View>
+
             <Pressable
               style={({ pressed }) => [
                 styles.speakerButton,
@@ -320,158 +309,155 @@ export default function ResultScreen() {
                 resizeMode="contain"
               />
             </Pressable>
+          </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
+          {(severity === 'severe' || severity === 'moderate') && (
+            <Animated.View
+              style={{
+                transform: [{ scale: emergencyPulseAnim }],
+              }}
             >
-              <View
-                style={[
-                  styles.severityCard,
-                  { backgroundColor: theme.severityFill },
-                ]}
-              >
-                <Image
-                  source={severityIcons[severity]}
-                  style={styles.severityIconLarge}
-                  resizeMode="contain"
-                />
-
-                <View style={styles.severityTextBox}>
-                  <Text style={styles.severityTitle}>
-                    {getSeverityText()}
-                  </Text>
-
-                  <Text style={styles.severitySubtitle}>
-                    {getSeveritySubtitle()}
-                  </Text>
-                </View>
-              </View>
-
-              {(severity === 'severe' || severity === 'moderate') && (
-                <Animated.View
-                  style={{
-                    transform: [{ scale: emergencyPulseAnim }],
-                  }}
-                >
-                  <Pressable
-                    style={({ pressed }) => [
-                      styles.callButton,
-                      severity === 'severe'
-                        ? styles.callButtonSevere
-                        : styles.callButtonModerate,
-                      pressed && styles.pressedButton,
-                    ]}
-                    onPress={callEmergency}
-                  >
-                    <Text style={styles.callButtonText}>
-                      📞 {t('call_emergency')}
-                    </Text>
-                  </Pressable>
-                </Animated.View>
-              )}
-
-              <View
-                style={[
-                  styles.infoCard,
-                  {
-                    borderColor: theme.boxBorder,
-                    backgroundColor: theme.cardBackground,
-                  },
-                ]}
-              >
-                <Image
-                  source={recommendationIcons[severity]}
-                  style={styles.infoIconLarge}
-                  resizeMode="contain"
-                />
-
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoTitle}>
-                    {t('recommendations')}
-                  </Text>
-
-                  {recommendation ? (
-                    <Text style={styles.infoText}>• {recommendation}</Text>
-                  ) : null}
-
-                  {recommendedAction ? (
-                    <Text style={styles.infoText}>• {recommendedAction}</Text>
-                  ) : null}
-
-                  {hasCritical && (
-                    <Text style={styles.infoText}>
-                      • {getTranslationSafe(
-                        'critical_symptoms_detected',
-                        'Critical symptoms detected'
-                      )}
-                    </Text>
-                  )}
-                </View>
-              </View>
-
-              <View
-                style={[
-                  styles.infoCard,
-                  styles.symptomCard,
-                  {
-                    borderColor: theme.boxBorder,
-                    backgroundColor: theme.cardBackground,
-                  },
-                ]}
-              >
-                <Image
-                  source={symptomIcons[severity]}
-                  style={styles.infoIconLarge}
-                  resizeMode="contain"
-                />
-
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoTitle}>
-                    {t('symptoms')}
-                  </Text>
-
-                  {translatedSymptoms.length > 0 ? (
-                    translatedSymptoms.map((item, index) => (
-                      <Text key={`${item}-${index}`} style={styles.infoText}>
-                        • {item}
-                      </Text>
-                    ))
-                  ) : (
-                    <Text style={styles.infoText}>
-                      {getTranslationSafe(
-                        'no_symptoms_found',
-                        'No symptoms found'
-                      )}
-                    </Text>
-                  )}
-                </View>
-              </View>
-
               <Pressable
                 style={({ pressed }) => [
-                  styles.startAgainButton,
-                  pressed && styles.startAgainPressed,
+                  styles.callButton,
+                  severity === 'severe'
+                    ? styles.callButtonSevere
+                    : styles.callButtonModerate,
+                  pressed && styles.pressedButton,
                 ]}
-                onPress={async () => {
-                  await stopAudio();
-                  router.replace('/input');
-                }}
+                onPress={callEmergency}
               >
-                {({ pressed }) => (
-                  <Text
-                    style={[
-                      styles.startAgainText,
-                      pressed && styles.startAgainTextPressed,
-                    ]}
-                  >
-                    ⟳ {t('start_again')}
-                  </Text>
-                )}
+                <Image
+                  source={require('../../assets/images/telephone-call.png')}
+                  style={styles.callIcon}
+                  resizeMode="contain"
+                />
+
+                <Text style={styles.callButtonText}>
+                  {t('call_emergency')}
+                </Text>
               </Pressable>
-            </ScrollView>
+            </Animated.View>
+          )}
+
+          <View
+            style={[
+              styles.infoCard,
+              {
+                borderColor: theme.boxBorder,
+                backgroundColor: theme.cardBackground,
+              },
+            ]}
+          >
+            <Image
+              source={recommendationIcons[severity]}
+              style={styles.infoIconLarge}
+              resizeMode="contain"
+            />
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>{t('recommendations')}</Text>
+
+              {recommendation ? (
+                <Text style={styles.infoHeading}>{recommendation}</Text>
+              ) : null}
+
+              {recommendedAction ? (
+                <Text style={styles.infoText}>{recommendedAction}</Text>
+              ) : null}
+
+              
+
+              {hasCritical && (
+                <Text style={styles.infoText}>
+                  {getTranslationSafe(
+                    'critical_symptoms_detected',
+                    'Critical symptoms detected'
+                  )}
+                </Text>
+              )}
+            </View>
           </View>
-        </View>
+
+          <View
+            style={[
+              styles.infoCard,
+              styles.symptomCard,
+              {
+                borderColor: theme.boxBorder,
+                backgroundColor: theme.cardBackground,
+              },
+            ]}
+          >
+            <Image
+              source={symptomIcons[severity]}
+              style={styles.infoIconLarge}
+              resizeMode="contain"
+            />
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>{t('symptoms')}</Text>
+
+              {translatedSymptoms.length > 0 ? (
+                translatedSymptoms.map((item, index) => (
+                  <Text key={`${item}-${index}`} style={styles.infoHeading}>
+                    • {item}
+                  </Text>
+                ))
+              ) : (
+                <Text style={styles.infoText}>
+                  {getTranslationSafe(
+                    'no_symptoms_found',
+                    'No symptoms found'
+                  )}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.startAgainButton,
+              pressed && styles.startAgainPressed,
+            ]}
+            onPress={async () => {
+              await stopAudio();
+              router.replace('/input');
+            }}
+          >
+            {({ pressed }) => (
+              <Text
+                style={[
+                  styles.startAgainText,
+                  pressed && styles.startAgainTextPressed,
+                ]}
+              >
+                {t('start_again')}
+              </Text>
+            )}
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.backPressedGrey,
+            ]}
+            onPress={async () => {
+              await stopAudio();
+              router.back();
+            }}
+          >
+            <View style={styles.backButtonContent}>
+              <Image
+                source={require('../../assets/images/back-arrow.png')}
+                style={styles.backArrowImage}
+                resizeMode="contain"
+              />
+
+              <Text style={styles.backText}>{t('back')}</Text>
+            </View>
+          </Pressable>
+        </ScrollView>
       </View>
     </AppScreen>
   );
