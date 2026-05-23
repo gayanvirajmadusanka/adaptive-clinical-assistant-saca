@@ -256,6 +256,58 @@
 }
 
 .symptom-card:hover {
+    -fx-background-color: #ede0ce;
     -fx-border-color: #B5523B;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.16), 8, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.14), 7, 0, 0, 2);
+}
+
+.symptom-audio-btn {
+    -fx-background-color: #D2A84B;
+    -fx-background-radius: 50;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 4, 0, 0, 1);
+}
+
+.symptom-audio-btn:hover {
+    -fx-background-color: #e0b855;
+}
+
+.symptom-audio-btn:pressed {
+    -fx-background-color: #b08830;
+}
+
+.symptom-card-active {
+    -fx-border-color: #B5523B;
+    -fx-border-width: 2.5;
+    -fx-background-color: #f5ead4;
+    -fx-effect: dropshadow(gaussian, rgba(181, 82, 59, 0.40), 10, 0, 0, 3);
+}
+
+.symptom-card-label {
+    -fx-font-family: "Kreon", "Georgia", serif;
+    -fx-font-size: 20px;
+    -fx-text-fill: #3a2a1a;
+    -fx-font-weight: bold;
+    -fx-padding: 10 8 10 8;
+}
+
+.symptom-card-active .symptom-card-label {
+    -fx-text-fill: #B5523B;
+}
+
+.symptom-card-active {
+    -fx-background-color: #f5ead4;
+    -fx-border-color: #B5523B;
+    -fx-border-width: 2.5;
+    -fx-effect: dropshadow(gaussian, rgba(181, 82, 59, 0.40), 10, 0, 0, 3);
+}
+
+.symptom-card-active .symptom-card-label {
+    -fx-text-fill: #B5523B;
 }
