@@ -128,22 +128,22 @@
     "symptoms": [
       {
         "id": "arm_pain",
-        "label_en": "Pain",
-        "label_wp": "Purrkunypa",
+        "label_en": "Arm pain",
+        "label_wp": "Kilpirli purrkunypa",
         "audio_en": "arm_pain_en.wav",
         "audio_wp": "arm_pain_wp.wav"
       },
       {
         "id": "arm_weakness",
-        "label_en": "Weakness",
-        "label_wp": "Rampaku",
+        "label_en": "Arm weakness",
+        "label_wp": "Kilpirli rampaku",
         "audio_en": "arm_weakness_en.wav",
         "audio_wp": "arm_weakness_wp.wav"
       },
       {
         "id": "swelling_arms",
-        "label_en": "Swelling",
-        "label_wp": "Kirakarrimi",
+        "label_en": "Arm swelling",
+        "label_wp": "Kilpirli kirakarrimi",
         "audio_en": "swelling_arms_en.wav",
         "audio_wp": "swelling_arms_wp.wav"
       }
@@ -158,8 +158,8 @@
     "symptoms": [
       {
         "id": "jaw_pain",
-        "label_en": "Pain",
-        "label_wp": "Purrkunypa",
+        "label_en": "Jaw pain",
+        "label_wp": "Wirlki purrkunypa",
         "audio_en": "jaw_pain_en.wav",
         "audio_wp": "jaw_pain_wp.wav"
       }
@@ -197,8 +197,8 @@
     "symptoms": [
       {
         "id": "ear_pain",
-        "label_en": "Pain",
-        "label_wp": "Purrkunypa",
+        "label_en": "Ear pain",
+        "label_wp": "Langa purrkunypa",
         "audio_en": "ear_pain_en.wav",
         "audio_wp": "ear_pain_wp.wav"
       }
@@ -213,15 +213,15 @@
     "symptoms": [
       {
         "id": "eye_pain",
-        "label_en": "Pain",
-        "label_wp": "Purrkunypa",
+        "label_en": "Eye pain",
+        "label_wp": "Milpa purrkunypa",
         "audio_en": "eye_pain_en.wav",
         "audio_wp": "eye_pain_wp.wav"
       },
       {
         "id": "eye_itching",
-        "label_en": "Itchy",
-        "label_wp": "Yayirri",
+        "label_en": "Eye itching",
+        "label_wp": "Milpa yayirri",
         "audio_en": "eye_itching_en.wav",
         "audio_wp": "eye_itching_wp.wav"
       }
@@ -252,8 +252,8 @@
     "symptoms": [
       {
         "id": "back_pain",
-        "label_en": "Pain",
-        "label_wp": "Purrkunypa",
+        "label_en": "Back pain",
+        "label_wp": "Pawiyi purrkunypa",
         "audio_en": "back_pain_en.wav",
         "audio_wp": "back_pain_wp.wav"
       }

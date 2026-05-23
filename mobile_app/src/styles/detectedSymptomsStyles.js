@@ -223,6 +223,52 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  iconButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '82%',
+    marginBottom: 30,
+  },
+
+ iconChoiceButton: {
+  width: 140,
+  height: 120,
+  borderRadius: 20,
+  backgroundColor: '#F5EAD8',
+  borderWidth: 2,
+  borderColor: '#CDBE9D',
+  alignItems: 'center',
+  justifyContent: 'center',
+  elevation: 3,
+},
+
+  iconChoiceSelected: {
+    borderWidth: 3,
+    borderColor: '#C94B32',
+    backgroundColor: 'rgba(245, 234, 216, 0.9)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+
+  iconChoicePressed: {
+    transform: [{ scale: 0.96 }],
+  },
+
+  yesNoIcon: {
+    width: 98,
+    height: 98,
+  },
+
+  yesNoIconSelected: {
+    transform: [{ scale: 1.08 }],
+  },
+
   backButton: {
     width: 190,
     height: 70,
@@ -336,7 +382,7 @@ export default StyleSheet.create({
     lineHeight: 24,
   },
 
- errorOkButton: {
+  errorOkButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',
     borderWidth: 2,
@@ -356,30 +402,5 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     fontSize: 18,
-  },
-
-  iconButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '82%',
-    marginBottom: 30,
-  },
-
-  iconChoiceButton: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  iconChoicePressed: {
-    opacity: 0.75,
-  },
-
-  yesNoIcon: {
-    width: 125,
-    height: 125,
   },
 });
