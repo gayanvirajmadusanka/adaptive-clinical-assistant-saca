@@ -25,6 +25,7 @@ import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
+import org.saca.utility.util.StringUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -76,10 +77,12 @@ public class TextResultController implements Initializable {
 
     private void displaySymptoms(List<String> symptoms) {
         symptomsBox.getChildren().clear();
-        if (symptoms == null || symptoms.isEmpty()) return;
+        if (symptoms == null || symptoms.isEmpty()) {
+            return;
+        }
 
         for (String symptom : symptoms) {
-            Label item = new Label("•  " + symptom);
+            Label item = new Label("•  " + StringUtil.capitalizeFirst(symptom));
             item.getStyleClass().add("result-symptom-item");
             item.setWrapText(true);
             symptomsBox.getChildren().add(item);
