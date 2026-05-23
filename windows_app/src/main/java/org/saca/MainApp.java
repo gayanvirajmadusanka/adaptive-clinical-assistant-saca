@@ -7,12 +7,16 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+/**
+ * MainClass of the Application
+ */
 public class MainApp extends Application {
 
     public static final double APP_WIDTH = 1000;
 
     public static final double APP_HEIGHT = 650;
 
+    // Main method
     public static void main(String[] args) {
         launch(args);
     }
@@ -32,6 +36,7 @@ public class MainApp extends Application {
                 APP_HEIGHT
         );
 
+        // Set application title
         stage.setTitle("SACA - Adaptive Clinical Assistant");
 
         // App icon
