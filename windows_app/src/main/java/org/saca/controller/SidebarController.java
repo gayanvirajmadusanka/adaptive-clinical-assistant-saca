@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 
 public class SidebarController implements Initializable {
 
-    // Sidebar width
     private static final double SIDEBAR_WIDTH = 280;
 
     private static final double COLLAPSED_WIDTH = 60;

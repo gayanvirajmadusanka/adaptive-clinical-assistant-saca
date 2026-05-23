@@ -30,6 +30,7 @@ import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
+import org.saca.utility.util.StringUtil;
 
 import java.net.URL;
 import java.util.List;
@@ -211,12 +212,12 @@ public class FinalResultController implements Initializable {
         symptomsBox.getChildren().clear();
         List<String> symptoms = rs.getSymptoms();
         if (symptoms != null) {
-            for (String s : symptoms) {
-                Label lbl = new Label("•  " + s);
-                lbl.getStyleClass().add("symptom-item");
-                lbl.setWrapText(true);
-                lbl.setMaxWidth(Double.MAX_VALUE);
-                symptomsBox.getChildren().add(lbl);
+            for (String symptom : symptoms) {
+                Label label = new Label("•  " + StringUtil.capitalizeFirst(symptom));
+                label.getStyleClass().add("symptom-item");
+                label.setWrapText(true);
+                label.setMaxWidth(Double.MAX_VALUE);
+                symptomsBox.getChildren().add(label);
             }
         }
     }

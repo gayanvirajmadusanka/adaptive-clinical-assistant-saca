@@ -193,7 +193,7 @@ public class BodyInputController implements Initializable {
 
         Label name = new Label(part.getLabel());
         name.getStyleClass().add("body-part-name");
-        name.setWrapText(false);
+        name.setWrapText(true);
         name.setEllipsisString("…");
         name.setMinWidth(0);
         name.setMaxWidth(Double.MAX_VALUE);

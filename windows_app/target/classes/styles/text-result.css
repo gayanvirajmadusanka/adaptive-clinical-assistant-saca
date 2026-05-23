@@ -47,7 +47,7 @@
 
 .result-symptom-item {
     -fx-text-fill: #3a2e1e;
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-font-family: "Kreon", "Georgia", serif;
 }
 
@@ -92,7 +92,7 @@
     -fx-background-radius: 30px;
     -fx-border-radius: 30px;
     -fx-font-family: "jsMath-cmbx10"; /* same as sidebar pills */
-    -fx-font-size: 14px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-focus-color: transparent;
@@ -174,7 +174,7 @@
 
 .result-voice-mic-hint {
     -fx-font-family: "Kreon", "Georgia", serif;
-    -fx-font-size: 11px;
+    -fx-font-size: 14px;
     -fx-text-fill: #7a6a52;
     -fx-alignment: CENTER;
     -fx-text-alignment: CENTER;

@@ -284,6 +284,7 @@ public class VoiceInputController implements Initializable {
         if (result == null
                 || (CommonUtil.isListEmpty(result.getSymptomsEn())
                 && CommonUtil.isListEmpty(result.getSymptomsWp()))) {
+
             DialogManager.errorDialog(
                     "No Symptoms Detected",
                     "We could not detect any symptoms from your recording",
