@@ -1,0 +1,341 @@
+{
+  "head": {
+    "id": "head",
+    "label_en": "Head",
+    "label_wp": "Jurru",
+    "audio_en": "head_en.wav",
+    "audio_wp": "head_wp.wav",
+    "symptoms": [
+      {
+        "id": "headache",
+        "label_en": "Headache",
+        "label_wp": "Walpawalpa",
+        "audio_en": "headache_en.wav",
+        "audio_wp": "headache_wp.wav"
+      },
+      {
+        "id": "dizziness",
+        "label_en": "Dizziness",
+        "label_wp": "Kurruru",
+        "audio_en": "dizziness_en.wav",
+        "audio_wp": "dizziness_wp.wav"
+      },
+      {
+        "id": "loss_of_consciousness",
+        "label_en": "Loss of consciousness",
+        "label_wp": "Tiirnki",
+        "audio_en": "loss_of_consciousness_en.wav",
+        "audio_wp": "loss_of_consciousness_wp.wav"
+      }
+    ]
+  },
+  "neck": {
+    "id": "neck",
+    "label_en": "Neck",
+    "label_wp": "Nguku",
+    "audio_en": "neck_en.wav",
+    "audio_wp": "neck_wp.wav",
+    "symptoms": [
+      {
+        "id": "stiff_neck",
+        "label_en": "Neck stiffness",
+        "label_wp": "Nguku kantalkantal",
+        "audio_en": "stiff_neck_en.wav",
+        "audio_wp": "stiff_neck_wp.wav"
+      }
+    ]
+  },
+  "chest": {
+    "id": "chest",
+    "label_en": "Chest",
+    "label_wp": "Mangarli",
+    "audio_en": "chest_en.wav",
+    "audio_wp": "chest_wp.wav",
+    "symptoms": [
+      {
+        "id": "chest_pain",
+        "label_en": "Chest pain",
+        "label_wp": "Mangarli purrkunypa",
+        "audio_en": "chest_pain_en.wav",
+        "audio_wp": "chest_pain_wp.wav"
+      },
+      {
+        "id": "shortness_breath",
+        "label_en": "Shortness of breath",
+        "label_wp": "Nguurlnguurlpa",
+        "audio_en": "shortness_breath_en.wav",
+        "audio_wp": "shortness_breath_wp.wav"
+      },
+      {
+        "id": "cough",
+        "label_en": "Cough",
+        "label_wp": "Kuntulpinyi",
+        "audio_en": "cough_en.wav",
+        "audio_wp": "cough_wp.wav"
+      }
+    ]
+  },
+  "stomach": {
+    "id": "stomach",
+    "label_en": "Stomach",
+    "label_wp": "Miyalu",
+    "audio_en": "stomach_en.wav",
+    "audio_wp": "stomach_wp.wav",
+    "symptoms": [
+      {
+        "id": "abdominal_pain",
+        "label_en": "Stomach pain",
+        "label_wp": "Miyalu purrkunypa",
+        "audio_en": "abdominal_pain_en.wav",
+        "audio_wp": "abdominal_pain_wp.wav"
+      },
+      {
+        "id": "nausea",
+        "label_en": "Nausea",
+        "label_wp": "Ngarlungarlu",
+        "audio_en": "nausea_en.wav",
+        "audio_wp": "nausea_wp.wav"
+      },
+      {
+        "id": "vomiting",
+        "label_en": "Vomiting",
+        "label_wp": "Yurlkulyu",
+        "audio_en": "vomiting_en.wav",
+        "audio_wp": "vomiting_wp.wav"
+      },
+      {
+        "id": "diarrhea",
+        "label_en": "Diarrhoea",
+        "label_wp": "Jinirrpa",
+        "audio_en": "diarrhea_en.wav",
+        "audio_wp": "diarrhea_wp.wav"
+      },
+      {
+        "id": "blood_stool",
+        "label_en": "Blood in stool",
+        "label_wp": "Jinirrpa jaarlkurlu",
+        "audio_en": "blood_stool_en.wav",
+        "audio_wp": "blood_stool_wp.wav"
+      }
+    ]
+  },
+  "arm": {
+    "id": "arm",
+    "label_en": "Arm",
+    "label_wp": "Kilpirli",
+    "audio_en": "arm_en.wav",
+    "audio_wp": "arm_wp.wav",
+    "symptoms": [
+      {
+        "id": "arm_pain",
+        "label_en": "Pain",
+        "label_wp": "Purrkunypa",
+        "audio_en": "arm_pain_en.wav",
+        "audio_wp": "arm_pain_wp.wav"
+      },
+      {
+        "id": "arm_weakness",
+        "label_en": "Weakness",
+        "label_wp": "Rampaku",
+        "audio_en": "arm_weakness_en.wav",
+        "audio_wp": "arm_weakness_wp.wav"
+      },
+      {
+        "id": "swelling_arms",
+        "label_en": "Swelling",
+        "label_wp": "Kirakarrimi",
+        "audio_en": "swelling_arms_en.wav",
+        "audio_wp": "swelling_arms_wp.wav"
+      }
+    ]
+  },
+  "jaw": {
+    "id": "jaw",
+    "label_en": "Jaw",
+    "label_wp": "Wirlki",
+    "audio_en": "jaw_en.wav",
+    "audio_wp": "jaw_wp.wav",
+    "symptoms": [
+      {
+        "id": "jaw_pain",
+        "label_en": "Pain",
+        "label_wp": "Purrkunypa",
+        "audio_en": "jaw_pain_en.wav",
+        "audio_wp": "jaw_pain_wp.wav"
+      }
+    ]
+  },
+  "nose": {
+    "id": "nose",
+    "label_en": "Nose",
+    "label_wp": "Mulyu",
+    "audio_en": "nose_en.wav",
+    "audio_wp": "nose_wp.wav",
+    "symptoms": [
+      {
+        "id": "runny_nose",
+        "label_en": "Runny nose",
+        "label_wp": "Mulyu rdulpu",
+        "audio_en": "runny_nose_en.wav",
+        "audio_wp": "runny_nose_wp.wav"
+      },
+      {
+        "id": "sneezing",
+        "label_en": "Sneezing",
+        "label_wp": "Jirrjinti",
+        "audio_en": "sneezing_en.wav",
+        "audio_wp": "sneezing_wp.wav"
+      }
+    ]
+  },
+  "ear": {
+    "id": "ear",
+    "label_en": "Ear",
+    "label_wp": "Langa",
+    "audio_en": "ear_en.wav",
+    "audio_wp": "ear_wp.wav",
+    "symptoms": [
+      {
+        "id": "ear_pain",
+        "label_en": "Pain",
+        "label_wp": "Purrkunypa",
+        "audio_en": "ear_pain_en.wav",
+        "audio_wp": "ear_pain_wp.wav"
+      }
+    ]
+  },
+  "eye": {
+    "id": "eye",
+    "label_en": "Eye",
+    "label_wp": "Milpa",
+    "audio_en": "eye_en.wav",
+    "audio_wp": "eye_wp.wav",
+    "symptoms": [
+      {
+        "id": "eye_pain",
+        "label_en": "Pain",
+        "label_wp": "Purrkunypa",
+        "audio_en": "eye_pain_en.wav",
+        "audio_wp": "eye_pain_wp.wav"
+      },
+      {
+        "id": "eye_itching",
+        "label_en": "Itchy",
+        "label_wp": "Yayirri",
+        "audio_en": "eye_itching_en.wav",
+        "audio_wp": "eye_itching_wp.wav"
+      }
+    ]
+  },
+  "throat": {
+    "id": "throat",
+    "label_en": "Throat",
+    "label_wp": "Waninja",
+    "audio_en": "throat_en.wav",
+    "audio_wp": "throat_wp.wav",
+    "symptoms": [
+      {
+        "id": "sore_throat",
+        "label_en": "Sore throat",
+        "label_wp": "Waninja kiri",
+        "audio_en": "sore_throat_en.wav",
+        "audio_wp": "sore_throat_wp.wav"
+      }
+    ]
+  },
+  "back": {
+    "id": "back",
+    "label_en": "Back",
+    "label_wp": "Pawiyi",
+    "audio_en": "back_en.wav",
+    "audio_wp": "back_wp.wav",
+    "symptoms": [
+      {
+        "id": "back_pain",
+        "label_en": "Pain",
+        "label_wp": "Purrkunypa",
+        "audio_en": "back_pain_en.wav",
+        "audio_wp": "back_pain_wp.wav"
+      }
+    ]
+  },
+  "general": {
+    "id": "whole_body",
+    "label_en": "Whole Body",
+    "label_wp": "Palka",
+    "audio_en": "whole_body_en.wav",
+    "audio_wp": "whole_body_wp.wav",
+    "symptoms": [
+      {
+        "id": "fever",
+        "label_en": "Fever",
+        "label_wp": "Rdurrurlpu",
+        "audio_en": "fever_en.wav",
+        "audio_wp": "fever_wp.wav"
+      },
+      {
+        "id": "chills",
+        "label_en": "Shivering",
+        "label_wp": "Mirrmirr",
+        "audio_en": "chills_en.wav",
+        "audio_wp": "chills_wp.wav"
+      },
+      {
+        "id": "fatigue",
+        "label_en": "Tired",
+        "label_wp": "Mata",
+        "audio_en": "fatigue_en.wav",
+        "audio_wp": "fatigue_wp.wav"
+      },
+      {
+        "id": "weakness",
+        "label_en": "Weakness",
+        "label_wp": "Rampaku",
+        "audio_en": "weakness_en.wav",
+        "audio_wp": "weakness_wp.wav"
+      },
+      {
+        "id": "swelling_parts_of_body",
+        "label_en": "Swelling",
+        "label_wp": "Kirakarrimi",
+        "audio_en": "swelling_parts_of_body_en.wav",
+        "audio_wp": "swelling_parts_of_body_wp.wav"
+      },
+      {
+        "id": "rash",
+        "label_en": "Rash",
+        "label_wp": "Mardalmardal",
+        "audio_en": "rash_en.wav",
+        "audio_wp": "rash_wp.wav"
+      },
+      {
+        "id": "itchy",
+        "label_en": "Itchy",
+        "label_wp": "Yayirri",
+        "audio_en": "itchy_en.wav",
+        "audio_wp": "itchy_wp.wav"
+      },
+      {
+        "id": "bleeding",
+        "label_en": "Bleeding",
+        "label_wp": "Ngamanjimanji",
+        "audio_en": "bleeding_en.wav",
+        "audio_wp": "bleeding_wp.wav"
+      },
+      {
+        "id": "dehydration",
+        "label_en": "Dehydrated / Very thirsty",
+        "label_wp": "Nantu",
+        "audio_en": "dehydration_en.wav",
+        "audio_wp": "dehydration_wp.wav"
+      },
+      {
+        "id": "blood_urine",
+        "label_en": "Blood in urine",
+        "label_wp": "Minjinpa jaarlkurlu",
+        "audio_en": "blood_urine_en.wav",
+        "audio_wp": "blood_urine_wp.wav"
+      }
+    ]
+  }
+}

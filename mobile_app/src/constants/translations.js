@@ -1,12 +1,15 @@
 export const translations = {
   en: {
-    input_title: 'Hi, Tell us how you feel',
-    input_subtitle:
-      'You can speak, type or use the body map to describe your symptoms.',
+    input_title: 'Hi, Tell us how you feel?',
+    input_subtitle: 'You can speak, type or use the body map to describe your symptoms.',
 
-    text: 'TEXT',
-    voice: 'VOICE',
+    text: 'WRITE',
+    voice: 'SPEAK',
     body: 'BODY',
+    show:'SHOW',
+    ok: 'OK',
+    cancel: 'Cancel',
+
 
     home: 'Home',
     language: 'Language',
@@ -20,16 +23,20 @@ export const translations = {
     yes: 'YES',
     no: 'NO',
 
-    text_input_title: 'Text',
+    text_input_title: 'Write',
+    speak_option: 'Speak',
+    speak_hint: 'Click on mic to record voice',
+    recording_hint: 'Recording... tap to stop',
+    processing_voice: 'Processing your voice...',
     text_input_question: 'What can I help with?',
     text_placeholder: 'Describe your symptoms and press Continue',
     continue: 'Continue',
-    back: '← Back',
+    back: 'Back',
+    submit: 'Submit',
 
     detected_title: 'Detected Symptoms',
     detected_question: 'Does this match you?',
-    detected_speak:
-      'Detected symptoms are headache, fever, body pain, and tiredness.',
+    detected_speak: 'Detected symptoms are headache, fever, body pain, and tiredness.',
 
     tell_us_more: 'Tell Us More',
     pain_level: 'PAIN LEVEL',
@@ -58,15 +65,10 @@ export const translations = {
     result: 'Final Results',
     recommendations: 'Recommendations',
     symptoms: 'Symptoms',
-
     severity: 'Severity',
-    mild: 'Mild',
-    moderate_result: 'Moderate',
-    severe: 'Severe',
-
     mild_label: 'Severity: Mild',
     moderate_label: 'Severity: Moderate',
-    severe_label: '⚠ SEVERE — Seek help now',
+    severe_label: 'Severity: Severe',
 
     headache: 'Headache',
     fever: 'Fever',
@@ -95,47 +97,61 @@ export const translations = {
     severe_recommendation_2: 'Call emergency services if needed.',
     severe_recommendation_3: 'Do not wait if symptoms are serious.',
 
-    mild_speak:
-      'Your result is mild. Please rest, drink water, and monitor your symptoms.',
-    moderate_speak:
-      'Your result is moderate. Please book a health check soon and get medical advice if symptoms continue.',
-    severe_speak:
-      'Your result is severe. Please seek urgent medical help now.',
+    mild_speak: 'Your result is mild. Please rest, drink water, and monitor your symptoms.',
+    moderate_speak: 'Your result is moderate. Please book a health check soon and get medical advice if symptoms continue.',
+    severe_speak: 'Your result is severe. Please seek urgent medical help now.',
+    you_can_treat_this_at_home:'You can treat this at home.',
+    medical_attention_recommended:'Medical attention is recommended.',
+    seek_emergency_help_now:'Seek emergency help now.',
+
+    about_title: 'Welcome to SACA...',
+    about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
+    about_paragraph: 'SACA is a smart Mobile app that helps you understand symptoms using AI. Describe issues via text, voice, or body map and get quick insights. It supports early health awareness and is not a replacement for medical advice.',
+
+    body_parts: 'Body Parts',
+    male: 'Male',
+    female:'Female',
   },
 
   wp: {
-    input_title: 'Nyuntu nyampu yimi',
-    input_subtitle:
-      'Nyuntu wangka, yimi, manu body map-kurlu symptoms yimi.',
+    input_title: 'Ngarrirni nyuntu, nyarrpa nyinami?',
+    input_subtitle: 'Wangkaya, pantirniya, manu milkikarriya nyuntu purrkunypa.',
 
-    text: 'YIMI',
-    voice: 'WANGKA',
+    text: 'Pantirniya',
+    voice: 'Wangkaya',
     body: 'BODY',
+    show: 'Milkikarriya',
+    ok: 'Yuwayi',
+    cancel: 'Lawa',
 
     home: 'Ngurra',
     language: 'Wangka',
 
     select_language: 'Wangka ngurrju',
-    english: 'English',
+    english: 'Ingliji',
     warlpiri: 'Warlpiri',
 
     confirm: 'Kurlarda',
     change_language: 'Wangka kutju-kurlu nyampu?',
-    yes: 'YUWA',
-    no: 'LAWA',
+    yes: 'Yuwayi',
+    no: 'Lawa',
 
-    text_input_title: 'Yimi',
+    text_input_title: 'Pantirniya',
+    speak_option: 'Wangkaya',
+    speak_hint: 'Mic-kurra nyampu, wangka record-ki',
+    recording_hint: 'Recording... stop-ki mic nyampuju',
+    processing_voice: 'Voice nyanyi...',
     text_input_question: 'Nyiya ka nyuntu nyampuju?',
     text_placeholder: 'Nyuntu symptoms yimi manu yangka',
     continue: 'Yangka',
-    back: '← Yankirri',
+    back: 'Yankirri',
+    submit: 'Submit',
 
-    detected_title: 'Symptoms nyangu',
+    detected_title: 'Purrkunypa nyangu',
     detected_question: 'Nyampu nyuntu-kurra?',
-    detected_speak:
-      'Symptoms nyangu Walpawalpa, Rdurrurlpu, body pain, manu tiredness.',
+    detected_speak: 'Purrkunypa nyangu Walpawalpa, Rdurrurlpu, body pain, manu tiredness.',
 
-    tell_us_more: 'Yimi More',
+    tell_us_more: 'Ngarrirni nyuntu panu',
     pain_level: 'Pina Level',
     pain_question: 'Nyuntu pina ngurrju?',
 
@@ -154,23 +170,21 @@ export const translations = {
     about_week: 'Week-jinta',
     more_than_week: 'Week-jinta jangka',
 
-    loading: 'LOADING',
+    loading: 'Yirrarni',
     loading_wait: 'Nyampu may take few minutes, please wait...',
-    loading_symptoms: 'Symptoms nyanyi...',
-    loading_severity: 'Severity nyanyi...',
+    loading_symptoms: 'Purrkunypa nguntupinyi nyuntu-nyangu....',
+    loading_severity: 'Purrkunypa wiri nguntupinyi...',
 
-    result: 'Yimi Ngurrju (Final Results)',
+    result: 'Purrkunypa Nyangu',
     recommendations: 'Ngurrju yimi',
-    symptoms: 'Symptoms',
-
-    severity: 'Pina Level',
-    mild: 'Pina Wangu (Mild)',
-    moderate_result: 'Pina Marda (Moderate)',
-    severe: 'Pina Wiri (Severe)',
-
-    mild_label: 'Pina Wangu (Mild)',
-    moderate_label: 'Pina Marda (Moderate)',
-    severe_label: '⚠ Pina Wiri — Help japirli now',
+    symptoms: 'Purrkunypa',
+    severity: 'Wiri',    
+    mild_label: 'Wiri: Witapardu',
+    moderate_label: 'Wiri: Wiriwiri',
+    severe_label: 'Wiri: Wirinyayirni',
+    you_can_treat_this_at_home:'You can treat this at home.',
+    medical_attention_recommended:'Medical attention is recommended.',
+    seek_emergency_help_now:'Seek emergency help now.',
 
     headache: 'Jangka marda',
     fever: 'ngaju rdurrurlpu',
@@ -184,12 +198,12 @@ export const translations = {
     vomiting: 'Vomiting',
     breathing_problem: 'Breathing problem',
 
-    call_emergency: 'Emergency Call',
-    start_again: 'Start Again',
+    call_emergency: 'Kapanku ngangkayikurra yanta.',
+    start_again: 'Pina Yangka',
 
     mild_recommendation_1: 'Rest manu water nyinyi.',
-    mild_recommendation_2: 'Symptoms nyanyi.',
-    mild_recommendation_3: 'Symptoms wiri-jangka help japirli.',
+    mild_recommendation_2: 'Purrkunypa nyanyi.',
+    mild_recommendation_3: 'Purrkunypa wiri-jangka help japirli.',
 
     moderate_recommendation_1: 'Health check book soon.',
     moderate_recommendation_2: 'Rest manu heavy work lawa.',
@@ -197,13 +211,18 @@ export const translations = {
 
     severe_recommendation_1: 'Urgent medical help japirli now.',
     severe_recommendation_2: 'Emergency services call if needed.',
-    severe_recommendation_3: 'Symptoms serious-jangka wait lawa.',
+    severe_recommendation_3: 'Purrkunypa serious-jangka wait lawa.',
 
-    mild_speak:
-      'Nyuntu result mild. Rest manu water nyinyi.',
-    moderate_speak:
-      'Nyuntu result moderate. Health check book soon.',
-    severe_speak:
-      'Nyuntu result severe. Urgent medical help japirli now.',
+    mild_speak: 'Nyuntu result mild. Rest manu water nyinyi.',
+    moderate_speak: 'Nyuntu result moderate. Health check book soon.',
+    severe_speak: 'Nyuntu result severe. Urgent medical help japirli now.',
+
+    about_title: 'Nyampu nyinami SACA-kurra...',
+    about_subtitle: 'Smart Adaptive Clinical Assistant (SACA)',
+    about_paragraph: 'SACA ka smart mobile app nyuntu-kurra. Ngula nyuntu symptoms yimi (text), wangka (voice), manu body map-kurlu nyampu yimi. AI ka nyampu nyanyi manu nyuntu quick kulini symptoms. Ngula health early kuju-kuju manu nyuntu ngurrju kulini. Ngula doctor manu medical advice replacement nyampuju lawa.',
+
+    body_parts: 'Palka Yimi',
+    male: 'Wati',
+    female:'Karnta',
   },
 };

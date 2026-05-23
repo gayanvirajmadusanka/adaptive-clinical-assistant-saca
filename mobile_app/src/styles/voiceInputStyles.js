@@ -1,179 +1,220 @@
-// Styles for VoiceInputScreen.
-// Defines microphone recording UI, pulse circle, waveform bars, playback controls, and continue button.
+// voiceInputStyles.js
+// Purpose: Screen-specific styles for VoiceInputScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-    // Main safe area background.
-safeArea: {
+  // Same main layout position as TextInputScreen.
+  container: {
     flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-    // Background image area.
-background: {
-    flex: 1,
-  },
-
-    // Voice screen main container.
-container: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight || 20,
-    paddingHorizontal: 18,
-    justifyContent: 'center',
-    transform: [{ translateY: -30 }],
-  },
-
-    // Header row with back icon, title, and voice icon.
-header: {
-    height: 70,
-    backgroundColor: '#D4AF4A',
-    borderRadius: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: 25,
+    paddingTop: 80,
   },
 
-    // SPEAK title text.
-headerTitle: {
-    fontSize: 26,
+  // Header copied/aligned with TextInputScreen style.
+  headerBar: {
+    width: '92%',
+    height: 60,
+    backgroundColor: '#D2B767',
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 25,
+  },
+
+  headerText: {
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
   headerIcon: {
-    width: 28,
-    height: 28,
+    position: 'absolute',
+    right: 25,
+    width: 30,
+    height: 30,
   },
 
-    // Main recording box.
-recordBox: {
-    height: 260,
-    borderWidth: 2,
-    borderColor: '#CDBB91',
-    borderRadius: 12,
+  recordBox: {
+    width: '92%',
+    minHeight: 270,
+    borderWidth: 1.5,
+    borderColor: '#C8B99A',
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
-    backgroundColor: 'rgba(248, 232, 199, 0.75)',
+    marginBottom: 26,
+    backgroundColor: 'rgba(245, 234, 212, 0.88)',
+    paddingVertical: 28,
+    paddingHorizontal: 20,
   },
 
-    // Animated circle around mic.
-pulseCircle: {
-    width: 125,
-    height: 125,
-    borderRadius: 62,
+  pulseCircle: {
+    width: 116,
+    height: 116,
+    borderRadius: 58,
     borderWidth: 2,
-    borderColor: '#CDBB91',
+    borderColor: '#C8B99A',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.10)',
   },
 
-    // Red border shown while recording.
-recordingBorder: {
-    borderColor: 'red',
+  recordingBorder: {
+    borderColor: '#C0392B',
     borderWidth: 3,
+    backgroundColor: 'rgba(192,57,43,0.08)',
   },
 
-    // Touchable mic area.
-micCircle: {
-    width: 115,
-    height: 115,
-    borderRadius: 60,
+  micCircle: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-    // Animated waveform container.
-waveformContainer: {
-    height: 65,
+  micImage: {
+    width: 58,
+    height: 58,
+  },
+
+  waveformContainer: {
+    height: 64,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 7,
-    marginTop: 12,
+    marginTop: 14,
   },
 
-    // Single waveform bar.
-waveBar: {
+  waveBar: {
     width: 7,
     borderRadius: 8,
-    backgroundColor: '#8B2E0A',
+    backgroundColor: '#8B3A1C',
   },
 
-    // Instruction/status text.
-recordText: {
+  recordText: {
     marginTop: 8,
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: '600',
-    color: '#3A2816',
+    color: '#7A6A52',
     textAlign: 'center',
   },
 
-    // Bottom controls container.
-bottomBox: {
-    height: 90,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: '#D7C69D',
-    backgroundColor: 'rgba(248, 232, 199, 0.85)',
+  bottomBox: {
+    width: '92%',
+    minHeight: 94,
+    borderRadius: 50,
+    borderWidth: 1.5,
+    borderColor: '#C8B99A',
+    backgroundColor: 'rgba(245, 234, 212, 0.9)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 26,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
 
   leftControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    gap: 12,
   },
 
-    // Delete recording button.
-deleteButton: {
+  deleteButton: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#A82312',
+    backgroundColor: '#C8A18C',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-    // Play/stop recording button.
-playButton: {
+  playButton: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#0A8F2D',
+    backgroundColor: '#A8C89A',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-    // Recording timer text.
-timeText: {
+  disabledControl: {
+    opacity: 0.35,
+  },
+
+  timeText: {
+    minWidth: 44,
     fontSize: 16,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#3A2A1A',
+  },
+
+  continueButton: {
+    minWidth: 118,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+  },
+
+  continueText: {
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-    // Continue button after recording.
-continueButton: {
-    paddingHorizontal: 28,
+  // Back button same as TextInputScreen.
+  backButton: {
+    width: 140,
     height: 55,
-    borderRadius: 25,
-    backgroundColor: '#E99B00',
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+  },
+
+  backButtonContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  continueText: {
-    fontSize: 16,
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
+  },
+
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  backText: {
+    fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',

@@ -8,13 +8,13 @@ import webrtcvad
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATA_DIR = os.path.join(_BASE_DIR, "data", "warlpiri")
 
-SAMPLE_RATE          = 16000
-N_MFCC               = 13      # base MFCC coefficients
-VAD_AGGRESSIVENESS   = 2       # 0-3, higher = more aggressive silence filtering
-VAD_FRAME_DURATION   = 30      # ms per VAD frame
-MIN_SEGMENT_DURATION = 0.15    # seconds - discard segments shorter than this
-DTW_THRESHOLD        = 200.0   # increased to account for 39-feature vectors
-FRAME_RATIO_LIMIT    = 3.0     # skip DTW if frame counts differ by more than this ratio
+SAMPLE_RATE = 16000
+N_MFCC = 13  # base MFCC coefficients
+VAD_AGGRESSIVENESS = 2  # 0-3, higher = more aggressive silence filtering
+VAD_FRAME_DURATION = 30  # ms per VAD frame
+MIN_SEGMENT_DURATION = 0.15  # seconds - discard segments shorter than this
+DTW_THRESHOLD = 200.0  # increased to account for 39-feature vectors
+FRAME_RATIO_LIMIT = 3.0  # skip DTW if frame counts differ by more than this ratio
 
 
 def _load(filename: str) -> dict:
@@ -24,7 +24,7 @@ def _load(filename: str) -> dict:
 
 
 # load data at module startup - fails fast if files are missing
-KEYWORD_MFCC        = _load("keyword_mfcc.json")
+KEYWORD_MFCC = _load("keyword_mfcc.json")
 KEYWORD_SYMPTOM_MAP = _load("keyword_symptom_map.json")
 
 # convert to numpy arrays once at load time
@@ -59,7 +59,7 @@ def _extract_mfcc(audio: np.ndarray, sr: int = SAMPLE_RATE) -> np.ndarray | None
     if len(audio) == 0:
         return None
     try:
-        mfcc  = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=N_MFCC)
+        mfcc = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=N_MFCC)
         delta = librosa.feature.delta(mfcc)
         delta2 = librosa.feature.delta(mfcc, order=2)
         return np.vstack([mfcc, delta, delta2])  # (39, frames)
@@ -108,14 +108,14 @@ def _segment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list:
     :param sr: sample rate
     :return: list of float32 audio segment arrays
     """
-    vad          = webrtcvad.Vad(VAD_AGGRESSIVENESS)
+    vad = webrtcvad.Vad(VAD_AGGRESSIVENESS)
     frame_length = int(sr * VAD_FRAME_DURATION / 1000)
-    min_samples  = int(MIN_SEGMENT_DURATION * sr)
-    segments     = []
-    current      = []
+    min_samples = int(MIN_SEGMENT_DURATION * sr)
+    segments = []
+    current = []
 
     for i in range(0, len(audio) - frame_length, frame_length):
-        frame       = audio[i:i + frame_length]
+        frame = audio[i:i + frame_length]
         frame_bytes = (frame * 32768).astype(np.int16).tobytes()
         try:
             is_speech = vad.is_speech(frame_bytes, sr)
@@ -135,20 +135,25 @@ def _segment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list:
     return segments
 
 
-def _match_segment(query_mfcc: np.ndarray) -> tuple[str, float] | None:
+def _match_segment(query_mfcc: np.ndarray, allowed_keywords: set | None = None) -> tuple[str, float] | None:
     """
-    Match a query MFCC matrix against all keyword references using DTW.
-    Supports multiple references per keyword - takes minimum distance.
-    Applies frame ratio pre-filter to skip obviously mismatched keywords
-    before running expensive O(n*m) DTW computation.
+    Match a query MFCC matrix against keyword references using DTW.
+    allowed_keywords restricts the search to a specific subset — pass the
+    valid WP answer words for the current question to avoid cross-keyword
+    confusions when the full 47-keyword set is not needed.
     :param query_mfcc: (n_features, frames) query feature matrix
+    :param allowed_keywords: if set, only match against these keywords
     :return: (keyword, distance) tuple if best match is below threshold, else None
     """
-    query_frames  = query_mfcc.shape[1]
-    best_keyword  = None
+    refs = (
+        _KEYWORD_REFS if allowed_keywords is None
+        else {k: v for k, v in _KEYWORD_REFS.items() if k in allowed_keywords}
+    )
+    query_frames = query_mfcc.shape[1]
+    best_keyword = None
     best_distance = float("inf")
 
-    for keyword, ref_list in _KEYWORD_REFS.items():
+    for keyword, ref_list in refs.items():
         for ref_mfcc in ref_list:
             ref_frames = ref_mfcc.shape[1]
 
@@ -162,7 +167,7 @@ def _match_segment(query_mfcc: np.ndarray) -> tuple[str, float] | None:
             dist = _dtw_distance(query_mfcc, ref_mfcc)
             if dist < best_distance:
                 best_distance = dist
-                best_keyword  = keyword
+                best_keyword = keyword
 
     if best_distance <= DTW_THRESHOLD:
         return best_keyword, best_distance
@@ -181,12 +186,12 @@ def _distance_to_confidence(distance: float) -> float:
     # sigmoid: score approaches 1 as distance approaches 0,
     # approaches 0 as distance approaches threshold
     centre = DTW_THRESHOLD / 2.0
-    scale  = DTW_THRESHOLD / 8.0
-    score  = 1.0 / (1.0 + np.exp((distance - centre) / scale))
+    scale = DTW_THRESHOLD / 8.0
+    score = 1.0 / (1.0 + np.exp((distance - centre) / scale))
     return round(float(score), 3)
 
 
-def recognize(audio_path: str) -> dict:
+def recognize(audio_path: str, allowed_keywords: set | None = None) -> dict:
     """
     Recognise Warlpiri symptom keywords from continuous speech audio.
 
@@ -214,7 +219,7 @@ def recognize(audio_path: str) -> dict:
 
     try:
         audio, sr = librosa.load(audio_path, sr=SAMPLE_RATE, mono=True)
-        audio, _  = librosa.effects.trim(audio, top_db=20)
+        audio, _ = librosa.effects.trim(audio, top_db=20)
     except Exception as e:
         return {**base, "recognized": False, "error": f"failed to load audio: {e}"}
 
@@ -233,7 +238,7 @@ def recognize(audio_path: str) -> dict:
         mfcc = _extract_mfcc(segment)
         if mfcc is None:
             continue
-        result = _match_segment(mfcc)
+        result = _match_segment(mfcc, allowed_keywords)
         if result:
             keyword, distance = result
             if keyword not in matched_keywords or distance < matched_keywords[keyword]:
@@ -242,15 +247,15 @@ def recognize(audio_path: str) -> dict:
     if not matched_keywords:
         return {
             **base,
-            "recognized":       False,
+            "recognized": False,
             "matched_keywords": {},
-            "symptoms":         [],
-            "confidence":       0.0,
-            "message":          "could not recognise any Warlpiri keywords - please try again"
+            "symptoms": [],
+            "confidence": 0.0,
+            "message": "could not recognise any Warlpiri keywords - please try again"
         }
 
     # map matched keywords to English symptom strings
-    symptoms       = []
+    symptoms = []
     keyword_scores = {}
     for keyword, distance in matched_keywords.items():
         symptom = KEYWORD_SYMPTOM_MAP.get(keyword)
@@ -259,16 +264,16 @@ def recognize(audio_path: str) -> dict:
         keyword_scores[keyword] = round(distance, 3)
 
     best_distance = min(matched_keywords.values())
-    confidence    = _distance_to_confidence(best_distance)
+    confidence = _distance_to_confidence(best_distance)
 
     return {
         **base,
-        "recognized":        True,
-        "matched_keywords":  keyword_scores,
-        "symptoms":          symptoms,
-        "confidence":        confidence,
+        "recognized": True,
+        "matched_keywords": keyword_scores,
+        "symptoms": symptoms,
+        "confidence": confidence,
         "segments_detected": len(segments),
-        "segments_matched":  len(matched_keywords)
+        "segments_matched": len(matched_keywords)
     }
 
 

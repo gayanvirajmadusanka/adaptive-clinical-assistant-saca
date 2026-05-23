@@ -1,85 +1,87 @@
 // TellUsMoreScreen.js
-// Purpose: Loads dynamic follow-up questions from FastAPI and collects user answers.
-// It supports question audio, progress tracking, back navigation, and language switching.
+// Purpose: Loads follow-up questions from FastAPI after detected symptoms.
+// AppScreen handles SafeArea, background, footer, and language modal.
 
-// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  ImageBackground,
-  Pressable,
-  StatusBar,
-  SafeAreaView,
   Image,
-  Modal,
-  Animated,
+  Pressable,
   Alert,
-  BackHandler
+  BackHandler,
 } from 'react-native';
+
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
+
+import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/tellUsMoreStyles';
+
 import { getFollowUpQuestions } from '../services/triageApi';
 import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam } from '../utils/routeParams';
 import { buildAnswerList } from '../utils/triagePayloads';
 
-
-// Main screen component: TellUsMoreScreen
 export default function TellUsMoreScreen() {
-    // Router handles navigation to severity loading and back screens.
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { t, lang, setLang } = useLanguage();
+  const { t, lang } = useLanguage();
 
-    // Read detected symptoms passed from DetectedSymptomsScreen.
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
+  const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
-  const [audioLoading, setAudioLoading] = useState(false);
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(null);
 
   const soundRef = useRef(null);
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
-    // Current question based on question index.
   const currentQuestion = questions[currentIndex];
-  const totalQuestions = questions.length || 6;
-  const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+  const totalQuestions = questions.length || 1;
 
-  // Loads follow-up questions from FastAPI for the selected language.
-    // Fetches follow-up questions from FastAPI based on detected symptoms and language.
+  const optionCount = currentQuestion?.options?.length || 0;
+  const isTwoOptionQuestion = optionCount === 2;
+
+  const multiOptionColors = [
+    styles.optionColor1,
+    styles.optionColor2,
+    styles.optionColor3,
+    styles.optionColor4,
+    styles.optionColor5,
+  ];
+
+  // Loads follow-up questions from backend based on detected symptoms and selected language.
   async function fetchQuestions(languageCode) {
     try {
       setLoadingQuestions(true);
 
       const data = await getFollowUpQuestions(symptomsEn, languageCode);
 
-      setQuestions(data?.questions || []);
+      const backendQuestions = Array.isArray(data)
+        ? data
+        : data?.questions || [];
+
+      setQuestions(backendQuestions);
       setCurrentIndex(0);
       setAnswers({});
       setSelectedOption(null);
     } catch (error) {
-      console.log('Questions API error:', error);
-      Alert.alert('Error', 'Could not load questions.');
+      console.log('Follow-up question error:', error);
+      Alert.alert('Error', 'Could not load follow-up questions.');
     } finally {
       setLoadingQuestions(false);
     }
   }
 
   useEffect(() => {
-    fetchQuestions(lang || 'en');
+    fetchQuestions(lang || params.language || 'en');
   }, []);
 
-    // Stops currently playing question audio and unloads it from memory.
+  // Stops currently playing question audio.
   const stopCurrentAudio = async () => {
     try {
       if (soundRef.current) {
@@ -98,17 +100,13 @@ export default function TellUsMoreScreen() {
     }
   };
 
-    // Plays audio for the current question using the backend voice_b64 response.
+  // Plays backend-generated voice for the current question.
   const playQuestionAudio = async () => {
     try {
       if (!currentQuestion?.voice_b64) {
         Alert.alert('Audio Error', 'No audio available.');
         return;
       }
-
-      if (audioLoading) return;
-
-      setAudioLoading(true);
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
@@ -133,17 +131,17 @@ export default function TellUsMoreScreen() {
           if (soundRef.current === sound) {
             soundRef.current = null;
           }
+
           await sound.unloadAsync();
         }
       });
     } catch (error) {
-      console.log('Audio error:', error);
+      console.log('Question audio error:', error);
       Alert.alert('Audio Error', 'Cannot play audio.');
-    } finally {
-      setAudioLoading(false);
     }
   };
 
+  // Clean up audio when leaving this screen.
   useEffect(() => {
     return () => {
       if (soundRef.current) {
@@ -165,12 +163,11 @@ export default function TellUsMoreScreen() {
     };
   }, []);
 
-    // Saves the selected answer option for the current question.
   const handleOptionPress = (option) => {
     setSelectedOption(option.id);
   };
 
-    // Saves current answer, moves to next question, or submits all answers to severity loading screen.
+  // Saves current answer and moves to next question or severity loading screen.
   const handleContinue = async () => {
     if (!selectedOption) {
       Alert.alert('Select answer', 'Please select one option.');
@@ -203,15 +200,16 @@ export default function TellUsMoreScreen() {
         pathname: '/loadingseverity',
         params: {
           symptoms_en: JSON.stringify(symptomsEn),
-          symptoms_wp: params.symptoms_wp || JSON.stringify([]),
+          symptoms_wp: JSON.stringify(symptomsWp),
           answers: JSON.stringify(finalAnswers),
-          language: params.language || lang || 'en',
+          language: lang || params.language || 'en',
+          source: params.source || 'text',
         },
       });
     }
   };
 
-    // Moves back to previous question, or previous screen if already on first question.
+  // Handles back button. Previous question first, then previous screen.
   const handleBack = async () => {
     await stopCurrentAudio();
 
@@ -227,254 +225,203 @@ export default function TellUsMoreScreen() {
     }
   };
 
+  // Android hardware back button support.
   useEffect(() => {
-  const backAction = () => {
-    handleBack();
-    return true;
-  };
+    const backAction = () => {
+      handleBack();
+      return true;
+    };
 
-  const backHandler = BackHandler.addEventListener(
-    'hardwareBackPress',
-    backAction
-  );
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
 
-  return () => backHandler.remove();
-}, [currentIndex, questions, answers]);
+    return () => backHandler.remove();
+  }, [currentIndex, questions, answers]);
 
-    // Opens language selection modal.
-  const openModal = () => {
-    setSelectedLang(null);
-    setModalVisible(true);
-
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 5,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const closeModal = () => {
-    Animated.timing(scaleAnim, {
-      toValue: 0.8,
-      duration: 120,
-      useNativeDriver: true,
-    }).start(() => setModalVisible(false));
-  };
-
-    // Changes language and reloads follow-up questions from backend.
-  const confirmLanguage = async () => {
-    if (!selectedLang) return;
-
+  // Called by AppScreen before changing language.
+  const beforeLanguageChange = async () => {
     await stopCurrentAudio();
+  };
 
-    setLang(selectedLang);
-    closeModal();
-
+  // Called by AppScreen after changing language.
+  const afterLanguageChange = async (selectedLang) => {
     await fetchQuestions(selectedLang);
   };
 
-    // Show loading UI while follow-up questions are being fetched.
   if (loadingQuestions) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
-
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading questions...</Text>
+      <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
+        afterLanguageChange={afterLanguageChange}
+        onHomePress={async () => {
+          await stopCurrentAudio();
+          router.replace('/input');
+        }}
+      >
+        <View style={styles.container}>
+          <View style={styles.headerBar}>
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>            
           </View>
-        </ImageBackground>
-      </SafeAreaView>
+
+          <Text style={styles.progressText}>Loading questions...</Text>
+
+          <View style={styles.questionBox}>
+            <Text style={styles.questionText}>Please wait...</Text>
+          </View>
+        </View>
+      </AppScreen>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
+        afterLanguageChange={afterLanguageChange}
+        onHomePress={async () => {
+          await stopCurrentAudio();
+          router.replace('/input');
+        }}
+      >
+        <View style={styles.container}>
+          <View style={styles.headerBar}>
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>
+          </View>
+
+          <View style={styles.questionBox}>
+            <Text style={styles.questionText}>
+              No follow-up questions found.
+            </Text>
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.backPressedGrey,
+            ]}
+            onPress={handleBack}
+          >
+            <View style={styles.backButtonContent}>
+              <Image
+                source={require('../../assets/images/back-arrow.png')}
+                style={styles.backArrowImage}
+                resizeMode="contain"
+              />
+
+              <Text style={styles.backText}>{t('back')}</Text>
+            </View>
+          </Pressable>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5EAD8" />
+    <AppScreen
+      beforeLanguageChange={beforeLanguageChange}
+      afterLanguageChange={afterLanguageChange}
+      onHomePress={async () => {
+        await stopCurrentAudio();
+        router.replace('/input');
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>{t('tell_us_more')}</Text>  
+        </View>
 
-      <View style={styles.wrapper}>
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
-        >
-          <View style={styles.container}>
-            <View style={styles.headerBar}>
-              <Pressable onPress={handleBack} style={styles.backCircle}>
-                <Text style={styles.backArrow}>←</Text>
-              </Pressable>
+        <Text style={styles.progressText}>
+          Question {currentIndex + 1} of {totalQuestions}
+        </Text>
 
-              <Text style={styles.headerText}>Tell us more</Text>
-            </View>
+        <View style={styles.progressBarBackground}>
+          <View
+            style={[
+              styles.progressBarFill,
+              {
+                width: `${((currentIndex + 1) / totalQuestions) * 100}%`,
+              },
+            ]}
+          />
+        </View>
 
-            <Text style={styles.questionNumber}>
-              Question {currentIndex + 1} of {totalQuestions}
-            </Text>
+        <View style={styles.questionBox}>
+          <Text style={styles.questionText}>{currentQuestion.text}</Text>
 
-                        {/* Progress bar shows current question progress. */}
-            <View style={styles.progressTrack}>
-              <View
+          <Pressable
+            style={({ pressed }) => [
+              styles.speakerButton,
+              pressed && styles.speakerPressed,
+            ]}
+            onPress={playQuestionAudio}
+          >
+            <Image
+              source={require('../../assets/images/speaker.png')}
+              style={styles.speakerIcon}
+              resizeMode="contain"
+            />
+          </Pressable>
+
+          {currentQuestion.options?.map((option, index) => {
+            const isSelected = selectedOption === option.id;
+
+            return (
+              <Pressable
+                key={option.id || index}
                 style={[
-                  styles.progressFill,
-                  { width: `${progressPercent}%` },
+                  styles.optionButton,
+                  isTwoOptionQuestion
+                    ? styles.twoOptionStyle
+                    : multiOptionColors[index],
+                  isSelected && styles.selectedOption,
                 ]}
-              />
-            </View>
-
-            <View style={styles.questionBox}>
-              <View style={styles.questionHeader}>
-                <Text style={styles.questionText}>
-                  {currentQuestion?.text}
-                </Text>
-
-                <Pressable
-                  style={styles.speakerButton}
-                  onPress={playQuestionAudio}
-                  disabled={audioLoading}
-                >
-                  <Image
-                    source={require('../../assets/images/speaker.png')}
-                    style={styles.speakerIcon}
-                    resizeMode="contain"
-                  />
-                </Pressable>
-              </View>
-
-              <View style={styles.optionsWrapper}>
-                                {/* Render answer options dynamically from backend. */}
-                {currentQuestion?.options?.map((option, index) => {
-                  const isSelected = selectedOption === option.id;
-
-                  return (
-                    <Pressable
-                      key={option.id}
-                      style={[
-                        styles.optionItem,
-                        index === 1 && styles.optionLight,
-                        index === 2 && styles.optionMedium,
-                        index === 3 && styles.optionDark,
-                        isSelected && styles.optionSelected,
-                      ]}
-                      onPress={() => handleOptionPress(option)}
-                    >
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.optionTextSelected,
-                        ]}
-                      >
-                        • {option.text}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.continueButton,
-                pressed && styles.continuePressed,
-              ]}
-              onPress={handleContinue}
-            >
-              <Text style={styles.continueText}>
-                {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={async () => {
-                await stopCurrentAudio();
-                router.replace('/input');
-              }}
-            >
-              <Text style={styles.footerIcon}>🏠</Text>
-              <Text style={styles.footerText}>{t('home')}</Text>
-            </Pressable>
-
-            <Pressable style={styles.footerItem} onPress={openModal}>
-              <Text style={styles.footerIcon}>🌐</Text>
-              <Text style={styles.footerText}>{t('language')}</Text>
-            </Pressable>
-          </View>
-
-          <Modal transparent visible={modalVisible} animationType="fade">
-            <View style={styles.modalOverlay}>
-              <Animated.View
-                style={[
-                  styles.languageModal,
-                  { transform: [{ scale: scaleAnim }] },
-                ]}
+                onPress={() => handleOptionPress(option)}
               >
-                <Text style={styles.modalTitle}>{t('select_language')}</Text>
-
-                <Pressable
+                <Text
                   style={[
-                    styles.languageOption,
-                    selectedLang === 'en' && styles.languageOptionSelected,
+                    styles.optionText,
+                    isSelected && styles.selectedOptionText,
                   ]}
-                  onPress={() => setSelectedLang('en')}
                 >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'en' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('english')}
-                  </Text>
-                </Pressable>
+                  • {option.text}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
 
-                <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'wp' && styles.languageOptionSelected,
-                  ]}
-                  onPress={() => setSelectedLang('wp')}
-                >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang === 'wp' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('warlpiri')}
-                  </Text>
-                </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.continueButton,
+            pressed && styles.continuePressed,
+          ]}
+          onPress={handleContinue}
+        >
+          <Text style={styles.continueText}>
+            {currentIndex === questions.length - 1 ? t('submit') : t('continue')}
+          </Text>
+        </Pressable>
 
-                <Text style={styles.confirmText}>{t('change_language')}</Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backPressedGrey,
+          ]}
+          onPress={handleBack}
+        >
+          <View style={styles.backButtonContent}>
+            <Image
+              source={require('../../assets/images/back-arrow.png')}
+              style={styles.backArrowImage}
+              resizeMode="contain"
+            />
 
-                <View style={styles.modalButtonRow}>
-                  <Pressable style={styles.cancelButton} onPress={closeModal}>
-                    <Text style={styles.cancelText}>{t('no')}</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={[
-                      styles.confirmButton,
-                      !selectedLang && styles.disabledButton,
-                    ]}
-                    disabled={!selectedLang}
-                    onPress={confirmLanguage}
-                  >
-                    <Text style={styles.confirmButtonText}>{t('yes')}</Text>
-                  </Pressable>
-                </View>
-              </Animated.View>
-            </View>
-          </Modal>
-        </ImageBackground>
+            <Text style={styles.backText}>{t('back')}</Text>
+          </View>
+        </Pressable>
       </View>
-    </SafeAreaView>
+    </AppScreen>
   );
 }
