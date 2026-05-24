@@ -1,7 +1,4 @@
 // VoiceInputScreen.js
-// Purpose: Records the user's symptom description by voice.
-// Auto-plays describe_symptoms_en/wp audio when this screen opens.
-// AppScreen handles SafeArea, background, footer, and language modal.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -94,13 +91,10 @@ export default function VoiceInputScreen() {
           ? describeSymptomsAudio.wp
           : describeSymptomsAudio.en;
 
-      const { sound } = await Audio.Sound.createAsync(
-        selectedAudio,
-        {
-          shouldPlay: true,
-          volume: 1.0,
-        }
-      );
+      const { sound } = await Audio.Sound.createAsync(selectedAudio, {
+        shouldPlay: true,
+        volume: 1.0,
+      });
 
       instructionSoundRef.current = sound;
 
@@ -489,11 +483,29 @@ export default function VoiceInputScreen() {
             {t('speak_option') || 'Speak'}
           </Text>
 
-          <Image
-            source={require('../../assets/images/voice.png')}
-            style={styles.headerIcon}
-            resizeMode="contain"
-          />
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              onPress={() => playDescribeSymptomsAudio(lang)}
+              disabled={isRecording}
+              style={({ pressed }) => [
+                styles.headerSpeakerButton,
+                pressed && styles.headerSpeakerPressed,
+                isRecording && styles.headerSpeakerDisabled,
+              ]}
+            >
+              <Image
+                source={require('../../assets/images/speaker.png')}
+                style={styles.headerSpeakerIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Image
+              source={require('../../assets/images/voice.png')}
+              style={styles.headerIcon}
+              resizeMode="contain"
+            />
+          </View>
         </View>
 
         <View style={styles.recordBox}>

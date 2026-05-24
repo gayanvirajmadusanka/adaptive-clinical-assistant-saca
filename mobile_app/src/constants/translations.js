@@ -25,7 +25,7 @@ export const translations = {
     text_input_title: 'Write',
     speak_option: 'Speak',
     speak_hint: 'Click on mic to record voice',
-    recording_hint: 'Recording... tap to stop',
+    recording_hint: 'Your Voice is Recording...',
     processing_voice: 'Processing your voice...',
     text_input_question: 'What can I help with?',
     text_placeholder: 'Describe your symptoms and press Continue',
@@ -158,7 +158,6 @@ export const translations = {
     no_answer_title: 'No Answer',
     no_answer_message_1: 'Please select an answer',
     no_answer_message_2: 'Choose one of the options before continuing.',
-    question: 'Question',
     of: 'of',
     no_follow_up_questions: 'No follow-up questions found.',
 
@@ -171,6 +170,27 @@ export const translations = {
     body_symptoms_hint: 'Tap symptom(s) that match',
 
     tap_red_dot: 'Tap red dot or choose from the list',
+
+    
+    voice_tap_to_answer: 'Tap to Answer',
+    voice_recording_hint: 'Voice is Recording',
+    voice_processing: 'Voice Processing',
+    voice_not_recognized_title: 'Voice not recognized',
+    voice_not_recognized_hint: 'Could not transcribe audio. Please tap your answer instead.',
+    voice_not_recognized: 'Could not recognize answer, please select or try again',
+
+    voice_loading_top: 'Checking your voice...',
+    voice_loading_bottom: 'Please wait while we process your voice...',
+    voice_loading_preparing: 'Preparing your results...',
+
+    voice_tell_us_more: 'Tell Us More',
+    voice_loading_questions: 'Loading questions...',
+    voice_answer_recorded: 'Voice answer recorded',
+    voice_answer_checking: 'Checking voice answer...',
+    voice_speak_answer: 'Speak your answer',
+    voice_recording_stop: 'Recording... tap mic to stop',
+    voice_click_mic: 'Click on mic to record voice',
+    voice_select_answer: 'Please select or speak one answer.',
   },
 
   wp: {
@@ -198,8 +218,8 @@ export const translations = {
 
     text_input_title: 'Pantirniya',
     speak_option: 'Wangkaya',
-    speak_hint: 'Mic-kurra nyampu, wangka record-ki',
-    recording_hint: 'Recording... stop-ki mic nyampuju',
+    speak_hint: 'Wangkaya mikiphona-kurra',
+    recording_hint: 'Wangkaya Yirrarni...',
     processing_voice: 'Voice nyanyi...',
     text_input_question: 'Nyiya ka nyuntu nyampuju?',
     text_placeholder: 'Ngarrirni nyuntu purrkunypa.',
@@ -333,7 +353,6 @@ export const translations = {
     no_answer_title: 'Japi lawa',
     no_answer_message_1: 'Yuwayi manu lawa milkikariya',
     no_answer_message_2: 'Jinta milarni, yantarla-wangu',
-    question: 'Japi',
     of: 'of',
     no_follow_up_questions: 'Japi-kari lawa.',
 
@@ -346,5 +365,26 @@ export const translations = {
     body_symptoms_hint: 'Purrkunypa nyuntu-nyangu milkikarriya',
 
     tap_red_dot: 'Purrkunypa nyuntu-nyangu milkikarriya',
+
+    voice_tap_to_answer: 'Milkikarriya jangkuman',
+    voice_recording_hint: 'Wangkaya-nyangu pirlirrpa yirrarni',
+    voice_processing: 'Wangkaya-nyangu yirrarni',
+    voice_not_recognized_title: 'Wangkaya milya-pi-nyi wiyarnu',
+    voice_not_recognized_hint: 'Wangkaya raa-pi-nyi',
+    voice_not_recognized: 'Jangkumani milya-pi-nyi wiyarnu. Milarni, wala-parri-rni kuja-rla',
+
+    voice_loading_top: 'Nyuntu-nyangu wangkami kardarni...',
+    voice_loading_bottom: 'Ngula-jangka nyampuju voice process-mani.',
+    voice_loading_preparing: 'Result jungarni-mani...',
+
+    voice_tell_us_more: 'Ngarrirni nyuntu panu',
+    voice_loading_questions: 'Japi yirrarni...',
+    voice_answer_recorded: 'Wangkaya-nyangu yirrarnu',
+    voice_answer_checking: 'Wangkaya-nyangu nyanganyi...',
+    voice_speak_answer: 'Wangkaya nyuntu jangku',
+    voice_recording_stop: 'Wangkaya yirrarni... mic tap-mani stop-kurra',
+    voice_click_mic: 'Mic tap-mani wangkaya yirrarni-kurra',
+    voice_select_answer: 'Yuwayi manu lawa milkikarriya manu wangkaya.',
+
   },
 };

@@ -138,6 +138,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 18,
     marginBottom: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
 
   twoOptionStyle: {
@@ -165,13 +167,21 @@ export default StyleSheet.create({
   },
 
   selectedOption: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
-    borderWidth: 2,
+    borderWidth: 3,
+    borderColor: '#000',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
   selectedOptionText: {
-    color: '#FFF',
+    color: '#000',
+    fontFamily: FONTS.bold,
   },
 
   optionText: {
@@ -375,4 +385,109 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
   },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorModalBox: {
+    width: '92%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#F5EAD8',
+    borderWidth: 1,
+    borderColor: '#8B3A1C',
+    elevation: 8,
+  },
+
+  errorHeader: {
+    backgroundColor: '#8B2E0A',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  errorTitle: {
+    color: '#FFF',
+    fontSize: 21,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    flex: 1,
+    paddingRight: 12,
+  },
+
+  errorCloseButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 9,
+    borderWidth: 3,
+    borderColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorCloseText: {
+    color: '#FFF',
+    fontSize: 34,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    lineHeight: 36,
+  },
+
+  errorBody: {
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 20,
+    minHeight: 150,
+  },
+
+  errorMessageBold: {
+    color: '#5C2E0A',
+    fontSize: 19,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 22,
+    lineHeight: 26,
+  },
+
+  errorMessage: {
+    color: '#5C2E0A',
+    fontSize: 17,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 28,
+    lineHeight: 24,
+  },
+
+  errorOkButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 22,
+  },
+
+  errorOkButtonPressed: {
+    backgroundColor: '#8B1E0D',
+    transform: [{ scale: 0.96 }],
+  },
+
+  errorOkText: {
+    color: '#FFF',
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+
+  continueDisabled: {
+  opacity: 0.45,
+},
+
 });

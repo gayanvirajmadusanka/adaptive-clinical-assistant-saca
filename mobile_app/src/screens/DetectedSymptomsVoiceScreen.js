@@ -1,39 +1,127 @@
 // DetectedSymptomsVoiceScreen.js
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, Image, Modal, Alert } from 'react-native';
+
+import {
+  View,
+  Text,
+  Pressable,
+  Image,
+  Modal,
+  ImageBackground,
+} from 'react-native';
+
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 
 import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
-import { extractSymptomsFromText } from '../services/triageApi';
+import {
+  extractSymptomsFromText,
+  submitAnswerAudio,
+} from '../services/triageApi';
 
-import { saveBase64AudioToCache } from '../utils/base64Audio';
+import {
+  readAudioFileAsBase64,
+  saveBase64AudioToCache,
+} from '../utils/base64Audio';
 
-import { parseJsonParam, toJsonParam } from '../utils/routeParams';
+import {
+  parseJsonParam,
+  toJsonParam,
+} from '../utils/routeParams';
+
+import { WAV_RECORDING_OPTIONS } from '../utils/audioRecordingOptions';
+
+const CONFIRM_SYMPTOMS_QUESTION_ID = 'confirm_symptoms';
+const CONFIRM_SYMPTOMS_ANSWER_YES = 'confirm_symptomsy';
+const CONFIRM_SYMPTOMS_ANSWER_NO = 'confirm_symptomsn';
+
+const INVALID_SYMPTOM_VALUES = [
+  '',
+  'none',
+  'null',
+  'undefined',
+  'no symptom',
+  'no symptoms',
+  'no symptoms detected',
+  'not detected',
+  'unknown',
+];
 
 export default function DetectedSymptomsVoiceScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { t, lang } = useLanguage();
 
-  const symptomsEn = parseJsonParam(params.symptoms_en, []);
-  const symptomsWp = parseJsonParam(params.symptoms_wp, []);
+  const rawSymptomsEn = parseJsonParam(params.symptoms_en, []);
+  const rawSymptomsWp = parseJsonParam(params.symptoms_wp, []);
+
+  const cleanSymptoms = (items = []) => {
+    return items
+      .map((item) => String(item || '').trim())
+      .filter((item) => {
+        const normalized = item.toLowerCase();
+        return !INVALID_SYMPTOM_VALUES.includes(normalized);
+      });
+  };
+
+  const symptomsEn = cleanSymptoms(rawSymptomsEn);
+  const symptomsWp = cleanSymptoms(rawSymptomsWp);
+
+  const hasNoSymptoms =
+    symptomsEn.length === 0 && symptomsWp.length === 0;
 
   const [voiceFileUriEn, setVoiceFileUriEn] = useState(null);
   const [voiceFileUriWp, setVoiceFileUriWp] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
-  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
-  const [selectedVoiceAnswer, setSelectedVoiceAnswer] = useState(null);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [answerErrorModalVisible, setAnswerErrorModalVisible] =
+    useState(false);
+
+  const [selectedVoiceAnswer, setSelectedVoiceAnswer] =
+    useState(null);
+
+  const [answerRecording, setAnswerRecording] = useState(null);
+  const [isAnswerRecording, setIsAnswerRecording] =
+    useState(false);
 
   const soundRef = useRef(null);
+  const autoPlayedRef = useRef(false);
+
+  const noSymptomsTitle = t('no_symptoms_detected');
+
+  const noSymptomsMessage1 =
+    lang === 'wp'
+      ? 'Ngula purrkunypa lawa nyangu nyuntu yirrarni-jangka.'
+      : 'We could not detect any symptoms from your recording.';
+
+  const noSymptomsMessage2 =
+    lang === 'wp'
+      ? 'Yirrarni-kari ngarrirni clear-piya.'
+      : 'Please try recording again more clearly.';
+
+  const answerErrorTitle = t(
+    'voice_not_recognized_title'
+  );
+
+  const answerErrorMessage1 =
+    lang === 'wp'
+      ? 'Answer lawa nyangu. Yuwayi manu Lawa milkikarriya.'
+      : 'Could not recognize answer, please select or try again';
+
+  const answerErrorMessage2 = t(
+    'voice_not_recognized_hint'
+  );
+
+  const okText = t('ok');
 
   useFocusEffect(
     useCallback(() => {
@@ -41,59 +129,79 @@ export default function DetectedSymptomsVoiceScreen() {
     }, [])
   );
 
+  useEffect(() => {
+    if (hasNoSymptoms) {
+      setErrorModalVisible(true);
+
+      setTimeout(() => {
+        readNoSymptomsAlertText();
+      }, 400);
+
+      return;
+    }
+
+    prepareInitialAudioAndAutoPlay();
+
+    return () => {
+      stopCurrentAudio();
+      stopAnswerRecordingIfActive();
+    };
+  }, []);
+
   const symptomsToShow =
     lang === 'wp' && symptomsWp.length > 0
       ? symptomsWp
       : symptomsEn.map((item) => {
-          const key = String(item).toLowerCase().replaceAll(' ', '_');
+          const key = String(item)
+            .toLowerCase()
+            .replaceAll(' ', '_');
+
           return t(key);
         });
 
   const symptomText =
     symptomsToShow.length > 0
-      ? symptomsToShow.map((item) => `• ${item}`).join('\n')
-      : 'No symptoms detected';
+      ? symptomsToShow
+          .map((item) => `• ${item}`)
+          .join('\n')
+      : '';
 
-  useEffect(() => {
-    prepareInitialAudio();
-
-    return () => {
-      stopCurrentAudio();
-    };
-  }, []);
-
-  async function prepareInitialAudio() {
+  async function prepareInitialAudioAndAutoPlay() {
     try {
-      const voiceB64En = String(params.voice_b64_en || '');
-      const voiceB64Wp = String(params.voice_b64_wp || '');
-
-      if (voiceB64En) {
-        const fileEn = await saveBase64AudioToCache(
-          voiceB64En,
-          'detected_symptoms_voice_en.wav'
-        );
-        setVoiceFileUriEn(fileEn);
+      if (hasNoSymptoms || autoPlayedRef.current) {
+        return;
       }
 
-      if (voiceB64Wp) {
-        const fileWp = await saveBase64AudioToCache(
-          voiceB64Wp,
-          'detected_symptoms_voice_wp.wav'
-        );
-        setVoiceFileUriWp(fileWp);
+      autoPlayedRef.current = true;
+
+      const fileUri = await getAudioFileForLanguage(
+        lang
+      );
+
+      if (fileUri) {
+        setTimeout(() => {
+          playAudioFromUri(fileUri);
+        }, 300);
       }
     } catch (error) {
-      console.log('Prepare detected voice audio error:', error);
+      console.log(
+        'Prepare and auto play audio error:',
+        error
+      );
     }
   }
 
   async function stopCurrentAudio() {
     try {
+      Speech.stop();
+
       if (soundRef.current) {
         const currentSound = soundRef.current;
+
         soundRef.current = null;
 
-        const status = await currentSound.getStatusAsync();
+        const status =
+          await currentSound.getStatusAsync();
 
         if (status.isLoaded) {
           await currentSound.stopAsync();
@@ -105,11 +213,93 @@ export default function DetectedSymptomsVoiceScreen() {
     }
   }
 
-  async function getAudioFileForLanguage(languageCode) {
-    const selectedLang = languageCode === 'wp' ? 'wp' : 'en';
+  async function stopAnswerRecordingIfActive() {
+    try {
+      if (answerRecording) {
+        await answerRecording.stopAndUnloadAsync();
 
-    if (selectedLang === 'wp' && voiceFileUriWp) return voiceFileUriWp;
-    if (selectedLang === 'en' && voiceFileUriEn) return voiceFileUriEn;
+        setAnswerRecording(null);
+        setIsAnswerRecording(false);
+      }
+    } catch (error) {
+      console.log(
+        'Stop answer recording cleanup error:',
+        error
+      );
+    }
+  }
+
+  async function readNoSymptomsAlertText() {
+    try {
+      await stopCurrentAudio();
+
+      const alertText = `${noSymptomsTitle}. ${noSymptomsMessage1} ${noSymptomsMessage2}`;
+
+      Speech.speak(alertText, {
+        language: 'en-AU',
+        pitch: 1.0,
+        rate: 0.85,
+      });
+    } catch (error) {
+      console.log(
+        'Read no symptoms alert text error:',
+        error
+      );
+    }
+  }
+
+  async function readAnswerErrorText() {
+    try {
+      await stopCurrentAudio();
+
+      const alertText = `${answerErrorTitle}. ${answerErrorMessage1}. ${answerErrorMessage2}`;
+
+      Speech.speak(alertText, {
+        language: 'en-AU',
+        pitch: 1.0,
+        rate: 0.85,
+      });
+    } catch (error) {
+      console.log(
+        'Read answer error text error:',
+        error
+      );
+    }
+  }
+
+  async function showAnswerNotRecognizedModal() {
+    await stopCurrentAudio();
+
+    setAnswerErrorModalVisible(true);
+
+    setTimeout(() => {
+      readAnswerErrorText();
+    }, 300);
+  }
+
+  async function getAudioFileForLanguage(
+    languageCode
+  ) {
+    if (hasNoSymptoms) {
+      return null;
+    }
+
+    const selectedLang =
+      languageCode === 'wp' ? 'wp' : 'en';
+
+    if (
+      selectedLang === 'wp' &&
+      voiceFileUriWp
+    ) {
+      return voiceFileUriWp;
+    }
+
+    if (
+      selectedLang === 'en' &&
+      voiceFileUriEn
+    ) {
+      return voiceFileUriEn;
+    }
 
     const directAudio =
       selectedLang === 'wp'
@@ -117,10 +307,11 @@ export default function DetectedSymptomsVoiceScreen() {
         : String(params.voice_b64_en || '');
 
     if (directAudio) {
-      const fileUri = await saveBase64AudioToCache(
-        directAudio,
-        `detected_symptoms_voice_${selectedLang}.wav`
-      );
+      const fileUri =
+        await saveBase64AudioToCache(
+          directAudio,
+          `detected_symptoms_voice_${selectedLang}.wav`
+        );
 
       if (selectedLang === 'wp') {
         setVoiceFileUriWp(fileUri);
@@ -138,21 +329,38 @@ export default function DetectedSymptomsVoiceScreen() {
           : symptomsEn.join(' ')
         : symptomsEn.join(' ');
 
-    if (!textToSend) return null;
+    if (!textToSend) {
+      return null;
+    }
 
-    const data = await extractSymptomsFromText(textToSend, selectedLang);
+    const data =
+      await extractSymptomsFromText(
+        textToSend,
+        selectedLang
+      );
 
     const audioBase64 =
       selectedLang === 'wp'
-        ? String(data?.voice_b64_wp || '')
-        : String(data?.voice_b64_en || '');
+        ? String(
+            data?.voice_b64_wp ||
+              data?.voice_b64 ||
+              ''
+          )
+        : String(
+            data?.voice_b64_en ||
+              data?.voice_b64 ||
+              ''
+          );
 
-    if (!audioBase64) return null;
+    if (!audioBase64) {
+      return null;
+    }
 
-    const fileUri = await saveBase64AudioToCache(
-      audioBase64,
-      `detected_symptoms_voice_${selectedLang}.wav`
-    );
+    const fileUri =
+      await saveBase64AudioToCache(
+        audioBase64,
+        `detected_symptoms_voice_${selectedLang}.wav`
+      );
 
     if (selectedLang === 'wp') {
       setVoiceFileUriWp(fileUri);
@@ -163,14 +371,9 @@ export default function DetectedSymptomsVoiceScreen() {
     return fileUri;
   }
 
-  async function playVoiceAudio() {
+  async function playAudioFromUri(fileUri) {
     try {
-      if (audioLoading) {
-        Alert.alert('Please wait', 'Preparing audio...');
-        return;
-      }
-
-      setAudioLoading(true);
+      await stopCurrentAudio();
 
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
@@ -179,34 +382,71 @@ export default function DetectedSymptomsVoiceScreen() {
         playThroughEarpieceAndroid: false,
       });
 
-      await stopCurrentAudio();
-
-      const fileUri = await getAudioFileForLanguage(lang);
-
-      if (!fileUri) {
-        Alert.alert('Audio Error', 'No detected symptoms audio found.');
-        return;
-      }
-
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: fileUri },
-        { shouldPlay: true, volume: 1.0 }
-      );
+      const { sound } =
+        await Audio.Sound.createAsync(
+          { uri: fileUri },
+          {
+            shouldPlay: true,
+            volume: 1.0,
+          }
+        );
 
       soundRef.current = sound;
 
-      sound.setOnPlaybackStatusUpdate(async (status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          if (soundRef.current === sound) {
-            soundRef.current = null;
-          }
+      sound.setOnPlaybackStatusUpdate(
+        async (status) => {
+          if (
+            status.isLoaded &&
+            status.didJustFinish
+          ) {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
+            }
 
-          await sound.unloadAsync();
+            await sound.unloadAsync();
+          }
         }
-      });
+      );
     } catch (error) {
-      console.log('Play detected voice audio error:', error);
-      Alert.alert('Audio Error', 'Unable to play audio.');
+      console.log(
+        'Play audio from uri error:',
+        error
+      );
+    }
+  }
+
+  async function playVoiceAudio() {
+    try {
+      if (audioLoading) {
+        return;
+      }
+
+      if (hasNoSymptoms) {
+        setErrorModalVisible(true);
+
+        await readNoSymptomsAlertText();
+
+        return;
+      }
+
+      setAudioLoading(true);
+
+      const fileUri =
+        await getAudioFileForLanguage(lang);
+
+      if (!fileUri) {
+        await showAnswerNotRecognizedModal();
+        return;
+      }
+
+      await playAudioFromUri(fileUri);
+    } catch (error) {
+      console.log(
+        'Play detected voice audio error:',
+        error
+      );
+
+      await showAnswerNotRecognizedModal();
     } finally {
       setAudioLoading(false);
     }
@@ -215,8 +455,11 @@ export default function DetectedSymptomsVoiceScreen() {
   async function handleYesPress() {
     if (loading) return;
 
-    if (symptomsEn.length === 0 && symptomsWp.length === 0) {
+    if (hasNoSymptoms) {
       setErrorModalVisible(true);
+
+      await readNoSymptomsAlertText();
+
       return;
     }
 
@@ -225,15 +468,19 @@ export default function DetectedSymptomsVoiceScreen() {
 
     await stopCurrentAudio();
 
-    router.push({
-      pathname: '/tellusmorevoice',
-      params: {
-        symptoms_en: toJsonParam(symptomsEn),
-        symptoms_wp: toJsonParam(symptomsWp),
-        language: lang,
-        source: 'voice',
-      },
-    });
+    setTimeout(() => {
+      router.push({
+        pathname: '/tellusmorevoice',
+        params: {
+          symptoms_en:
+            toJsonParam(symptomsEn),
+          symptoms_wp:
+            toJsonParam(symptomsWp),
+          language: lang,
+          source: 'voice',
+        },
+      });
+    }, 350);
   }
 
   async function handleNoPress() {
@@ -241,20 +488,228 @@ export default function DetectedSymptomsVoiceScreen() {
 
     await stopCurrentAudio();
 
+    setTimeout(() => {
+      router.replace('/voiceinput');
+    }, 350);
+  }
+
+  async function handleAnswerMicPress() {
+    try {
+      if (audioLoading) {
+        return;
+      }
+
+      if (isAnswerRecording) {
+        await stopAnswerRecording();
+        return;
+      }
+
+      await startAnswerRecording();
+    } catch (error) {
+      console.log(
+        'Answer recording error:',
+        error
+      );
+
+      await showAnswerNotRecognizedModal();
+    }
+  }
+
+  async function startAnswerRecording() {
+    const permission =
+      await Audio.requestPermissionsAsync();
+
+    if (!permission.granted) {
+      await showAnswerNotRecognizedModal();
+      return;
+    }
+
+    await stopCurrentAudio();
+
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    });
+
+    const newRecording =
+      new Audio.Recording();
+
+    await newRecording.prepareToRecordAsync(
+      WAV_RECORDING_OPTIONS
+    );
+
+    await newRecording.startAsync();
+
+    setAnswerRecording(newRecording);
+    setIsAnswerRecording(true);
+  }
+
+  async function stopAnswerRecording() {
+    try {
+      if (!answerRecording) {
+        return;
+      }
+
+      await answerRecording.stopAndUnloadAsync();
+
+      const uri = answerRecording.getURI();
+
+      setAnswerRecording(null);
+      setIsAnswerRecording(false);
+
+      if (!uri) {
+        await showAnswerNotRecognizedModal();
+        return;
+      }
+
+      await detectYesNoFromVoice(uri);
+    } catch (error) {
+      console.log(
+        'Stop answer recording error:',
+        error
+      );
+
+      setAnswerRecording(null);
+      setIsAnswerRecording(false);
+
+      await showAnswerNotRecognizedModal();
+    }
+  }
+
+  async function detectYesNoFromVoice(uri) {
+    try {
+      setAudioLoading(true);
+
+      const audioBase64 =
+        await readAudioFileAsBase64(
+          String(uri)
+        );
+
+      if (
+        !audioBase64 ||
+        audioBase64.length < 100
+      ) {
+        await showAnswerNotRecognizedModal();
+        return;
+      }
+
+      const data = await submitAnswerAudio(
+        audioBase64,
+        CONFIRM_SYMPTOMS_QUESTION_ID,
+        lang
+      );
+
+      console.log(
+        'ANSWER AUDIO API DATA:',
+        JSON.stringify(data, null, 2)
+      );
+
+      const recognized =
+        data?.recognized === true;
+
+      const answerId = String(
+        data?.answer_id || ''
+      ).toLowerCase();
+
+      if (
+        recognized &&
+        answerId ===
+          CONFIRM_SYMPTOMS_ANSWER_YES
+      ) {
+        setSelectedVoiceAnswer('yes');
+
+        setTimeout(() => {
+          handleYesPress();
+        }, 450);
+
+        return;
+      }
+
+      if (
+        recognized &&
+        answerId ===
+          CONFIRM_SYMPTOMS_ANSWER_NO
+      ) {
+        setSelectedVoiceAnswer('no');
+
+        setTimeout(() => {
+          handleNoPress();
+        }, 450);
+
+        return;
+      }
+
+      await showAnswerNotRecognizedModal();
+    } catch (error) {
+      console.log(
+        'Detect yes no voice error:',
+        error
+      );
+
+      await showAnswerNotRecognizedModal();
+    } finally {
+      setAudioLoading(false);
+    }
+  }
+
+  async function closeAnswerErrorModal() {
+    await stopCurrentAudio();
+
+    setAnswerErrorModalVisible(false);
+  }
+
+  async function goBackToVoiceInput() {
+    await stopCurrentAudio();
+
+    await stopAnswerRecordingIfActive();
+
+    setErrorModalVisible(false);
+
     router.replace('/voiceinput');
   }
 
   async function beforeLanguageChange() {
     await stopCurrentAudio();
+
+    await stopAnswerRecordingIfActive();
   }
 
-  async function afterLanguageChange(selectedLang) {
+  async function afterLanguageChange(
+    selectedLang
+  ) {
     try {
       setAudioLoading(true);
+
       await stopCurrentAudio();
-      await getAudioFileForLanguage(selectedLang);
+
+      if (hasNoSymptoms) {
+        setErrorModalVisible(true);
+
+        setTimeout(() => {
+          readNoSymptomsAlertText();
+        }, 300);
+
+        return;
+      }
+
+      const fileUri =
+        await getAudioFileForLanguage(
+          selectedLang
+        );
+
+      if (fileUri) {
+        setTimeout(() => {
+          playAudioFromUri(fileUri);
+        }, 300);
+      }
     } catch (error) {
-      console.log('Detected voice language update error:', error);
+      console.log(
+        'Detected voice language update error:',
+        error
+      );
     } finally {
       setAudioLoading(false);
     }
@@ -262,27 +717,41 @@ export default function DetectedSymptomsVoiceScreen() {
 
   return (
     <AppScreen
-      languageLabel={audioLoading ? 'Updating...' : undefined}
+      languageLabel={
+        audioLoading ? 'Updating...' : undefined
+      }
       languageModalDisabled={audioLoading}
-      beforeLanguageChange={beforeLanguageChange}
-      afterLanguageChange={afterLanguageChange}
+      beforeLanguageChange={
+        beforeLanguageChange
+      }
+      afterLanguageChange={
+        afterLanguageChange
+      }
       onHomePress={async () => {
         await stopCurrentAudio();
+
+        await stopAnswerRecordingIfActive();
+
         router.replace('/input');
       }}
     >
       <View style={styles.container}>
         <View style={styles.headerBar}>
-          <Text style={styles.headerText}>{t('detected_title')}</Text>
+          <Text style={styles.headerText}>
+            {t('detected_title')}
+          </Text>
         </View>
 
         <View style={styles.symptomBox}>
-          <Text style={styles.symptomText}>{symptomText}</Text>
+          <Text style={styles.symptomText}>
+            {symptomText}
+          </Text>
 
           <Pressable
             style={({ pressed }) => [
               styles.speakerButton,
-              pressed && styles.speakerPressed,
+              pressed &&
+                styles.speakerPressed,
             ]}
             onPress={playVoiceAudio}
           >
@@ -294,20 +763,25 @@ export default function DetectedSymptomsVoiceScreen() {
           </Pressable>
         </View>
 
-        <Text style={styles.questionText}>{t('detected_question')}</Text>
+        <Text style={styles.questionText}>
+          {t('detected_question')}
+        </Text>
 
         <View style={styles.voiceAnswerRow}>
           <Pressable
             style={[
               styles.voiceYesNoButton,
-              selectedVoiceAnswer === 'yes' && styles.voiceAnswerSelected,
+              selectedVoiceAnswer ===
+                'yes' &&
+                styles.voiceAnswerSelected,
             ]}
             onPress={handleYesPress}
           >
             <Text
               style={[
                 styles.voiceYesNoText,
-                selectedVoiceAnswer === 'yes' &&
+                selectedVoiceAnswer ===
+                  'yes' &&
                   styles.voiceAnswerSelectedText,
               ]}
             >
@@ -318,77 +792,238 @@ export default function DetectedSymptomsVoiceScreen() {
           <Pressable
             style={[
               styles.voiceYesNoButton,
-              selectedVoiceAnswer === 'no' && styles.voiceAnswerSelected,
+              selectedVoiceAnswer ===
+                'no' &&
+                styles.voiceAnswerSelected,
             ]}
             onPress={handleNoPress}
           >
             <Text
               style={[
                 styles.voiceYesNoText,
-                selectedVoiceAnswer === 'no' &&
+                selectedVoiceAnswer ===
+                  'no' &&
                   styles.voiceAnswerSelectedText,
               ]}
             >
               {t('no')}
             </Text>
           </Pressable>
+
+          <View style={styles.voiceMicWrapper}>
+            <Pressable
+              style={[
+                styles.detectedMicButton,
+                isAnswerRecording &&
+                  styles.detectedMicRecording,
+              ]}
+              onPress={
+                handleAnswerMicPress
+              }
+            >
+              <Image
+                source={require('../../assets/images/microphone.png')}
+                style={styles.detectedMicIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Text
+              style={
+                styles.tapToAnswerText
+              }
+            >
+              {audioLoading
+                ? t('voice_processing')
+                : isAnswerRecording
+                ? t(
+                    'voice_recording_hint'
+                  )
+                : t(
+                    'voice_tap_to_answer'
+                  )}
+            </Text>
+          </View>
         </View>
 
         <Pressable
           style={({ pressed }) => [
             styles.backButton,
-            pressed && styles.backPressedGrey,
+            pressed &&
+              styles.backPressedGrey,
           ]}
           onPress={async () => {
             await stopCurrentAudio();
+
+            await stopAnswerRecordingIfActive();
+
             router.back();
           }}
         >
-          <View style={styles.backButtonContent}>
+          <View
+            style={styles.backButtonContent}
+          >
             <Image
               source={require('../../assets/images/back-arrow.png')}
-              style={styles.backArrowImage}
+              style={
+                styles.backArrowImage
+              }
               resizeMode="contain"
             />
 
-            <Text style={styles.backText}>{t('back')}</Text>
+            <Text style={styles.backText}>
+              {t('back')}
+            </Text>
           </View>
         </Pressable>
       </View>
 
-      <Modal transparent visible={errorModalVisible} animationType="fade">
+      <Modal
+        transparent
+        visible={errorModalVisible}
+        animationType="fade"
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.errorModalBox}>
             <View style={styles.errorHeader}>
-              <Text style={styles.errorTitle}>No Symptoms Detected</Text>
+              <Text
+                style={styles.errorTitle}
+              >
+                {noSymptomsTitle}
+              </Text>
 
               <Pressable
-                onPress={() => setErrorModalVisible(false)}
-                style={styles.errorCloseButton}
+                onPress={
+                  goBackToVoiceInput
+                }
+                style={
+                  styles.errorCloseButton
+                }
               >
-                <Text style={styles.errorCloseText}>×</Text>
+                <Text
+                  style={
+                    styles.errorCloseText
+                  }
+                >
+                  ×
+                </Text>
               </Pressable>
             </View>
 
-            <View style={styles.errorBody}>
-              <Text style={styles.errorMessageBold}>
-                We could not detect any symptoms from your voice.
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
+              <Text
+                style={
+                  styles.errorMessageBold
+                }
+              >
+                {noSymptomsMessage1}
               </Text>
 
-              <Text style={styles.errorMessage}>
-                Please try speaking your symptoms in more detail.
+              <Text
+                style={styles.errorMessage}
+              >
+                {noSymptomsMessage2}
               </Text>
 
               <Pressable
                 style={({ pressed }) => [
                   styles.errorOkButton,
-                  pressed && styles.errorOkButtonPressed,
+                  pressed &&
+                    styles.errorOkButtonPressed,
                 ]}
-                onPress={() => setErrorModalVisible(false)}
+                onPress={
+                  goBackToVoiceInput
+                }
               >
-                <Text style={styles.errorOkText}>Ok</Text>
+                <Text
+                  style={
+                    styles.errorOkText
+                  }
+                >
+                  {okText}
+                </Text>
+              </Pressable>
+            </ImageBackground>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent
+        visible={
+          answerErrorModalVisible
+        }
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalBox}>
+            <View style={styles.errorHeader}>
+              <Text
+                style={styles.errorTitle}
+              >
+                {answerErrorTitle}
+              </Text>
+
+              <Pressable
+                onPress={
+                  closeAnswerErrorModal
+                }
+                style={
+                  styles.errorCloseButton
+                }
+              >
+                <Text
+                  style={
+                    styles.errorCloseText
+                  }
+                >
+                  ×
+                </Text>
               </Pressable>
             </View>
+
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
+              <Text
+                style={
+                  styles.errorMessageBold
+                }
+              >
+                {answerErrorMessage1}
+              </Text>
+
+              <Text
+                style={styles.errorMessage}
+              >
+                {answerErrorMessage2}
+              </Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.errorOkButton,
+                  pressed &&
+                    styles.errorOkButtonPressed,
+                ]}
+                onPress={
+                  closeAnswerErrorModal
+                }
+              >
+                <Text
+                  style={
+                    styles.errorOkText
+                  }
+                >
+                  {okText}
+                </Text>
+              </Pressable>
+            </ImageBackground>
           </View>
         </View>
       </Modal>
