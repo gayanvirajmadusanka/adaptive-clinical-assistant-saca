@@ -31,6 +31,13 @@ import org.saca.utility.manager.NavBarManager;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Controller for the Tell us more body map screen
+ *
+ * <p>Handles user interactions on the Tell us more body map flow.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TellUsMoreBodyController implements Initializable {
 
     private final Map<String, String> selectedAnswers = new HashMap<>();

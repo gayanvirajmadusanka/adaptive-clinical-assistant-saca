@@ -34,6 +34,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Body Result screen
+ *
+ * <p>Handles user interactions on the Body Result Screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class BodyResultController implements Initializable {
 
     @FXML

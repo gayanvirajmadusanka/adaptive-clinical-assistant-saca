@@ -4,8 +4,35 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Static data store for all body parts supported by the SACA application.
+ *
+ * <p>Provides a pre-populated, ordered map of {@link BodyPart} objects,
+ * each containing bilingual labels, audio filenames, and a list of
+ * associated {@link BodySymptom} symptoms in both English (EN) and
+ * Warlpiri (WP).</p>
+ *
+ * <p>Body parts included:</p>
+ * <ul>
+ *   <li>Head, Eye, Ear, Nose, Jaw, Throat, Neck</li>
+ *   <li>Chest, Stomach, Back, Arm</li>
+ *   <li>General / Whole Body</li>
+ * </ul>
+ *
+ * <p>Usage example:</p>
+ * <pre>{@code
+ * BodyPart head = BodyPartsData.get("head");
+ * Map<String, BodyPart> all = BodyPartsData.getAllParts();
+ * }</pre>
+ *
+ * @author Gayan Madusanka
+ */
 public class BodyPartsData {
 
+    /**
+     * Ordered map of body parts keyed by their unique identifier.
+     * Uses {@link LinkedHashMap} to preserve insertion order for display.
+     */
     private static final Map<String, BodyPart> PARTS = new LinkedHashMap<>();
 
     static {
@@ -102,10 +129,26 @@ public class BodyPartsData {
                 )));
     }
 
+    /**
+     * Returns an ordered map of all body parts keyed by their unique identifier.
+     *
+     * <p>The map preserves insertion order, which determines the display
+     * order in the body map screen.</p>
+     *
+     * @return unmodifiable-safe {@link LinkedHashMap} of all {@link BodyPart} entries
+     */
     public static Map<String, BodyPart> getAllParts() {
         return PARTS;
     }
 
+    /**
+     * Retrieves a single {@link BodyPart} by its unique identifier.
+     *
+     * <p>Returns {@code null} if no body part is found for the given ID.</p>
+     *
+     * @param id the unique identifier of the body part (e.g. {@code "head"}, {@code "arm"}, {@code "general"})
+     * @return the matching {@link BodyPart}, or {@code null} if not found
+     */
     public static BodyPart get(String id) {
         return PARTS.get(id);
     }

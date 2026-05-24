@@ -21,6 +21,13 @@ import org.saca.utility.manager.NavBarManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Side bar screen
+ *
+ * <p>Handles user interactions on the Side bar Screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class SidebarController implements Initializable {
 
     private static final double SIDEBAR_WIDTH = 280;

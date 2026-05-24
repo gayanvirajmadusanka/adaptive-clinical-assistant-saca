@@ -31,6 +31,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Text result screen
+ *
+ * <p>Handles user interactions on the Text result.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TextResultController implements Initializable {
 
     @FXML

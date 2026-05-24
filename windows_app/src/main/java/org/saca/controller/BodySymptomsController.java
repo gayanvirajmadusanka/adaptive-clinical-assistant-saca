@@ -36,6 +36,13 @@ import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Body Symptoms screen
+ *
+ * <p>Handles user interactions on the Body Symptoms Screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class BodySymptomsController implements Initializable {
 
     private final List<String> selectedIds = new ArrayList<>();

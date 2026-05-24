@@ -23,6 +23,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the text input screen
+ *
+ * <p>Handles user interactions on the Text input.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TextInputController implements Initializable {
 
     @FXML
