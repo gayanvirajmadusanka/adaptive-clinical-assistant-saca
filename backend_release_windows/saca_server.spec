@@ -1,17 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller spec for SACA Windows server executable.
-# Run from project root: pyinstaller backend_release_windows/saca_server.spec
-
 import os
+import sys
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# Spec file lives in backend_release_windows/ — resolve project root from here
-_HERE    = os.path.dirname(os.path.abspath(SPEC))
-_ROOT    = os.path.dirname(_HERE)
+_HERE = os.path.dirname(os.path.abspath(SPEC))
+_ROOT = os.path.dirname(_HERE)
 
-# Collect spaCy model data
+# Collect spaCy model data explicitly
+import spacy
+import en_core_web_sm
+spacy_model_path = os.path.dirname(en_core_web_sm.__file__)
 spacy_data = collect_data_files('en_core_web_sm')
 
 a = Analysis(
@@ -19,14 +19,15 @@ a = Analysis(
     pathex=[_ROOT],
     binaries=[],
     datas=[
-        # Runtime data files — bundled alongside backend_release_windows/ in the exe
         (os.path.join(_ROOT, 'backend', 'data'),   'backend_release_windows/data'),
         (os.path.join(_ROOT, 'backend', 'models'), 'backend_release_windows/models'),
-        # spaCy model
+        # spaCy model - explicit path bundle
+        (spacy_model_path, 'en_core_web_sm'),
         *spacy_data,
     ],
     hiddenimports=[
-        # uvicorn internals not auto-detected by PyInstaller
+        'en_core_web_sm',
+        'en_core_web_sm.lang.en',
         'uvicorn.logging',
         'uvicorn.loops',
         'uvicorn.loops.auto',
@@ -37,35 +38,26 @@ a = Analysis(
         'uvicorn.protocols.websockets.auto',
         'uvicorn.lifespan',
         'uvicorn.lifespan.on',
-        # fastapi / starlette
         'starlette.routing',
         'starlette.middleware',
-        # sklearn estimators used in pickled models
         'sklearn.neural_network',
         'sklearn.pipeline',
         'sklearn.preprocessing',
         'sklearn.ensemble',
         'sklearn.feature_extraction.text',
-        # xgboost
         'xgboost',
-        # whisper
         'whisper',
         'whisper.audio',
         'whisper.model',
-        # rapidfuzz
         'rapidfuzz',
-        # imbalanced-learn
         'imblearn',
     ],
     hookspath=[os.path.join(_HERE, 'hooks')],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        # dev / analysis only — not needed in the exe
         'matplotlib', 'seaborn', 'pandas', 'jupyter', 'notebook',
         'pytest', 'IPython', 'tkinter',
-        # webrtcvad hook is broken in pyinstaller-hooks-contrib; exclude it.
-        # audio_warlpiri.py uses lazy try/except import so absence is handled gracefully.
         'webrtcvad',
     ],
     win_no_prefer_redirects=False,
@@ -90,7 +82,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,       # keep console for log visibility; set False for silent background exe
+    console=True,
     disable_windowed_traceback=False,
     target_arch=None,
     codesign_identity=None,
