@@ -2,13 +2,13 @@ name: Build Windows Installer
 
 on:
   push:
-    branches: [release]
+    branches: [ release ]
     paths:
       - 'backend_release_windows/**'
       - 'windows_app/**'
       - 'backend/data/**'
       - 'backend/models/**'
-  workflow_dispatch:  # allow manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
@@ -63,11 +63,22 @@ jobs:
         working-directory: windows_app
         run: mvn clean package -q
 
-      - name: Copy saca_server.exe and main jar into jpackage input
+      - name: Copy saca_server.exe and main JAR into lib
         shell: pwsh
         run: |
-          Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe
-          Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar
+          Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe -Force
+          Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar -Force
+
+      - name: Create custom JRE with jlink
+        shell: pwsh
+        run: |
+          jlink `
+            --module-path "$env:JAVAFX_HOME\lib" `
+            --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.sql,javafx.controls,javafx.fxml,javafx.media,jdk.unsupported `
+            --output custom-jre `
+            --strip-debug `
+            --no-header-files `
+            --no-man-pages
 
       - name: Run jpackage
         shell: pwsh
@@ -78,11 +89,10 @@ jobs:
             --app-version 1.0 `
             --vendor "SACA Team" `
             --description "SACA Adaptive Clinical Assistant" `
+            --runtime-image custom-jre `
             --input windows_app\target\lib `
             --main-jar SACA-1.0-SNAPSHOT.jar `
             --main-class org.saca.MainApp `
-            --module-path "$env:JAVAFX_HOME\lib" `
-            --add-modules javafx.controls,javafx.fxml,javafx.media `
             --win-dir-chooser `
             --win-shortcut `
             --win-menu `
