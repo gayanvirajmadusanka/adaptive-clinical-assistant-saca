@@ -107,8 +107,8 @@ export default StyleSheet.create({
 
   bodyDot: {
     position: 'absolute',
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
     borderRadius: 10,
     backgroundColor: '#D6001C',
     borderWidth: 3,
@@ -125,48 +125,64 @@ export default StyleSheet.create({
 
   // Dot positions matched to the current large body image.
   dotHead: {
-    top: '9%',
-    left: '44%',
+    top: '2%',
+    left: '45%',
   },
 
   dotEye: {
-    top: '14%',
-    left: '47%',
+    top: '6%',
+    left: '52%',
   },
 
   dotEar: {
-    top: '16%',
-    left: '55%',
+    top: '6%',
+    left: '60%',
   },
 
   dotJaw: {
-    top: '21%',
-    left: '49%',
+    top: '10%',
+    left: '55%',
   },
 
+  dotNose: {
+    top: '7%',
+    left: '45%',
+  },
+
+
   dotNeck: {
-    top: '27%',
-    left: '49%',
+    top: '15%',
+    left: '55%',
+  },
+
+  dotThroat: {
+    top: '14%',
+    left: '45%',
   },
 
   dotChest: {
-    top: '37%',
-    left: '49%',
+    top: '22%',
+    left: '45%',
   },
 
   dotStomach: {
-    top: '50%',
-    left: '49%',
+    top: '35%',
+    left: '45%',
   },
 
   dotArm: {
     top: '48%',
-    left: '66%',
+    left: '75%',
+  },
+
+  dotBack: {
+    top: '35%',
+    left: '60%',
   },
 
   dotWholeBody: {
     top: '70%',
-    left: '49%',
+    left: '80%',
   },
 
   tooltip: {
@@ -187,47 +203,62 @@ export default StyleSheet.create({
   },
 
   tooltipHead: {
-    top: '8%',
-    left: '58%',
+    top: '0%',
+    left: '75%',
   },
 
   tooltipEye: {
-    top: '13%',
-    left: '60%',
+    top: '5%',
+    left: '75%',
   },
 
   tooltipEar: {
-    top: '15%',
-    left: '68%',
+    top: '6%',
+    left: '75%',
+  },
+
+   tooltipNose: {
+    top: '6%',
+    left: '75%',
   },
 
   tooltipJaw: {
-    top: '20%',
-    left: '62%',
+    top: '10%',
+    left: '75%',
   },
 
   tooltipNeck: {
-    top: '26%',
-    left: '62%',
+    top: '15%',
+    left: '75%',
+  },
+
+  tooltipThroat: {  
+    top: '15%',
+    left: '75%',
   },
 
   tooltipChest: {
-    top: '36%',
-    left: '62%',
+    top: '22%',
+    left: '75%',
   },
 
   tooltipStomach: {
-    top: '49%',
-    left: '62%',
+    top: '35%',
+    left: '75%',
+  },
+
+  tooltipBack: {
+    top: '35%',
+    left: '75%',
   },
 
   tooltipArm: {
-    top: '47%',
-    left: '76%',
+    top: '48%',
+    left: '80%',
   },
 
   tooltipWholeBody: {
-    top: '69%',
+    top: '65%',
     left: '62%',
   },
 

@@ -1,7 +1,7 @@
 // bodyTellUsMoreStyles.js
 // Purpose: Screen-specific styles for BodyTellUsMoreScreen.
-// Pain question now uses same button/card size as Question 3,
-// but keeps image above text.
+// Option colors now match TellUsMoreScreen:
+// 2 options = same color, more options = different colors.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
@@ -117,7 +117,6 @@ export default StyleSheet.create({
     width: '100%',
     minHeight: 120,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 250, 238, 0.95)',
     borderWidth: 1.8,
     borderColor: '#E0CDB0',
     flexDirection: 'row',
@@ -132,7 +131,6 @@ export default StyleSheet.create({
     width: '100%',
     minHeight: 120,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 250, 238, 0.95)',
     borderWidth: 1.8,
     borderColor: '#E0CDB0',
     alignItems: 'center',
@@ -141,6 +139,30 @@ export default StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 14,
     elevation: 3,
+  },
+
+  twoOptionStyle: {
+    backgroundColor: '#E6C37D',
+  },
+
+  optionColor1: {
+    backgroundColor: '#F2EEE4',
+  },
+
+  optionColor2: {
+    backgroundColor: '#E5C48A',
+  },
+
+  optionColor3: {
+    backgroundColor: '#D8A95C',
+  },
+
+  optionColor4: {
+    backgroundColor: '#BC7A3E',
+  },
+
+  optionColor5: {
+    backgroundColor: '#8D360F',
   },
 
   optionCardSelected: {
