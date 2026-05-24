@@ -10,6 +10,8 @@ import {
   Pressable,
   Alert,
   BackHandler,
+  Modal,
+  ImageBackground,
 } from 'react-native';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -37,6 +39,7 @@ export default function TellUsMoreScreen() {
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   const soundRef = useRef(null);
 
@@ -54,7 +57,6 @@ export default function TellUsMoreScreen() {
     styles.optionColor5,
   ];
 
-  // Loads follow-up questions from backend based on detected symptoms and selected language.
   async function fetchQuestions(languageCode) {
     try {
       setLoadingQuestions(true);
@@ -81,7 +83,6 @@ export default function TellUsMoreScreen() {
     fetchQuestions(lang || params.language || 'en');
   }, []);
 
-  // Stops currently playing question audio.
   const stopCurrentAudio = async () => {
     try {
       if (soundRef.current) {
@@ -100,7 +101,6 @@ export default function TellUsMoreScreen() {
     }
   };
 
-  // Plays backend-generated voice for the current question.
   const playQuestionAudio = async () => {
     try {
       if (!currentQuestion?.voice_b64) {
@@ -141,7 +141,6 @@ export default function TellUsMoreScreen() {
     }
   };
 
-  // Clean up audio when leaving this screen.
   useEffect(() => {
     return () => {
       if (soundRef.current) {
@@ -167,10 +166,9 @@ export default function TellUsMoreScreen() {
     setSelectedOption(option.id);
   };
 
-  // Saves current answer and moves to next question or severity loading screen.
   const handleContinue = async () => {
     if (!selectedOption) {
-      Alert.alert('Select answer', 'Please select one option.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -209,7 +207,6 @@ export default function TellUsMoreScreen() {
     }
   };
 
-  // Handles back button. Previous question first, then previous screen.
   const handleBack = async () => {
     await stopCurrentAudio();
 
@@ -225,7 +222,6 @@ export default function TellUsMoreScreen() {
     }
   };
 
-  // Android hardware back button support.
   useEffect(() => {
     const backAction = () => {
       handleBack();
@@ -240,15 +236,56 @@ export default function TellUsMoreScreen() {
     return () => backHandler.remove();
   }, [currentIndex, questions, answers]);
 
-  // Called by AppScreen before changing language.
   const beforeLanguageChange = async () => {
     await stopCurrentAudio();
   };
 
-  // Called by AppScreen after changing language.
   const afterLanguageChange = async (selectedLang) => {
     await fetchQuestions(selectedLang);
   };
+
+  const renderNoAnswerModal = () => (
+    <Modal transparent visible={errorModalVisible} animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.errorModalBox}>
+          <View style={styles.errorHeader}>
+            <Text style={styles.errorTitle}>{t('no_answer_title')}</Text>
+
+            <Pressable
+              onPress={() => setErrorModalVisible(false)}
+              style={styles.errorCloseButton}
+            >
+              <Text style={styles.errorCloseText}>×</Text>
+            </Pressable>
+          </View>
+
+          <ImageBackground
+            source={require('../../assets/images/background.png')}
+            style={styles.errorBody}
+            resizeMode="cover"
+          >
+            <Text style={styles.errorMessageBold}>
+              {t('no_answer_message_1')}
+            </Text>
+
+            <Text style={styles.errorMessage}>
+              {t('no_answer_message_2')}
+            </Text>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.errorOkButton,
+                pressed && styles.errorOkButtonPressed,
+              ]}
+              onPress={() => setErrorModalVisible(false)}
+            >
+              <Text style={styles.errorOkText}>{t('ok')}</Text>
+            </Pressable>
+          </ImageBackground>
+        </View>
+      </View>
+    </Modal>
+  );
 
   if (loadingQuestions) {
     return (
@@ -262,13 +299,13 @@ export default function TellUsMoreScreen() {
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
-            <Text style={styles.headerText}>{t('tell_us_more')}</Text>            
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>
           </View>
 
-          <Text style={styles.progressText}>Loading questions...</Text>
+          <Text style={styles.progressText}>{t('loading')}</Text>
 
           <View style={styles.questionBox}>
-            <Text style={styles.questionText}>Please wait...</Text>
+            <Text style={styles.questionText}>{t('loading_wait')}</Text>
           </View>
         </View>
       </AppScreen>
@@ -292,7 +329,7 @@ export default function TellUsMoreScreen() {
 
           <View style={styles.questionBox}>
             <Text style={styles.questionText}>
-              No follow-up questions found.
+              {t('no_follow_up_questions')}
             </Text>
           </View>
 
@@ -329,11 +366,11 @@ export default function TellUsMoreScreen() {
     >
       <View style={styles.container}>
         <View style={styles.headerBar}>
-          <Text style={styles.headerText}>{t('tell_us_more')}</Text>  
+          <Text style={styles.headerText}>{t('tell_us_more')}</Text>
         </View>
 
         <Text style={styles.progressText}>
-          Question {currentIndex + 1} of {totalQuestions}
+          {t('question')} {currentIndex + 1} {t('of')} {totalQuestions}
         </Text>
 
         <View style={styles.progressBarBackground}>
@@ -400,7 +437,9 @@ export default function TellUsMoreScreen() {
           onPress={handleContinue}
         >
           <Text style={styles.continueText}>
-            {currentIndex === questions.length - 1 ? t('submit') : t('continue')}
+            {currentIndex === questions.length - 1
+              ? t('submit')
+              : t('continue')}
           </Text>
         </Pressable>
 
@@ -422,6 +461,8 @@ export default function TellUsMoreScreen() {
           </View>
         </Pressable>
       </View>
+
+      {renderNoAnswerModal()}
     </AppScreen>
   );
 }

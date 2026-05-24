@@ -5,82 +5,73 @@ import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-    // Main safe area background.
-safeArea: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-    // Wrapper with status bar spacing.
-wrapper: {
+  wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-    // Background image area.
-background: {
+  background: {
     flex: 1,
   },
 
-    // Centered loading container.
-container: {
+  container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 25,
   },
 
-    // Top loading message.
-topText: {
-    fontSize: 24,
+  topText: {
+    fontSize: 30,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    marginBottom: 60,
+    marginBottom: 70,
   },
 
-    // Circular progress wrapper.
-circleWrapper: {
-    width: 190,
-    height: 190,
+  circleWrapper: {
+    width: 230,
+    height: 230,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-    // Text content inside progress circle.
-circleContent: {
+  circleContent: {
     position: 'absolute',
-    width: 130,
-    height: 130,
-    borderRadius: 65,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-    // Percentage number text.
-percent: {
-    fontSize: 34,
+  percent: {
+    fontSize: 42,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#2B1B12',
   },
 
-    // LOADING/DONE label.
-loadingText: {
-    fontSize: 12,
+  loadingText: {
+    fontSize: 14,
     fontFamily: FONTS.bold,
     letterSpacing: 3,
     color: '#8B5A2B',
-    marginTop: 6,
+    marginTop: 8,
   },
 
-    // Bottom helper/status text.
-bottomText: {
-    fontSize: 14,
+  bottomText: {
+    fontSize: 18,
     fontFamily: FONTS.regular,
     color: '#5C4A3A',
     textAlign: 'center',
-    marginTop: 55,
+    marginTop: 65,
+    lineHeight: 26,
   },
 });

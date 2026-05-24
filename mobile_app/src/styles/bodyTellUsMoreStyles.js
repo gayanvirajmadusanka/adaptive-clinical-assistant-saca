@@ -1,6 +1,7 @@
 // bodyTellUsMoreStyles.js
 // Purpose: Screen-specific styles for BodyTellUsMoreScreen.
-// Shared SafeArea, background, footer, and language modal styles are handled by AppScreen.
+// Pain question now uses same button/card size as Question 3,
+// but keeps image above text.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
@@ -62,6 +63,7 @@ export default StyleSheet.create({
     backgroundColor: 'rgba(255, 250, 238, 0.92)',
     padding: 16,
     marginBottom: 14,
+    position: 'relative',
   },
 
   questionText: {
@@ -71,7 +73,35 @@ export default StyleSheet.create({
     color: '#111',
     textAlign: 'center',
     marginBottom: 14,
+    paddingRight: 54,
     lineHeight: 28,
+  },
+
+  speakerButton: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#E3AD35',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#000',
+    zIndex: 10,
+    elevation: 10,
+  },
+
+  speakerPressed: {
+    backgroundColor: '#8B3A1C',
+    borderColor: '#5C2E0A',
+    transform: [{ scale: 0.95 }],
+  },
+
+  speakerIcon: {
+    width: 24,
+    height: 24,
   },
 
   optionsScroll: {
@@ -85,7 +115,7 @@ export default StyleSheet.create({
 
   optionCard: {
     width: '100%',
-    minHeight: 112,
+    minHeight: 120,
     borderRadius: 22,
     backgroundColor: 'rgba(255, 250, 238, 0.95)',
     borderWidth: 1.8,
@@ -93,46 +123,54 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     marginBottom: 14,
     elevation: 3,
   },
 
-  optionCardVertical: {
+  painOptionCard: {
     width: '100%',
-    minHeight: 210,
+    minHeight: 120,
     borderRadius: 22,
     backgroundColor: 'rgba(255, 250, 238, 0.95)',
     borderWidth: 1.8,
     borderColor: '#E0CDB0',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     marginBottom: 14,
     elevation: 3,
   },
 
   optionCardSelected: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
+    borderWidth: 3,
+    borderColor: '#000',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
   optionImage: {
-    width: 92,
-    height: 92,
+    width: 105,
+    height: 105,
     marginRight: 16,
   },
 
-  optionImageVertical: {
-    width: 260,
-    height: 135,
-    marginBottom: 10,
+  painOptionImage: {
+    width: 165,
+    height: 72,
+    marginBottom: 6,
   },
 
   optionImagePlaceholder: {
-    width: 92,
-    height: 92,
+    width: 105,
+    height: 105,
     borderRadius: 18,
     backgroundColor: '#EADCC4',
     alignItems: 'center',
@@ -140,14 +178,14 @@ export default StyleSheet.create({
     marginRight: 16,
   },
 
-  optionImagePlaceholderVertical: {
-    width: 260,
-    height: 135,
+  painOptionImagePlaceholder: {
+    width: 165,
+    height: 72,
     borderRadius: 18,
     backgroundColor: '#EADCC4',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
 
   placeholderText: {
@@ -159,25 +197,25 @@ export default StyleSheet.create({
 
   optionText: {
     flex: 1,
-    fontSize: 19,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
+    lineHeight: 28,
   },
 
-  optionTextVertical: {
-    fontSize: 21,
+  painOptionText: {
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    lineHeight: 28,
-    width: '100%',
-    paddingHorizontal: 10,
+    lineHeight: 24,
   },
 
   optionTextSelected: {
-    color: '#FFF',
+    color: '#000',
+    fontFamily: FONTS.bold,
   },
 
   continueButton: {
@@ -241,5 +279,105 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorModalBox: {
+    width: '92%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#F5EAD8',
+    borderWidth: 1,
+    borderColor: '#8B3A1C',
+    elevation: 8,
+  },
+
+  errorHeader: {
+    backgroundColor: '#8B2E0A',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  errorTitle: {
+    color: '#FFF',
+    fontSize: 21,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    flex: 1,
+    paddingRight: 12,
+  },
+
+  errorCloseButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 9,
+    borderWidth: 3,
+    borderColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorCloseText: {
+    color: '#FFF',
+    fontSize: 34,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    lineHeight: 36,
+  },
+
+  errorBody: {
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 20,
+    minHeight: 150,
+  },
+
+  errorMessageBold: {
+    color: '#5C2E0A',
+    fontSize: 19,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 22,
+    lineHeight: 26,
+  },
+
+  errorMessage: {
+    color: '#5C2E0A',
+    fontSize: 17,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 28,
+    lineHeight: 24,
+  },
+
+  errorOkButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 22,
+  },
+
+  errorOkButtonPressed: {
+    backgroundColor: '#8B1E0D',
+    transform: [{ scale: 0.96 }],
+  },
+
+  errorOkText: {
+    color: '#FFF',
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });

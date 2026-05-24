@@ -46,7 +46,8 @@ export default function LanguageModal({
             <Text
               style={[
                 commonStyles.languageOptionText,
-                selectedLang === 'en' && commonStyles.languageOptionTextSelected,
+                selectedLang === 'en' &&
+                  commonStyles.languageOptionTextSelected,
               ]}
             >
               {t('english')}
@@ -63,7 +64,8 @@ export default function LanguageModal({
             <Text
               style={[
                 commonStyles.languageOptionText,
-                selectedLang === 'wp' && commonStyles.languageOptionTextSelected,
+                selectedLang === 'wp' &&
+                  commonStyles.languageOptionTextSelected,
               ]}
             >
               {t('warlpiri')}
@@ -82,9 +84,16 @@ export default function LanguageModal({
               disabled={!selectedLang || disabled}
               onPress={onConfirm}
             >
-              <Text style={commonStyles.confirmButtonText}>
-                {confirmLabel || t('ok')}
-              </Text>
+              {({ pressed }) => (
+                <Text
+                  style={[
+                    commonStyles.confirmButtonText,
+                    pressed && { color: '#FFF' },
+                  ]}
+                >
+                  {confirmLabel || t('ok')}
+                </Text>
+              )}
             </Pressable>
 
             <Pressable
@@ -94,9 +103,16 @@ export default function LanguageModal({
               ]}
               onPress={onCancel}
             >
-              <Text style={commonStyles.cancelText}>
-                {cancelLabel || t('cancel')}
-              </Text>
+              {({ pressed }) => (
+                <Text
+                  style={[
+                    commonStyles.cancelText,
+                    pressed && { color: '#FFF' },
+                  ]}
+                >
+                  {cancelLabel || t('cancel')}
+                </Text>
+              )}
             </Pressable>
           </View>
         </Animated.View>
