@@ -25,11 +25,19 @@ import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
+import org.saca.utility.util.StringUtil;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Text result screen
+ *
+ * <p>Handles user interactions on the Text result.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TextResultController implements Initializable {
 
     @FXML
@@ -76,10 +84,12 @@ public class TextResultController implements Initializable {
 
     private void displaySymptoms(List<String> symptoms) {
         symptomsBox.getChildren().clear();
-        if (symptoms == null || symptoms.isEmpty()) return;
+        if (symptoms == null || symptoms.isEmpty()) {
+            return;
+        }
 
         for (String symptom : symptoms) {
-            Label item = new Label("•  " + symptom);
+            Label item = new Label("•  " + StringUtil.capitalizeFirst(symptom));
             item.getStyleClass().add("result-symptom-item");
             item.setWrapText(true);
             symptomsBox.getChildren().add(item);

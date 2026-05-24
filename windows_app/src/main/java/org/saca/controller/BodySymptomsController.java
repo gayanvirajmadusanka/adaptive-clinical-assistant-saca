@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.saca.model.body.BodyPart;
@@ -35,6 +36,13 @@ import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Body Symptoms screen
+ *
+ * <p>Handles user interactions on the Body Symptoms Screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class BodySymptomsController implements Initializable {
 
     private final List<String> selectedIds = new ArrayList<>();
@@ -66,7 +74,6 @@ public class BodySymptomsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         String partKey = CacheManager.getCachedBodyPartKey();
-
         if (partKey != null && !partKey.isEmpty()) {
             BodyPart cached = BodyPartsData.get(partKey);
             if (cached != null) {
@@ -103,16 +110,17 @@ public class BodySymptomsController implements Initializable {
             card.getStyleClass().add("symptom-card");
             card.setPrefWidth(190);
             card.setMaxWidth(190);
+            card.setCursor(javafx.scene.Cursor.HAND);
 
-            // Image
-            String key = part.getId().equals("general") ? "whole_body" : part.getId();
+            String imgKey = part.getId().equals("general") ? "whole_body" : part.getId();
+            URL imageUrl = resolveImage(imgKey, symptom.getId(), gender, other);
 
-            URL imageUrl = resolveImage(key, symptom.getId(), gender, other);
             ImageView imageView = new ImageView();
             imageView.setFitWidth(168);
             imageView.setFitHeight(140);
             imageView.setPreserveRatio(true);
             imageView.getStyleClass().add("symptom-part-image");
+            imageView.setMouseTransparent(true);
 
             if (imageUrl != null) {
                 imageView.setImage(new Image(imageUrl.toExternalForm(), true));
@@ -121,52 +129,12 @@ public class BodySymptomsController implements Initializable {
                         + partKey + "/" + symptom.getId() + "_" + gender + ".png");
             }
 
-            // Button
-            Button btn = new Button(symptom.getLabel());
-            btn.getStyleClass().add("symptom-select-btn");
-            btn.setMaxWidth(Double.MAX_VALUE);
-            btn.setWrapText(true);
-
-            if (restoredIds != null && restoredIds.contains(symptom.getId())) {
-                selectedIds.add(symptom.getId());
-
-                if (LanguageManager.isLanguageEnglish()) {
-                    selectedLabels.add(symptom.getLabelEn());
-                } else {
-                    selectedLabels.add(symptom.getLabelWp());
-                }
-
-                btn.getStyleClass().add("symptom-select-btn-active");
-                imageView.setOpacity(1.0);
-            } else {
-                imageView.setOpacity(0.85);
-            }
-
-            btn.setOnAction(e -> {
-                if (selectedIds.contains(symptom.getId())) {
-                    selectedIds.remove(symptom.getId());
-
-                    if (LanguageManager.isLanguageEnglish()) {
-                        selectedLabels.remove(symptom.getLabelEn());
-                    } else {
-                        selectedLabels.remove(symptom.getLabelWp());
-                    }
-
-                    btn.getStyleClass().remove("symptom-select-btn-active");
-                    imageView.setOpacity(0.85);
-                } else {
-                    selectedIds.add(symptom.getId());
-
-                    if (LanguageManager.isLanguageEnglish()) {
-                        selectedLabels.add(symptom.getLabelEn());
-                    } else {
-                        selectedLabels.add(symptom.getLabelWp());
-                    }
-
-                    btn.getStyleClass().add("symptom-select-btn-active");
-                    imageView.setOpacity(1.0);
-                }
-            });
+            Label label = new Label(symptom.getLabel());
+            label.getStyleClass().add("symptom-card-label");
+            label.setWrapText(true);
+            label.setMaxWidth(Double.MAX_VALUE);
+            label.setMouseTransparent(true);
+            HBox.setHgrow(label, Priority.ALWAYS);
 
             String audioFile = symptom.getAudio();
             ImageView spkIcon = new ImageView(new Image(
@@ -174,10 +142,12 @@ public class BodySymptomsController implements Initializable {
             spkIcon.setFitWidth(16);
             spkIcon.setFitHeight(16);
             spkIcon.setPreserveRatio(true);
+
             Button spkBtn = new Button();
             spkBtn.setGraphic(spkIcon);
             spkBtn.getStyleClass().add("body-speaker-btn");
             spkBtn.setOnAction(e -> {
+                e.consume();
                 if (AudioService.isPlaying()) {
                     AudioService.stop();
                     spkIcon.setImage(new Image(getClass().getResource("/icons/speaker.png").toExternalForm()));
@@ -196,12 +166,37 @@ public class BodySymptomsController implements Initializable {
                 }
             });
 
-            HBox btnRow = new javafx.scene.layout.HBox(8);
-            btnRow.setAlignment(Pos.CENTER_LEFT);
-            btn.setMaxWidth(Double.MAX_VALUE);
-            javafx.scene.layout.HBox.setHgrow(btn, javafx.scene.layout.Priority.ALWAYS);
-            btnRow.getChildren().addAll(btn, spkBtn);
-            card.getChildren().addAll(imageView, btnRow);
+            HBox bottomRow = new HBox(6);
+            bottomRow.setAlignment(Pos.CENTER_LEFT);
+            bottomRow.getChildren().addAll(label, spkBtn);
+
+            if (restoredIds != null && restoredIds.contains(symptom.getId())) {
+                selectedIds.add(symptom.getId());
+                selectedLabels.add(LanguageManager.isLanguageEnglish()
+                        ? symptom.getLabelEn() : symptom.getLabelWp());
+                card.getStyleClass().add("symptom-card-active");
+                imageView.setOpacity(1.0);
+            } else {
+                imageView.setOpacity(0.85);
+            }
+
+            card.setOnMouseClicked(e -> {
+                if (selectedIds.contains(symptom.getId())) {
+                    selectedIds.remove(symptom.getId());
+                    selectedLabels.remove(LanguageManager.isLanguageEnglish()
+                            ? symptom.getLabelEn() : symptom.getLabelWp());
+                    card.getStyleClass().remove("symptom-card-active");
+                    imageView.setOpacity(0.85);
+                } else {
+                    selectedIds.add(symptom.getId());
+                    selectedLabels.add(LanguageManager.isLanguageEnglish()
+                            ? symptom.getLabelEn() : symptom.getLabelWp());
+                    card.getStyleClass().add("symptom-card-active");
+                    imageView.setOpacity(1.0);
+                }
+            });
+
+            card.getChildren().addAll(imageView, bottomRow);
             symptomCardsBox.getChildren().add(card);
         }
     }

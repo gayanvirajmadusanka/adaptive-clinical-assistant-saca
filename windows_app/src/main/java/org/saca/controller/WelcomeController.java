@@ -7,6 +7,13 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
+/**
+ * Controller for the Welcome screen
+ *
+ * <p>Handles user interactions on the Welcome screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class WelcomeController {
 
     public Button aboutButton;

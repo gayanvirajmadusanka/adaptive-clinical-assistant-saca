@@ -8,6 +8,13 @@ import java.nio.file.Path;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Audio service
+ *
+ * <p>This service handles all Audio play, stop</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class AudioService {
 
     private static Process currentProcess;

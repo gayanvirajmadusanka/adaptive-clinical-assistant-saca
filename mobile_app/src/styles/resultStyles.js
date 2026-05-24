@@ -1,98 +1,105 @@
 // resultStyles.js
-// Purpose: Screen-specific styles for ResultScreen.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export const resultTheme = {
   severe: {
-    header: '#6E0000',
-    headerText: '#F5E6C8',
-
-    screenBackground: '#9A3F18',
-    severityFill: '#A41206',
-
-    cardBackground: '#F3E4C3',
-    boxBorder: '#D2B07B',
+    severityFill: '#8B070C',
+    cardBackground: '#F5EAD8',
+    boxBorder: '#C9B78F',
   },
 
   moderate: {
-    header: '#B86B00',
-    headerText: '#FFFFFF',
-
-    screenBackground: '#F3E4C3',
-    severityFill: '#ff7700',
-
-    cardBackground: '#F3E4C3',
-    boxBorder: '#D9B27C',
+    severityFill: '#D7AE43',
+    cardBackground: '#F5EAD8',
+    boxBorder: '#C9B78F',
   },
 
   mild: {
-    header: '#B85C00',
-    headerText: '#FFFFFF',
-
-    screenBackground: '#F3E4C3',
-    severityFill: '#5C8A3C',
-
-    cardBackground: '#F3E4C3',
-    boxBorder: '#D9B27C',
+    severityFill: '#5A8F3A',
+    cardBackground: '#F5EAD8',
+    boxBorder: '#C9B78F',
   },
 };
 
 export default StyleSheet.create({
   contentWrapper: {
     flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingTop: 82,
-  },
-
-  resultCard: {
-    width: '100%',
-    flex: 1,
-    borderRadius: 22,
-    overflow: 'hidden',
-    elevation: 5,
+    paddingHorizontal: 12,
+    paddingTop: 62,
   },
 
   headerBar: {
+    width: '100%',
     height: 72,
-    justifyContent: 'center',
+    borderRadius: 18,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    backgroundColor: '#C87936',
   },
 
   headerText: {
-    fontSize: 28,
+    fontSize: 30,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-  },
-
-  content: {
-    flex: 1,
-    paddingHorizontal: 14,
-    paddingTop: 52,
-    paddingBottom: 0,
-    position: 'relative',
+    color: '#000',
   },
 
   scrollContent: {
-    paddingBottom: 34,
+    paddingBottom: 16,
+  },
+
+  severityCard: {
+    width: '100%',
+    minHeight: 114,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    marginBottom: 14,
+    elevation: 5,
+  },
+
+  severityIconLarge: {
+    width: 70,
+    height: 70,
+    marginRight: 14,
+  },
+
+  severityTextBox: {
+    flex: 1,
+    paddingRight: 8,
+  },
+
+  severityTitle: {
+    fontSize: 28,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    lineHeight: 34,
+  },
+
+  severitySubtitle: {
+    fontSize: 16,
+    fontFamily: FONTS.regular,
+    color: '#FFFFFF',
+    marginTop: 4,
+    lineHeight: 21,
   },
 
   speakerButton: {
-    position: 'absolute',
-    right: 22,
-    top: 2,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#F2B233',
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#D7AE43',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#000',
-    elevation: 8,
-    zIndex: 50,
+    elevation: 6,
   },
 
   speakerPressed: {
@@ -101,45 +108,8 @@ export default StyleSheet.create({
   },
 
   speakerIcon: {
-    width: 25,
-    height: 25,
-  },
-
-  severityCard: {
-    width: '100%',
-    minHeight: 118,
-    borderRadius: 22,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    marginBottom: 16,
-    elevation: 5,
-  },
-
-  severityIconLarge: {
-    width: 92,
-    height: 92,
-    marginRight: 18,
-  },
-
-  severityTextBox: {
-    flex: 1,
-  },
-
-  severityTitle: {
-    fontSize: 34,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    lineHeight: 38,
-  },
-
-  severitySubtitle: {
-    fontSize: 15,
-    fontFamily: FONTS.regular,
-    color: '#FFFFFF',
-    marginTop: 4,
+    width: 30,
+    height: 30,
   },
 
   callButton: {
@@ -149,49 +119,55 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+    flexDirection: 'row',
+    backgroundColor: '#F5EAD8',
   },
 
   callButtonSevere: {
-    backgroundColor: '#FFF4F4',
-    borderColor: '#8B0000',
+    borderColor: '#5F1207',
     borderWidth: 3,
   },
 
   callButtonModerate: {
-    backgroundColor: '#FFF8F0',
-    borderColor: '#C62828',
+    borderColor: '#5F1207',
     borderWidth: 3,
   },
 
+  callIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+  },
+
   callButtonText: {
-    fontSize: 17,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#8B0000',
+    color: '#4B0900',
   },
 
   infoCard: {
     width: '100%',
-    minHeight: 150,
-    borderRadius: 24,
-    borderWidth: 1.4,
+    minHeight: 132,
+    borderRadius: 16,
+    borderWidth: 1.5,
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingHorizontal: 18,
-    paddingVertical: 20,
-    marginBottom: 18,
-    elevation: 5,
+    paddingVertical: 18,
+    marginBottom: 14,
+    elevation: 3,
   },
 
   symptomCard: {
-    minHeight: 116,
+    minHeight: 98,
   },
 
   infoIconLarge: {
-    width: 78,
-    height: 78,
+    width: 58,
+    height: 58,
     marginRight: 16,
-    marginTop: 2,
+    marginTop: 4,
   },
 
   infoContent: {
@@ -202,31 +178,36 @@ export default StyleSheet.create({
     fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#111111',
-    marginBottom: 12,
+    color: '#111',
+    marginBottom: 10,
+  },
+
+  infoHeading: {
+    fontSize: 18,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#5C2E0A',
+    marginBottom: 8,
   },
 
   infoText: {
-    fontSize: 15,
-    fontFamily: FONTS.bold,
-    color: '#111111',
-    marginBottom: 8,
+    fontSize: 16,
+    fontFamily: FONTS.regular,
+    color: '#4A2108',
     lineHeight: 22,
   },
 
   startAgainButton: {
     width: '100%',
-    minHeight: 72,
-    borderRadius: 20,
-    backgroundColor: '#E3AD35',
+    height: 58,
+    borderRadius: 30,
+    backgroundColor: '#D19A24',
     borderWidth: 2,
-    borderColor: '#C8911F',
+    borderColor: '#5C2E0A',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
-    marginBottom: 10,
-    paddingVertical: 18,
-    elevation: 5,
+    marginBottom: 12,
+    elevation: 4,
   },
 
   startAgainPressed: {
@@ -239,15 +220,54 @@ export default StyleSheet.create({
     fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#2C1A0E',
+    color: '#111',
   },
 
   startAgainTextPressed: {
     color: '#FFFFFF',
   },
 
+  backButton: {
+    width: 170,
+    height: 58,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: '#000',
+    backgroundColor: '#F5EAD8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    elevation: 4,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  backArrowImage: {
+    width: 22,
+    height: 22,
+    marginRight: 10,
+  },
+
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+    transform: [{ scale: 0.96 }],
+  },
+
+  backText: {
+    fontSize: 22,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
   pressedButton: {
-    opacity: 0.8,
+    opacity: 0.85,
     transform: [{ scale: 0.97 }],
   },
 });

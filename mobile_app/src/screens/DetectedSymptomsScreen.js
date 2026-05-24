@@ -1,6 +1,6 @@
 // DetectedSymptomsScreen.js
 // Purpose: Displays symptoms detected by the FastAPI backend.
-// Supports text, voice, and body flow audio using voice_b64_en / voice_b64_wp.
+// If no symptoms are detected, it shows an error popup and returns to TextInputScreen.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -10,6 +10,7 @@ import {
   Image,
   Modal,
   Alert,
+  ImageBackground,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -51,7 +52,9 @@ export default function DetectedSymptomsScreen() {
   );
 
   useEffect(() => {
-    fetchInitialAudio();
+    if (symptomsEn.length === 0 && symptomsWp.length === 0) {
+      setErrorModalVisible(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -69,91 +72,7 @@ export default function DetectedSymptomsScreen() {
   const symptomText =
     symptomsToShow.length > 0
       ? symptomsToShow.map((item) => `• ${item}`).join('\n')
-      : 'No symptoms detected';
-
-  async function fetchInitialAudio() {
-    try {
-      const voiceB64En = params.voice_b64_en || '';
-      const voiceB64Wp = params.voice_b64_wp || '';
-
-      if (voiceB64En) {
-        const fileEn = await saveBase64AudioToCache(
-          voiceB64En,
-          'detected_symptoms_en.wav'
-        );
-
-        if (fileEn) {
-          setVoiceFileUriEn(fileEn);
-
-          if (lang !== 'wp') {
-            setVoiceFileUri(fileEn);
-          }
-        }
-      }
-
-      if (voiceB64Wp) {
-        const fileWp = await saveBase64AudioToCache(
-          voiceB64Wp,
-          'detected_symptoms_wp.wav'
-        );
-
-        if (fileWp) {
-          setVoiceFileUriWp(fileWp);
-
-          if (lang === 'wp') {
-            setVoiceFileUri(fileWp);
-          }
-        }
-      }
-
-      if (!voiceB64En && !voiceB64Wp) {
-        console.log('No initial detected symptoms audio found.');
-      }
-    } catch (error) {
-      console.log('Initial audio load error:', error);
-    }
-  }
-
-  const updateAudioForCurrentLanguage = async () => {
-    try {
-      await stopCurrentAudio();
-
-      if (lang === 'wp') {
-        if (voiceFileUriWp) {
-          setVoiceFileUri(voiceFileUriWp);
-          return;
-        }
-
-        if (params.voice_b64_wp) {
-          const fileWp = await saveBase64AudioToCache(
-            params.voice_b64_wp,
-            'detected_symptoms_wp.wav'
-          );
-
-          setVoiceFileUriWp(fileWp);
-          setVoiceFileUri(fileWp);
-          return;
-        }
-      }
-
-      if (voiceFileUriEn) {
-        setVoiceFileUri(voiceFileUriEn);
-        return;
-      }
-
-      if (params.voice_b64_en) {
-        const fileEn = await saveBase64AudioToCache(
-          params.voice_b64_en,
-          'detected_symptoms_en.wav'
-        );
-
-        setVoiceFileUriEn(fileEn);
-        setVoiceFileUri(fileEn);
-      }
-    } catch (error) {
-      console.log('Update current language audio error:', error);
-    }
-  };
+      : '';
 
   const stopCurrentAudio = async () => {
     try {
@@ -173,6 +92,26 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
+  const updateAudioForCurrentLanguage = async () => {
+    try {
+      await stopCurrentAudio();
+
+      if (lang === 'wp' && voiceFileUriWp) {
+        setVoiceFileUri(voiceFileUriWp);
+        return;
+      }
+
+      if (lang !== 'wp' && voiceFileUriEn) {
+        setVoiceFileUri(voiceFileUriEn);
+        return;
+      }
+
+      setVoiceFileUri(null);
+    } catch (error) {
+      console.log('Update current language audio error:', error);
+    }
+  };
+
   async function fetchAudioForLanguage(languageCode) {
     try {
       setAudioLoading(true);
@@ -180,33 +119,12 @@ export default function DetectedSymptomsScreen() {
 
       if (languageCode === 'en' && voiceFileUriEn) {
         setVoiceFileUri(voiceFileUriEn);
-        return;
+        return voiceFileUriEn;
       }
 
       if (languageCode === 'wp' && voiceFileUriWp) {
         setVoiceFileUri(voiceFileUriWp);
-        return;
-      }
-
-      const directAudio =
-        languageCode === 'wp'
-          ? params.voice_b64_wp || ''
-          : params.voice_b64_en || '';
-
-      if (directAudio) {
-        const newFile = await saveBase64AudioToCache(
-          directAudio,
-          `detected_symptoms_${languageCode}.wav`
-        );
-
-        if (languageCode === 'wp') {
-          setVoiceFileUriWp(newFile);
-        } else {
-          setVoiceFileUriEn(newFile);
-        }
-
-        setVoiceFileUri(newFile);
-        return;
+        return voiceFileUriWp;
       }
 
       const textToSend =
@@ -217,20 +135,18 @@ export default function DetectedSymptomsScreen() {
           : symptomsEn.join(' ');
 
       if (!textToSend) {
-        console.log('No text available to generate detected audio.');
-        return;
+        return null;
       }
 
       const data = await extractSymptomsFromText(textToSend, languageCode);
 
       const audioBase64 =
         languageCode === 'wp'
-          ? data?.voice_b64_wp || ''
-          : data?.voice_b64_en || '';
+          ? data?.voice_b64_wp || data?.voice_b64 || ''
+          : data?.voice_b64_en || data?.voice_b64 || '';
 
       if (!audioBase64) {
-        console.log('No audio returned from backend.');
-        return;
+        return null;
       }
 
       const newFile = await saveBase64AudioToCache(
@@ -245,13 +161,11 @@ export default function DetectedSymptomsScreen() {
       }
 
       setVoiceFileUri(newFile);
+      return newFile;
     } catch (error) {
       console.log('Audio update error:', error);
-
-      Alert.alert(
-        'Audio Error',
-        'Could not update audio.'
-      );
+      Alert.alert('Audio Error', 'Could not update audio.');
+      return null;
     } finally {
       setAudioLoading(false);
     }
@@ -273,11 +187,10 @@ export default function DetectedSymptomsScreen() {
 
       await stopCurrentAudio();
 
-      let fileUri = voiceFileUri;
+      let fileUri = lang === 'wp' ? voiceFileUriWp : voiceFileUriEn;
 
       if (!fileUri) {
-        await fetchAudioForLanguage(lang);
-        fileUri = lang === 'wp' ? voiceFileUriWp : voiceFileUriEn;
+        fileUri = await fetchAudioForLanguage(lang);
       }
 
       if (!fileUri) {
@@ -341,6 +254,12 @@ export default function DetectedSymptomsScreen() {
 
   const afterLanguageChange = async (selectedLang) => {
     await fetchAudioForLanguage(selectedLang);
+  };
+
+  const goBackToTextInput = async () => {
+    await stopCurrentAudio();
+    setErrorModalVisible(false);
+    router.replace('/textinput');
   };
 
   const handleYesPress = async () => {
@@ -467,23 +386,27 @@ export default function DetectedSymptomsScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.errorModalBox}>
             <View style={styles.errorHeader}>
-              <Text style={styles.errorTitle}>No Symptoms Detected</Text>
+              <Text style={styles.errorTitle}>{t('no_symptoms_detected')}</Text>
 
               <Pressable
-                onPress={() => setErrorModalVisible(false)}
+                onPress={goBackToTextInput}
                 style={styles.errorCloseButton}
               >
                 <Text style={styles.errorCloseText}>×</Text>
               </Pressable>
             </View>
 
-            <View style={styles.errorBody}>
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
               <Text style={styles.errorMessageBold}>
-                We could not detect any symptoms from your description.
+                {t('no_symptoms_message_1')}
               </Text>
 
               <Text style={styles.errorMessage}>
-                Please try describing your symptoms in more detail.
+                {t('no_symptoms_message_2')}
               </Text>
 
               <Pressable
@@ -491,11 +414,11 @@ export default function DetectedSymptomsScreen() {
                   styles.errorOkButton,
                   pressed && styles.errorOkButtonPressed,
                 ]}
-                onPress={() => setErrorModalVisible(false)}
+                onPress={goBackToTextInput}
               >
-                <Text style={styles.errorOkText}>Ok</Text>
+                <Text style={styles.errorOkText}>{t('ok')}</Text>
               </Pressable>
-            </View>
+            </ImageBackground>
           </View>
         </View>
       </Modal>

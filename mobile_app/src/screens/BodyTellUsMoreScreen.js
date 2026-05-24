@@ -1,5 +1,7 @@
 // BodyTellUsMoreScreen.js
-// Purpose: Body follow-up questions using backend option IDs and question type.
+// Purpose: Body follow-up questions using backend option IDs, option images,
+// speaker audio, same option layout for all questions, pain question special layout,
+// and custom alert modal.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -11,15 +13,22 @@ import {
   Alert,
   Animated,
   BackHandler,
+  Modal,
+  ImageBackground,
 } from 'react-native';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Audio } from 'expo-av';
 
 import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import { getFollowUpQuestions } from '../services/triageApi';
 import { parseJsonParam } from '../utils/routeParams';
+import { saveBase64AudioToCache } from '../utils/base64Audio';
+
 import styles from '../styles/bodyTellUsMoreStyles';
+
+const SPEAKER_ICON = require('../../assets/images/speaker.png');
 
 const OPTION_IMAGES = {
   male: require('../../assets/images/male_image.png'),
@@ -62,18 +71,18 @@ const OPTION_CONFIG = {
   '0b4': { imageMale: 'elder_male', imageFemale: 'elder_female' },
 
   // Duration
-  '1a': { image: 'today', large: true },
-  '1b': { image: 'yesterday', large: true },
-  '1c': { image: 'two_three_days', large: true },
-  '1d': { image: 'about_week', large: true },
-  '1e': { image: 'more_week', large: true },
+  '1a': { image: 'today' },
+  '1b': { image: 'yesterday' },
+  '1c': { image: 'two_three_days' },
+  '1d': { image: 'about_week' },
+  '1e': { image: 'more_week' },
 
   // Pain
-  '2a': { image: 'pain_none', large: true },
-  '2b': { image: 'pain_little', large: true },
-  '2c': { image: 'pain_moderate', large: true },
-  '2d': { image: 'pain_very_bad', large: true },
-  '2e': { image: 'pain_unbearable', large: true },
+  '2a': { image: 'pain_none' },
+  '2b': { image: 'pain_little' },
+  '2c': { image: 'pain_moderate' },
+  '2d': { image: 'pain_very_bad' },
+  '2e': { image: 'pain_unbearable' },
 };
 
 function normalizeText(value = '') {
@@ -133,13 +142,18 @@ function getOptionImage(option, question, selectedGender) {
   return OPTION_IMAGES[config.image];
 }
 
-function shouldUseLargeCard(option, question) {
-  if (question?.type === 'yes_no') {
-    return true;
-  }
+function checkPainQuestion(question) {
+  const id = String(question?.id || '');
+  const type = String(question?.question_type || question?.type || '').toLowerCase();
+  const text = String(question?.text || '').toLowerCase();
 
-  const config = OPTION_CONFIG[getOptionId(option)];
-  return Boolean(config?.large);
+  return (
+    id === '2' ||
+    id === '4' ||
+    type.includes('pain') ||
+    text.includes('how bad is your pain') ||
+    text.includes('pain')
+  );
 }
 
 export default function BodyTellUsMoreScreen() {
@@ -156,16 +170,84 @@ export default function BodyTellUsMoreScreen() {
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedGender, setSelectedGender] = useState(params.gender || 'male');
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const soundRef = useRef(null);
 
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length || 1;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
 
+  async function stopCurrentAudio() {
+    try {
+      if (soundRef.current) {
+        const currentSound = soundRef.current;
+        soundRef.current = null;
+
+        const status = await currentSound.getStatusAsync();
+
+        if (status.isLoaded) {
+          await currentSound.stopAsync();
+          await currentSound.unloadAsync();
+        }
+      }
+    } catch (error) {
+      console.log('Stop body tell us more audio error:', error);
+    }
+  }
+
+  async function playQuestionAudio() {
+    try {
+      if (!currentQuestion?.voice_b64) {
+        Alert.alert('Audio Error', 'No audio available.');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
+
+      await stopCurrentAudio();
+
+      const fileUri = await saveBase64AudioToCache(
+        currentQuestion.voice_b64,
+        `body_question_${currentQuestion.id}.wav`
+      );
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: fileUri },
+        { shouldPlay: true, volume: 1.0 }
+      );
+
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          try {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
+            }
+
+            await sound.unloadAsync();
+          } catch (error) {
+            console.log('Finished body question audio unload error:', error);
+          }
+        }
+      });
+    } catch (error) {
+      console.log('Body question audio error:', error);
+      Alert.alert('Audio Error', 'Cannot play audio.');
+    }
+  }
+
   async function fetchQuestions(languageCode = lang || params.language || 'en') {
     try {
       setLoadingQuestions(true);
+      await stopCurrentAudio();
 
       const data = await getFollowUpQuestions(symptomsEn, languageCode);
 
@@ -187,6 +269,10 @@ export default function BodyTellUsMoreScreen() {
 
   useEffect(() => {
     fetchQuestions();
+
+    return () => {
+      stopCurrentAudio();
+    };
   }, []);
 
   const animateQuestionChange = () => {
@@ -210,14 +296,14 @@ export default function BodyTellUsMoreScreen() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!currentQuestion) {
       Alert.alert('Error', 'No question found.');
       return;
     }
 
     if (!selectedOption) {
-      Alert.alert('Select answer', 'Please select one option.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -235,6 +321,7 @@ export default function BodyTellUsMoreScreen() {
     };
 
     setAnswers(updatedAnswers);
+    await stopCurrentAudio();
 
     if (currentIndex < questions.length - 1) {
       const nextIndex = currentIndex + 1;
@@ -261,7 +348,9 @@ export default function BodyTellUsMoreScreen() {
     });
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
+    await stopCurrentAudio();
+
     if (currentIndex > 0) {
       const previousIndex = currentIndex - 1;
       const previousQuestion = questions[previousIndex];
@@ -288,15 +377,70 @@ export default function BodyTellUsMoreScreen() {
     return () => backHandler.remove();
   }, [currentIndex, questions, answers]);
 
+  const beforeLanguageChange = async () => {
+    await stopCurrentAudio();
+  };
+
   const afterLanguageChange = async (selectedLang) => {
     await fetchQuestions(selectedLang);
   };
 
+  const renderNoAnswerModal = () => (
+    <Modal transparent visible={errorModalVisible} animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.errorModalBox}>
+          <View style={styles.errorHeader}>
+            <Text style={styles.errorTitle}>
+              {t('no_answer_title') || 'No Answer Selected'}
+            </Text>
+
+            <Pressable
+              onPress={() => setErrorModalVisible(false)}
+              style={styles.errorCloseButton}
+            >
+              <Text style={styles.errorCloseText}>×</Text>
+            </Pressable>
+          </View>
+
+          <ImageBackground
+            source={require('../../assets/images/background.png')}
+            style={styles.errorBody}
+            resizeMode="cover"
+          >
+            <Text style={styles.errorMessageBold}>
+              {t('no_answer_message_1') ||
+                'Please select one answer before continuing.'}
+            </Text>
+
+            <Text style={styles.errorMessage}>
+              {t('no_answer_message_2') ||
+                'Tap one option and then press continue.'}
+            </Text>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.errorOkButton,
+                pressed && styles.errorOkButtonPressed,
+              ]}
+              onPress={() => setErrorModalVisible(false)}
+            >
+              <Text style={styles.errorOkText}>{t('ok') || 'Ok'}</Text>
+            </Pressable>
+          </ImageBackground>
+        </View>
+      </View>
+    </Modal>
+  );
+
   if (loadingQuestions) {
     return (
       <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
         afterLanguageChange={afterLanguageChange}
-        onHomePress={() => router.replace('/input')}
+        onHomePress={async () => {
+          await stopCurrentAudio();
+          router.replace('/input');
+        }}
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
@@ -316,8 +460,12 @@ export default function BodyTellUsMoreScreen() {
   if (!currentQuestion) {
     return (
       <AppScreen
+        beforeLanguageChange={beforeLanguageChange}
         afterLanguageChange={afterLanguageChange}
-        onHomePress={() => router.replace('/input')}
+        onHomePress={async () => {
+          await stopCurrentAudio();
+          router.replace('/input');
+        }}
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
@@ -325,9 +473,7 @@ export default function BodyTellUsMoreScreen() {
           </View>
 
           <View style={styles.questionBox}>
-            <Text style={styles.questionText}>
-              No follow-up questions found.
-            </Text>
+            <Text style={styles.questionText}>No follow-up questions found.</Text>
           </View>
 
           <Pressable
@@ -348,14 +494,20 @@ export default function BodyTellUsMoreScreen() {
             </View>
           </Pressable>
         </View>
+
+        {renderNoAnswerModal()}
       </AppScreen>
     );
   }
 
   return (
     <AppScreen
+      beforeLanguageChange={beforeLanguageChange}
       afterLanguageChange={afterLanguageChange}
-      onHomePress={() => router.replace('/input')}
+      onHomePress={async () => {
+        await stopCurrentAudio();
+        router.replace('/input');
+      }}
     >
       <View style={styles.container}>
         <View style={styles.headerBar}>
@@ -375,6 +527,20 @@ export default function BodyTellUsMoreScreen() {
         <Animated.View style={[styles.questionBox, { opacity: fadeAnim }]}>
           <Text style={styles.questionText}>{currentQuestion.text}</Text>
 
+          <Pressable
+            style={({ pressed }) => [
+              styles.speakerButton,
+              pressed && styles.speakerPressed,
+            ]}
+            onPress={playQuestionAudio}
+          >
+            <Image
+              source={SPEAKER_ICON}
+              style={styles.speakerIcon}
+              resizeMode="contain"
+            />
+          </Pressable>
+
           <ScrollView
             style={styles.optionsScroll}
             showsVerticalScrollIndicator={true}
@@ -385,21 +551,19 @@ export default function BodyTellUsMoreScreen() {
             {currentQuestion.options?.map((option) => {
               const optionId = getOptionId(option);
               const optionText = getOptionText(option);
-              const useLargeCard = shouldUseLargeCard(option, currentQuestion);
               const optionImage = getOptionImage(
                 option,
                 currentQuestion,
                 selectedGender
               );
               const isSelected = selectedOption === optionId;
+              const isPainQuestion = checkPainQuestion(currentQuestion);
 
               return (
                 <Pressable
                   key={optionId}
                   style={[
-                    useLargeCard
-                      ? styles.optionCardVertical
-                      : styles.optionCard,
+                    isPainQuestion ? styles.painOptionCard : styles.optionCard,
                     isSelected && styles.optionCardSelected,
                   ]}
                   onPress={() => handleOptionPress(option)}
@@ -408,8 +572,8 @@ export default function BodyTellUsMoreScreen() {
                     <Image
                       source={optionImage}
                       style={
-                        useLargeCard
-                          ? styles.optionImageVertical
+                        isPainQuestion
+                          ? styles.painOptionImage
                           : styles.optionImage
                       }
                       resizeMode="contain"
@@ -417,8 +581,8 @@ export default function BodyTellUsMoreScreen() {
                   ) : (
                     <View
                       style={
-                        useLargeCard
-                          ? styles.optionImagePlaceholderVertical
+                        isPainQuestion
+                          ? styles.painOptionImagePlaceholder
                           : styles.optionImagePlaceholder
                       }
                     >
@@ -428,9 +592,7 @@ export default function BodyTellUsMoreScreen() {
 
                   <Text
                     style={[
-                      useLargeCard
-                        ? styles.optionTextVertical
-                        : styles.optionText,
+                      isPainQuestion ? styles.painOptionText : styles.optionText,
                       isSelected && styles.optionTextSelected,
                     ]}
                     numberOfLines={3}
@@ -473,6 +635,8 @@ export default function BodyTellUsMoreScreen() {
           </View>
         </Pressable>
       </View>
+
+      {renderNoAnswerModal()}
     </AppScreen>
   );
 }

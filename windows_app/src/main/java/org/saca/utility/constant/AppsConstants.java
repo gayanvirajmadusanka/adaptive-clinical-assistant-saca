@@ -1,5 +1,12 @@
 package org.saca.utility.constant;
 
+/**
+ * Apps constants
+ *
+ * <p>This class keep constants to reuse in the app</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class AppsConstants {
 
     public static final String CONFIRM_SYMPTOMS_QUESTION_ID = "confirm_symptoms";
@@ -7,6 +14,8 @@ public class AppsConstants {
     public static final String CONFIRM_SYMPTOMS_ANSWER_YES = "confirm_symptomsy";
 
     public static final String CONFIRM_SYMPTOMS_ANSWER_NO = "confirm_symptomsn";
+
+    public static final String QUESTION_TYPE_YES_NO = "yes_no";
 
     public enum AppLanguage {
         EN("en", "English"), WP("wp", "Warlpiri");

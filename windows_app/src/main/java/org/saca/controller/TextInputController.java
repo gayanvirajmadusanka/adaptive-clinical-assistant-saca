@@ -23,6 +23,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the text input screen
+ *
+ * <p>Handles user interactions on the Text input.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TextInputController implements Initializable {
 
     @FXML
@@ -59,6 +66,10 @@ public class TextInputController implements Initializable {
 
         if (text.isEmpty()) {
             symptomInput.setPromptText(LanguageManager.get("text_input_empty_prompt"));
+            DialogManager.warningDialog(
+                    LanguageManager.get("describe_your_symptoms"),
+                    LanguageManager.get("describe_your_symptoms"),
+                    LanguageManager.get("text_input_empty_prompt"));
             return;
         }
 

@@ -31,8 +31,16 @@ import java.util.Base64;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Body Input screen
+ *
+ * @author Gayan Madusanka
+ */
 public class BodyInputController implements Initializable {
 
+    /**
+     * Body map zones
+     */
     private static final double[][] ZONES = {
             {0.4973, 0.090, 0.082, 0.060},
             {0.4570, 0.148, 0.026, 0.020},
@@ -50,12 +58,18 @@ public class BodyInputController implements Initializable {
             {0.5640, 0.710, 0.042, 0.065},
     };
 
+    /**
+     * Body map zone keys
+     */
     private static final String[] ZONE_KEYS = {
             "head", "eye", "eye", "nose", "jaw",
             "ear", "ear", "throat", "chest", "stomach",
             "arm", "arm", "general", "general"
     };
 
+    /**
+     * Body map zone labels
+     */
     private static final String[] ZONE_LABELS = {
             "Head", "Eye (left)", "Eye (right)", "Nose", "Jaw / Mouth",
             "Ear (left)", "Ear (right)", "Throat / Neck", "Chest", "Stomach",
@@ -64,16 +78,22 @@ public class BodyInputController implements Initializable {
 
     @FXML
     private SidebarController sidebarController;
+
     @FXML
     private StackPane bodyImagePane;
+
     @FXML
     private ImageView bodyImage;
+
     @FXML
     private Pane zonesPane;
+
     @FXML
     private VBox partsListBox;
+
     @FXML
     private Button maleBtn;
+
     @FXML
     private Button femaleBtn;
 
@@ -84,7 +104,6 @@ public class BodyInputController implements Initializable {
         // Restore gender from cache
         isMale = CacheManager.isSelectedGenderMale();
 
-        // Sync toggle button styles to restored gender
         if (isMale) {
             maleBtn.getStyleClass().setAll("gender-btn-header", "gender-btn-header-active");
             femaleBtn.getStyleClass().setAll("gender-btn-header");
@@ -103,6 +122,9 @@ public class BodyInputController implements Initializable {
         });
     }
 
+    /**
+     * Build body zones
+     */
     private void buildZones() {
         zonesPane.getChildren().clear();
 
@@ -128,9 +150,9 @@ public class BodyInputController implements Initializable {
             zone.setStroke(Color.TRANSPARENT);
             zone.setCursor(javafx.scene.Cursor.HAND);
 
-            Tooltip tip = new Tooltip(label);
-            tip.setShowDelay(Duration.millis(200));
-            tip.setStyle(
+            Tooltip tooltip = new Tooltip(label);
+            tooltip.setShowDelay(Duration.millis(200));
+            tooltip.setStyle(
                     "-fx-font-family: 'Kreon', Georgia, serif;" +
                             "-fx-font-size: 14px; -fx-font-weight: bold;" +
                             "-fx-background-color: #3a2a1a;" +
@@ -138,7 +160,7 @@ public class BodyInputController implements Initializable {
                             "-fx-padding: 6 14 6 14;" +
                             "-fx-background-radius: 10;"
             );
-            Tooltip.install(zone, tip);
+            Tooltip.install(zone, tooltip);
 
             zone.setOnMouseEntered(e -> {
                 zone.setFill(Color.web("#C0392B", 0.22));
@@ -158,6 +180,9 @@ public class BodyInputController implements Initializable {
         }
     }
 
+    /**
+     * Build body part list
+     */
     private void buildPartsList() {
         partsListBox.getChildren().clear();
 
@@ -180,6 +205,12 @@ public class BodyInputController implements Initializable {
         }
     }
 
+    /**
+     * Build body part cards to display
+     *
+     * @param part BodyPart
+     * @return HBox
+     */
     private HBox buildPartCard(BodyPart part) {
         String key = part.getId().equals("whole_body") ? "general" : part.getId();
 
@@ -193,7 +224,7 @@ public class BodyInputController implements Initializable {
 
         Label name = new Label(part.getLabel());
         name.getStyleClass().add("body-part-name");
-        name.setWrapText(false);
+        name.setWrapText(true);
         name.setEllipsisString("…");
         name.setMinWidth(0);
         name.setMaxWidth(Double.MAX_VALUE);
@@ -231,6 +262,12 @@ public class BodyInputController implements Initializable {
         return row;
     }
 
+    /**
+     * Play audio
+     *
+     * @param part BodyPart to play audio
+     * @param icon Icon to set
+     */
     private void playAudio(BodyPart part, ImageView icon) {
         if (AudioService.isPlaying()) {
             AudioService.stop();
@@ -240,11 +277,15 @@ public class BodyInputController implements Initializable {
 
         try {
             URL audioURL = getClass().getResource("/audio/body_parts/" + part.getAudio());
-            if (audioURL == null) return;
-            String b64 = Base64.getEncoder().encodeToString(audioURL.openStream().readAllBytes());
+
+            if (audioURL == null) {
+                return;
+            }
+
+            String voiceBase64 = Base64.getEncoder().encodeToString(audioURL.openStream().readAllBytes());
             setIcon(icon, "/icons/mute.png");
 
-            AudioService.playBase64Wav(b64,
+            AudioService.playBase64Wav(voiceBase64,
                     err -> Platform.runLater(() -> setIcon(icon, "/icons/speaker.png")),
                     () -> Platform.runLater(() -> setIcon(icon, "/icons/speaker.png")));
         } catch (Exception e) {
@@ -252,14 +293,30 @@ public class BodyInputController implements Initializable {
         }
     }
 
+    /**
+     * Set icon
+     *
+     * @param imageView ImageView to set icon
+     * @param path      Icon path
+     */
     private void setIcon(ImageView imageView, String path) {
         imageView.setImage(new Image(getClass().getResource(path).toExternalForm()));
     }
 
+    /**
+     * Open symptoms
+     *
+     * @param partKey Part key to open symptoms
+     */
     private void openSymptoms(String partKey) {
         BodyPart part = BodyPartsData.get(partKey);
-        if (part == null) return;
+
+        if (part == null) {
+            return;
+        }
+
         AudioService.stop();
+
         try {
             NavBarManager.setCurrentView("/view/BodySymptomsView.fxml");
             FXMLLoader loader = new FXMLLoader(
@@ -273,6 +330,9 @@ public class BodyInputController implements Initializable {
         }
     }
 
+    /**
+     * Handle male button click
+     */
     @FXML
     private void handleMale() {
         isMale = true;
@@ -284,6 +344,9 @@ public class BodyInputController implements Initializable {
         buildZones();
     }
 
+    /**
+     * Handle female button click
+     */
     @FXML
     private void handleFemale() {
         isMale = false;
@@ -295,6 +358,11 @@ public class BodyInputController implements Initializable {
         buildZones();
     }
 
+    /**
+     * Handle back button
+     *
+     * @param event ActionEvent to handle back
+     */
     @FXML
     private void handleBack(ActionEvent event) {
         AudioService.stop();

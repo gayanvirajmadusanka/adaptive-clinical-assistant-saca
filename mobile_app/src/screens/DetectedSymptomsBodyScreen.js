@@ -38,6 +38,9 @@ export default function DetectedSymptomsBodyScreen() {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
 
+  // Stores selected Yes / No so selected button can show red border effect
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+
   const soundRef = useRef(null);
 
   useEffect(() => {
@@ -47,6 +50,12 @@ export default function DetectedSymptomsBodyScreen() {
   useEffect(() => {
     updateAudioForCurrentLanguage();
   }, [lang]);
+
+  useEffect(() => {
+    return () => {
+      stopCurrentAudio();
+    };
+  }, []);
 
   const symptomsToShow =
     lang === 'wp' && symptomsWp.length > 0
@@ -297,12 +306,6 @@ export default function DetectedSymptomsBodyScreen() {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      stopCurrentAudio();
-    };
-  }, []);
-
   const beforeLanguageChange = async () => {
     await stopCurrentAudio();
   };
@@ -312,6 +315,8 @@ export default function DetectedSymptomsBodyScreen() {
   };
 
   const handleYesPress = async () => {
+    setSelectedAnswer('yes');
+
     if (symptomsEn.length === 0 && symptomsWp.length === 0) {
       setErrorModalVisible(true);
       return;
@@ -319,21 +324,27 @@ export default function DetectedSymptomsBodyScreen() {
 
     await stopCurrentAudio();
 
-    router.push({
-      pathname: '/bodytellusmore',
-      params: {
-        symptoms_en: toJsonParam(symptomsEn),
-        symptoms_wp: toJsonParam(symptomsWp),
-        language: lang,
-        gender: params.gender || 'male',
-        source: 'body',
-      },
-    });
+    setTimeout(() => {
+      router.push({
+        pathname: '/bodytellusmore',
+        params: {
+          symptoms_en: toJsonParam(symptomsEn),
+          symptoms_wp: toJsonParam(symptomsWp),
+          language: lang,
+          gender: params.gender || 'male',
+          source: 'body',
+        },
+      });
+    }, 250);
   };
 
   const handleNoPress = async () => {
+    setSelectedAnswer('no');
     await stopCurrentAudio();
-    router.replace('/bodyinput');
+
+    setTimeout(() => {
+      router.replace('/bodyinput');
+    }, 250);
   };
 
   return (
@@ -378,13 +389,17 @@ export default function DetectedSymptomsBodyScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.iconChoiceButton,
+              selectedAnswer === 'yes' && styles.iconChoiceSelected,
               pressed && styles.iconChoicePressed,
             ]}
             onPress={handleYesPress}
           >
             <Image
               source={require('../../assets/images/yes_icon.png')}
-              style={styles.yesNoIcon}
+              style={[
+                styles.yesNoIcon,
+                selectedAnswer === 'yes' && styles.yesNoIconSelected,
+              ]}
               resizeMode="contain"
             />
           </Pressable>
@@ -392,13 +407,17 @@ export default function DetectedSymptomsBodyScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.iconChoiceButton,
+              selectedAnswer === 'no' && styles.iconChoiceSelected,
               pressed && styles.iconChoicePressed,
             ]}
             onPress={handleNoPress}
           >
             <Image
               source={require('../../assets/images/no_icon.png')}
-              style={styles.yesNoIcon}
+              style={[
+                styles.yesNoIcon,
+                selectedAnswer === 'no' && styles.yesNoIconSelected,
+              ]}
               resizeMode="contain"
             />
           </Pressable>
