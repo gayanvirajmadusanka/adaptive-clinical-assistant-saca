@@ -2,13 +2,13 @@ name: Build Windows Installer
 
 on:
   push:
-    branches: [release]
+    branches: [ release ]
     paths:
       - 'backend_release_windows/**'
       - 'windows_app/**'
       - 'backend/data/**'
       - 'backend/models/**'
-  workflow_dispatch:  # allow manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
@@ -50,6 +50,15 @@ jobs:
           Expand-Archive -Path $dest -DestinationPath "$env:RUNNER_TEMP\javafx"
           echo "JAVAFX_HOME=$env:RUNNER_TEMP\javafx\javafx-sdk-21.0.2" | Out-File -Append $env:GITHUB_ENV
 
+      - name: Download JavaFX jmods
+        shell: pwsh
+        run: |
+          $url  = "https://download2.gluonhq.com/openjfx/21.0.2/openjfx-21.0.2_windows-x64_bin-jmods.zip"
+          $dest = "$env:RUNNER_TEMP\javafx-jmods.zip"
+          Invoke-WebRequest -Uri $url -OutFile $dest
+          Expand-Archive -Path $dest -DestinationPath "$env:RUNNER_TEMP\javafx-jmods"
+          echo "JAVAFX_JMODS=$env:RUNNER_TEMP\javafx-jmods\javafx-jmods-21.0.2" | Out-File -Append $env:GITHUB_ENV
+
       - name: Install Python dependencies
         run: pip install -r backend_release_windows/requirements_windows.txt
 
@@ -63,11 +72,23 @@ jobs:
         working-directory: windows_app
         run: mvn clean package -q
 
-      - name: Copy saca_server.exe and main jar into jpackage input
+      - name: Copy saca_server.exe and main JAR into lib
         shell: pwsh
         run: |
-          Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe
-          Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar
+          Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe -Force
+          Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar -Force
+
+      - name: Create custom JRE with jlink
+        shell: pwsh
+        run: |
+          $jdkMods = (Get-Command java).Source | Split-Path | Split-Path | Join-Path -ChildPath "jmods"
+          jlink `
+            --module-path "$jdkMods;$env:JAVAFX_JMODS" `
+            --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.sql,javafx.controls,javafx.fxml,javafx.media,jdk.unsupported `
+            --output custom-jre `
+            --strip-debug `
+            --no-header-files `
+            --no-man-pages
 
       - name: Run jpackage
         shell: pwsh
@@ -78,11 +99,10 @@ jobs:
             --app-version 1.0 `
             --vendor "SACA Team" `
             --description "SACA Adaptive Clinical Assistant" `
+            --runtime-image custom-jre `
             --input windows_app\target\lib `
             --main-jar SACA-1.0-SNAPSHOT.jar `
-            --main-class org.saca.MainApp `
-            --module-path "$env:JAVAFX_HOME\lib" `
-            --add-modules javafx.controls,javafx.fxml,javafx.media `
+            --main-class org.saca.Launcher `
             --win-dir-chooser `
             --win-shortcut `
             --win-menu `
