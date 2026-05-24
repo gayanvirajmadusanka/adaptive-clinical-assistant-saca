@@ -62,8 +62,8 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r backend_release_windows/requirements_windows.txt
 
-      - name: Download spaCy model
-        run: python -m spacy download en_core_web_sm
+      - name: Verify spaCy model
+        run: python -c "import en_core_web_sm; print('spaCy model OK:', en_core_web_sm.__file__)"
 
       - name: Build saca_server.exe (PyInstaller)
         run: pyinstaller backend_release_windows/saca_server.spec --clean --distpath backend_release_windows/dist
@@ -81,7 +81,8 @@ jobs:
       - name: Create custom JRE with jlink
         shell: pwsh
         run: |
-          $jdkMods = (Get-Command java).Source | Split-Path | Split-Path | Join-Path -ChildPath "jmods"
+          $javaHome = $env:JAVA_HOME
+          $jdkMods = "$javaHome\jmods"
           jlink `
             --module-path "$jdkMods;$env:JAVAFX_JMODS" `
             --add-modules java.base,java.desktop,java.logging,java.naming,java.net.http,java.sql,javafx.controls,javafx.fxml,javafx.media,jdk.unsupported `
