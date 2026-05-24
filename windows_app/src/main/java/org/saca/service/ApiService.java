@@ -12,6 +12,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+/**
+ * API service
+ *
+ * <p>This service handles all API communication with python backend</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class ApiService {
 
     private static final String BASE_URL = "http://127.0.0.1:8000";

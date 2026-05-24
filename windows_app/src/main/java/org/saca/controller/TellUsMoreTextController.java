@@ -29,6 +29,13 @@ import org.saca.utility.manager.NavBarManager;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Controller for the Tell us more text screen
+ *
+ * <p>Handles user interactions on the Tell us more text flow.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TellUsMoreTextController implements Initializable {
 
     private final Map<String, String> selectedAnswers = new HashMap<>();

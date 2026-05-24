@@ -6,6 +6,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
+/**
+ * Audio record service
+ *
+ * <p>This service handles all Audio recordings</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class AudioRecorderService {
 
     private static final AudioFormat FORMAT = new AudioFormat(

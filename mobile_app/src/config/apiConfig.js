@@ -5,6 +5,6 @@ import { Platform } from 'react-native';
 export const API_CONFIG = {
   BASE_URL: (Platform.OS === 'android' && !__DEV__)
     ? 'http://127.0.0.1:8000'
-    : 'http://192.168.1.106:8000',
+    : 'http://10.227.128.20:8000',
   TIMEOUT_MS: 30000,
 };

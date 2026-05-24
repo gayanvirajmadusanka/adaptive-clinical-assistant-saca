@@ -13,6 +13,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Dashboard screen
+ *
+ * <p>Handles user interactions on the Dashboard.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class DashboardController implements Initializable {
 
     @FXML

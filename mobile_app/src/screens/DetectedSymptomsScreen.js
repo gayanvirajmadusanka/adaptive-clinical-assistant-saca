@@ -1,26 +1,22 @@
 // DetectedSymptomsScreen.js
 // Purpose: Displays symptoms detected by the FastAPI backend.
-// It supports English/Warlpiri display, audio playback, language switching, error handling, and navigation to TellUsMore.
+// If no symptoms are detected, it shows an error popup and returns to TextInputScreen.
 
-// React and React Native imports used to build this screen component.
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  ImageBackground,
   Pressable,
-  StatusBar,
-  SafeAreaView,
   Image,
   Modal,
-  Animated,
   Alert,
+  ImageBackground,
 } from 'react-native';
-
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 
+import AppScreen from '../components/AppScreen';
 import { useLanguage } from '../context/LanguageContext';
 import styles from '../styles/detectedSymptomsStyles';
 
@@ -28,73 +24,60 @@ import { extractSymptomsFromText } from '../services/triageApi';
 import { saveBase64AudioToCache } from '../utils/base64Audio';
 import { parseJsonParam, toJsonParam } from '../utils/routeParams';
 
-// Main screen component: DetectedSymptomsScreen
 export default function DetectedSymptomsScreen() {
   const router = useRouter();
-
-  const { t, lang, setLang } = useLanguage();
-
   const params = useLocalSearchParams();
+  const { t, lang } = useLanguage();
 
-  // Convert JSON string params back into arrays
   const symptomsEn = parseJsonParam(params.symptoms_en, []);
   const symptomsWp = parseJsonParam(params.symptoms_wp, []);
 
-  // Audio file path received from previous screen
-  const initialVoiceFileUri = params.voice_file_uri || null;
+  const isVoiceFlow = params.source === 'voice';
+  const isBodyFlow = params.source === 'body';
 
-  // Stores current audio file URI
-  const [voiceFileUri, setVoiceFileUri] = useState(initialVoiceFileUri);
+  const [voiceFileUri, setVoiceFileUri] = useState(null);
+  const [voiceFileUriEn, setVoiceFileUriEn] = useState(null);
+  const [voiceFileUriWp, setVoiceFileUriWp] = useState(null);
 
-  // Controls language modal visibility
-  const [modalVisible, setModalVisible] = useState(false);
-
-  // Controls error modal visibility
   const [errorModalVisible, setErrorModalVisible] = useState(false);
-
-  // Stores selected language before confirmation
-  const [selectedLang, setSelectedLang] = useState(null);
-
-  // Prevents double clicking on Yes button
   const [loading, setLoading] = useState(false);
-
-  // Shows loading state while audio is being updated
   const [audioLoading, setAudioLoading] = useState(false);
 
-  // Keeps reference to currently playing audio
   const soundRef = useRef(null);
 
-  // Animation value for language modal popup
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-
-  // Reset loading when returning to this screen
   useFocusEffect(
     useCallback(() => {
       setLoading(false);
     }, [])
   );
 
-  // Decide which symptoms should be displayed based on selected language
+  useEffect(() => {
+    if (symptomsEn.length === 0 && symptomsWp.length === 0) {
+      setErrorModalVisible(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    updateAudioForCurrentLanguage();
+  }, [lang]);
+
   const symptomsToShow =
-    lang === 'wp'
+    lang === 'wp' && symptomsWp.length > 0
       ? symptomsWp
       : symptomsEn.map((item) => {
-          const key = item.toLowerCase().replaceAll(' ', '_');
+          const key = String(item).toLowerCase().replaceAll(' ', '_');
           return t(key);
         });
 
-  // Convert symptoms array into bullet list text
   const symptomText =
     symptomsToShow.length > 0
       ? symptomsToShow.map((item) => `• ${item}`).join('\n')
-      : 'No symptoms detected';
+      : '';
 
-  // Stops current audio and removes it from memory
   const stopCurrentAudio = async () => {
     try {
       if (soundRef.current) {
         const currentSound = soundRef.current;
-
         soundRef.current = null;
 
         const status = await currentSound.getStatusAsync();
@@ -109,124 +92,145 @@ export default function DetectedSymptomsScreen() {
     }
   };
 
-  // Fetch translated audio from backend when language changes
+  const updateAudioForCurrentLanguage = async () => {
+    try {
+      await stopCurrentAudio();
+
+      if (lang === 'wp' && voiceFileUriWp) {
+        setVoiceFileUri(voiceFileUriWp);
+        return;
+      }
+
+      if (lang !== 'wp' && voiceFileUriEn) {
+        setVoiceFileUri(voiceFileUriEn);
+        return;
+      }
+
+      setVoiceFileUri(null);
+    } catch (error) {
+      console.log('Update current language audio error:', error);
+    }
+  };
+
   async function fetchAudioForLanguage(languageCode) {
     try {
       setAudioLoading(true);
+      await stopCurrentAudio();
 
-      // Choose text to send based on selected language
+      if (languageCode === 'en' && voiceFileUriEn) {
+        setVoiceFileUri(voiceFileUriEn);
+        return voiceFileUriEn;
+      }
+
+      if (languageCode === 'wp' && voiceFileUriWp) {
+        setVoiceFileUri(voiceFileUriWp);
+        return voiceFileUriWp;
+      }
+
       const textToSend =
         languageCode === 'wp'
-          ? symptomsWp.join(' ')
+          ? symptomsWp.length > 0
+            ? symptomsWp.join(' ')
+            : symptomsEn.join(' ')
           : symptomsEn.join(' ');
 
-      // Send symptoms to backend and receive audio response
-      const data = await extractSymptomsFromText(
-        textToSend,
-        languageCode
-      );
-
-      // Save base64 audio as local file
-      const newFile = await saveBase64AudioToCache(
-        data?.voice_b64,
-        `voice_${languageCode}.wav`
-      );
-
-      // Update audio file URI
-      if (newFile) {
-        setVoiceFileUri(newFile);
+      if (!textToSend) {
+        return null;
       }
+
+      const data = await extractSymptomsFromText(textToSend, languageCode);
+
+      const audioBase64 =
+        languageCode === 'wp'
+          ? data?.voice_b64_wp || data?.voice_b64 || ''
+          : data?.voice_b64_en || data?.voice_b64 || '';
+
+      if (!audioBase64) {
+        return null;
+      }
+
+      const newFile = await saveBase64AudioToCache(
+        audioBase64,
+        `detected_symptoms_${languageCode}.wav`
+      );
+
+      if (languageCode === 'wp') {
+        setVoiceFileUriWp(newFile);
+      } else {
+        setVoiceFileUriEn(newFile);
+      }
+
+      setVoiceFileUri(newFile);
+      return newFile;
     } catch (error) {
       console.log('Audio update error:', error);
-
-      Alert.alert(
-        'Audio Error',
-        'Could not update audio.'
-      );
+      Alert.alert('Audio Error', 'Could not update audio.');
+      return null;
     } finally {
       setAudioLoading(false);
     }
   }
 
-  // Plays detected symptoms audio
   const playVoiceAudio = async () => {
     try {
-      if (!voiceFileUri) {
-        Alert.alert(
-          'Audio Error',
-          'No audio file found.'
-        );
-
-        return;
-      }
-
       if (audioLoading) {
-        Alert.alert(
-          'Please wait',
-          'Updating audio...'
-        );
-
+        Alert.alert('Please wait', 'Preparing audio...');
         return;
       }
 
-      // Allows playback even if iPhone is in silent mode
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
       });
 
-      // Stop previous audio before playing new audio
       await stopCurrentAudio();
 
-      // Load and play audio file
-      const { sound } =
-        await Audio.Sound.createAsync(
-          { uri: voiceFileUri },
-          {
-            shouldPlay: true,
-            volume: 1.0,
-          }
-        );
+      let fileUri = lang === 'wp' ? voiceFileUriWp : voiceFileUriEn;
+
+      if (!fileUri) {
+        fileUri = await fetchAudioForLanguage(lang);
+      }
+
+      if (!fileUri) {
+        Alert.alert('Audio Error', 'No audio file found.');
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: fileUri },
+        {
+          shouldPlay: true,
+          volume: 1.0,
+        }
+      );
 
       soundRef.current = sound;
 
-      // Unload audio when playback finishes
-      sound.setOnPlaybackStatusUpdate(
-        async (status) => {
-          if (
-            status.isLoaded &&
-            status.didJustFinish
-          ) {
-            try {
-              if (soundRef.current === sound) {
-                soundRef.current = null;
-              }
-
-              await sound.unloadAsync();
-            } catch (error) {
-              console.log(
-                'Finished audio unload error:',
-                error
-              );
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          try {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
             }
+
+            await sound.unloadAsync();
+          } catch (error) {
+            console.log('Finished audio unload error:', error);
           }
         }
-      );
+      });
     } catch (error) {
       console.log('Play error:', error);
-
-      Alert.alert(
-        'Audio Error',
-        'Unable to play audio.'
-      );
+      Alert.alert('Audio Error', 'Unable to play audio.');
     }
   };
 
-  // Cleanup audio when leaving screen
   useEffect(() => {
     return () => {
       if (soundRef.current) {
         const currentSound = soundRef.current;
-
         soundRef.current = null;
 
         currentSound
@@ -238,459 +242,186 @@ export default function DetectedSymptomsScreen() {
             }
           })
           .catch((error) => {
-            console.log(
-              'Cleanup audio error:',
-              error
-            );
+            console.log('Cleanup audio error:', error);
           });
       }
     };
   }, []);
 
-  // Opens language selection popup
-  const openModal = () => {
-    setSelectedLang(null);
-
-    setModalVisible(true);
-
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 5,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  // Closes language popup
-  const closeModal = () => {
-    Animated.timing(scaleAnim, {
-      toValue: 0.8,
-      duration: 120,
-      useNativeDriver: true,
-    }).start(() => setModalVisible(false));
-  };
-
-  // Confirms selected language and refreshes audio
-  const confirmLanguage = async () => {
-    if (!selectedLang) return;
-
+  const beforeLanguageChange = async () => {
     await stopCurrentAudio();
+  };
 
-    // Change app language
-    setLang(selectedLang);
-
-    // Close language modal first
-    closeModal();
-
-    // Show error popup if Warlpiri symptoms are empty
-    if (selectedLang === 'wp' && symptomsWp.length === 0) {
-      setErrorModalVisible(true);
-      return;
-    }
-
-    // Refresh translated audio
+  const afterLanguageChange = async (selectedLang) => {
     await fetchAudioForLanguage(selectedLang);
   };
 
-  // Handles YES button and navigates to TellUsMore screen
+  const goBackToTextInput = async () => {
+    await stopCurrentAudio();
+    setErrorModalVisible(false);
+    router.replace('/textinput');
+  };
+
   const handleYesPress = async () => {
     if (loading) return;
 
-    // Show error modal only when Warlpiri has no symptoms
-    if (lang === 'wp' && symptomsWp.length === 0) {
+    if (symptomsEn.length === 0 && symptomsWp.length === 0) {
       setErrorModalVisible(true);
       return;
     }
 
     setLoading(true);
-
     await stopCurrentAudio();
 
     router.push({
-      pathname: '/tellusmore',
+      pathname: isBodyFlow
+        ? '/bodytellusmore'
+        : isVoiceFlow
+        ? '/tellusmorevoice'
+        : '/tellusmore',
+
       params: {
         symptoms_en: toJsonParam(symptomsEn),
         symptoms_wp: toJsonParam(symptomsWp),
         language: lang,
+        gender: params.gender || 'male',
+        source: params.source || 'text',
       },
     });
   };
 
+  const handleNoPress = async () => {
+    await stopCurrentAudio();
+
+    if (isBodyFlow) {
+      router.replace('/bodyinput');
+    } else if (isVoiceFlow) {
+      router.replace('/voiceinput');
+    } else {
+      router.replace('/textinput');
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#F5EAD8"
-      />
+    <AppScreen
+      languageLabel={audioLoading ? 'Updating...' : undefined}
+      languageModalDisabled={audioLoading}
+      beforeLanguageChange={beforeLanguageChange}
+      afterLanguageChange={afterLanguageChange}
+      onHomePress={async () => {
+        await stopCurrentAudio();
+        router.replace('/input');
+      }}
+    >
+      <View style={styles.container}>
+        <View style={styles.headerBar}>
+          <Text style={styles.headerText}>{t('detected_title')}</Text>
+        </View>
 
-      <View style={styles.wrapper}>
-        <ImageBackground
-          source={require('../../assets/images/background.png')}
-          style={styles.background}
-          resizeMode="cover"
+        <View style={styles.symptomBox}>
+          <Text style={styles.symptomText}>{symptomText}</Text>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.speakerButton,
+              pressed && styles.speakerPressed,
+            ]}
+            onPress={playVoiceAudio}
+          >
+            <Image
+              source={require('../../assets/images/speaker.png')}
+              style={styles.speakerIcon}
+              resizeMode="contain"
+            />
+          </Pressable>
+        </View>
+
+        <Text style={styles.questionText}>{t('detected_question')}</Text>
+
+        <View style={styles.buttonRow}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.choiceButton,
+              pressed && styles.choicePressed,
+            ]}
+            onPress={handleYesPress}
+          >
+            <Text style={styles.choiceText}>{t('yes')}</Text>
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.choiceButton,
+              pressed && styles.choicePressed,
+            ]}
+            onPress={handleNoPress}
+          >
+            <Text style={styles.choiceText}>{t('no')}</Text>
+          </Pressable>
+        </View>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backPressedGrey,
+          ]}
+          onPress={async () => {
+            await stopCurrentAudio();
+            router.back();
+          }}
         >
-          <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.headerBar}>
-              <Text style={styles.headerText}>
-                {t('detected_title')}
-              </Text>
-            </View>
+          <View style={styles.backButtonContent}>
+            <Image
+              source={require('../../assets/images/back-arrow.png')}
+              style={styles.backArrowImage}
+              resizeMode="contain"
+            />
 
-            {/* Symptoms display box */}
-            <View style={styles.symptomBox}>
-              <Text style={styles.symptomText}>
-                {symptomText}
-              </Text>
-
-              {/* Speaker button */}
-              <Pressable
-                style={({ pressed }) => [
-                  styles.speakerButton,
-                  pressed &&
-                    styles.speakerPressed,
-                ]}
-                onPress={playVoiceAudio}
-              >
-                <Image
-                  source={require('../../assets/images/speaker.png')}
-                  style={styles.speakerIcon}
-                  resizeMode="contain"
-                />
-              </Pressable>
-            </View>
-
-            {/* Confirmation question */}
-            <Text style={styles.questionText}>
-              {t('detected_question')}
-            </Text>
-
-            {/* Yes / No buttons */}
-            <View style={styles.buttonRow}>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.choiceButton,
-                  pressed &&
-                    styles.choicePressed,
-                ]}
-                onPress={handleYesPress}
-              >
-                <Text style={styles.choiceText}>
-                  {t('yes')}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.choiceButton,
-                  pressed &&
-                    styles.choicePressed,
-                ]}
-                onPress={async () => {
-                  await stopCurrentAudio();
-
-                  router.replace('/textinput');
-                }}
-              >
-                <Text style={styles.choiceText}>
-                  {t('no')}
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* Back button */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed &&
-                  styles.backPressedGrey,
-              ]}
-              onPress={async () => {
-                await stopCurrentAudio();
-
-                router.back();
-              }}
-            >
-              <Text style={styles.backText}>
-                {t('back')}
-              </Text>
-            </Pressable>
+            <Text style={styles.backText}>{t('back')}</Text>
           </View>
-
-          {/* Footer navigation */}
-          <View style={styles.footer}>
-            <Pressable
-              style={styles.footerItem}
-              onPress={async () => {
-                await stopCurrentAudio();
-
-                router.replace('/input');
-              }}
-            >
-              <Text style={styles.footerIcon}>
-                🏠
-              </Text>
-
-              <Text style={styles.footerText}>
-                {t('home')}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={styles.footerItem}
-              onPress={openModal}
-            >
-              <Text style={styles.footerIcon}>
-                🌐
-              </Text>
-
-              <Text style={styles.footerText}>
-                {audioLoading
-                  ? 'Updating...'
-                  : t('language')}
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Language selection modal */}
-          <Modal
-            transparent
-            visible={modalVisible}
-            animationType="fade"
-          >
-            <View style={styles.modalOverlay}>
-              <Animated.View
-                style={[
-                  styles.languageModal,
-                  {
-                    transform: [
-                      {
-                        scale: scaleAnim,
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <Text style={styles.modalTitle}>
-                  {t('select_language')}
-                </Text>
-
-                <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'en' &&
-                      styles.languageOptionSelected,
-                  ]}
-                  onPress={() =>
-                    setSelectedLang('en')
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang ===
-                        'en' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('english')}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  style={[
-                    styles.languageOption,
-                    selectedLang === 'wp' &&
-                      styles.languageOptionSelected,
-                  ]}
-                  onPress={() =>
-                    setSelectedLang('wp')
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.languageOptionText,
-                      selectedLang ===
-                        'wp' &&
-                        styles.languageOptionTextSelected,
-                    ]}
-                  >
-                    {t('warlpiri')}
-                  </Text>
-                </Pressable>
-
-                <Text style={styles.confirmText}>
-                  {t('change_language')}
-                </Text>
-
-                <View
-                  style={styles.modalButtonRow}
-                >
-                  <Pressable
-                    style={styles.cancelButton}
-                    onPress={closeModal}
-                  >
-                    <Text
-                      style={styles.cancelText}
-                    >
-                      {t('no')}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={[
-                      styles.confirmButton,
-                      !selectedLang &&
-                        styles.disabledButton,
-                    ]}
-                    disabled={
-                      !selectedLang ||
-                      audioLoading
-                    }
-                    onPress={confirmLanguage}
-                  >
-                    <Text
-                      style={
-                        styles.confirmButtonText
-                      }
-                    >
-                      {audioLoading
-                        ? '...'
-                        : t('yes')}
-                    </Text>
-                  </Pressable>
-                </View>
-              </Animated.View>
-            </View>
-          </Modal>
-
-          {/* Error modal when no symptoms are detected */}
-          <Modal
-            transparent
-            visible={errorModalVisible}
-            animationType="fade"
-          >
-            <View style={styles.modalOverlay}>
-              <View
-                style={{
-                  width: '90%',
-                  backgroundColor: '#F5E6C8',
-                  borderRadius: 12,
-                  overflow: 'hidden',
-                  borderWidth: 1,
-                  borderColor: '#5C2E0A',
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor: '#8B2E0A',
-                    paddingVertical: 18,
-                    paddingHorizontal: 18,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent:
-                      'space-between',
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: '#FFF',
-                      fontSize: 18,
-                      fontWeight: 'bold',
-                      flex: 1,
-                      paddingRight: 12,
-                    }}
-                  >
-                    No Symptoms Detected
-                  </Text>
-
-                  <Pressable
-                    onPress={() => {
-                      setErrorModalVisible(
-                        false
-                      );
-                    }}
-                    style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: 8,
-                      borderWidth: 3,
-                      borderColor: '#FFF',
-                      alignItems: 'center',
-                      justifyContent:
-                        'center',
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: '#FFF',
-                        fontSize: 28,
-                        fontWeight: 'bold',
-                        lineHeight: 30,
-                      }}
-                    >
-                      ×
-                    </Text>
-                  </Pressable>
-                </View>
-
-                <View style={{ padding: 22 }}>
-                  <Text
-                    style={{
-                      color: '#5C2E0A',
-                      fontSize: 16,
-                      fontWeight: 'bold',
-                      marginBottom: 18,
-                      lineHeight: 22,
-                    }}
-                  >
-                    We could not detect any
-                    symptoms from your
-                    description.
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: '#5C2E0A',
-                      fontSize: 15,
-                      marginBottom: 20,
-                      lineHeight: 22,
-                    }}
-                  >
-                    Please try describing your
-                    symptoms in more detail.
-                  </Text>
-
-                  <Pressable
-                    style={{
-                      alignSelf: 'flex-end',
-                      backgroundColor:
-                        '#8B2E0A',
-                      paddingHorizontal: 28,
-                      paddingVertical: 10,
-                      borderRadius: 22,
-                    }}
-                    onPress={() => {
-                      setErrorModalVisible(
-                        false
-                      );
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: '#FFF',
-                        fontWeight: 'bold',
-                        fontSize: 15,
-                      }}
-                    >
-                      Ok
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          </Modal>
-        </ImageBackground>
+        </Pressable>
       </View>
-    </SafeAreaView>
+
+      <Modal transparent visible={errorModalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalBox}>
+            <View style={styles.errorHeader}>
+              <Text style={styles.errorTitle}>{t('no_symptoms_detected')}</Text>
+
+              <Pressable
+                onPress={goBackToTextInput}
+                style={styles.errorCloseButton}
+              >
+                <Text style={styles.errorCloseText}>×</Text>
+              </Pressable>
+            </View>
+
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
+              <Text style={styles.errorMessageBold}>
+                {t('no_symptoms_message_1')}
+              </Text>
+
+              <Text style={styles.errorMessage}>
+                {t('no_symptoms_message_2')}
+              </Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.errorOkButton,
+                  pressed && styles.errorOkButtonPressed,
+                ]}
+                onPress={goBackToTextInput}
+              >
+                <Text style={styles.errorOkText}>{t('ok')}</Text>
+              </Pressable>
+            </ImageBackground>
+          </View>
+        </View>
+      </Modal>
+    </AppScreen>
   );
 }

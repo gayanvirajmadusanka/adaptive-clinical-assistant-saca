@@ -31,11 +31,19 @@ import org.saca.utility.manager.CacheManager;
 import org.saca.utility.manager.DialogManager;
 import org.saca.utility.manager.LanguageManager;
 import org.saca.utility.manager.NavBarManager;
+import org.saca.utility.util.StringUtil;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Voice result screen
+ *
+ * <p>Handles user interactions on the Voice result.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class VoiceResultController implements Initializable {
 
     @FXML
@@ -103,7 +111,7 @@ public class VoiceResultController implements Initializable {
         }
 
         for (String symptom : symptoms) {
-            Label item = new Label("•  " + symptom);
+            Label item = new Label("•  " + StringUtil.capitalizeFirst(symptom));
             item.getStyleClass().add("result-symptom-item");
             item.setWrapText(true);
             symptomsBox.getChildren().add(item);

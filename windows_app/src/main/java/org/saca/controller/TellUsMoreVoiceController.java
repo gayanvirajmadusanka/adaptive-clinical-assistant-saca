@@ -36,6 +36,13 @@ import org.saca.utility.manager.NavBarManager;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Controller for the Tell us more voice screen
+ *
+ * <p>Handles user interactions on the Tell us more voice flow.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class TellUsMoreVoiceController implements Initializable {
 
     private final Map<String, String> selectedAnswers = new HashMap<>();

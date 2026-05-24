@@ -8,6 +8,13 @@ import javafx.stage.Stage;
 import org.saca.utility.constant.AppsConstants;
 import org.saca.utility.manager.LanguageManager;
 
+/**
+ * Controller for the Select language screen
+ *
+ * <p>Handles user interactions on the Select language Screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class SelectLanguageController {
 
     public void handleEnglishClick(ActionEvent event) {

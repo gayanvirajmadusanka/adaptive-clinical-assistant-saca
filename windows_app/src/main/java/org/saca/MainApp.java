@@ -19,6 +19,9 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ResourceBundle;
 
+/**
+ * MainClass of the Application
+ */
 public class MainApp extends Application {
 
     public static final double APP_WIDTH = 1000;
@@ -30,6 +33,7 @@ public class MainApp extends Application {
 
     private Process backendProcess;
 
+    // Main method
     public static void main(String[] args) {
         launch(args);
     }

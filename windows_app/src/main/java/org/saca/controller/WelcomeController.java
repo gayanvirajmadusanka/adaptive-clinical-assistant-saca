@@ -8,6 +8,13 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.saca.utility.manager.LanguageManager;
 
+/**
+ * Controller for the Welcome screen
+ *
+ * <p>Handles user interactions on the Welcome screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class WelcomeController {
 
     public Button aboutButton;

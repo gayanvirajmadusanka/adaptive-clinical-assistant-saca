@@ -1,8 +1,5 @@
 // LoadingScreen.js
-// Purpose: Sends text symptoms to FastAPI, shows circular progress, and navigates to DetectedSymptomsScreen.
-// The progress stops at 90% until the API response is received.
 
-// React and React Native imports used to build this screen component.
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -13,120 +10,104 @@ import {
   Alert,
   Animated,
 } from 'react-native';
-import Svg, { Circle } from 'react-native-svg'; // Used for circular progress UI
-import { useRouter, useLocalSearchParams } from 'expo-router'; // Navigation + receiving params
+
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import Svg, { Circle } from 'react-native-svg';
+
 import styles from '../styles/loadingStyles';
-
-// API + utility functions
 import { extractSymptomsFromText } from '../services/triageApi';
-import { saveBase64AudioToCache } from '../utils/base64Audio';
-import { buildDetectedSymptomsParams } from '../utils/routeParams';
+import { toJsonParam } from '../utils/routeParams';
+import { useLanguage } from '../context/LanguageContext';
 
-// Create animated circle component
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-// Main screen component: LoadingScreen
 export default function LoadingScreen() {
-
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const { t } = useLanguage();
 
-  // Get parameters passed from previous screen
-  const { text, language } = useLocalSearchParams();
-
-  // Progress percentage state (0–100)
   const [percent, setPercent] = useState(0);
 
-  // Store API response data
-  const [apiData, setApiData] = useState(null);
-
-  // Flag to check if API call is finished
-  const [apiFinished, setApiFinished] = useState(false);
-
-  // Animation value for circular progress
   const progressAnim = useRef(new Animated.Value(0)).current;
-
-  // Prevent multiple navigation calls
   const navigatedRef = useRef(false);
 
-  // Circle properties
-  const radius = 80;
-  const strokeWidth = 15;
+  const radius = 95;
+  const strokeWidth = 17;
+  const size = 230;
+  const center = size / 2;
   const circumference = 2 * Math.PI * radius;
 
-  // Animate progress when percent changes
+  useEffect(() => {
+    sendTextToApi();
+
+    const timer = setInterval(() => {
+      setPercent((prev) => {
+        if (prev < 95) return prev + 3;
+        return 95;
+      });
+    }, 60);
+
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: percent,
-      duration: percent >= 100 ? 0 : 200,
+      duration: 50,
       useNativeDriver: false,
     }).start();
   }, [percent]);
 
-  // Increment progress automatically
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setPercent((prev) => {
-        if (!apiFinished && prev >= 90) return 90; // Stop at 90% until API finishes
-        if (prev >= 100) return 100;
-        return prev + 1;
-      });
-    }, 35);
-
-    return () => clearInterval(timer); // Cleanup
-  }, [apiFinished]);
-
-  // MAIN FUNCTION → Calls FastAPI
-  async function loadDetectedSymptoms() {
+  async function sendTextToApi() {
     try {
-      // Send text + language to backend
-      const data = await extractSymptomsFromText(text, language || 'en');
+      const text = String(params.text || '').trim();
+      const selectedLanguage = String(params.language || 'en');
 
-      // Convert base64 voice to file
-      const voiceFileUri = await saveBase64AudioToCache(
-        data?.voice_b64,
-        'saca_detected_voice.wav'
-      );
+      if (!text) {
+        Alert.alert('Error', 'No symptom text found.');
+        router.replace('/textinput');
+        return;
+      }
 
-      // Store API response + voice file
-      setApiData({
-        ...data,
-        voice_file_uri: voiceFileUri,
+      const data = await extractSymptomsFromText(text, selectedLanguage);
+
+      if (navigatedRef.current) return;
+      navigatedRef.current = true;
+
+      setPercent(100);
+
+      const symptomsEn =
+        data?.detected_symptoms_en ||
+        data?.symptoms_en ||
+        data?.symptoms ||
+        [];
+
+      const symptomsWp =
+        data?.detected_symptoms_wp ||
+        data?.symptoms_wp ||
+        [];
+
+      router.replace({
+        pathname: '/detectedsymptoms',
+        params: {
+          symptoms_en: toJsonParam(symptomsEn),
+          symptoms_wp: toJsonParam(symptomsWp),
+          language: selectedLanguage,
+          source: 'text',
+        },
       });
-
-      setApiFinished(true); // API completed
     } catch (error) {
       console.log('Text API error:', error);
 
-      // Show error alert
-      Alert.alert('Connection Error', 'Could not connect to FastAPI.');
+      Alert.alert(
+        'Error',
+        'Could not detect symptoms. Please check backend connection.'
+      );
 
-      // Go back to input screen
       router.replace('/textinput');
     }
   }
 
-  // Call API once when screen loads
-  useEffect(() => {
-    loadDetectedSymptoms();
-  }, []);
-
-  // Navigate when everything is ready
-  useEffect(() => {
-    if (apiFinished && percent >= 100 && apiData && !navigatedRef.current) {
-      navigatedRef.current = true;
-
-      router.replace({
-        pathname: '/detectedsymptoms',
-        params: buildDetectedSymptomsParams(
-          apiData,
-          language,
-          apiData.voice_file_uri
-        ),
-      });
-    }
-  }, [apiFinished, percent, apiData]);
-
-  // Convert progress to circle animation
   const strokeDashoffset = progressAnim.interpolate({
     inputRange: [0, 100],
     outputRange: [circumference, 0],
@@ -142,69 +123,45 @@ export default function LoadingScreen() {
           style={styles.background}
           resizeMode="cover"
         >
-
           <View style={styles.container}>
+            <Text style={styles.topText}>{t('detecting_symptoms')}</Text>
 
-            {/* Top text */}
-            <Text style={styles.topText}>Checking your Symptoms...</Text>
-
-            {/* Circular Progress UI */}
             <View style={styles.circleWrapper}>
-              {/* SVG draws the circular loading progress. */}
-              <Svg width={190} height={190}>
-
-                {/* Background circle */}
+              <Svg width={size} height={size}>
                 <Circle
-                  cx="95"
-                  cy="95"
+                  cx={center}
+                  cy={center}
                   r={radius}
                   stroke="#D6A24B"
                   strokeWidth={strokeWidth}
                   fill="transparent"
                 />
 
-                {/* Animated progress circle */}
-                {percent >= 100 ? (
-                  <Circle
-                    cx="95"
-                    cy="95"
-                    r={radius}
-                    stroke="#B65A24"
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                  />
-                ) : (
-                  <AnimatedCircle
-                    cx="95"
-                    cy="95"
-                    r={radius}
-                    stroke="#B65A24"
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                    strokeDasharray={`${circumference} ${circumference}`}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    rotation="-90"
-                    origin="95, 95"
-                  />
-                )}
+                <AnimatedCircle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#B65A24"
+                  strokeWidth={strokeWidth}
+                  fill="transparent"
+                  strokeDasharray={`${circumference} ${circumference}`}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  rotation="-90"
+                  origin={`${center}, ${center}`}
+                />
               </Svg>
 
-              {/* Center content */}
               <View style={styles.circleContent}>
                 <Text style={styles.percent}>{percent}%</Text>
+
                 <Text style={styles.loadingText}>
-                  {percent >= 100 ? 'DONE' : 'LOADING'}
+                  {percent >= 100 ? t('done') : t('loading')}
                 </Text>
               </View>
             </View>
 
-            {/* Bottom text */}
-            <Text style={styles.bottomText}>
-              {percent >= 100
-                ? 'Preparing your results...'
-                : 'Please wait while we detect your symptoms...'}
-            </Text>
+            <Text style={styles.bottomText}>{t('please_wait_symptoms')}</Text>
           </View>
         </ImageBackground>
       </View>

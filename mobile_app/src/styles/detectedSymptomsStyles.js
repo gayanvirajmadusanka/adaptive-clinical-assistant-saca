@@ -1,320 +1,406 @@
-// Styles for DetectedSymptomsScreen.
-// Defines the detected symptoms card, audio speaker button, YES/NO buttons, footer, and language/error modals.
+// detectedSymptomsStyles.js
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  // Main safe area background.
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-  // Full screen wrapper with status bar spacing.
-  wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-  // Background image container.
-  background: {
-    flex: 1,
-  },
-
-  // Main content area.
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 25,
-    paddingTop: 80,
+    paddingHorizontal: 22,
+    paddingTop: 85,
   },
 
-  // Header bar behind the screen title.
   headerBar: {
-    width: '92%',
-    height: 60,
+    width: '94%',
+    height: 64,
     backgroundColor: '#C87936',
-    borderRadius: 10,
-    justifyContent: 'center',
+    borderRadius: 14,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 35,
+    justifyContent: 'center',
+    marginBottom: 28,
   },
 
-  // Header text style.
   headerText: {
-    fontSize: 22,
+    fontSize: 26,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // Box that displays detected symptoms and the speaker button.
   symptomBox: {
-    width: '92%',
-    minHeight: 140,
-    backgroundColor: 'rgba(255,255,255,0.75)',
-    borderWidth: 1,
-    borderColor: '#B9A98E',
-    borderRadius: 8,
-    padding: 25,
-    marginBottom: 35,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  // Detected symptom bullet list text.
-  symptomText: {
-    fontSize: 18,
-    fontFamily: FONTS.regular,
-    color: '#000',
-    lineHeight: 30,
-    flex: 1,
-  },
-
-  // Circular speaker button container.
-  speakerButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
-  },
-
-  // Speaker button pressed effect.
-  speakerPressed: {
-    backgroundColor: '#A9A9A9',
-    transform: [{ scale: 0.9 }],
-  },
-
-  // Speaker icon size.
-  speakerIcon: {
-    width: 35,
-    height: 35,
-  },
-
-  // Confirmation question text.
-  questionText: {
-    fontSize: 16,
-    fontFamily: FONTS.regular,
-    color: '#111',
-    marginBottom: 12,
-  },
-
-  // Row for YES and NO buttons.
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 25,
+    width: '94%',
+    minHeight: 300,
+    backgroundColor: '#E6DCC5',
+    borderRadius: 26,
+    padding: 24,
     marginBottom: 30,
+    position: 'relative',
   },
 
-  // YES/NO button style.
-  choiceButton: {
-    width: 100,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#E8D5A0',
-    borderWidth: 1.5,
-    borderColor: '#D4A96A',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // YES/NO button pressed state.
-  choicePressed: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
-    transform: [{ scale: 0.96 }],
-  },
-
-  // YES/NO button label.
-  choiceText: {
-    fontSize: 13,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#5C2E0A',
-  },
-
-  // Back button style.
-  backButton: {
-    width: 150,
-    height: 55,
-    backgroundColor: '#F5EAD8',
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 3,
-  },
-
-  // Back button pressed state.
-  backPressedGrey: {
-    backgroundColor: '#A9A9A9',
-    transform: [{ scale: 0.96 }],
-  },
-
-  // Back button text.
-  backText: {
-    fontSize: 22,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  // Bottom footer navigation bar.
-  footer: {
-    height: 55,
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  // Individual footer item.
-  footerItem: {
-    alignItems: 'center',
-  },
-
-  // Footer icon style.
-  footerIcon: {
-    fontSize: 22,
-    fontFamily: FONTS.regular,
-    color: '#fff',
-  },
-
-  // Footer label style.
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
-  },
-
-  // Dark transparent background behind modal.
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 25,
-  },
-
-  // Language selection modal box.
-  languageModal: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
-    padding: 22,
-    alignItems: 'center',
-    elevation: 8,
-  },
-
-  // Modal title text.
-  modalTitle: {
+  symptomText: {
     fontSize: 24,
+    lineHeight: 38,
     fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2C1A0E',
-    marginBottom: 20,
+    color: '#4B3A2A',
+    paddingRight: 70,
   },
 
-  // Language option button.
-  languageOption: {
-    width: '100%',
-    height: 55,
-    backgroundColor: '#E8D5A0',
-    borderColor: '#D4A96A',
-    borderWidth: 2,
-    borderRadius: 18,
+  speakerButton: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#E3AD35',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    borderWidth: 3,
+    borderColor: '#000',
   },
 
-  // Selected language option.
-  languageOptionSelected: {
+  speakerPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
-    transform: [{ scale: 0.97 }],
   },
 
-  // Language option text.
-  languageOptionText: {
-    fontSize: 20,
+  speakerIcon: {
+    width: 30,
+    height: 30,
+  },
+
+  questionText: {
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#5C2E0A',
-  },
-
-  // Selected language option text.
-  languageOptionTextSelected: {
-    color: '#F5E6C8',
-  },
-
-  // Modal confirmation message.
-  confirmText: {
-    fontSize: 15,
-    fontFamily: FONTS.regular,
-    color: '#2C1A0E',
-    marginTop: 8,
-    marginBottom: 18,
+    color: '#3D2A1A',
+    marginBottom: 28,
     textAlign: 'center',
   },
 
-  // Row for modal buttons.
-  modalButtonRow: {
-    width: '100%',
+  buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    width: '84%',
+    marginBottom: 34,
   },
 
-  // Cancel button in modal.
-  cancelButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
+  choiceButton: {
+    width: 145,
+    height: 64,
+    borderRadius: 34,
+    backgroundColor: '#E3AD35',
+    borderWidth: 3,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+
+  choicePressed: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+  },
+
+  choiceText: {
+    fontSize: 26,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  voiceAnswerRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginBottom: 30,
+  },
+
+  voiceYesNoButton: {
+    width: 112,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#D4A64D',
     borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 6,
+    elevation: 4,
+  },
+
+  voiceYesNoText: {
+    fontSize: 18,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  voiceAnswerSelected: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+  },
+
+  voiceAnswerSelectedText: {
+    color: '#FFF',
+  },
+
+  voiceMicWrapper: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginLeft: 8,
+    width: 110,
+  },
+
+  detectedMicButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#C87936',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  detectedMicRecording: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+  },
+
+  detectedMicIcon: {
+    width: 34,
+    height: 34,
+  },
+
+  tapToAnswerText: {
+    marginTop: 6,
+    fontSize: 11,
+    fontFamily: FONTS.regular,
+    color: '#5C2E0A',
+    textAlign: 'center',
+    minHeight: 24,
+  },
+
+  detectedRecordedBox: {
+    marginTop: 8,
+    width: 108,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EFE2CC',
+    borderWidth: 1,
+    borderColor: '#B9A57F',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+  },
+
+  detectedPlayButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#3E8B3A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  detectedDurationText: {
+    fontSize: 11,
+    fontFamily: FONTS.bold,
+    color: '#000',
+  },
+
+  detectedDeleteButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#A3361A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  iconButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '82%',
+    marginBottom: 30,
+  },
+
+ iconChoiceButton: {
+  width: 140,
+  height: 120,
+  borderRadius: 20,
+  backgroundColor: '#F5EAD8',
+  borderWidth: 2,
+  borderColor: '#CDBE9D',
+  alignItems: 'center',
+  justifyContent: 'center',
+  elevation: 3,
+},
+
+  iconChoiceSelected: {
+    borderWidth: 3,
+    borderColor: '#C94B32',
+    backgroundColor: 'rgba(245, 234, 216, 0.9)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+
+  iconChoicePressed: {
+    transform: [{ scale: 0.96 }],
+  },
+
+  yesNoIcon: {
+    width: 98,
+    height: 98,
+  },
+
+  yesNoIconSelected: {
+    transform: [{ scale: 1.08 }],
+  },
+
+  backButton: {
+    width: 190,
+    height: 70,
+    borderRadius: 36,
+    borderWidth: 3,
     borderColor: '#000',
     backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 4,
   },
 
-  // Cancel button text.
-  cancelText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  // Confirm button in modal.
-  confirmButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
+  backButtonContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Confirm button text.
-  confirmButtonText: {
-    fontSize: 17,
+  backArrowImage: {
+    width: 26,
+    height: 26,
+    marginRight: 10,
+  },
+
+  backPressedGrey: {
+    backgroundColor: '#A9A9A9',
+  },
+
+  backText: {
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // Disabled button opacity.
-  disabledButton: {
-    opacity: 0.45,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorModalBox: {
+    width: '92%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#F5EAD8',
+    borderWidth: 1,
+    borderColor: '#8B3A1C',
+    elevation: 8,
+  },
+
+  errorHeader: {
+    backgroundColor: '#8B2E0A',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  errorTitle: {
+    color: '#FFF',
+    fontSize: 21,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    flex: 1,
+    paddingRight: 12,
+  },
+
+  errorCloseButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 9,
+    borderWidth: 3,
+    borderColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorCloseText: {
+    color: '#FFF',
+    fontSize: 34,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    lineHeight: 36,
+  },
+
+  errorBody: {
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 20,
+    minHeight: 155,
+  },
+
+  errorMessageBold: {
+    color: '#5C2E0A',
+    fontSize: 19,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 22,
+    lineHeight: 26,
+  },
+
+  errorMessage: {
+    color: '#5C2E0A',
+    fontSize: 17,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 28,
+    lineHeight: 24,
+  },
+
+  errorOkButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 22,
+  },
+
+  errorOkButtonPressed: {
+    backgroundColor: '#8B1E0D',
+    transform: [{ scale: 0.96 }],
+  },
+
+  errorOkText: {
+    color: '#FFF',
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });

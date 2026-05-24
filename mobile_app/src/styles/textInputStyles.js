@@ -1,131 +1,99 @@
-// Styles for TextInputScreen.
-// Defines text input form, header, continue/back buttons, footer, and language modal.
+// textInputStyles.js
+// Purpose: Screen-specific styles for TextInputScreen.
+// Shared SafeArea, background, footer, and language modal styles were moved to commonLayoutStyles.js.
 
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-    // Main safe area background.
-safeArea: {
-    flex: 1,
-    backgroundColor: '#F5EAD8',
-  },
-
-    // Wrapper with status bar spacing.
-wrapper: {
-    flex: 1,
-    paddingTop: StatusBar.currentHeight,
-  },
-
-    // Background image area.
-background: {
-    flex: 1,
-  },
-
-    // Text input screen container.
-container: {
+  container: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 25,
-    paddingTop: 80,
+    paddingTop: 95, // moved slightly lower
   },
 
-    // Header bar containing title and icon.
-headerBar: {
-    width: '92%',
-    height: 60,
-    backgroundColor: '#6F8F83',
+  headerBar: {
+    width: '94%',
+    height: 70, // increased size
+    backgroundColor: '#5F7D6E',
     borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
+    marginBottom: 35,
   },
 
-    // Header title text.
-headerText: {
-    fontSize: 24,
+  headerText: {
+    fontSize: 30, // increased font size
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-    // Header icon image.
-headerIcon: {
+  headerIcon: {
     position: 'absolute',
     right: 25,
-    width: 30,
-    height: 30,
+    width: 38, // increased icon size
+    height: 38,
   },
 
-    // Text input outer box.
-inputBox: {
-    width: '88%',
-    height: 250,
+  inputBox: {
+    width: '92%',
+    height: 300, // increased description box size
     backgroundColor: '#E6D7BF',
     borderRadius: 25,
-    padding: 20,
-    marginBottom: 45,
+    padding: 24,
+    marginBottom: 55,
   },
 
-    // Prompt above text input.
-questionText: {
-    fontSize: 16,
+  questionText: {
+    fontSize: 22, // increased question font
     fontFamily: FONTS.bold,
     fontWeight: '600',
-    color: '#555',
-    marginBottom: 18,
+    color: '#000',
+    marginBottom: 22,
+    lineHeight: 30,
   },
 
-    // Multiline input field.
-textInput: {
+  textInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 22, // increased typing text size
     fontFamily: FONTS.regular,
     color: '#222',
     textAlignVertical: 'top',
+    lineHeight: 30,
   },
 
-    // Continue button.
-continueButton: {
-    width: 230,
-    height: 65,
+  continueButton: {
+    width: 250, // increased button size
+    height: 72,
     backgroundColor: '#E3AD35',
     borderRadius: 30,
     borderWidth: 2,
     borderColor: '#000',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    marginBottom: 25,
+    marginBottom: 30,
   },
 
   continuePressedGreen: {
-    backgroundColor: '#8B3A1C', 
-    borderColor: '#5C2E0A',     
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
-  }, 
+  },
 
   continueText: {
-    fontSize: 24,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-    marginRight: 12,
-  },
-
-  arrow: {
-    fontSize: 42,
+    fontSize: 28, // increased button text
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-    // Back button.
-backButton: {
-    width: 140,
-    height: 55,
+  backButton: {
+    width: 160, // increased size
+    height: 60,
     borderRadius: 28,
     borderWidth: 2,
     borderColor: '#000',
@@ -135,154 +103,128 @@ backButton: {
     elevation: 3,
   },
 
+  backButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  backArrowImage: {
+    width: 26, // increased arrow size
+    height: 26,
+    marginRight: 10,
+  },
+
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
   backText: {
-    fontSize: 22,
+    fontSize: 24, // increased text size
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-    // Bottom footer navigation.
-footer: {
-    height: 55,
-    backgroundColor: '#000',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  footerItem: {
-    alignItems: 'center',
-  },
-
-  footerIcon: {
-    fontSize: 22,
-    fontFamily: FONTS.regular,
-    color: '#fff',
-  },
-
-  footerText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: FONTS.regular,
-    marginTop: 2,
-  },
-
-    // Language modal overlay.
+  // Modal overlay
 modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 25,
-  },
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.35)',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
 
-    // Language modal box.
-languageModal: {
-    width: '90%',
-    backgroundColor: '#F5E6C8',
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: '#8B3A1C',
-    padding: 22,
-    alignItems: 'center',
-    elevation: 8,
-  },
+// Main modal box
+errorModalBox: {
+  width: '92%',
+  borderRadius: 12,
+  overflow: 'hidden',
+  backgroundColor: '#F5EAD8',
+  borderWidth: 1,
+  borderColor: '#8B3A1C',
+  elevation: 8,
+},
 
-  modalTitle: {
-    fontSize: 24,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2C1A0E',
-    marginBottom: 20,
-  },
+// Top red header
+errorHeader: {
+  backgroundColor: '#8B2E0A',
+  paddingVertical: 18,
+  paddingHorizontal: 18,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+},
 
-  languageOption: {
-    width: '100%',
-    height: 55,
-    backgroundColor: '#E8D5A0',
-    borderColor: '#D4A96A',
-    borderWidth: 2,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
+// Header title
+errorTitle: {
+  color: '#FFF',
+  fontSize: 21,
+  fontFamily: FONTS.bold,
+  fontWeight: 'bold',
+  flex: 1,
+  paddingRight: 12,
+},
 
-  languageOptionSelected: {
-    backgroundColor: '#8B3A1C',
-    borderColor: '#5C2E0A',
-    transform: [{ scale: 0.97 }],
-  },
+// Close button
+errorCloseButton: {
+  width: 48,
+  height: 48,
+  borderRadius: 9,
+  borderWidth: 3,
+  borderColor: '#FFF',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
 
-  languageOptionText: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#5C2E0A',
-  },
+// X icon
+errorCloseText: {
+  color: '#FFF',
+  fontSize: 34,
+  fontFamily: FONTS.bold,
+  fontWeight: 'bold',
+  lineHeight: 36,
+},
 
-  languageOptionTextSelected: {
-    color: '#F5E6C8',
-  },
+// Modal body
+errorBody: {
+  paddingHorizontal: 22,
+  paddingTop: 28,
+  paddingBottom: 20,
+  minHeight: 150,
+},
 
-  confirmText: {
-    fontSize: 15,
-    fontFamily: FONTS.regular,
-    color: '#2C1A0E',
-    marginTop: 8,
-    marginBottom: 18,
-    textAlign: 'center',
-  },
+// Message text
+errorMessageBold: {
+  color: '#5C2E0A',
+  fontSize: 19,
+  fontFamily: FONTS.bold,
+  fontWeight: 'bold',
+  marginBottom: 28,
+  lineHeight: 26,
+},
 
-  modalButtonRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  cancelButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: '#000',
-    backgroundColor: '#F5EAD8',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  cancelText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-
-  confirmButton: {
-    width: '45%',
-    height: 48,
-    borderRadius: 24,
+errorOkButton: {
+    alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',
     borderWidth: 2,
     borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 22,
   },
 
-  confirmButtonText: {
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#000',
-  },
+// Button pressed effect
+errorOkButtonPressed: {
+  backgroundColor: '#8B1E0D',
+  transform: [{ scale: 0.96 }],
+},
 
-  disabledButton: {
-    opacity: 0.45,
-  },
+// OK button text
+errorOkText: {
+  color: '#FFF',
+  fontFamily: FONTS.bold,
+  fontWeight: 'bold',
+  fontSize: 18,
+},
 });
