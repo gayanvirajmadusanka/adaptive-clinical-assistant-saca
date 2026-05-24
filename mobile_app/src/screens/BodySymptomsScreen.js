@@ -1,5 +1,6 @@
 // BodySymptomsScreen.js
-// Purpose: Shows symptoms for selected body part with image, text, and local audio.
+// Purpose: Shows symptoms for selected body part with image, text, local audio,
+// and custom alert modal when no symptom is selected.
 // AppScreen handles SafeArea, background, footer, and language modal.
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -10,6 +11,8 @@ import {
   Pressable,
   ScrollView,
   Alert,
+  Modal,
+  ImageBackground,
 } from 'react-native';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -303,6 +306,7 @@ export default function BodySymptomsScreen() {
   const part = bodyMap[partKey] || bodyMap.general || bodyMap.whole_body;
 
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   const symptoms = useMemo(() => {
     return part?.symptoms || [];
@@ -349,6 +353,8 @@ export default function BodySymptomsScreen() {
 
     if (audioSource) {
       await playLocalAudio(audioSource);
+    } else {
+      Alert.alert('Audio Error', 'No audio file found for this symptom.');
     }
   };
 
@@ -366,7 +372,7 @@ export default function BodySymptomsScreen() {
 
   const handleConfirm = async () => {
     if (selectedSymptoms.length === 0) {
-      Alert.alert('No answer', 'Please select at least one symptom.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -391,6 +397,53 @@ export default function BodySymptomsScreen() {
       },
     });
   };
+
+  const renderNoAnswerModal = () => (
+    <Modal transparent visible={errorModalVisible} animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.errorModalBox}>
+          <View style={styles.errorHeader}>
+            <Text style={styles.errorTitle}>
+              {t('no_answer_title') || 'No Answer Selected'}
+            </Text>
+
+            <Pressable
+              onPress={() => setErrorModalVisible(false)}
+              style={styles.errorCloseButton}
+            >
+              <Text style={styles.errorCloseText}>×</Text>
+            </Pressable>
+          </View>
+
+          <ImageBackground
+            source={require('../../assets/images/background.png')}
+            style={styles.errorBody}
+            resizeMode="cover"
+          >
+            <Text style={styles.errorMessageBold}>
+              {t('no_answer_message_1') ||
+                'Please select at least one symptom before continuing.'}
+            </Text>
+
+            <Text style={styles.errorMessage}>
+              {t('no_answer_message_2') ||
+                'Tap one symptom and then press confirm.'}
+            </Text>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.errorOkButton,
+                pressed && styles.errorOkButtonPressed,
+              ]}
+              onPress={() => setErrorModalVisible(false)}
+            >
+              <Text style={styles.errorOkText}>{t('ok') || 'Ok'}</Text>
+            </Pressable>
+          </ImageBackground>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <AppScreen
@@ -524,6 +577,8 @@ export default function BodySymptomsScreen() {
           </View>
         </Pressable>
       </View>
+
+      {renderNoAnswerModal()}
     </AppScreen>
   );
 }
