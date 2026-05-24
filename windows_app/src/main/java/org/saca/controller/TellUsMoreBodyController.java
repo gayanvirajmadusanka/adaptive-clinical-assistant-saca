@@ -135,9 +135,14 @@ public class TellUsMoreBodyController implements Initializable {
         currentSelectedId = selectedAnswers.get(question.getId());
 
         boolean isYesNo = question.getType().equals(AppsConstants.QUESTION_TYPE_YES_NO);
+        boolean anyImage;
 
-        boolean anyImage = isYesNo || question.getOptions().stream().anyMatch(o ->
-                getClass().getResource("/images/options/" + o.getId().toLowerCase() + ".png") != null);
+        if (question.getId().equals("0b")) {
+            anyImage = true;
+        } else {
+            anyImage = isYesNo || question.getOptions().stream().anyMatch(o ->
+                    getClass().getResource("/images/options/" + o.getId().toLowerCase() + ".png") != null);
+        }
 
         if (anyImage) {
             HBox row = new HBox(12);
@@ -185,7 +190,22 @@ public class TellUsMoreBodyController implements Initializable {
             if (isYesNo) {
                 imageUrl = getClass().getResource("/images/options/option_" + option.getText().toLowerCase() + ".png");
             } else {
-                imageUrl = getClass().getResource("/images/options/" + optId + ".png");
+                if (questionId.equals("0b")) {
+                    StringBuilder imageFinder = new StringBuilder();
+                    imageFinder.append(optId);
+                    imageFinder.append("_");
+                    if (selectedAnswers.get("0a").equals("0a1")) {
+                        // Male
+                        imageFinder.append("male");
+                    } else {
+                        // Female
+                        imageFinder.append("female");
+                    }
+
+                    imageUrl = getClass().getResource("/images/options/" + imageFinder + ".png");
+                } else {
+                    imageUrl = getClass().getResource("/images/options/" + optId + ".png");
+                }
             }
 
             btn = new Button(option.getText());
@@ -194,13 +214,13 @@ public class TellUsMoreBodyController implements Initializable {
 
             if (imageUrl != null) {
                 ImageView imageView = new ImageView(new Image(imageUrl.toExternalForm(), true));
-                imageView.setFitWidth(90);
-                imageView.setFitHeight(90);
+                imageView.setFitWidth(80);
+                imageView.setFitHeight(80);
                 imageView.setPreserveRatio(true);
                 btn.setGraphic(imageView);
             }
-            btn.setPrefWidth(130);
-            btn.setMaxWidth(130);
+            btn.setPrefWidth(120);
+            btn.setMaxWidth(120);
             btn.setWrapText(true);
         } else {
             btn = new Button("  ●  " + option.getText());
