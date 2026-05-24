@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import org.saca.utility.manager.LanguageManager;
 
 public class WelcomeController {
 
@@ -14,7 +15,8 @@ public class WelcomeController {
     public void handleAboutClick(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(
-                    getClass().getResource("/view/AboutView.fxml")
+                    getClass().getResource("/view/AboutView.fxml"),
+                    LanguageManager.getBundle()
             );
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -30,7 +32,8 @@ public class WelcomeController {
     public void handleStartClick(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(
-                    getClass().getResource("/view/SelectLanguageView.fxml")
+                    getClass().getResource("/view/SelectLanguageView.fxml"),
+                    LanguageManager.getBundle()
             );
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

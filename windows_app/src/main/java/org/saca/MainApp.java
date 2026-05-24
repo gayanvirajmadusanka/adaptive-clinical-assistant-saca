@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.saca.controller.LoadingController;
+import org.saca.utility.manager.LanguageManager;
 
 import java.io.File;
 import java.net.URI;
@@ -16,15 +17,16 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ResourceBundle;
 
 public class MainApp extends Application {
 
-    public static final double APP_WIDTH  = 1000;
+    public static final double APP_WIDTH = 1000;
     public static final double APP_HEIGHT = 650;
 
     private static final String BACKEND_HEALTH_URL = "http://127.0.0.1:8000/questions";
-    private static final int    POLL_INTERVAL_MS   = 500;
-    private static final int    POLL_TIMEOUT_MS    = 30_000;
+    private static final int POLL_INTERVAL_MS = 500;
+    private static final int POLL_TIMEOUT_MS = 30_000;
 
     private Process backendProcess;
 
@@ -38,12 +40,16 @@ public class MainApp extends Application {
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/app-logo.png")));
         stage.setResizable(false);
 
+        // Load resource bundle
+        ResourceBundle bundle = LanguageManager.getBundle();
+
         // Show loading screen while the backend starts up
-        FXMLLoader loadingLoader = new FXMLLoader(getClass().getResource("/view/LoadingView.fxml"));
+        FXMLLoader loadingLoader = new FXMLLoader(
+                getClass().getResource("/view/LoadingView.fxml"), bundle);
         Parent loadingRoot = loadingLoader.load();
         LoadingController loadingCtrl = loadingLoader.getController();
         loadingCtrl.setTitle("Starting SACA...");
-        loadingCtrl.setDuration(Integer.MAX_VALUE); // indefinite pulse until server ready
+        loadingCtrl.setDuration(Integer.MAX_VALUE);
 
         Scene loadingScene = new Scene(loadingRoot, APP_WIDTH, APP_HEIGHT);
         loadingScene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
@@ -76,16 +82,11 @@ public class MainApp extends Application {
         }
     }
 
-
-
     private void spawnBackend() throws Exception {
-        // jpackage installs saca_server.exe next to the runtime/ JRE folder.
-        // java.home points to <install_dir>/runtime, so parent is <install_dir>.
         File installDir = new File(System.getProperty("java.home")).getParentFile();
-        File serverExe  = new File(installDir, "saca_server.exe");
+        File serverExe = new File(installDir, "saca_server.exe");
 
         if (!serverExe.exists()) {
-            // Dev mode: backend is expected to already be running externally.
             System.out.println("[SACA] saca_server.exe not found — assuming dev mode, skipping spawn");
             return;
         }
@@ -121,14 +122,16 @@ public class MainApp extends Application {
             Thread.sleep(POLL_INTERVAL_MS);
         }
         throw new RuntimeException(
-            "Backend did not respond within " + (POLL_TIMEOUT_MS / 1000) + " seconds.");
+                "Backend did not respond within " + (POLL_TIMEOUT_MS / 1000) + " seconds.");
     }
 
     private void showMainView(Stage stage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
-            Parent root  = loader.load();
-            Scene  scene = new Scene(root, APP_WIDTH, APP_HEIGHT);
+            ResourceBundle bundle = LanguageManager.getBundle();
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/view/MainView.fxml"), bundle);
+            Parent root = loader.load();
+            Scene scene = new Scene(root, APP_WIDTH, APP_HEIGHT);
             scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
             stage.setScene(scene);
         } catch (Exception e) {
