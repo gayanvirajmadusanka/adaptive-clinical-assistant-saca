@@ -2,6 +2,13 @@ package org.saca.utility.manager;
 
 import org.saca.utility.constant.AppsConstants;
 
+/**
+ * Navigation Bar Manager
+ *
+ * <p>This class manages Navigations in the application</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class NavBarManager {
 
     private static AppsConstants.YesNo isNavBarVisible = AppsConstants.YesNo.N;

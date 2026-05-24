@@ -9,21 +9,37 @@ import org.saca.model.response.VoiceResultRS;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Cache Manager
+ *
+ * <p>This class manages caches in the application</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class CacheManager {
 
     private static TextResultRS textResultRS = null;
+
     private static VoiceResultRS voiceResultRS = null;
+
     private static QuestionsRS questionsRS = null;
+
     private static ClassifyRS classifyRS = null;
+
     private static String lastSymptomText = "";
+
     private static String lastRecordedAudio = "";
+
     private static List<AnswerRQ> savedAnswers = new ArrayList<>();
+
     private static List<String> cachedSymptomsEn = new ArrayList<>();
 
-    // Body map symptom selection persistence
     private static boolean isTextResultLoadFromShow = false;
+
     private static String cachedBodyPartKey = "";
+
     private static List<String> cachedBodySymptomIds = new ArrayList<>();
+
     private static List<String> cachedBodySymptomLabels = new ArrayList<>();
 
     private static boolean selectedGenderMale = true;

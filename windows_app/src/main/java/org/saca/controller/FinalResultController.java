@@ -36,6 +36,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Final result screen
+ *
+ * <p>Handles user interactions on the Final result Screen.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class FinalResultController implements Initializable {
 
     @FXML

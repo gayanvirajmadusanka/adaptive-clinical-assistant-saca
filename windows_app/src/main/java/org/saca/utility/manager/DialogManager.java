@@ -6,6 +6,13 @@ import javafx.scene.control.ButtonType;
 
 import java.util.Optional;
 
+/**
+ * Dialog Manager
+ *
+ * <p>This class manages Popup Dialogs in the application</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class DialogManager {
 
     private static final String CSS_PATH = "/styles/style.css";

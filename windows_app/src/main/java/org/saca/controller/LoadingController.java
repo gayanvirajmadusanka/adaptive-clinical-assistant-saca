@@ -16,6 +16,11 @@ import org.saca.utility.manager.LanguageManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Loading screen
+ *
+ * @author Gayan Madusanka
+ */
 public class LoadingController implements Initializable {
 
     private static final double TRACK_WIDTH = 18;

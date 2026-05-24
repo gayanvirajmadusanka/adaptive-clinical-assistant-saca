@@ -33,6 +33,13 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Voice input screen
+ *
+ * <p>Handles user interactions on the Voice input.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class VoiceInputController implements Initializable {
 
     @FXML

@@ -1,5 +1,12 @@
 package org.saca.utility.constant;
 
+/**
+ * Apps constants
+ *
+ * <p>This class keep constants to reuse in the app</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class AppsConstants {
 
     public static final String CONFIRM_SYMPTOMS_QUESTION_ID = "confirm_symptoms";

@@ -6,6 +6,13 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+/**
+ * Langauge Manager
+ *
+ * <p>This class manages langauge in the application</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class LanguageManager {
 
     private static Locale currentLocale = Locale.ENGLISH;

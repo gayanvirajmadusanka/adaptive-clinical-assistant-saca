@@ -37,6 +37,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the Voice result screen
+ *
+ * <p>Handles user interactions on the Voice result.</p>
+ *
+ * @author Gayan Madusanka
+ */
 public class VoiceResultController implements Initializable {
 
     @FXML
