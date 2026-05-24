@@ -69,6 +69,12 @@ jobs:
           Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe -Force
           Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar -Force
 
+      - name: Verify lib folder contents
+        shell: pwsh
+        run: |
+          Write-Host "=== Contents of windows_app/target/lib ==="
+          Get-ChildItem windows_app\target\lib\ | Format-Table Name, Length
+
       - name: Create custom JRE with jlink
         shell: pwsh
         run: |
@@ -92,11 +98,17 @@ jobs:
             --runtime-image custom-jre `
             --input windows_app\target\lib `
             --main-jar SACA-1.0-SNAPSHOT.jar `
-            --main-class org.saca.MainApp `
+            --main-class org.saca.Launcher `
             --win-dir-chooser `
             --win-shortcut `
             --win-menu `
             --dest dist_installer
+
+      - name: Verify installer was created
+        shell: pwsh
+        run: |
+          Write-Host "=== Contents of dist_installer ==="
+          Get-ChildItem dist_installer\ | Format-Table Name, Length
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4

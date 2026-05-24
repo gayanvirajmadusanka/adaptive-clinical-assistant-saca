@@ -46,14 +46,17 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
             </plugin>
+
+            <!-- JavaFX Maven Plugin - updated to Launcher -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>org.saca.MainApp</mainClass>
+                    <mainClass>org.saca.Launcher</mainClass>
                 </configuration>
             </plugin>
+
             <!-- Copies all dependency JARs to target/lib/ for jpackage -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -70,7 +73,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Sets Main-Class in the app JAR manifest -->
+
+            <!-- Sets Main-Class in the app JAR manifest - updated to Launcher -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -78,7 +82,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.saca.MainApp</mainClass>
+                            <mainClass>org.saca.Launcher</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
