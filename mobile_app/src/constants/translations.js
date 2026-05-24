@@ -167,6 +167,10 @@ export const translations = {
     please_wait_severity: 'Please wait while we analyze your severity...',
     error: 'Error',
     severity_error_message: 'Could not get result.',
+
+    body_symptoms_hint: 'Tap symptom(s) that match',
+
+    tap_red_dot: 'Tap red dot or choose from the list',
   },
 
   wp: {
@@ -187,7 +191,7 @@ export const translations = {
     english: 'Ingliji',
     warlpiri: 'Warlpiri',
 
-    confirm: 'Kurlarda',
+    confirm: 'Yuwayi',
     change_language: 'Wangka kutju-kurlu nyampu?',
     yes: 'Yuwayi',
     no: 'Lawa',
@@ -199,7 +203,7 @@ export const translations = {
     processing_voice: 'Voice nyanyi...',
     text_input_question: 'Nyiya ka nyuntu nyampuju?',
     text_placeholder: 'Ngarrirni nyuntu purrkunypa.',
-    continue: 'Yangka',
+    continue: 'Yantarla',
     back: 'Yankirri',
     submit: 'Yungkurlu',
     question: 'Japi',
@@ -338,5 +342,9 @@ export const translations = {
     please_wait_severity: 'Wait-ki. Ngula nyuntu purrkunypa wiri nyanganyi.',
     error: 'Error',
     severity_error_message: 'Result lawa nyangu.',
+
+    body_symptoms_hint: 'Purrkunypa nyuntu-nyangu milkikarriya',
+
+    tap_red_dot: 'Purrkunypa nyuntu-nyangu milkikarriya',
   },
 };
