@@ -1,126 +1,158 @@
 // voiceInputStyles.js
 // Purpose: Screen-specific styles for VoiceInputScreen.
-// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
+// Balanced size similar to TextInputScreen.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
-  // Same main layout position as TextInputScreen.
   container: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 25,
-    paddingTop: 80,
+    paddingTop: 75,
   },
 
-  // Header copied/aligned with TextInputScreen style.
   headerBar: {
-    width: '92%',
-    height: 60,
+    width: '94%',
+    height: 68,
     backgroundColor: '#D2B767',
     borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
+    marginBottom: 28,
+    paddingHorizontal: 18,
   },
 
   headerText: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  headerIcon: {
+  headerRightGroup: {
     position: 'absolute',
-    right: 25,
-    width: 30,
-    height: 30,
+    right: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  headerSpeakerButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#E3AD35',
+    borderWidth: 2,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+
+  headerSpeakerPressed: {
+    backgroundColor: '#8B3A1C',
+    transform: [{ scale: 0.95 }],
+  },
+
+  headerSpeakerDisabled: {
+    opacity: 0.45,
+  },
+
+  headerSpeakerIcon: {
+    width: 22,
+    height: 22,
+  },
+
+  headerIcon: {
+    width: 36,
+    height: 36,
   },
 
   recordBox: {
     width: '92%',
-    minHeight: 270,
+    height: 360,
     borderWidth: 1.5,
     borderColor: '#C8B99A',
-    borderRadius: 16,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 26,
-    backgroundColor: 'rgba(245, 234, 212, 0.88)',
-    paddingVertical: 28,
+    backgroundColor: 'rgba(245, 234, 212, 0.92)',
+    paddingVertical: 30,
     paddingHorizontal: 20,
+    marginBottom: 35,
   },
 
   pulseCircle: {
-    width: 116,
-    height: 116,
-    borderRadius: 58,
-    borderWidth: 2,
+    width: 145,
+    height: 145,
+    borderRadius: 72,
+    borderWidth: 3,
     borderColor: '#C8B99A',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
 
   recordingBorder: {
     borderColor: '#C0392B',
-    borderWidth: 3,
+    borderWidth: 4,
     backgroundColor: 'rgba(192,57,43,0.08)',
   },
 
   micCircle: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   micImage: {
-    width: 58,
-    height: 58,
+    width: 72,
+    height: 72,
   },
 
   waveformContainer: {
-    height: 64,
+    height: 75,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
-    marginTop: 14,
+    gap: 8,
+    marginTop: 22,
   },
 
   waveBar: {
-    width: 7,
-    borderRadius: 8,
+    width: 8,
+    borderRadius: 10,
     backgroundColor: '#8B3A1C',
   },
 
   recordText: {
-    marginTop: 8,
-    fontSize: 18,
+    marginTop: 18,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: '600',
     color: '#7A6A52',
     textAlign: 'center',
+    lineHeight: 28,
+    paddingHorizontal: 10,
   },
 
   bottomBox: {
     width: '92%',
-    minHeight: 94,
+    minHeight: 96,
     borderRadius: 50,
     borderWidth: 1.5,
     borderColor: '#C8B99A',
-    backgroundColor: 'rgba(245, 234, 212, 0.9)',
+    backgroundColor: 'rgba(245, 234, 212, 0.95)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 26,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 28,
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -135,18 +167,18 @@ export default StyleSheet.create({
   },
 
   deleteButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: '#C8A18C',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   playButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: '#A8C89A',
     alignItems: 'center',
     justifyContent: 'center',
@@ -157,36 +189,35 @@ export default StyleSheet.create({
   },
 
   timeText: {
-    minWidth: 44,
-    fontSize: 16,
+    minWidth: 48,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#3A2A1A',
   },
 
   continueButton: {
-    minWidth: 118,
-    height: 54,
-    borderRadius: 27,
+    minWidth: 128,
+    height: 58,
+    borderRadius: 28,
     backgroundColor: '#E3AD35',
     borderWidth: 2,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 18,
+    paddingHorizontal: 22,
   },
 
   continueText: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // Back button same as TextInputScreen.
   backButton: {
-    width: 140,
-    height: 55,
+    width: 160,
+    height: 60,
     borderRadius: 28,
     borderWidth: 2,
     borderColor: '#000',
@@ -203,9 +234,9 @@ export default StyleSheet.create({
   },
 
   backArrowImage: {
-    width: 22,
-    height: 22,
-    marginRight: 8,
+    width: 24,
+    height: 24,
+    marginRight: 10,
   },
 
   backPressedGrey: {
@@ -214,7 +245,7 @@ export default StyleSheet.create({
   },
 
   backText: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',

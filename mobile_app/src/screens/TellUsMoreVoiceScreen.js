@@ -9,12 +9,14 @@ import {
   Pressable,
   Image,
   Animated,
-  Alert,
   BackHandler,
+  Modal,
+  ImageBackground,
 } from 'react-native';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 import AppScreen from '../components/AppScreen';
@@ -23,7 +25,7 @@ import styles from '../styles/tellUsMoreVoiceStyles';
 
 import {
   getFollowUpQuestions,
-  resolveAnswerAudio,
+  submitAnswerAudio,
 } from '../services/triageApi';
 
 import {
@@ -48,6 +50,9 @@ export default function TellUsMoreVoiceScreen() {
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
+
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [voiceErrorModalVisible, setVoiceErrorModalVisible] = useState(false);
 
   const [audioLoading, setAudioLoading] = useState(false);
   const [questionAudioPlaying, setQuestionAudioPlaying] = useState(false);
@@ -102,10 +107,11 @@ export default function TellUsMoreVoiceScreen() {
       setAnswers({});
       setSelectedOption(null);
       setVoiceAnswerMap({});
+
       await resetVoiceAnswer();
     } catch (error) {
       console.log('Questions API error:', error);
-      Alert.alert('Error', 'Could not load questions.');
+      await showVoiceErrorModal();
     } finally {
       setLoadingQuestions(false);
     }
@@ -115,8 +121,10 @@ export default function TellUsMoreVoiceScreen() {
     fetchQuestions(lang || params.language || 'en');
   }, []);
 
-  const stopCurrentAudio = async () => {
+  async function stopCurrentAudio() {
     try {
+      Speech.stop();
+
       if (soundRef.current) {
         const sound = soundRef.current;
         soundRef.current = null;
@@ -134,9 +142,9 @@ export default function TellUsMoreVoiceScreen() {
       console.log('Stop audio error:', error);
       setQuestionAudioPlaying(false);
     }
-  };
+  }
 
-  const playQuestionAudio = async () => {
+  async function playQuestionAudio() {
     try {
       if (!currentQuestion?.voice_b64) return;
 
@@ -162,7 +170,10 @@ export default function TellUsMoreVoiceScreen() {
 
       const { sound } = await Audio.Sound.createAsync(
         { uri: fileUri },
-        { shouldPlay: true, volume: 1.0 }
+        {
+          shouldPlay: true,
+          volume: 1.0,
+        }
       );
 
       soundRef.current = sound;
@@ -181,11 +192,11 @@ export default function TellUsMoreVoiceScreen() {
     } catch (error) {
       console.log('Question audio error:', error);
       setQuestionAudioPlaying(false);
-      Alert.alert('Audio Error', 'Cannot play audio.');
+      await showVoiceErrorModal();
     } finally {
       setAudioLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     if (!currentQuestion?.id || !currentQuestion?.voice_b64) return;
@@ -197,7 +208,7 @@ export default function TellUsMoreVoiceScreen() {
     return () => clearTimeout(timer);
   }, [currentQuestion?.id]);
 
-  const startPulse = () => {
+  function startPulse() {
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
@@ -212,14 +223,14 @@ export default function TellUsMoreVoiceScreen() {
         }),
       ])
     ).start();
-  };
+  }
 
-  const stopPulse = () => {
+  function stopPulse() {
     pulseAnim.stopAnimation();
     pulseAnim.setValue(1);
-  };
+  }
 
-  const animateBars = () => {
+  function animateBars() {
     const loopBar = (bar, height, duration) =>
       Animated.loop(
         Animated.sequence([
@@ -241,19 +252,21 @@ export default function TellUsMoreVoiceScreen() {
     loopBar(bar3, 44, 350).start();
     loopBar(bar4, 62, 410).start();
     loopBar(bar5, 38, 360).start();
-  };
+  }
 
-  const stopBars = () => {
-    [bar1, bar2, bar3, bar4, bar5].forEach((bar) => bar.stopAnimation());
+  function stopBars() {
+    [bar1, bar2, bar3, bar4, bar5].forEach((bar) =>
+      bar.stopAnimation()
+    );
 
     bar1.setValue(14);
     bar2.setValue(28);
     bar3.setValue(18);
     bar4.setValue(34);
     bar5.setValue(20);
-  };
+  }
 
-  const startTimer = () => {
+  function startTimer() {
     secondsRef.current = 0;
     setRecordDuration('0.00');
 
@@ -261,16 +274,63 @@ export default function TellUsMoreVoiceScreen() {
       secondsRef.current += 0.1;
       setRecordDuration(secondsRef.current.toFixed(2));
     }, 100);
-  };
+  }
 
-  const stopTimer = () => {
+  function stopTimer() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }
 
-  const handleMicPress = async () => {
+  async function showVoiceErrorModal() {
+    await stopCurrentAudio();
+
+    setVoiceErrorModalVisible(true);
+
+    setTimeout(() => {
+      Speech.speak(
+        `${t('voice_not_recognized_title')}. ${t(
+          'voice_not_recognized'
+        )}. ${t('voice_not_recognized_hint')}`,
+        {
+          language: 'en-AU',
+          pitch: 1.0,
+          rate: 0.85,
+        }
+      );
+    }, 300);
+  }
+
+  async function closeVoiceErrorModal() {
+    Speech.stop();
+    setVoiceErrorModalVisible(false);
+  }
+
+  async function readNoAnswerMessage() {
+    try {
+      await stopCurrentAudio();
+
+      const message = `${t('no_answer_title')}. ${t(
+        'no_answer_message_1'
+      )}. ${t('no_answer_message_2')}`;
+
+      Speech.speak(message, {
+        language: 'en-AU',
+        pitch: 1.0,
+        rate: 0.85,
+      });
+    } catch (error) {
+      console.log('Read no answer message error:', error);
+    }
+  }
+
+  async function closeNoAnswerModal() {
+    Speech.stop();
+    setErrorModalVisible(false);
+  }
+
+  async function handleMicPress() {
     try {
       if (isRecording) {
         await stopVoiceRecording();
@@ -279,18 +339,15 @@ export default function TellUsMoreVoiceScreen() {
       }
     } catch (error) {
       console.log('Voice answer recording error:', error);
-      Alert.alert('Recording error', 'Could not record your voice answer.');
+      await showVoiceErrorModal();
     }
-  };
+  }
 
-  const startVoiceRecording = async () => {
+  async function startVoiceRecording() {
     const permission = await Audio.requestPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert(
-        'Permission required',
-        'Please allow microphone permission to record your answer.'
-      );
+      await showVoiceErrorModal();
       return;
     }
 
@@ -324,9 +381,9 @@ export default function TellUsMoreVoiceScreen() {
     startPulse();
     animateBars();
     startTimer();
-  };
+  }
 
-  const stopVoiceRecording = async () => {
+  async function stopVoiceRecording() {
     if (!recording) return;
 
     await recording.stopAndUnloadAsync();
@@ -335,7 +392,7 @@ export default function TellUsMoreVoiceScreen() {
     const duration = secondsRef.current.toFixed(2);
 
     if (!uri) {
-      Alert.alert('Recording error', 'Audio file was not saved.');
+      await showVoiceErrorModal();
       return;
     }
 
@@ -361,9 +418,9 @@ export default function TellUsMoreVoiceScreen() {
     setTimeout(() => {
       resolveRecordedAnswer(uri, currentQuestion?.id);
     }, 1000);
-  };
+  }
 
-  const resolveRecordedAnswer = async (uri, questionId) => {
+  async function resolveRecordedAnswer(uri, questionId) {
     try {
       if (!uri || !questionId) return;
 
@@ -371,13 +428,22 @@ export default function TellUsMoreVoiceScreen() {
 
       const audioBase64 = await readAudioFileAsBase64(String(uri));
 
-      const data = await resolveAnswerAudio(
+      const data = await submitAnswerAudio(
         audioBase64,
         questionId,
         lang || 'en'
       );
 
       if (data?.recognized && data?.answer_id) {
+        const matchedOption = currentQuestion?.options?.find(
+          (item) => item.id === data.answer_id
+        );
+
+        if (!matchedOption) {
+          await showVoiceErrorModal();
+          return;
+        }
+
         setSelectedOption(data.answer_id);
 
         setAnswers((prev) => ({
@@ -385,31 +451,21 @@ export default function TellUsMoreVoiceScreen() {
           [questionId]: {
             question_id: questionId,
             answer_id: data.answer_id,
-            answer_text:
-              currentQuestion?.options?.find(
-                (item) => item.id === data.answer_id
-              )?.text || '',
+            answer_text: matchedOption.text || '',
           },
         }));
       } else {
-        Alert.alert(
-          'Voice not recognised',
-          data?.message || 'Please select the answer manually.'
-        );
+        await showVoiceErrorModal();
       }
     } catch (error) {
       console.log('Resolve answer audio error:', error);
-
-      Alert.alert(
-        'Voice answer error',
-        'Could not check your voice answer. Please select manually.'
-      );
+      await showVoiceErrorModal();
     } finally {
       setResolvingVoice(false);
     }
-  };
+  }
 
-  const handlePlayVoice = async () => {
+  async function handlePlayVoice() {
     try {
       if (!recordingUri) return;
 
@@ -424,7 +480,9 @@ export default function TellUsMoreVoiceScreen() {
         setRecordedSound(null);
       }
 
-      const { sound } = await Audio.Sound.createAsync({ uri: recordingUri });
+      const { sound } = await Audio.Sound.createAsync({
+        uri: recordingUri,
+      });
 
       setRecordedSound(sound);
       setIsPlayingVoice(true);
@@ -440,11 +498,11 @@ export default function TellUsMoreVoiceScreen() {
       await sound.playAsync();
     } catch (error) {
       console.log('Voice answer playback error:', error);
-      Alert.alert('Playback error', 'Could not play your voice answer.');
+      await showVoiceErrorModal();
     }
-  };
+  }
 
-  const handleDeleteVoice = async () => {
+  async function handleDeleteVoice() {
     try {
       if (recording) {
         await recording.stopAndUnloadAsync();
@@ -476,9 +534,9 @@ export default function TellUsMoreVoiceScreen() {
     } catch (error) {
       console.log('Delete voice answer error:', error);
     }
-  };
+  }
 
-  const resetVoiceAnswer = async () => {
+  async function resetVoiceAnswer() {
     try {
       if (recording) {
         await recording.stopAndUnloadAsync();
@@ -502,9 +560,9 @@ export default function TellUsMoreVoiceScreen() {
     stopPulse();
     stopBars();
     stopTimer();
-  };
+  }
 
-  const restoreVoiceForQuestion = (questionId) => {
+  function restoreVoiceForQuestion(questionId) {
     const savedVoice = voiceAnswerMap[questionId];
 
     if (savedVoice) {
@@ -518,9 +576,9 @@ export default function TellUsMoreVoiceScreen() {
     setIsRecording(false);
     setIsPlayingVoice(false);
     setResolvingVoice(false);
-  };
+  }
 
-  const handleOptionPress = (option) => {
+  function handleOptionPress(option) {
     setSelectedOption(option.id);
 
     if (currentQuestion?.id) {
@@ -533,11 +591,16 @@ export default function TellUsMoreVoiceScreen() {
         },
       }));
     }
-  };
+  }
 
-  const handleContinue = async () => {
+  async function handleContinue() {
     if (!selectedOption) {
-      Alert.alert('Select answer', 'Please select or speak one answer.');
+      setErrorModalVisible(true);
+
+      setTimeout(() => {
+        readNoAnswerMessage();
+      }, 300);
+
       return;
     }
 
@@ -555,10 +618,12 @@ export default function TellUsMoreVoiceScreen() {
     };
 
     setAnswers(updatedAnswers);
+
     await stopCurrentAudio();
 
     if (recordedSound) {
       await recordedSound.unloadAsync();
+
       setRecordedSound(null);
       setIsPlayingVoice(false);
     }
@@ -568,7 +633,9 @@ export default function TellUsMoreVoiceScreen() {
       const nextQuestion = questions[nextIndex];
 
       setCurrentIndex(nextIndex);
+
       setSelectedOption(updatedAnswers[nextQuestion.id]?.answer_id || null);
+
       restoreVoiceForQuestion(nextQuestion.id);
     } else {
       const finalAnswers = buildAnswerList(updatedAnswers);
@@ -584,13 +651,14 @@ export default function TellUsMoreVoiceScreen() {
         },
       });
     }
-  };
+  }
 
-  const handleBack = async () => {
+  async function handleBack() {
     await stopCurrentAudio();
 
     if (recordedSound) {
       await recordedSound.unloadAsync();
+
       setRecordedSound(null);
       setIsPlayingVoice(false);
     }
@@ -601,12 +669,14 @@ export default function TellUsMoreVoiceScreen() {
       const previousAnswer = answers[previousQuestion.id];
 
       setCurrentIndex(previousIndex);
+
       setSelectedOption(previousAnswer?.answer_id || null);
+
       restoreVoiceForQuestion(previousQuestion.id);
     } else {
       router.back();
     }
-  };
+  }
 
   useEffect(() => {
     const backAction = () => {
@@ -650,7 +720,9 @@ export default function TellUsMoreVoiceScreen() {
         }}
       >
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading questions...</Text>
+          <Text style={styles.loadingText}>
+            {t('voice_loading_questions')}
+          </Text>
         </View>
       </AppScreen>
     );
@@ -668,18 +740,20 @@ export default function TellUsMoreVoiceScreen() {
     >
       <View style={styles.container}>
         <View style={styles.headerBar}>
-          <Text style={styles.headerText}>Tell us more</Text>
+          <Text style={styles.headerText}>{t('voice_tell_us_more')}</Text>
         </View>
 
         <Text style={styles.questionNumber}>
-          Question {currentIndex + 1} of {totalQuestions}
+          {t('question')} {currentIndex + 1} {t('of')} {totalQuestions}
         </Text>
 
         <View style={styles.progressTrack}>
           <View
             style={[
               styles.progressFill,
-              { width: `${progressPercent}%` },
+              {
+                width: `${progressPercent}%`,
+              },
             ]}
           />
         </View>
@@ -687,7 +761,9 @@ export default function TellUsMoreVoiceScreen() {
         <View style={styles.contentRow}>
           <View style={styles.questionBox}>
             <View style={styles.questionHeader}>
-              <Text style={styles.questionText}>{currentQuestion?.text}</Text>
+              <Text style={styles.questionText}>
+                {currentQuestion?.text}
+              </Text>
 
               <Pressable
                 style={({ pressed }) => [
@@ -737,8 +813,8 @@ export default function TellUsMoreVoiceScreen() {
                 <View style={styles.voiceRecordedBox}>
                   <Text style={styles.voiceRecordedText}>
                     {resolvingVoice
-                      ? 'Checking voice answer...'
-                      : 'Voice answer recorded'}
+                      ? t('voice_answer_checking')
+                      : t('voice_answer_recorded')}
                   </Text>
                 </View>
               )}
@@ -746,13 +822,17 @@ export default function TellUsMoreVoiceScreen() {
           </View>
 
           <View style={styles.voiceBox}>
-            <Text style={styles.voiceTitle}>Speak your answer</Text>
+            <Text style={styles.voiceTitle}>
+              {t('voice_speak_answer')}
+            </Text>
 
             <Animated.View
               style={[
                 styles.pulseCircle,
                 isRecording && styles.recordingBorder,
-                { transform: [{ scale: pulseAnim }] },
+                {
+                  transform: [{ scale: pulseAnim }],
+                },
               ]}
             >
               <Pressable onPress={handleMicPress} style={styles.micCircle}>
@@ -776,8 +856,8 @@ export default function TellUsMoreVoiceScreen() {
 
             <Text style={styles.voiceHint}>
               {isRecording
-                ? 'Recording... tap mic to stop'
-                : 'Click on mic to record voice'}
+                ? t('voice_recording_stop')
+                : t('voice_click_mic')}
             </Text>
 
             {recordingUri && (
@@ -793,7 +873,9 @@ export default function TellUsMoreVoiceScreen() {
                   />
                 </Pressable>
 
-                <Text style={styles.voiceDurationText}>{recordDuration}</Text>
+                <Text style={styles.voiceDurationText}>
+                  {recordDuration}
+                </Text>
 
                 <Pressable
                   onPress={handleDeleteVoice}
@@ -811,14 +893,23 @@ export default function TellUsMoreVoiceScreen() {
         </View>
 
         <Pressable
+          disabled={!selectedOption}
           style={({ pressed }) => [
             styles.continueButton,
-            pressed && styles.continuePressed,
+
+            !selectedOption &&
+              styles.continueDisabled,
+
+            selectedOption &&
+              pressed &&
+              styles.continuePressed,
           ]}
           onPress={handleContinue}
         >
           <Text style={styles.continueText}>
-            {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
+            {currentIndex === questions.length - 1
+              ? t('submit')
+              : t('continue')}
           </Text>
         </Pressable>
 
@@ -840,6 +931,90 @@ export default function TellUsMoreVoiceScreen() {
           </View>
         </Pressable>
       </View>
+
+      <Modal transparent visible={errorModalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalBox}>
+            <View style={styles.errorHeader}>
+              <Text style={styles.errorTitle}>{t('no_answer_title')}</Text>
+
+              <Pressable
+                onPress={closeNoAnswerModal}
+                style={styles.errorCloseButton}
+              >
+                <Text style={styles.errorCloseText}>×</Text>
+              </Pressable>
+            </View>
+
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
+              <Text style={styles.errorMessageBold}>
+                {t('no_answer_message_1')}
+              </Text>
+
+              <Text style={styles.errorMessage}>
+                {t('no_answer_message_2')}
+              </Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.errorOkButton,
+                  pressed && styles.errorOkButtonPressed,
+                ]}
+                onPress={closeNoAnswerModal}
+              >
+                <Text style={styles.errorOkText}>{t('ok')}</Text>
+              </Pressable>
+            </ImageBackground>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent visible={voiceErrorModalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModalBox}>
+            <View style={styles.errorHeader}>
+              <Text style={styles.errorTitle}>
+                {t('voice_not_recognized_title')}
+              </Text>
+
+              <Pressable
+                onPress={closeVoiceErrorModal}
+                style={styles.errorCloseButton}
+              >
+                <Text style={styles.errorCloseText}>×</Text>
+              </Pressable>
+            </View>
+
+            <ImageBackground
+              source={require('../../assets/images/background.png')}
+              style={styles.errorBody}
+              resizeMode="cover"
+            >
+              <Text style={styles.errorMessageBold}>
+                {t('voice_not_recognized')}
+              </Text>
+
+              <Text style={styles.errorMessage}>
+                {t('voice_not_recognized_hint')}
+              </Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.errorOkButton,
+                  pressed && styles.errorOkButtonPressed,
+                ]}
+                onPress={closeVoiceErrorModal}
+              >
+                <Text style={styles.errorOkText}>{t('ok')}</Text>
+              </Pressable>
+            </ImageBackground>
+          </View>
+        </View>
+      </Modal>
     </AppScreen>
   );
 }

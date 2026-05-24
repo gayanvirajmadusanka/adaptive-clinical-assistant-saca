@@ -460,11 +460,30 @@ export default function VoiceInputScreen() {
           <Text style={styles.headerText}>
             {t('speak_option') || 'Speak'}
           </Text>
-          <Image
-            source={require('../../assets/images/voice.png')}
-            style={styles.headerIcon}
-            resizeMode="contain"
-          />
+
+          <View style={styles.headerRightGroup}>
+            <Pressable
+              onPress={() => playDescribeSymptomsAudio(lang)}
+              disabled={isRecording}
+              style={({ pressed }) => [
+                styles.headerSpeakerButton,
+                pressed && styles.headerSpeakerPressed,
+                isRecording && styles.headerSpeakerDisabled,
+              ]}
+            >
+              <Image
+                source={require('../../assets/images/speaker.png')}
+                style={styles.headerSpeakerIcon}
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <Image
+              source={require('../../assets/images/voice.png')}
+              style={styles.headerIcon}
+              resizeMode="contain"
+            />
+          </View>
         </View>
 
         <View style={styles.recordBox}>
