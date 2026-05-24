@@ -66,6 +66,10 @@ public class TextInputController implements Initializable {
 
         if (text.isEmpty()) {
             symptomInput.setPromptText(LanguageManager.get("text_input_empty_prompt"));
+            DialogManager.warningDialog(
+                    LanguageManager.get("describe_your_symptoms"),
+                    LanguageManager.get("describe_your_symptoms"),
+                    LanguageManager.get("text_input_empty_prompt"));
             return;
         }
 
