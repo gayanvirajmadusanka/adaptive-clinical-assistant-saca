@@ -19,9 +19,6 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ResourceBundle;
 
-/**
- * MainClass of the Application
- */
 public class MainApp extends Application {
 
     public static final double APP_WIDTH = 1000;
@@ -29,11 +26,10 @@ public class MainApp extends Application {
 
     private static final String BACKEND_HEALTH_URL = "http://127.0.0.1:8000/questions";
     private static final int POLL_INTERVAL_MS = 500;
-    private static final int POLL_TIMEOUT_MS = 30_000;
+    private static final int POLL_TIMEOUT_MS = 60_000;  // increased to 60s
 
     private Process backendProcess;
 
-    // Main method
     public static void main(String[] args) {
         launch(args);
     }
@@ -88,7 +84,14 @@ public class MainApp extends Application {
 
     private void spawnBackend() throws Exception {
         File installDir = new File(System.getProperty("java.home")).getParentFile();
-        File serverExe = new File(installDir, "saca_server.exe");
+
+        // jpackage puts app files in app\ subfolder
+        File serverExe = new File(installDir, "app\\saca_server.exe");
+
+        // Fallback to install root for older builds
+        if (!serverExe.exists()) {
+            serverExe = new File(installDir, "saca_server.exe");
+        }
 
         if (!serverExe.exists()) {
             System.out.println("[SACA] saca_server.exe not found — assuming dev mode, skipping spawn");
