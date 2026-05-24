@@ -293,9 +293,9 @@ public class VoiceInputController implements Initializable {
                 && CommonUtil.isListEmpty(result.getSymptomsWp()))) {
 
             DialogManager.errorDialog(
-                    "No Symptoms Detected",
-                    "We could not detect any symptoms from your recording",
-                    "Please try recording again more clearly."
+                    LanguageManager.get("no_symptoms_detected"),
+                    LanguageManager.get("we_could_not_detect_any_symptoms_from_your_recording"),
+                    LanguageManager.get("please_try_recording_again_more_clearly")
             );
             stage.getScene().setRoot(voiceInputView);
             return;
