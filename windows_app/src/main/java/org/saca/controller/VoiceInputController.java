@@ -247,9 +247,9 @@ public class VoiceInputController implements Initializable {
 
         stage = (Stage) micBtn.getScene().getWindow();
 
-        VoiceInputRQ rq = new VoiceInputRQ();
-        rq.setAudioB64(audioB64);
-        rq.setLanguage(LanguageManager.isLanguageEnglish()
+        VoiceInputRQ voiceInputRQ = new VoiceInputRQ();
+        voiceInputRQ.setAudioB64(audioB64);
+        voiceInputRQ.setLanguage(LanguageManager.isLanguageEnglish()
                 ? AppsConstants.AppLanguage.EN.getShortDescription()
                 : AppsConstants.AppLanguage.WP.getShortDescription());
 
@@ -267,7 +267,7 @@ public class VoiceInputController implements Initializable {
             voiceInputView = stage.getScene().getRoot();
 
             ApiService.detectSymptomsAudio(
-                    rq,
+                    voiceInputRQ,
                     result -> Platform.runLater(() -> {
                         loadingCtrl.stop();
                         navigateToResult(result);
@@ -292,11 +292,14 @@ public class VoiceInputController implements Initializable {
                 || (CommonUtil.isListEmpty(result.getSymptomsEn())
                 && CommonUtil.isListEmpty(result.getSymptomsWp()))) {
 
-            DialogManager.errorDialog(
-                    LanguageManager.get("no_symptoms_detected"),
-                    LanguageManager.get("we_could_not_detect_any_symptoms_from_your_recording"),
-                    LanguageManager.get("please_try_recording_again_more_clearly")
-            );
+            if (result != null) {
+                if (LanguageManager.isLanguageEnglish()) {
+                    showUnrecognizedPopup(result.getVoiceB64En());
+                } else {
+                    showUnrecognizedPopup(result.getVoiceB64Wp());
+                }
+            }
+
             stage.getScene().setRoot(voiceInputView);
             return;
         }
@@ -402,5 +405,20 @@ public class VoiceInputController implements Initializable {
 
     private void stopDurationTimer() {
         if (durationTimer != null) durationTimer.stop();
+    }
+
+    private void showUnrecognizedPopup(String voiceB64) {
+        if (voiceB64 != null && !voiceB64.isBlank()) {
+            AudioService.playBase64Wav(voiceB64, err -> {
+            }, () -> {
+            });
+        }
+
+        DialogManager.warningDialogWithOnHidden(
+                LanguageManager.get("no_symptoms_detected"),
+                LanguageManager.get("we_could_not_detect_any_symptoms_from_your_recording"),
+                LanguageManager.get("please_try_recording_again_more_clearly"),
+                AudioService::stop
+        );
     }
 }
