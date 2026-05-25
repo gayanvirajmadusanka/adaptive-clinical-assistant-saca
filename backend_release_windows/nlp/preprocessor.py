@@ -1,7 +1,8 @@
 import re
-import sys
 import os
+import sys
 import spacy
+
 
 def _load_spacy_model():
     # Try normal load first
@@ -10,15 +11,21 @@ def _load_spacy_model():
     except OSError:
         pass
 
-    # If frozen (PyInstaller), try loading from bundle directory
+    # If frozen (PyInstaller), search for config.cfg recursively in bundle
     if getattr(sys, 'frozen', False):
         bundle_dir = sys._MEIPASS
-        model_path = os.path.join(bundle_dir, 'en_core_web_sm')
-        if os.path.exists(model_path):
-            try:
-                return spacy.load(model_path)
-            except Exception as e:
-                print(f"[SACA] Failed to load spaCy from bundle path: {e}")
+        print(f"[SACA] Searching for spaCy model in bundle: {bundle_dir}")
+
+        for root, dirs, files in os.walk(bundle_dir):
+            if 'config.cfg' in files:
+                try:
+                    print(f"[SACA] Trying spaCy model at: {root}")
+                    nlp = spacy.load(root)
+                    print(f"[SACA] spaCy model loaded from: {root}")
+                    return nlp
+                except Exception as e:
+                    print(f"[SACA] Failed at {root}: {e}")
+                    continue
 
     raise OSError("spaCy model missing - run: python -m spacy download en_core_web_sm")
 

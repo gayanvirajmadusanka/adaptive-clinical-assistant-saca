@@ -15,6 +15,11 @@ _ROOT = os.path.dirname(_HERE)
 spacy_model_dir = os.path.dirname(en_core_web_sm.__file__)
 print(f"[SACA] spaCy model path: {spacy_model_dir}")
 
+# Get versioned subfolder explicitly
+spacy_model_version_dir = os.path.join(spacy_model_dir, 'en_core_web_sm-3.7.1')
+print(f"[SACA] spaCy model version dir: {spacy_model_version_dir}")
+print(f"[SACA] spaCy version dir exists: {os.path.exists(spacy_model_version_dir)}")
+
 # Collect all spaCy model data
 spacy_data = collect_data_files('en_core_web_sm')
 spacy_submodules = collect_submodules('en_core_web_sm')
@@ -28,8 +33,10 @@ a = Analysis(
     datas=[
         (os.path.join(_ROOT, 'backend', 'data'),   'backend_release_windows/data'),
         (os.path.join(_ROOT, 'backend', 'models'), 'backend_release_windows/models'),
-        # spaCy model - explicit directory copy
+        # Bundle package root
         (spacy_model_dir, 'en_core_web_sm'),
+        # Bundle versioned subfolder explicitly — this is where config.cfg lives
+        (spacy_model_version_dir, 'en_core_web_sm/en_core_web_sm-3.7.1'),
         *spacy_data,
     ],
     hiddenimports=[
