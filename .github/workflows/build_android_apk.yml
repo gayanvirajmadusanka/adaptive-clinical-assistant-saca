@@ -56,11 +56,12 @@ jobs:
       - name: Install Python deps for MFCC precompute
         run: pip install numpy scipy python_speech_features soundfile
 
-      - name: Re-train NLP classifier with sklearn 1.1.3 (Android-compatible pickle)
+      - name: Re-train models with sklearn 1.1.3 (Android-compatible pickles)
         run: |
           python -m venv /tmp/venv_sklearn113
-          /tmp/venv_sklearn113/bin/pip install --quiet "numpy<2" scikit-learn==1.1.3 pandas rapidfuzz
+          /tmp/venv_sklearn113/bin/pip install --quiet "numpy<2" scikit-learn==1.1.3 pandas rapidfuzz "imbalanced-learn==0.10.1"
           /tmp/venv_sklearn113/bin/python backend/scripts/retrain_nlp_sklearn113.py
+          /tmp/venv_sklearn113/bin/python backend/scripts/retrain_ml_sklearn113.py
 
       - name: Prepare backend_release_android data and models
         run: |
@@ -77,6 +78,10 @@ jobs:
           for model in mlp.pkl tfidf_vectorizer.pkl label_encoder.pkl; do
             [ -f "backend/models/$model" ] && cp "backend/models/$model" backend_release_android/models/
           done
+          # Overwrite with sklearn 1.1.3-compatible triage model pickles for Android
+          cp backend/models/mlp_android.pkl              backend_release_android/models/mlp.pkl
+          cp backend/models/tfidf_vectorizer_android.pkl backend_release_android/models/tfidf_vectorizer.pkl
+          cp backend/models/label_encoder_android.pkl    backend_release_android/models/label_encoder.pkl
           # Use sklearn 1.1.3-compatible NLP model pickles for Android
           cp backend/models/nlp_symptom_classifier_android.pkl backend_release_android/models/nlp_symptom_classifier.pkl
           cp backend/models/nlp_tfidf_vectorizer_android.pkl   backend_release_android/models/nlp_tfidf_vectorizer.pkl

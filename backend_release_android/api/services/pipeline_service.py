@@ -23,16 +23,30 @@ _ID_TO_WP = {key: value[Language.WP] for key, value in _SYMPTOM_MAP.items()}
 _EN_TO_ID = {value['en']: key for key, value in _SYMPTOM_MAP.items()}
 _EN_TO_WP = {value['en']: value['wp'] for value in _SYMPTOM_MAP.values()}
 
-predictor = TriagePredictor(
-    model_path=os.path.join(_BASE_DIR, 'models', 'mlp.pkl'),
-    tfidf_path=os.path.join(_BASE_DIR, 'models', 'tfidf_vectorizer.pkl'),
-    le_path=os.path.join(_BASE_DIR, 'models', 'label_encoder.pkl')
-)
+_predictor = None
+
+
+def _resolve_model(name: str) -> str:
+    android = os.path.join(_BASE_DIR, 'models', f'{name}_android.pkl')
+    if os.path.exists(android):
+        return android
+    return os.path.join(_BASE_DIR, 'models', f'{name}.pkl')
+
+
+def _get_predictor() -> TriagePredictor:
+    global _predictor
+    if _predictor is None:
+        _predictor = TriagePredictor(
+            model_path=_resolve_model('mlp'),
+            tfidf_path=_resolve_model('tfidf_vectorizer'),
+            le_path=_resolve_model('label_encoder'),
+        )
+    return _predictor
 
 
 def classify(symptoms: list, answers: list, language: Language = Language.EN) -> ClassifyResponse:
     resolved = resolve_answers(answers, symptoms)
-    result = predictor.predict(
+    result = _get_predictor().predict(
         symptoms=symptoms,
         age=resolved['age_group'],
         gender=resolved['gender'],

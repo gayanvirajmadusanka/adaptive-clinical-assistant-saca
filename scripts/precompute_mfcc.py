@@ -27,7 +27,7 @@ SAMPLE_RATE = 16000
 N_MFCC      = 13
 
 # answer keyword WAV name -> Warlpiri keyword
-# bridges Yoshani's answer WAV filenames to the keywords audio_warlpiri.py expects
+# bridges answer WAV filenames to the keywords audio_warlpiri.py expects
 _ANSWER_WAV_TO_KEYWORD = {
     "answer_yes_wp.wav":              "yuwayi",
     "answer_no_wp.wav":               "lawa",
