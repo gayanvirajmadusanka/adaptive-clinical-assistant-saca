@@ -1,210 +1,285 @@
 // textInputStyles.js
-// Purpose: Screen-specific styles for TextInputScreen.
-// Shared SafeArea, background, footer, and language modal styles were moved to commonLayoutStyles.js.
+// Purpose: Styles for TextInputScreen.
+// Controls text input box, buttons, detected symptoms area,
+// speaker buttons, and navigation layout.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
+
+  // Main screen container
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 25,
-    paddingTop: 95, // moved slightly lower
+    paddingHorizontal: 22,
+    paddingTop: 78,
   },
 
+  // ===============================
+  // Header Section
+  // ===============================
+
+  // Header box container
   headerBar: {
     width: '94%',
-    height: 70, // increased size
-    backgroundColor: '#5F7D6E',
-    borderRadius: 10,
-    flexDirection: 'row',
+    height: 64,
+    backgroundColor: '#C87936',
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 35,
+    marginBottom: 18,
   },
 
+  // Header title text
   headerText: {
-    fontSize: 30, // increased font size
+    fontSize: 26,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  headerIcon: {
-    position: 'absolute',
-    right: 25,
-    width: 38, // increased icon size
-    height: 38,
-  },
-
-  inputBox: {
-    width: '92%',
-    height: 300, // increased description box size
-    backgroundColor: '#E6D7BF',
-    borderRadius: 25,
-    padding: 24,
-    marginBottom: 55,
-  },
-
-  questionText: {
-    fontSize: 22, // increased question font
+  // Small helper/instruction text
+  hintText: {
+    fontSize: 18,
     fontFamily: FONTS.bold,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 22,
-    lineHeight: 30,
+    fontWeight: 'bold',
+    color: '#3D2A1A',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 26,
   },
 
-  textInput: {
-    flex: 1,
-    fontSize: 22, // increased typing text size
-    fontFamily: FONTS.regular,
-    color: '#222',
-    textAlignVertical: 'top',
-    lineHeight: 30,
-  },
+  // ===============================
+  // Text Input Area
+  // ===============================
 
-  continueButton: {
-    width: 250, // increased button size
-    height: 72,
-    backgroundColor: '#E3AD35',
-    borderRadius: 30,
+  // Main text input box
+  inputBox: {
+    width: '94%',
+    minHeight: 220,
+    borderRadius: 24,
+    backgroundColor: '#F5EAD8',
     borderWidth: 2,
+    borderColor: '#BCA67A',
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    marginBottom: 22,
+    textAlignVertical: 'top',
+    fontSize: 20,
+    fontFamily: FONTS.regular,
+    color: '#111',
+    lineHeight: 28,
+  },
+
+  // Placeholder text style
+  placeholderTextColor: {
+    color: '#7A6A55',
+  },
+
+  // ===============================
+  // Speaker Button
+  // ===============================
+
+  // Speaker button container
+  speakerButton: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#E3AD35',
+    borderWidth: 3,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    marginBottom: 30,
+    marginBottom: 20,
+    elevation: 5,
   },
 
-  continuePressedGreen: {
+  // Speaker button pressed effect
+  speakerPressed: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
+    transform: [{ scale: 0.95 }],
+  },
+
+  // Speaker icon image
+  speakerIcon: {
+    width: 30,
+    height: 30,
+  },
+
+  // ===============================
+  // Continue Button
+  // ===============================
+
+  // Continue button container
+  continueButton: {
+    width: '94%',
+    height: 64,
+    backgroundColor: '#E3AD35',
+    borderRadius: 34,
+    borderWidth: 3,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    marginBottom: 14,
+  },
+
+  // Continue button pressed effect
+  continuePressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
   },
 
+  // Continue button text
   continueText: {
-    fontSize: 28, // increased button text
+    fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
+  // ===============================
+  // Back Button
+  // ===============================
+
+  // Back button container
   backButton: {
-    width: 160, // increased size
-    height: 60,
-    borderRadius: 28,
-    borderWidth: 2,
+    width: 170,
+    height: 58,
+    borderRadius: 30,
+    borderWidth: 3,
     borderColor: '#000',
     backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3,
+    elevation: 4,
+    marginBottom: 12,
   },
 
+  // Content inside back button
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  // Back arrow image
   backArrowImage: {
-    width: 26, // increased arrow size
-    height: 26,
+    width: 22,
+    height: 22,
     marginRight: 10,
   },
 
+  // Back button pressed effect
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
+  // Back button text
   backText: {
-    fontSize: 24, // increased text size
+    fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // Modal overlay
-modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0,0,0,0.35)',
-  alignItems: 'center',
-  justifyContent: 'center',
-},
+  // ===============================
+  // Error Modal Styling
+  // ===============================
 
-// Main modal box
-errorModalBox: {
-  width: '92%',
-  borderRadius: 12,
-  overflow: 'hidden',
-  backgroundColor: '#F5EAD8',
-  borderWidth: 1,
-  borderColor: '#8B3A1C',
-  elevation: 8,
-},
+  // Dark overlay behind modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-// Top red header
-errorHeader: {
-  backgroundColor: '#8B2E0A',
-  paddingVertical: 18,
-  paddingHorizontal: 18,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-},
+  // Main modal box
+  errorModalBox: {
+    width: '92%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#F5EAD8',
+    borderWidth: 1,
+    borderColor: '#8B3A1C',
+    elevation: 8,
+  },
 
-// Header title
-errorTitle: {
-  color: '#FFF',
-  fontSize: 21,
-  fontFamily: FONTS.bold,
-  fontWeight: 'bold',
-  flex: 1,
-  paddingRight: 12,
-},
+  // Modal top header
+  errorHeader: {
+    backgroundColor: '#8B2E0A',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
 
-// Close button
-errorCloseButton: {
-  width: 48,
-  height: 48,
-  borderRadius: 9,
-  borderWidth: 3,
-  borderColor: '#FFF',
-  alignItems: 'center',
-  justifyContent: 'center',
-},
+  // Error title text
+  errorTitle: {
+    color: '#FFF',
+    fontSize: 21,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    flex: 1,
+    paddingRight: 12,
+  },
 
-// X icon
-errorCloseText: {
-  color: '#FFF',
-  fontSize: 34,
-  fontFamily: FONTS.bold,
-  fontWeight: 'bold',
-  lineHeight: 36,
-},
+  // Close (X) button
+  errorCloseButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 9,
+    borderWidth: 3,
+    borderColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-// Modal body
-errorBody: {
-  paddingHorizontal: 22,
-  paddingTop: 28,
-  paddingBottom: 20,
-  minHeight: 150,
-},
+  // Close button text
+  errorCloseText: {
+    color: '#FFF',
+    fontSize: 34,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    lineHeight: 36,
+  },
 
-// Message text
-errorMessageBold: {
-  color: '#5C2E0A',
-  fontSize: 19,
-  fontFamily: FONTS.bold,
-  fontWeight: 'bold',
-  marginBottom: 28,
-  lineHeight: 26,
-},
+  // Modal body content
+  errorBody: {
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 20,
+    minHeight: 150,
+  },
 
-errorOkButton: {
+  // Main bold error message
+  errorMessageBold: {
+    color: '#5C2E0A',
+    fontSize: 19,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 22,
+    lineHeight: 26,
+  },
+
+  // Secondary error message
+  errorMessage: {
+    color: '#5C2E0A',
+    fontSize: 17,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    marginBottom: 28,
+    lineHeight: 24,
+  },
+
+  // OK button inside modal
+  errorOkButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',
     borderWidth: 2,
@@ -214,17 +289,17 @@ errorOkButton: {
     borderRadius: 22,
   },
 
-// Button pressed effect
-errorOkButtonPressed: {
-  backgroundColor: '#8B1E0D',
-  transform: [{ scale: 0.96 }],
-},
+  // OK button pressed effect
+  errorOkButtonPressed: {
+    backgroundColor: '#8B1E0D',
+    transform: [{ scale: 0.96 }],
+  },
 
-// OK button text
-errorOkText: {
-  color: '#FFF',
-  fontFamily: FONTS.bold,
-  fontWeight: 'bold',
-  fontSize: 18,
-},
+  // OK button text
+  errorOkText: {
+    color: '#FFF',
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
 });

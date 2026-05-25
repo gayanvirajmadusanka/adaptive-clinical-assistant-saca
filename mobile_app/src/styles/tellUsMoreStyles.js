@@ -1,11 +1,14 @@
 // tellUsMoreStyles.js
 // Purpose: Screen-specific styles for TellUsMoreScreen.
-// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
+// Shared SafeArea, background, footer,
+// and language modal styles are in commonLayoutStyles.js.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
+
+  // Main centered screen container
   container: {
     flex: 1,
     alignItems: 'center',
@@ -13,6 +16,11 @@ export default StyleSheet.create({
     paddingTop: 72,
   },
 
+  // ===============================
+  // Header Section
+  // ===============================
+
+  // Top header box
   headerBar: {
     width: '94%',
     height: 56,
@@ -23,6 +31,7 @@ export default StyleSheet.create({
     marginBottom: 14,
   },
 
+  // Header title text
   headerText: {
     fontSize: 20,
     fontFamily: FONTS.bold,
@@ -30,6 +39,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // Progress question count text
   progressText: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -38,6 +48,7 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
+  // Progress bar background
   progressBarBackground: {
     width: '94%',
     height: 10,
@@ -47,12 +58,18 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
 
+  // Progress bar fill animation
   progressBarFill: {
     height: '100%',
     backgroundColor: '#C87936',
     borderRadius: 10,
   },
 
+  // ===============================
+  // Question Box
+  // ===============================
+
+  // Question container box
   questionBox: {
     width: '94%',
     backgroundColor: '#E6D7BF',
@@ -64,6 +81,7 @@ export default StyleSheet.create({
     borderColor: '#BCA67A',
   },
 
+  // Question text
   questionText: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -74,6 +92,7 @@ export default StyleSheet.create({
     lineHeight: 26,
   },
 
+  // Speaker button inside question box
   speakerButton: {
     position: 'absolute',
     right: 12,
@@ -88,17 +107,24 @@ export default StyleSheet.create({
     borderColor: '#000',
   },
 
+  // Speaker button pressed effect
   speakerPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
     transform: [{ scale: 0.95 }],
   },
 
+  // Speaker icon image
   speakerIcon: {
     width: 24,
     height: 24,
   },
 
+  // ===============================
+  // Answer Option Buttons
+  // ===============================
+
+  // Base option button style
   optionButton: {
     width: '100%',
     minHeight: 54,
@@ -110,10 +136,12 @@ export default StyleSheet.create({
     borderColor: 'transparent',
   },
 
+  // Shared color for yes/no style questions
   twoOptionStyle: {
     backgroundColor: '#E6C37D',
   },
 
+  // Option background colors
   optionColor1: {
     backgroundColor: '#F2EEE4',
   },
@@ -134,6 +162,7 @@ export default StyleSheet.create({
     backgroundColor: '#8D360F',
   },
 
+  // Selected option style
   selectedOption: {
     borderWidth: 3,
     borderColor: '#000',
@@ -147,11 +176,13 @@ export default StyleSheet.create({
     elevation: 5,
   },
 
+  // Selected option text style
   selectedOptionText: {
     color: '#000',
     fontFamily: FONTS.bold,
   },
 
+  // Option button text
   optionText: {
     fontSize: 17,
     fontFamily: FONTS.bold,
@@ -159,6 +190,11 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // ===============================
+  // Continue Button
+  // ===============================
+
+  // Continue/submit button
   continueButton: {
     width: '94%',
     height: 62,
@@ -172,12 +208,14 @@ export default StyleSheet.create({
     marginBottom: 14,
   },
 
+  // Continue button pressed effect
   continuePressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
   },
 
+  // Continue button text
   continueText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -185,6 +223,11 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // ===============================
+  // Back Button
+  // ===============================
+
+  // Back button container
   backButton: {
     width: 170,
     height: 58,
@@ -198,23 +241,27 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
+  // Content inside back button
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  // Back arrow image
   backArrowImage: {
     width: 22,
     height: 22,
     marginRight: 10,
   },
 
+  // Back button pressed effect
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
+  // Back button text
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -222,6 +269,11 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // ===============================
+  // Error Modal Styling
+  // ===============================
+
+  // Dark overlay behind modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',
@@ -229,6 +281,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Main modal box
   errorModalBox: {
     width: '92%',
     borderRadius: 12,
@@ -239,6 +292,7 @@ export default StyleSheet.create({
     elevation: 8,
   },
 
+  // Modal top header
   errorHeader: {
     backgroundColor: '#8B2E0A',
     paddingVertical: 18,
@@ -248,6 +302,7 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
 
+  // Error title text
   errorTitle: {
     color: '#FFF',
     fontSize: 21,
@@ -257,6 +312,7 @@ export default StyleSheet.create({
     paddingRight: 12,
   },
 
+  // Close (X) button
   errorCloseButton: {
     width: 48,
     height: 48,
@@ -267,6 +323,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Close button text
   errorCloseText: {
     color: '#FFF',
     fontSize: 34,
@@ -275,6 +332,7 @@ export default StyleSheet.create({
     lineHeight: 36,
   },
 
+  // Modal body content area
   errorBody: {
     paddingHorizontal: 22,
     paddingTop: 28,
@@ -282,6 +340,7 @@ export default StyleSheet.create({
     minHeight: 150,
   },
 
+  // Main bold error message
   errorMessageBold: {
     color: '#5C2E0A',
     fontSize: 19,
@@ -291,6 +350,7 @@ export default StyleSheet.create({
     lineHeight: 26,
   },
 
+  // Secondary error message
   errorMessage: {
     color: '#5C2E0A',
     fontSize: 17,
@@ -300,6 +360,7 @@ export default StyleSheet.create({
     lineHeight: 24,
   },
 
+  // OK button inside modal
   errorOkButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',
@@ -310,11 +371,13 @@ export default StyleSheet.create({
     borderRadius: 22,
   },
 
+  // OK button pressed effect
   errorOkButtonPressed: {
     backgroundColor: '#8B1E0D',
     transform: [{ scale: 0.96 }],
   },
 
+  // OK button text
   errorOkText: {
     color: '#FFF',
     fontFamily: FONTS.bold,

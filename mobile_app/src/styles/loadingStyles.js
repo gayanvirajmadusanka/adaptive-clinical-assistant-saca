@@ -1,24 +1,31 @@
-// Styles for LoadingScreen and LoadingSeverityScreen.
-// Defines circular loading screen layout, percentage text, and status message styling.
+// loadingStyles.js
+// Purpose: Styles for LoadingScreen and LoadingSeverityScreen.
+// Controls circular loading UI, loading percentage,
+// animated circle content, and loading status text.
 
 import { StyleSheet, StatusBar } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
+
+  // Safe area background
   safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
+  // Main wrapper with status bar spacing
   wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
+  // Full-screen background image area
   background: {
     flex: 1,
   },
 
+  // Main centered loading container
   container: {
     flex: 1,
     alignItems: 'center',
@@ -26,6 +33,7 @@ export default StyleSheet.create({
     paddingHorizontal: 25,
   },
 
+  // Top loading title text
   topText: {
     fontSize: 30,
     fontFamily: FONTS.bold,
@@ -35,6 +43,7 @@ export default StyleSheet.create({
     marginBottom: 70,
   },
 
+  // Circular progress wrapper
   circleWrapper: {
     width: 230,
     height: 230,
@@ -42,6 +51,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Inner content inside loading circle
   circleContent: {
     position: 'absolute',
     width: 160,
@@ -51,6 +61,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Percentage number text
   percent: {
     fontSize: 42,
     fontFamily: FONTS.bold,
@@ -58,6 +69,7 @@ export default StyleSheet.create({
     color: '#2B1B12',
   },
 
+  // Small loading text below percentage
   loadingText: {
     fontSize: 14,
     fontFamily: FONTS.bold,
@@ -66,6 +78,7 @@ export default StyleSheet.create({
     marginTop: 8,
   },
 
+  // Bottom informational text
   bottomText: {
     fontSize: 18,
     fontFamily: FONTS.regular,

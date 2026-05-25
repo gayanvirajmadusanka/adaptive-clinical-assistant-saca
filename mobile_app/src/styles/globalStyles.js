@@ -1,33 +1,36 @@
-// Global reusable text styles.
-// These styles are shared when screens need common typography.
+// globalStyles.js
+// Purpose: Global reusable typography styles.
+// These styles are shared across multiple screens
+// for consistent text design throughout the app.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
-// Shared typography styles used when a screen needs quick reusable text styling.
+// Shared typography styles used when screens need quick reusable text styling.
 export default StyleSheet.create({
-  // Reusable main title text.
+
+  // Main reusable title text
   title: {
     fontFamily: FONTS.bold,
     fontSize: 24,
     color: '#111',
   },
 
-  // Reusable subtitle text.
+  // Reusable subtitle text
   subtitle: {
     fontFamily: FONTS.bold,
     fontSize: 18,
     color: '#111',
   },
 
-  // Reusable normal body text.
+  // Reusable normal paragraph/body text
   bodyText: {
     fontFamily: FONTS.regular,
     fontSize: 16,
     color: '#111',
   },
 
-  // Reusable button label text.
+  // Reusable button text style
   buttonText: {
     fontFamily: FONTS.bold,
     fontSize: 18,

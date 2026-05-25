@@ -6,12 +6,15 @@ import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
 export default StyleSheet.create({
+
+  // Main container for the screen
   container: {
     flex: 1,
     paddingHorizontal: 18,
     paddingTop: 70,
   },
 
+  // Top title/header box
   headerBar: {
     width: '92%',
     height: 60,
@@ -23,6 +26,7 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
+  // Header title text
   headerText: {
     fontSize: 28,
     fontFamily: FONTS.bold,
@@ -30,6 +34,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // Gender switch container
   genderToggle: {
     width: 220,
     height: 46,
@@ -46,6 +51,7 @@ export default StyleSheet.create({
     elevation: 20,
   },
 
+  // Male/Female button
   genderButton: {
     flex: 1,
     height: 36,
@@ -56,10 +62,12 @@ export default StyleSheet.create({
     elevation: 30,
   },
 
+  // Active selected gender button
   genderButtonActive: {
     backgroundColor: '#8B3A1C',
   },
 
+  // Gender text style
   genderText: {
     fontSize: 14,
     fontFamily: FONTS.bold,
@@ -67,10 +75,12 @@ export default StyleSheet.create({
     color: '#5C2E0A',
   },
 
+  // Selected gender text color
   genderTextActive: {
     color: '#F5E6C8',
   },
 
+  // Small instruction text below gender toggle
   hintText: {
     textAlign: 'center',
     fontSize: 16,
@@ -82,6 +92,7 @@ export default StyleSheet.create({
     zIndex: 20,
   },
 
+  // Main layout card containing body + parts list
   mainCard: {
     flex: 1,
     flexDirection: 'row',
@@ -90,6 +101,7 @@ export default StyleSheet.create({
     zIndex: 1,
   },
 
+  // Left section containing body image
   bodyPanel: {
     flex: 1.25,
     alignItems: 'center',
@@ -99,12 +111,14 @@ export default StyleSheet.create({
     overflow: 'visible',
   },
 
+  // Human body image
   bodyImage: {
     width: '175%',
     height: '118%',
     marginBottom: -20,
   },
 
+  // Red clickable body dots
   bodyDot: {
     position: 'absolute',
     width: 15,
@@ -117,74 +131,94 @@ export default StyleSheet.create({
     elevation: 50,
   },
 
+  // Dot animation when pressed
   dotPressed: {
     transform: [{ scale: 1.18 }],
     backgroundColor: '#FF304F',
     borderColor: '#FFF',
   },
 
-  // Dot positions matched to the current large body image.
+  // ===============================
+  // Dot Positions on Body Image
+  // ===============================
+
+  // Head dot position
   dotHead: {
     top: '2%',
     left: '45%',
   },
 
+  // Eye dot position
   dotEye: {
     top: '6%',
     left: '52%',
   },
 
+  // Ear dot position
   dotEar: {
     top: '6%',
     left: '60%',
   },
 
+  // Jaw dot position
   dotJaw: {
     top: '10%',
     left: '55%',
   },
 
+  // Nose dot position
   dotNose: {
     top: '7%',
     left: '45%',
   },
 
-
+  // Neck dot position
   dotNeck: {
     top: '15%',
     left: '55%',
   },
 
+  // Throat dot position
   dotThroat: {
     top: '14%',
     left: '45%',
   },
 
+  // Chest dot position
   dotChest: {
     top: '22%',
     left: '45%',
   },
 
+  // Stomach dot position
   dotStomach: {
     top: '35%',
     left: '45%',
   },
 
+  // Arm dot position
   dotArm: {
     top: '48%',
     left: '75%',
   },
 
+  // Back dot position
   dotBack: {
     top: '35%',
     left: '60%',
   },
 
+  // Whole body dot position
   dotWholeBody: {
     top: '70%',
     left: '80%',
   },
 
+  // ===============================
+  // Tooltip Styling
+  // ===============================
+
+  // Tooltip box
   tooltip: {
     position: 'absolute',
     backgroundColor: '#1F1F1F',
@@ -195,6 +229,7 @@ export default StyleSheet.create({
     elevation: 100,
   },
 
+  // Tooltip text
   tooltipText: {
     color: '#FFF',
     fontSize: 13,
@@ -202,6 +237,7 @@ export default StyleSheet.create({
     fontWeight: 'bold',
   },
 
+  // Tooltip positions
   tooltipHead: {
     top: '0%',
     left: '75%',
@@ -217,7 +253,7 @@ export default StyleSheet.create({
     left: '75%',
   },
 
-   tooltipNose: {
+  tooltipNose: {
     top: '6%',
     left: '75%',
   },
@@ -232,7 +268,7 @@ export default StyleSheet.create({
     left: '75%',
   },
 
-  tooltipThroat: {  
+  tooltipThroat: {
     top: '15%',
     left: '75%',
   },
@@ -262,6 +298,11 @@ export default StyleSheet.create({
     left: '62%',
   },
 
+  // ===============================
+  // Right Side Parts List
+  // ===============================
+
+  // Right panel containing body part cards
   partsPanel: {
     flex: 0.78,
     paddingLeft: 4,
@@ -269,6 +310,7 @@ export default StyleSheet.create({
     paddingTop: 10,
   },
 
+  // Title above body parts list
   partsTitle: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -277,11 +319,13 @@ export default StyleSheet.create({
     marginBottom: 10,
   },
 
+  // Scrollable list spacing
   partsList: {
     paddingBottom: 24,
     gap: 9,
   },
 
+  // Individual body part card
   partCard: {
     width: '100%',
     height: 52,
@@ -297,11 +341,13 @@ export default StyleSheet.create({
     elevation: 2,
   },
 
+  // Pressed body part card style
   partCardPressed: {
     backgroundColor: '#EDE0CE',
     borderColor: '#B5523B',
   },
 
+  // Body part text
   partText: {
     flex: 1,
     fontSize: 14,
@@ -311,6 +357,7 @@ export default StyleSheet.create({
     marginRight: 6,
   },
 
+  // Speaker button circle
   speakerCircle: {
     width: 35,
     height: 35,
@@ -320,17 +367,24 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Speaker button pressed effect
   speakerPressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.95 }],
   },
 
+  // Speaker icon image
   speakerIcon: {
     width: 22,
     height: 22,
   },
 
+  // ===============================
+  // Back Button Styling
+  // ===============================
+
+  // Back button container
   backButton: {
     width: 140,
     height: 55,
@@ -346,23 +400,27 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
+  // Row layout inside back button
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  // Back arrow image
   backArrowImage: {
     width: 22,
     height: 22,
     marginRight: 8,
   },
 
+  // Back button pressed effect
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
+  // Back button text
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,

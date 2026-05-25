@@ -1,347 +1,239 @@
 // tellUsMoreVoiceStyles.js
-// Purpose: Screen-specific styles for TellUsMoreVoiceScreen.
-// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
+// Purpose: Styles for TellUsMoreVoiceScreen.
+// Controls voice question cards, option buttons,
+// microphone recording UI, speaker buttons,
+// progress bar, and navigation buttons.
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
 
-const { width } = Dimensions.get('window');
-const isSmallPhone = width < 390;
-
 export default StyleSheet.create({
+
+  // Main screen container
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingTop: 80,
+    paddingHorizontal: 20,
+    paddingTop: 72,
   },
 
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  // ===============================
+  // Header Section
+  // ===============================
 
-  loadingText: {
-    fontSize: 20,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#2B1B12',
-  },
-
+  // Top header box
   headerBar: {
-    width: '92%',
-    height: 60,
+    width: '94%',
+    height: 56,
     backgroundColor: '#C87936',
-    borderRadius: 10,
-    justifyContent: 'center',
+    borderRadius: 14,
     alignItems: 'center',
-    marginBottom: 18,
+    justifyContent: 'center',
+    marginBottom: 14,
   },
 
+  // Header title text
   headerText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  questionNumber: {
-    textAlign: 'center',
-    fontSize: 16,
+  // Progress question number text
+  progressText: {
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#7A180E',
-    marginBottom: 14,
+    color: '#7A1F00',
+    marginBottom: 12,
   },
 
-  progressTrack: {
-    width: '92%',
+  // Progress bar background
+  progressBarBackground: {
+    width: '94%',
     height: 10,
     borderRadius: 10,
-    backgroundColor: '#E8D5A8',
+    backgroundColor: '#DDD0A8',
     overflow: 'hidden',
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
-  progressFill: {
+  // Progress bar fill animation
+  progressBarFill: {
     height: '100%',
+    backgroundColor: '#C87936',
     borderRadius: 10,
-    backgroundColor: '#C8661F',
   },
 
-  contentRow: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'stretch',
-  },
+  // ===============================
+  // Question Box
+  // ===============================
 
+  // Question container
   questionBox: {
-    flex: 1.25,
-    borderWidth: 1.5,
-    borderColor: '#B8A37D',
-    backgroundColor: 'rgba(246, 232, 203, 0.92)',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingTop: 18,
-    paddingBottom: 14,
-    minHeight: 260,
+    width: '94%',
+    backgroundColor: '#E6D7BF',
+    borderRadius: 22,
+    padding: 16,
+    marginBottom: 16,
+    position: 'relative',
+    borderWidth: 2,
+    borderColor: '#BCA67A',
   },
 
-  questionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: 18,
-  },
-
+  // Question text
   questionText: {
-    flex: 1,
-    fontSize: isSmallPhone ? 16 : 18,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    color: '#111',
-    paddingRight: 8,
+    color: '#000',
+    marginBottom: 14,
+    paddingRight: 58,
+    lineHeight: 26,
   },
 
+  // Speaker button inside question box
   speakerButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: '#E3AD35',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#000',
   },
 
+  // Speaker button pressed effect
   speakerPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
     transform: [{ scale: 0.95 }],
   },
 
+  // Speaker icon image
   speakerIcon: {
     width: 24,
     height: 24,
   },
 
-  optionsWrapper: {
-    gap: 10,
-  },
+  // ===============================
+  // Voice Recording Section
+  // ===============================
 
-  optionButton: {
+  // Voice answer area
+  voiceAnswerContainer: {
     width: '100%',
-    minHeight: 48,
-    borderRadius: 16,
-    justifyContent: 'center',
-    paddingHorizontal: 18,
-    marginBottom: 10,
-    borderWidth: 2,
-    borderColor: 'transparent',
+    alignItems: 'center',
+    marginBottom: 24,
   },
 
-  twoOptionStyle: {
-    backgroundColor: '#E6C37D',
-  },
-
-  optionColor1: {
-    backgroundColor: '#F2EEE4',
-  },
-
-  optionColor2: {
-    backgroundColor: '#E5C48A',
-  },
-
-  optionColor3: {
-    backgroundColor: '#D8A95C',
-  },
-
-  optionColor4: {
-    backgroundColor: '#BC7A3E',
-  },
-
-  optionColor5: {
-    backgroundColor: '#8D360F',
-  },
-
-  selectedOption: {
+  // Microphone button
+  micButton: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    backgroundColor: '#C87936',
     borderWidth: 3,
     borderColor: '#000',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
     elevation: 5,
   },
 
-  selectedOptionText: {
-    color: '#000',
-    fontFamily: FONTS.bold,
+  // Microphone button while recording
+  micButtonRecording: {
+    backgroundColor: '#8B1E0D',
+    borderColor: '#5F1207',
   },
 
-  optionText: {
-    fontSize: isSmallPhone ? 14 : 16,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#111',
-  },
-
-  voiceRecordedBox: {
-    minHeight: 42,
-    borderRadius: 9,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(218, 219, 187, 0.85)',
-  },
-
-  voiceRecordedText: {
-    fontSize: isSmallPhone ? 13 : 15,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#1A7A2B',
-  },
-
-  voiceBox: {
-    flex: 0.95,
-    borderWidth: 1.5,
-    borderColor: '#B8A37D',
-    backgroundColor: 'rgba(246, 232, 203, 0.92)',
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 18,
-    minHeight: 260,
-    alignItems: 'center',
-  },
-
-  voiceTitle: {
-    fontSize: isSmallPhone ? 16 : 18,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#1A1000',
-    textAlign: 'center',
-    marginBottom: 18,
-  },
-
-  pulseCircle: {
-    width: isSmallPhone ? 92 : 104,
-    height: isSmallPhone ? 92 : 104,
-    borderRadius: isSmallPhone ? 46 : 52,
-    borderWidth: 2,
-    borderColor: '#C8B99A',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-
-  recordingBorder: {
-    borderColor: '#C0392B',
-    borderWidth: 3,
-    backgroundColor: 'rgba(192,57,43,0.08)',
-  },
-
-  micCircle: {
-    width: isSmallPhone ? 82 : 94,
-    height: isSmallPhone ? 82 : 94,
-    borderRadius: isSmallPhone ? 41 : 47,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  micImage: {
-    width: isSmallPhone ? 48 : 56,
-    height: isSmallPhone ? 48 : 56,
-  },
-
-  waveformContainer: {
-    height: 42,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    marginTop: 8,
-  },
-
-  waveBar: {
-    width: 5,
-    borderRadius: 8,
-    backgroundColor: '#8B3A1C',
-  },
-
-  voiceHint: {
-    marginTop: 14,
-    fontSize: isSmallPhone ? 12 : 14,
-    fontFamily: FONTS.regular,
-    color: '#7A4A2A',
-    textAlign: 'center',
-  },
-
-  voicePlaybackBar: {
-    marginTop: 16,
-    width: '100%',
-    minHeight: 54,
-    borderRadius: 28,
-    backgroundColor: '#EDE0CE',
-    borderWidth: 1.5,
-    borderColor: '#C8B99A',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: isSmallPhone ? 12 : 16,
-    paddingHorizontal: 8,
-  },
-
-  voicePlayButton: {
+  // Microphone icon image
+  micIcon: {
     width: 42,
     height: 42,
-    borderRadius: 21,
-    backgroundColor: '#3A7A3A',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
-  voiceDurationText: {
+  // Instruction text below microphone
+  tapToAnswerText: {
+    marginTop: 10,
     fontSize: 15,
     fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#1A1000',
-    minWidth: 42,
+    color: '#5C2E0A',
     textAlign: 'center',
   },
 
-  voiceDeleteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#8B3A1C',
+  // Recorded voice playback container
+  recordedBox: {
+    marginTop: 14,
+    width: 180,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#EFE2CC',
+    borderWidth: 2,
+    borderColor: '#B9A57F',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+  },
+
+  // Play recorded audio button
+  playButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#3E8B3A',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  // Audio duration text
+  durationText: {
+    fontSize: 13,
+    fontFamily: FONTS.bold,
+    color: '#000',
+  },
+
+  // Delete recorded audio button
+  deleteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#A3361A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // ===============================
+  // Continue Button
+  // ===============================
+
+  // Continue/submit button
   continueButton: {
-    width: '92%',
-    height: 64,
+    width: '94%',
+    height: 62,
     backgroundColor: '#E3AD35',
-    borderRadius: 34,
-    borderWidth: 2,
+    borderRadius: 32,
+    borderWidth: 3,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    marginTop: 22,
+    elevation: 5,
     marginBottom: 14,
   },
 
+  // Continue button pressed effect
   continuePressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
   },
 
+  // Continue button text
   continueText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -349,145 +241,49 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // ===============================
+  // Back Button
+  // ===============================
+
+  // Back button container
   backButton: {
-    width: 140,
-    height: 55,
-    borderRadius: 28,
-    borderWidth: 2,
+    width: 170,
+    height: 58,
+    borderRadius: 30,
+    borderWidth: 3,
     borderColor: '#000',
     backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3,
+    elevation: 4,
     marginBottom: 12,
   },
 
+  // Content inside back button
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  // Back arrow image
   backArrowImage: {
     width: 22,
     height: 22,
-    marginRight: 8,
+    marginRight: 10,
   },
 
+  // Back button pressed effect
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
+  // Back button text
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  errorModalBox: {
-    width: '92%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#F5EAD8',
-    borderWidth: 1,
-    borderColor: '#8B3A1C',
-    elevation: 8,
-  },
-
-  errorHeader: {
-    backgroundColor: '#8B2E0A',
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  errorTitle: {
-    color: '#FFF',
-    fontSize: 21,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    flex: 1,
-    paddingRight: 12,
-  },
-
-  errorCloseButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 9,
-    borderWidth: 3,
-    borderColor: '#FFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  errorCloseText: {
-    color: '#FFF',
-    fontSize: 34,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    lineHeight: 36,
-  },
-
-  errorBody: {
-    paddingHorizontal: 22,
-    paddingTop: 28,
-    paddingBottom: 20,
-    minHeight: 150,
-  },
-
-  errorMessageBold: {
-    color: '#5C2E0A',
-    fontSize: 19,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    marginBottom: 22,
-    lineHeight: 26,
-  },
-
-  errorMessage: {
-    color: '#5C2E0A',
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    marginBottom: 28,
-    lineHeight: 24,
-  },
-
-  errorOkButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
-    paddingHorizontal: 28,
-    paddingVertical: 10,
-    borderRadius: 22,
-  },
-
-  errorOkButtonPressed: {
-    backgroundColor: '#8B1E0D',
-    transform: [{ scale: 0.96 }],
-  },
-
-  errorOkText: {
-    color: '#FFF',
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-
-  continueDisabled: {
-  opacity: 0.45,
-},
-
 });

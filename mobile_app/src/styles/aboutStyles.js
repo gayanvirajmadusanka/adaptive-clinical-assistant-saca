@@ -1,5 +1,6 @@
 // aboutStyles.js
 // Purpose: Screen-specific styles for AboutScreen.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
 import { StyleSheet } from 'react-native';
 import { FONTS } from '../constants/fonts';
@@ -43,8 +44,7 @@ export default StyleSheet.create({
     marginBottom: 22,
   },
 
-  // Main about paragraph
-  // Justified and aligned evenly on both sides.
+  // Main about paragraph.
   paragraph: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -57,7 +57,6 @@ export default StyleSheet.create({
   },
 
   // Back button
-  // Same style as TextInputScreen.
   backButton: {
     width: 170,
     height: 58,
