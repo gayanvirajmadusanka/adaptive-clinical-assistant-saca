@@ -10,7 +10,6 @@ org/saca/model/response/TextResultRS.class
 org/saca/model/response/ClassifyRS.class
 org/saca/service/AudioService.class
 org/saca/model/response/QuestionRS.class
-org/saca/controller/AudioOverlayController.class
 org/saca/model/response/VoiceResultRS.class
 org/saca/service/ApiService$AnswerAudioCallback.class
 org/saca/model/response/OptionRS.class
@@ -26,7 +25,6 @@ org/saca/controller/LoadingController.class
 org/saca/controller/WelcomeController.class
 org/saca/utility/manager/NavBarManager.class
 org/saca/utility/constant/AppsConstants$SeverityMode.class
-org/saca/utility/manager/TTSManager.class
 org/saca/service/ApiService$SuccessCallbackText.class
 org/saca/controller/TextResultController.class
 org/saca/controller/VoiceInputController.class
@@ -48,7 +46,6 @@ org/saca/model/body/BodySymptom.class
 org/saca/Launcher.class
 org/saca/service/AudioRecorderService.class
 org/saca/MainApp.class
-org/saca/utility/manager/TTSManager$1.class
 org/saca/model/body/BodyPartsData.class
 org/saca/utility/manager/DialogManager.class
 org/saca/utility/manager/CacheManager.class
