@@ -1,7 +1,7 @@
 // BodyTellUsMoreScreen.js
 // Purpose: Body follow-up questions using backend option IDs, option images,
-// speaker audio, same option layout for all questions, pain question special layout,
-// and custom alert modal.
+// speaker audio, translated UI labels, pain question special layout,
+// TellUsMore option colors, and custom alert modal.
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -60,24 +60,20 @@ const OPTION_IMAGES = {
 };
 
 const OPTION_CONFIG = {
-  // Gender
   '0a1': { gender: 'male', image: 'male' },
   '0a2': { gender: 'female', image: 'female' },
 
-  // Age
   '0b1': { imageMale: 'child_male', imageFemale: 'child_female' },
   '0b2': { imageMale: 'youth_male', imageFemale: 'youth_female' },
   '0b3': { imageMale: 'adult_male', imageFemale: 'adult_female' },
   '0b4': { imageMale: 'elder_male', imageFemale: 'elder_female' },
 
-  // Duration
   '1a': { image: 'today' },
   '1b': { image: 'yesterday' },
   '1c': { image: 'two_three_days' },
   '1d': { image: 'about_week' },
   '1e': { image: 'more_week' },
 
-  // Pain
   '2a': { image: 'pain_none' },
   '2b': { image: 'pain_little' },
   '2c': { image: 'pain_moderate' },
@@ -144,7 +140,9 @@ function getOptionImage(option, question, selectedGender) {
 
 function checkPainQuestion(question) {
   const id = String(question?.id || '');
-  const type = String(question?.question_type || question?.type || '').toLowerCase();
+  const type = String(
+    question?.question_type || question?.type || ''
+  ).toLowerCase();
   const text = String(question?.text || '').toLowerCase();
 
   return (
@@ -178,6 +176,17 @@ export default function BodyTellUsMoreScreen() {
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length || 1;
   const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+
+  const optionCount = currentQuestion?.options?.length || 0;
+  const isTwoOptionQuestion = optionCount === 2;
+
+  const multiOptionColors = [
+    styles.optionColor1,
+    styles.optionColor2,
+    styles.optionColor3,
+    styles.optionColor4,
+    styles.optionColor5,
+  ];
 
   async function stopCurrentAudio() {
     try {
@@ -390,9 +399,7 @@ export default function BodyTellUsMoreScreen() {
       <View style={styles.modalOverlay}>
         <View style={styles.errorModalBox}>
           <View style={styles.errorHeader}>
-            <Text style={styles.errorTitle}>
-              {t('no_answer_title') || 'No Answer Selected'}
-            </Text>
+            <Text style={styles.errorTitle}>{t('no_answer_title')}</Text>
 
             <Pressable
               onPress={() => setErrorModalVisible(false)}
@@ -408,13 +415,11 @@ export default function BodyTellUsMoreScreen() {
             resizeMode="cover"
           >
             <Text style={styles.errorMessageBold}>
-              {t('no_answer_message_1') ||
-                'Please select one answer before continuing.'}
+              {t('no_answer_message_1')}
             </Text>
 
             <Text style={styles.errorMessage}>
-              {t('no_answer_message_2') ||
-                'Tap one option and then press continue.'}
+              {t('no_answer_message_2')}
             </Text>
 
             <Pressable
@@ -424,7 +429,7 @@ export default function BodyTellUsMoreScreen() {
               ]}
               onPress={() => setErrorModalVisible(false)}
             >
-              <Text style={styles.errorOkText}>{t('ok') || 'Ok'}</Text>
+              <Text style={styles.errorOkText}>{t('ok')}</Text>
             </Pressable>
           </ImageBackground>
         </View>
@@ -444,13 +449,13 @@ export default function BodyTellUsMoreScreen() {
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
-            <Text style={styles.headerText}>Tell us more</Text>
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>
           </View>
 
-          <Text style={styles.questionNumber}>Loading questions...</Text>
+          <Text style={styles.questionNumber}>{t('loading')}</Text>
 
           <View style={styles.questionBox}>
-            <Text style={styles.questionText}>Please wait...</Text>
+            <Text style={styles.questionText}>{t('loading_wait')}</Text>
           </View>
         </View>
       </AppScreen>
@@ -469,11 +474,13 @@ export default function BodyTellUsMoreScreen() {
       >
         <View style={styles.container}>
           <View style={styles.headerBar}>
-            <Text style={styles.headerText}>Tell us more</Text>
+            <Text style={styles.headerText}>{t('tell_us_more')}</Text>
           </View>
 
           <View style={styles.questionBox}>
-            <Text style={styles.questionText}>No follow-up questions found.</Text>
+            <Text style={styles.questionText}>
+              {t('no_follow_up_questions')}
+            </Text>
           </View>
 
           <Pressable
@@ -511,11 +518,11 @@ export default function BodyTellUsMoreScreen() {
     >
       <View style={styles.container}>
         <View style={styles.headerBar}>
-          <Text style={styles.headerText}>Tell us more</Text>
+          <Text style={styles.headerText}>{t('tell_us_more')}</Text>
         </View>
 
         <Text style={styles.questionNumber}>
-          Question {currentIndex + 1} of {questions.length}
+          {t('question')} {currentIndex + 1} {t('of')} {questions.length}
         </Text>
 
         <View style={styles.progressTrack}>
@@ -548,7 +555,7 @@ export default function BodyTellUsMoreScreen() {
             indicatorStyle="black"
             contentContainerStyle={styles.optionsWrapper}
           >
-            {currentQuestion.options?.map((option) => {
+            {currentQuestion.options?.map((option, index) => {
               const optionId = getOptionId(option);
               const optionText = getOptionText(option);
               const optionImage = getOptionImage(
@@ -559,11 +566,16 @@ export default function BodyTellUsMoreScreen() {
               const isSelected = selectedOption === optionId;
               const isPainQuestion = checkPainQuestion(currentQuestion);
 
+              const optionColorStyle = isTwoOptionQuestion
+                ? styles.twoOptionStyle
+                : multiOptionColors[index] || styles.optionColor1;
+
               return (
                 <Pressable
                   key={optionId}
                   style={[
                     isPainQuestion ? styles.painOptionCard : styles.optionCard,
+                    optionColorStyle,
                     isSelected && styles.optionCardSelected,
                   ]}
                   onPress={() => handleOptionPress(option)}
@@ -613,7 +625,9 @@ export default function BodyTellUsMoreScreen() {
           onPress={handleContinue}
         >
           <Text style={styles.continueText}>
-            {currentIndex === questions.length - 1 ? 'Submit' : 'Continue'}
+            {currentIndex === questions.length - 1
+              ? t('submit')
+              : t('continue')}
           </Text>
         </Pressable>
 

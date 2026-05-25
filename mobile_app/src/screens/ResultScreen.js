@@ -121,39 +121,6 @@ export default function ResultScreen() {
     return value === key ? fallback : value;
   };
 
-  useEffect(() => {
-    const backAction = () => {
-      router.replace('/input');
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, []);
-
-  useEffect(() => {
-    if (severity === 'severe' || severity === 'moderate') {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(emergencyPulseAnim, {
-            toValue: 1.03,
-            duration: 700,
-            useNativeDriver: true,
-          }),
-          Animated.timing(emergencyPulseAnim, {
-            toValue: 1,
-            duration: 700,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-  }, [severity]);
-
   const stopAudio = async () => {
     try {
       Speech.stop();
@@ -214,6 +181,51 @@ export default function ResultScreen() {
       Alert.alert('Audio Error', 'Cannot play result audio.');
     }
   };
+
+  // Auto play result audio when this screen appears
+  // Also replays correct audio when severity or language changes
+  useEffect(() => {
+    if (resultData) {
+      speakResult();
+    }
+  }, [resultData, lang]);
+
+  useEffect(() => {
+    const backAction = () => {
+      router.replace('/input');
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    if (severity === 'severe' || severity === 'moderate') {
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(emergencyPulseAnim, {
+            toValue: 1.03,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+          Animated.timing(emergencyPulseAnim, {
+            toValue: 1,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      pulseAnimation.start();
+
+      return () => pulseAnimation.stop();
+    }
+  }, [severity]);
 
   useEffect(() => {
     return () => {
@@ -365,8 +377,6 @@ export default function ResultScreen() {
               {recommendedAction ? (
                 <Text style={styles.infoText}>{recommendedAction}</Text>
               ) : null}
-
-              
 
               {hasCritical && (
                 <Text style={styles.infoText}>

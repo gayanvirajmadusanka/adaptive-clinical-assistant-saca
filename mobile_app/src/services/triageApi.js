@@ -1,7 +1,6 @@
-// Import API endpoint paths
-import { API_ENDPOINTS } from '../constants/apiEndpoints';
+// triageApi.js
 
-// Import reusable HTTP POST function
+import { API_ENDPOINTS } from '../constants/apiEndpoints';
 import { postJson } from './httpClient';
 
 export function extractSymptomsFromText(text, language = 'en') {
@@ -33,15 +32,21 @@ export function classifySymptoms(symptoms, answers, language = 'en') {
   });
 }
 
-export async function resolveAnswerAudio(audioBase64, questionId, language) {
+// Used for DetectedSymptomsVoice yes/no AND TellUsMoreVoice answers
+export function submitAnswerAudio(audioBase64, questionId, language = 'en') {
   return postJson('/answer/audio', {
     audio_b64: audioBase64,
     question_id: questionId,
-    language: language || 'en',
+    language,
   });
 }
 
-export async function extractSymptomsFromBody(symptoms, language = 'en') {
+// Keep this alias so old screens using resolveAnswerAudio still work
+export function resolveAnswerAudio(audioBase64, questionId, language = 'en') {
+  return submitAnswerAudio(audioBase64, questionId, language);
+}
+
+export function extractSymptomsFromBody(symptoms, language = 'en') {
   return postJson(API_ENDPOINTS.EXTRACT_IMAGE, {
     symptoms,
     language,

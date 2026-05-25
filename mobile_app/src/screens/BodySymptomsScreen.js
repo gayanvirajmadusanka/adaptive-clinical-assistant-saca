@@ -474,7 +474,7 @@ export default function BodySymptomsScreen() {
 
         <Text style={styles.hintText}>
           {t('select_symptoms') === 'select_symptoms'
-            ? 'Tap symptom(s) that match'
+            ? t('body_symptoms_hint')
             : t('select_symptoms')}
         </Text>
 
