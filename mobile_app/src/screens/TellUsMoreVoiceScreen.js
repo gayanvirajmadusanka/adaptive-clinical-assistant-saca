@@ -37,6 +37,11 @@ import { parseJsonParam } from '../utils/routeParams';
 import { buildAnswerList } from '../utils/triagePayloads';
 import { WAV_RECORDING_OPTIONS } from '../utils/audioRecordingOptions';
 
+const alertAudioMap = {
+  en: require('../../assets/audio/ui/could_not_catch_en.wav'),
+  wp: require('../../assets/audio/ui/could_not_catch_wp.wav'),
+};
+
 export default function TellUsMoreVoiceScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -141,6 +146,41 @@ export default function TellUsMoreVoiceScreen() {
     } catch (error) {
       console.log('Stop audio error:', error);
       setQuestionAudioPlaying(false);
+    }
+  }
+
+  async function playAlertAudio() {
+    try {
+      await stopCurrentAudio();
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
+
+      const selectedLang = lang === 'wp' ? 'wp' : 'en';
+      const audioSource = alertAudioMap[selectedLang];
+
+      const { sound } = await Audio.Sound.createAsync(audioSource, {
+        shouldPlay: true,
+        volume: 1.0,
+      });
+
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          if (soundRef.current === sound) {
+            soundRef.current = null;
+          }
+
+          await sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log('Play alert audio error:', error);
     }
   }
 
@@ -289,44 +329,25 @@ export default function TellUsMoreVoiceScreen() {
     setVoiceErrorModalVisible(true);
 
     setTimeout(() => {
-      Speech.speak(
-        `${t('voice_not_recognized_title')}. ${t(
-          'voice_not_recognized'
-        )}. ${t('voice_not_recognized_hint')}`,
-        {
-          language: 'en-AU',
-          pitch: 1.0,
-          rate: 0.85,
-        }
-      );
+      playAlertAudio();
     }, 300);
   }
 
   async function closeVoiceErrorModal() {
-    Speech.stop();
+    await stopCurrentAudio();
     setVoiceErrorModalVisible(false);
   }
 
   async function readNoAnswerMessage() {
     try {
-      await stopCurrentAudio();
-
-      const message = `${t('no_answer_title')}. ${t(
-        'no_answer_message_1'
-      )}. ${t('no_answer_message_2')}`;
-
-      Speech.speak(message, {
-        language: 'en-AU',
-        pitch: 1.0,
-        rate: 0.85,
-      });
+      await playAlertAudio();
     } catch (error) {
       console.log('Read no answer message error:', error);
     }
   }
 
   async function closeNoAnswerModal() {
-    Speech.stop();
+    await stopCurrentAudio();
     setErrorModalVisible(false);
   }
 
