@@ -65,6 +65,20 @@ jobs:
       - name: Verify spaCy model
         run: python -c "import en_core_web_sm; print('spaCy model OK:', en_core_web_sm.__file__)"
 
+      - name: Debug spaCy model location
+        run: |
+          python -c "
+          import en_core_web_sm, os
+          from PyInstaller.utils.hooks import collect_data_files
+          model_dir = os.path.dirname(en_core_web_sm.__file__)
+          data = collect_data_files('en_core_web_sm')
+          print('Model dir:', model_dir)
+          print('Model dir exists:', os.path.exists(model_dir))
+          print('Collected files:', len(data))
+          for src, dst in data[:5]:
+              print(f'  {src} -> {dst}')
+          "
+
       - name: Build saca_server.exe (PyInstaller)
         run: pyinstaller backend_release_windows/saca_server.spec --clean --distpath backend_release_windows/dist
 
