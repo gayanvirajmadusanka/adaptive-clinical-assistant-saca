@@ -73,6 +73,12 @@ public class VoiceResultController implements Initializable {
 
     private Timeline micPulse;
 
+    @FXML
+    private Button voiceResultYesBtn;
+
+    @FXML
+    private Button voiceResultNoBtn;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         VoiceResultRS saved = CacheManager.getVoiceResultRS();
@@ -138,6 +144,7 @@ public class VoiceResultController implements Initializable {
                     voiceMicHint.setText(LanguageManager.get("voice_recording_hint"));
                     voiceMicBtn.getStyleClass().add("result-voice-mic-btn-recording");
                     startMicPulse();
+                    disableYesOrNoButtons();
                 }),
                 err -> Platform.runLater(() ->
                         DialogManager.errorDialog("Microphone Error", "Cannot start recording", err))
@@ -226,6 +233,8 @@ public class VoiceResultController implements Initializable {
         voiceMicHint.setText(LanguageManager.get("voice_tap_to_answer"));
         voiceMicBtn.setDisable(false);
         voiceMicBtn.getStyleClass().remove("result-voice-mic-btn-recording");
+
+        enableYesOrNoButtons();
     }
 
     private void startMicPulse() {
@@ -441,5 +450,17 @@ public class VoiceResultController implements Initializable {
     private void resetSpeakerIcon() {
         speakerIcon.setImage(new Image(
                 getClass().getResource("/icons/speaker.png").toExternalForm()));
+    }
+
+    private void enableYesOrNoButtons() {
+        // Hide Yes/No while recording
+        voiceResultYesBtn.setDisable(false);
+        voiceResultNoBtn.setDisable(false);
+    }
+
+    private void disableYesOrNoButtons() {
+        // Show Yes/No again after recording done
+        voiceResultYesBtn.setDisable(true);
+        voiceResultNoBtn.setDisable(true);
     }
 }
