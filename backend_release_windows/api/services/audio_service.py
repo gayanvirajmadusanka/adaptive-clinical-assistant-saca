@@ -213,7 +213,7 @@ def get_detected_symptoms_audio(symptoms: list, language: str) -> str:
     :return: base64 encoded WAV string
     """
     if not symptoms:
-        logger.warning('get_detected_symptoms_audio called with empty symptoms list')
+        return _to_b64(_stitch([_get_clip('ui', 'could_not_catch', language)]))
 
     clips = [_get_clip('ui', 'detected_symptoms', language)]
     for symptom_id in symptoms:

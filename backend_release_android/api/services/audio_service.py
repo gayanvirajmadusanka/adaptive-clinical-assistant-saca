@@ -193,6 +193,9 @@ def get_question_audio(question_id: str, options: list, language: str) -> str:
 
 
 def get_detected_symptoms_audio(symptoms: list, language: str) -> str:
+    if not symptoms:
+        return _to_b64(_stitch([_get_clip_samples('ui', 'could_not_catch', language)]))
+
     clips = [_get_clip_samples('ui', 'detected_symptoms', language)]
     for symptom_id in symptoms:
         clip = _get_clip_samples('symptoms', symptom_id, language)
