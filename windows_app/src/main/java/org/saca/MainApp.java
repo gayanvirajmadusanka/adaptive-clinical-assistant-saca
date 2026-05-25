@@ -16,17 +16,22 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ResourceBundle;
 
 public class MainApp extends Application {
 
     public static final double APP_WIDTH = 1000;
+
     public static final double APP_HEIGHT = 650;
 
     private static final String BACKEND_HEALTH_URL = "http://127.0.0.1:8000/questions";
+
     private static final int POLL_INTERVAL_MS = 500;
-    private static final int POLL_TIMEOUT_MS = 60_000;  // increased to 60s
+
+    private static final int POLL_TIMEOUT_MS = 60_000;
 
     private Process backendProcess;
 
@@ -40,10 +45,8 @@ public class MainApp extends Application {
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/app-logo.png")));
         stage.setResizable(false);
 
-        // Load resource bundle
         ResourceBundle bundle = LanguageManager.getBundle();
 
-        // Show loading screen while the backend starts up
         FXMLLoader loadingLoader = new FXMLLoader(
                 getClass().getResource("/view/LoadingView.fxml"), bundle);
         Parent loadingRoot = loadingLoader.load();
@@ -58,6 +61,7 @@ public class MainApp extends Application {
 
         Thread starter = new Thread(() -> {
             try {
+                installFonts();
                 spawnBackend();
                 pollUntilReady();
                 Platform.runLater(() -> {
@@ -82,13 +86,64 @@ public class MainApp extends Application {
         }
     }
 
+    private void installFonts() {
+        try {
+            File installDir = new File(System.getProperty("java.home")).getParentFile();
+            File fontsDir = new File(installDir, "app\\fonts");
+            File windowsFonts = new File("C:\\Windows\\Fonts");
+
+            if (!fontsDir.exists()) {
+                System.out.println("[SACA] No fonts directory found, skipping font install");
+                return;
+            }
+
+            File[] fontFiles = fontsDir.listFiles(
+                    (dir, name) -> name.toLowerCase().endsWith(".ttf")
+            );
+
+            if (fontFiles == null || fontFiles.length == 0) {
+                System.out.println("[SACA] No font files found");
+                return;
+            }
+
+            for (File font : fontFiles) {
+                File dest = new File(windowsFonts, font.getName());
+                if (!dest.exists()) {
+                    Files.copy(
+                            font.toPath(),
+                            dest.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
+
+                    // Register font in Windows registry
+                    String fontName = font.getName().replace(".ttf", "");
+                    Runtime.getRuntime().exec(new String[]{
+                            "reg", "add",
+                            "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts",
+                            "/v", fontName,
+                            "/t", "REG_SZ",
+                            "/d", font.getName(),
+                            "/f"
+                    });
+
+                    System.out.println("[SACA] Installed font: " + font.getName());
+                } else {
+                    System.out.println("[SACA] Font already installed: " + font.getName());
+                }
+            }
+
+            System.out.println("[SACA] Font installation complete");
+
+        } catch (Exception e) {
+            System.out.println("[SACA] Font install skipped: " + e.getMessage());
+        }
+    }
+
     private void spawnBackend() throws Exception {
         File installDir = new File(System.getProperty("java.home")).getParentFile();
 
-        // jpackage puts app files in app\ subfolder
         File serverExe = new File(installDir, "app\\saca_server.exe");
 
-        // Fallback to install root for older builds
         if (!serverExe.exists()) {
             serverExe = new File(installDir, "saca_server.exe");
         }
@@ -108,6 +163,7 @@ public class MainApp extends Application {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(POLL_INTERVAL_MS))
                 .build();
+
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(BACKEND_HEALTH_URL))
                 .POST(HttpRequest.BodyPublishers.ofString("{\"symptoms\":[]}"))
@@ -116,6 +172,7 @@ public class MainApp extends Application {
                 .build();
 
         long deadline = System.currentTimeMillis() + POLL_TIMEOUT_MS;
+
         while (System.currentTimeMillis() < deadline) {
             try {
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());

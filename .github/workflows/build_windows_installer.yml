@@ -78,6 +78,15 @@ jobs:
           Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe -Force
           Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar -Force
 
+      - name: Copy fonts into jpackage input
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path windows_app\target\lib\fonts
+          Copy-Item windows_app\src\main\resources\fonts\*.ttf `
+                    windows_app\target\lib\fonts\ -Force
+          Write-Host "=== Fonts copied ==="
+          Get-ChildItem windows_app\target\lib\fonts\
+
       - name: Create custom JRE with jlink
         shell: pwsh
         run: |
