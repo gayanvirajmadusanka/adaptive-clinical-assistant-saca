@@ -1,31 +1,34 @@
-// languageStyles.js
-// Purpose: Styles for LanguageScreen.
-// Controls language selection layout,
-// selected button states, and bilingual typography.
+// Styles for LanguageScreen.
+// Defines language selection layout, selected button state, and bilingual screen typography.
 
+// Import StyleSheet and StatusBar from React Native
 import { StyleSheet, StatusBar } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for LanguageScreen
 export default StyleSheet.create({
 
-  // Safe area background to avoid notch overlap
+  // Main safe area background.
+  // Prevents content from overlapping device notch/status bar.
   safeArea: {
     flex: 1,
     backgroundColor: '#F5EAD8',
   },
 
-  // Main wrapper with status bar spacing
+  // Wrapper with status bar spacing.
   wrapper: {
     flex: 1,
     paddingTop: StatusBar.currentHeight,
   },
 
-  // Background image area
+  // Background image/container area.
   background: {
     flex: 1,
   },
 
-  // Main centered container
+  // Centered language selection container.
   container: {
     flex: 1,
     alignItems: 'center',
@@ -33,7 +36,7 @@ export default StyleSheet.create({
     paddingTop: 120,
   },
 
-  // Screen title text
+  // Language screen title.
   title: {
     fontSize: 30,
     fontFamily: FONTS.bold,
@@ -43,11 +46,7 @@ export default StyleSheet.create({
     marginBottom: 80,
   },
 
-  // ===============================
-  // Language Buttons
-  // ===============================
-
-  // Base reusable language button
+  // Base language button.
   button: {
     width: '78%',
     height: 75,
@@ -58,30 +57,34 @@ export default StyleSheet.create({
     marginBottom: 40,
   },
 
-  // Default button style (English style)
+  /* DEFAULT (ENGLISH STYLE FOR BOTH) */
+
+  // Default unselected button state.
   defaultButton: {
     backgroundColor: '#E8D5A0',
     borderColor: '#D4A96A',
   },
 
-  // Default text color
+  // Default unselected text color.
   defaultText: {
     color: '#5C2E0A',
   },
 
-  // Selected button style (Warlpiri style)
+  /* SELECTED → WARLPIRI STYLE */
+
+  // Selected language button state.
   selectedButton: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
   },
 
-  // Selected text color
+  // Selected language text color.
   selectedText: {
     color: '#F5E6C8',
   },
 
-  // Language button text
+  // Language option text.
   text: {
     fontSize: 28,
     fontFamily: FONTS.bold,

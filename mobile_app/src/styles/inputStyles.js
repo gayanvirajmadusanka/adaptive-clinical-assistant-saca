@@ -1,14 +1,17 @@
 // inputStyles.js
 // Purpose: Screen-specific styles for InputScreen.
-// Shared SafeArea, background, footer,
-// and language modal styles are in commonLayoutStyles.js.
+// Shared SafeArea, background, footer, and language modal styles are now in commonLayoutStyles.js.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for InputScreen
 export default StyleSheet.create({
 
-  // Main centered container for all input cards
+  // Main centered container for input cards.
   container: {
     flex: 1,
     alignItems: 'center',
@@ -16,7 +19,7 @@ export default StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // Main screen title text
+  // Main screen title.
   title: {
     fontSize: 28,
     fontFamily: FONTS.bold,
@@ -26,7 +29,7 @@ export default StyleSheet.create({
     color: '#111',
   },
 
-  // Subtitle / instruction text
+  // Subtitle/instruction text.
   subtitle: {
     fontSize: 18,
     fontFamily: FONTS.regular,
@@ -37,14 +40,10 @@ export default StyleSheet.create({
     lineHeight: 26,
   },
 
-  // ===============================
-  // Input Method Cards
-  // ===============================
-
-  // Base reusable style for all cards
+  // Base style for all input method cards.
   card: {
-    width: 210, // Increased button width
-    height: 145, // Increased button height
+    width: 210, // increased button width
+    height: 145, // increased button height
     borderRadius: 20,
     borderWidth: 2,
     alignItems: 'center',
@@ -59,38 +58,39 @@ export default StyleSheet.create({
     shadowRadius: 4,
   },
 
-  // Text input card color theme
+  // Text input card color.
   textCard: {
     backgroundColor: '#5F7D6E',
     borderColor: '#2E3D36',
   },
 
-  // Voice input card color theme
+  // Voice input card color.
   voiceCard: {
     backgroundColor: '#D9C27A',
     borderColor: '#7A6420',
   },
 
-  // Body map input card color theme
+  // Body map card color.
   bodyCard: {
     backgroundColor: '#B5523B',
     borderColor: '#6E1F12',
   },
 
-  // Card pressed animation/effect
+  // Card press feedback effect.
+  // Slightly shrinks and changes color when pressed.
   cardPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
-  // Card icon image
+  // Input card icon image.
   cardImage: {
     width: 65,
     height: 65,
     marginBottom: 14,
   },
 
-  // Card label text
+  // Input card label text.
   cardText: {
     fontSize: 24,
     fontFamily: FONTS.bold,

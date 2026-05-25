@@ -65,9 +65,26 @@ export default function WelcomeScreen() {
               ]}
               onPress={() => router.push('/language')} // Navigate to Language Selection Screen
             >
+
+              {/* Left Sun Icon */}
+              <Image
+                source={require('../../assets/images/sun.png')}
+                style={styles.sunIcon}
+                resizeMode="contain"
+              />
+
+              {/* Start Button Text */}
               <Text style={styles.startButtonText}>
                 Start{'\n'}Yangka
               </Text>
+
+              {/* Right Sun Icon */}
+              <Image
+                source={require('../../assets/images/sun.png')}
+                style={styles.sunIcon}
+                resizeMode="contain"
+              />
+
             </Pressable>
 
             {/* About Section */}

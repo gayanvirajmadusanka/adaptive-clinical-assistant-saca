@@ -1,133 +1,98 @@
 // textInputStyles.js
-// Purpose: Styles for TextInputScreen.
-// Controls text input box, buttons, detected symptoms area,
-// speaker buttons, and navigation layout.
+// Purpose: Screen-specific styles for TextInputScreen.
+// Shared SafeArea, background, footer, and language modal styles were moved to commonLayoutStyles.js.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for TextInputScreen
 export default StyleSheet.create({
 
   // Main screen container
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingTop: 78,
+    paddingHorizontal: 25,
+    paddingTop: 95, // moved slightly lower
   },
 
-  // ===============================
-  // Header Section
-  // ===============================
-
-  // Header box container
+  // Header bar container
   headerBar: {
     width: '94%',
-    height: 64,
-    backgroundColor: '#C87936',
-    borderRadius: 14,
+    height: 70, // increased size
+    backgroundColor: '#5F7D6E',
+    borderRadius: 10,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 18,
+    marginBottom: 35,
   },
 
   // Header title text
   headerText: {
-    fontSize: 26,
+    fontSize: 30, // increased font size
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // Small helper/instruction text
-  hintText: {
-    fontSize: 18,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#3D2A1A',
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 26,
+  // Header speaker/icon image
+  headerIcon: {
+    position: 'absolute',
+    right: 25,
+    width: 38, // increased icon size
+    height: 38,
   },
 
-  // ===============================
-  // Text Input Area
-  // ===============================
-
-  // Main text input box
+  // Main text input container box
   inputBox: {
-    width: '94%',
-    minHeight: 220,
-    borderRadius: 24,
-    backgroundColor: '#F5EAD8',
-    borderWidth: 2,
-    borderColor: '#BCA67A',
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    width: '92%',
+    height: 300, // increased description box size
+    backgroundColor: '#E6D7BF',
+    borderRadius: 25,
+    padding: 24,
+    marginBottom: 55,
+  },
+
+  // Question/instruction text
+  questionText: {
+    fontSize: 22, // increased question font
+    fontFamily: FONTS.bold,
+    fontWeight: '600',
+    color: '#000',
     marginBottom: 22,
-    textAlignVertical: 'top',
-    fontSize: 20,
+    lineHeight: 30,
+  },
+
+  // Text input typing area
+  textInput: {
+    flex: 1,
+    fontSize: 22, // increased typing text size
     fontFamily: FONTS.regular,
-    color: '#111',
-    lineHeight: 28,
+    color: '#222',
+    textAlignVertical: 'top',
+    lineHeight: 30,
   },
 
-  // Placeholder text style
-  placeholderTextColor: {
-    color: '#7A6A55',
-  },
-
-  // ===============================
-  // Speaker Button
-  // ===============================
-
-  // Speaker button container
-  speakerButton: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: '#E3AD35',
-    borderWidth: 3,
-    borderColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    elevation: 5,
-  },
-
-  // Speaker button pressed effect
-  speakerPressed: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
-    transform: [{ scale: 0.95 }],
-  },
-
-  // Speaker icon image
-  speakerIcon: {
-    width: 30,
-    height: 30,
-  },
-
-  // ===============================
-  // Continue Button
-  // ===============================
-
-  // Continue button container
+  // Continue button style
   continueButton: {
-    width: '94%',
-    height: 64,
+    width: 250, // increased button size
+    height: 72,
     backgroundColor: '#E3AD35',
-    borderRadius: 34,
-    borderWidth: 3,
+    borderRadius: 30,
+    borderWidth: 2,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
-    marginBottom: 14,
+    elevation: 4,
+    marginBottom: 30,
   },
 
   // Continue button pressed effect
-  continuePressed: {
+  continuePressedGreen: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
@@ -135,41 +100,36 @@ export default StyleSheet.create({
 
   // Continue button text
   continueText: {
-    fontSize: 22,
+    fontSize: 28, // increased button text
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // ===============================
-  // Back Button
-  // ===============================
-
-  // Back button container
+  // Back button style
   backButton: {
-    width: 170,
-    height: 58,
-    borderRadius: 30,
-    borderWidth: 3,
+    width: 160, // increased size
+    height: 60,
+    borderRadius: 28,
+    borderWidth: 2,
     borderColor: '#000',
     backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    marginBottom: 12,
+    elevation: 3,
   },
 
-  // Content inside back button
+  // Back button content row
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Back arrow image
+  // Back arrow image style
   backArrowImage: {
-    width: 22,
-    height: 22,
+    width: 26, // increased arrow size
+    height: 26,
     marginRight: 10,
   },
 
@@ -179,19 +139,16 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  // Back button text
+  // Back button text style
   backText: {
-    fontSize: 22,
+    fontSize: 24, // increased text size
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // ===============================
-  // Error Modal Styling
-  // ===============================
-
-  // Dark overlay behind modal
+  // Modal overlay
+  // Dark transparent background behind modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',
@@ -210,7 +167,7 @@ export default StyleSheet.create({
     elevation: 8,
   },
 
-  // Modal top header
+  // Top red header
   errorHeader: {
     backgroundColor: '#8B2E0A',
     paddingVertical: 18,
@@ -220,7 +177,7 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  // Error title text
+  // Header title text
   errorTitle: {
     color: '#FFF',
     fontSize: 21,
@@ -230,7 +187,7 @@ export default StyleSheet.create({
     paddingRight: 12,
   },
 
-  // Close (X) button
+  // Close button style
   errorCloseButton: {
     width: 48,
     height: 48,
@@ -241,7 +198,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Close button text
+  // X close icon text
   errorCloseText: {
     color: '#FFF',
     fontSize: 34,
@@ -250,7 +207,7 @@ export default StyleSheet.create({
     lineHeight: 36,
   },
 
-  // Modal body content
+  // Modal body container
   errorBody: {
     paddingHorizontal: 22,
     paddingTop: 28,
@@ -258,27 +215,17 @@ export default StyleSheet.create({
     minHeight: 150,
   },
 
-  // Main bold error message
+  // Main error message text
   errorMessageBold: {
     color: '#5C2E0A',
     fontSize: 19,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
-    marginBottom: 22,
+    marginBottom: 28,
     lineHeight: 26,
   },
 
-  // Secondary error message
-  errorMessage: {
-    color: '#5C2E0A',
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    marginBottom: 28,
-    lineHeight: 24,
-  },
-
-  // OK button inside modal
+  // OK button style
   errorOkButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',

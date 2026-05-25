@@ -1,14 +1,17 @@
 // tellUsMoreStyles.js
 // Purpose: Screen-specific styles for TellUsMoreScreen.
-// Shared SafeArea, background, footer,
-// and language modal styles are in commonLayoutStyles.js.
+// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for TellUsMoreScreen
 export default StyleSheet.create({
 
-  // Main centered screen container
+  // Main screen container
   container: {
     flex: 1,
     alignItems: 'center',
@@ -16,11 +19,7 @@ export default StyleSheet.create({
     paddingTop: 72,
   },
 
-  // ===============================
-  // Header Section
-  // ===============================
-
-  // Top header box
+  // Header bar container
   headerBar: {
     width: '94%',
     height: 56,
@@ -39,7 +38,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // Progress question count text
+  // Progress text showing current question number
   progressText: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -58,16 +57,12 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
 
-  // Progress bar fill animation
+  // Progress bar fill color
   progressBarFill: {
     height: '100%',
     backgroundColor: '#C87936',
     borderRadius: 10,
   },
-
-  // ===============================
-  // Question Box
-  // ===============================
 
   // Question container box
   questionBox: {
@@ -81,7 +76,7 @@ export default StyleSheet.create({
     borderColor: '#BCA67A',
   },
 
-  // Question text
+  // Main question text
   questionText: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -120,10 +115,6 @@ export default StyleSheet.create({
     height: 24,
   },
 
-  // ===============================
-  // Answer Option Buttons
-  // ===============================
-
   // Base option button style
   optionButton: {
     width: '100%',
@@ -136,12 +127,12 @@ export default StyleSheet.create({
     borderColor: 'transparent',
   },
 
-  // Shared color for yes/no style questions
+  // Shared style when there are only 2 options
   twoOptionStyle: {
     backgroundColor: '#E6C37D',
   },
 
-  // Option background colors
+  // Different option background colors
   optionColor1: {
     backgroundColor: '#F2EEE4',
   },
@@ -182,7 +173,7 @@ export default StyleSheet.create({
     fontFamily: FONTS.bold,
   },
 
-  // Option button text
+  // Option text style
   optionText: {
     fontSize: 17,
     fontFamily: FONTS.bold,
@@ -190,11 +181,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // ===============================
-  // Continue Button
-  // ===============================
-
-  // Continue/submit button
+  // Continue button style
   continueButton: {
     width: '94%',
     height: 62,
@@ -223,11 +210,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // ===============================
-  // Back Button
-  // ===============================
-
-  // Back button container
+  // Back button style
   backButton: {
     width: 170,
     height: 58,
@@ -241,14 +224,14 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Content inside back button
+  // Back button content row
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Back arrow image
+  // Back arrow image style
   backArrowImage: {
     width: 22,
     height: 22,
@@ -261,17 +244,13 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  // Back button text
+  // Back button text style
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
-
-  // ===============================
-  // Error Modal Styling
-  // ===============================
 
   // Dark overlay behind modal
   modalOverlay: {
@@ -281,7 +260,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Main modal box
+  // Error modal container
   errorModalBox: {
     width: '92%',
     borderRadius: 12,
@@ -292,7 +271,7 @@ export default StyleSheet.create({
     elevation: 8,
   },
 
-  // Modal top header
+  // Error modal header
   errorHeader: {
     backgroundColor: '#8B2E0A',
     paddingVertical: 18,
@@ -302,7 +281,7 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  // Error title text
+  // Error modal title text
   errorTitle: {
     color: '#FFF',
     fontSize: 21,
@@ -312,7 +291,7 @@ export default StyleSheet.create({
     paddingRight: 12,
   },
 
-  // Close (X) button
+  // Error modal close button
   errorCloseButton: {
     width: 48,
     height: 48,
@@ -323,7 +302,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Close button text
+  // Error modal X icon
   errorCloseText: {
     color: '#FFF',
     fontSize: 34,
@@ -332,7 +311,7 @@ export default StyleSheet.create({
     lineHeight: 36,
   },
 
-  // Modal body content area
+  // Error modal body section
   errorBody: {
     paddingHorizontal: 22,
     paddingTop: 28,
@@ -340,7 +319,7 @@ export default StyleSheet.create({
     minHeight: 150,
   },
 
-  // Main bold error message
+  // Bold error message
   errorMessageBold: {
     color: '#5C2E0A',
     fontSize: 19,
@@ -350,7 +329,7 @@ export default StyleSheet.create({
     lineHeight: 26,
   },
 
-  // Secondary error message
+  // Normal error message
   errorMessage: {
     color: '#5C2E0A',
     fontSize: 17,
@@ -360,7 +339,7 @@ export default StyleSheet.create({
     lineHeight: 24,
   },
 
-  // OK button inside modal
+  // OK button style
   errorOkButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',

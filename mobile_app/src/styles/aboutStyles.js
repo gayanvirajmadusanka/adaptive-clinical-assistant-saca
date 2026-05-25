@@ -1,12 +1,17 @@
 // aboutStyles.js
 // Purpose: Screen-specific styles for AboutScreen.
-// Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
+// Import StyleSheet to create React Native styles
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for AboutScreen
 export default StyleSheet.create({
+
   // Main scroll container
+  // Controls spacing and alignment of screen content
   container: {
     alignItems: 'center',
     paddingHorizontal: 32,
@@ -15,6 +20,7 @@ export default StyleSheet.create({
   },
 
   // Main heading
+  // Used for the About screen title
   title: {
     fontSize: 28,
     fontFamily: FONTS.bold,
@@ -26,6 +32,7 @@ export default StyleSheet.create({
   },
 
   // SACA logo
+  // Displays the app logo image
   logo: {
     width: 130,
     height: 130,
@@ -34,6 +41,7 @@ export default StyleSheet.create({
   },
 
   // Subtitle text
+  // Small heading shown below logo
   subTitle: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -44,7 +52,8 @@ export default StyleSheet.create({
     marginBottom: 22,
   },
 
-  // Main about paragraph.
+  // Main about paragraph
+  // Justified and aligned evenly on both sides.
   paragraph: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -57,6 +66,7 @@ export default StyleSheet.create({
   },
 
   // Back button
+  // Same style as TextInputScreen.
   backButton: {
     width: 170,
     height: 58,
@@ -71,12 +81,14 @@ export default StyleSheet.create({
   },
 
   // Back button pressed state
+  // Slightly shrinks and darkens button when pressed
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
   // Back button content row
+  // Aligns icon and text horizontally
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -84,6 +96,7 @@ export default StyleSheet.create({
   },
 
   // Back arrow image
+  // Styling for arrow icon inside back button
   backArrowImage: {
     width: 26,
     height: 26,
@@ -91,6 +104,7 @@ export default StyleSheet.create({
   },
 
   // Back button text
+  // Text styling for the back button label
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,

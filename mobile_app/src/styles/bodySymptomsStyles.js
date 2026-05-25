@@ -2,9 +2,13 @@
 // Purpose: Screen-specific styles for BodySymptomsScreen.
 // Shared SafeArea, background, footer, and language modal styles are in commonLayoutStyles.js.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for BodySymptomsScreen
 export default StyleSheet.create({
 
   // Main screen container
@@ -14,7 +18,7 @@ export default StyleSheet.create({
     paddingTop: 76,
   },
 
-  // Top header box
+  // Header bar container
   headerBar: {
     width: '94%',
     height: 64,
@@ -51,13 +55,13 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Speaker icon image
+  // Header speaker icon image
   headerSpeakerIcon: {
     width: 24,
     height: 24,
   },
 
-  // Instruction text below header
+  // Hint text below header
   hintText: {
     textAlign: 'center',
     fontSize: 18,
@@ -67,14 +71,14 @@ export default StyleSheet.create({
     marginBottom: 14,
   },
 
-  // Scroll view for symptoms list
+  // ScrollView container for symptoms list
   symptomsScroll: {
     flexGrow: 0,
     maxHeight: 500,
     paddingRight: 6,
   },
 
-  // Extra bottom spacing for symptom list
+  // Symptoms list spacing
   symptomsList: {
     paddingBottom: 12,
   },
@@ -96,7 +100,7 @@ export default StyleSheet.create({
     elevation: 3,
   },
 
-  // Active/selected symptom card
+  // Active selected symptom card
   symptomCardActive: {
     borderWidth: 3,
     borderColor: '#000',
@@ -117,7 +121,7 @@ export default StyleSheet.create({
     marginRight: 14,
   },
 
-  // Placeholder shown if image is missing
+  // Placeholder box when symptom image is missing
   symptomImagePlaceholder: {
     width: 112,
     height: 112,
@@ -128,7 +132,7 @@ export default StyleSheet.create({
     marginRight: 14,
   },
 
-  // Placeholder text/icon
+  // Placeholder text inside missing image box
   placeholderText: {
     fontSize: 34,
     fontFamily: FONTS.bold,
@@ -136,7 +140,7 @@ export default StyleSheet.create({
     color: '#8B3A1C',
   },
 
-  // Symptom text label
+  // Symptom text style
   symptomText: {
     flex: 1,
     fontSize: 20,
@@ -146,13 +150,13 @@ export default StyleSheet.create({
     paddingRight: 8,
   },
 
-  // Selected symptom text style
+  // Active selected symptom text
   symptomTextActive: {
     color: '#000',
     fontFamily: FONTS.bold,
   },
 
-  // Speaker button beside symptom
+  // Speaker button beside symptom card
   symptomSpeakerButton: {
     width: 46,
     height: 46,
@@ -170,14 +174,14 @@ export default StyleSheet.create({
     height: 24,
   },
 
-  // Speaker button pressed effect
+  // Pressed state for speaker buttons
   speakerPressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.95 }],
   },
 
-  // Continue/confirm button
+  // Confirm button style
   confirmButton: {
     width: '100%',
     height: 64,
@@ -207,7 +211,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // Back button container
+  // Back button style
   backButton: {
     width: 140,
     height: 55,
@@ -222,14 +226,14 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Content inside back button
+  // Back button content layout
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Back arrow image
+  // Back arrow image style
   backArrowImage: {
     width: 22,
     height: 22,
@@ -242,7 +246,7 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  // Back button text
+  // Back button text style
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -250,11 +254,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // ===============================
-  // Error Modal Styling
-  // ===============================
-
-  // Dark overlay behind modal
+  // Dark background overlay for modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',
@@ -262,7 +262,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Main modal box
+  // Error modal main box
   errorModalBox: {
     width: '92%',
     borderRadius: 12,
@@ -273,7 +273,7 @@ export default StyleSheet.create({
     elevation: 8,
   },
 
-  // Modal top header
+  // Error modal header section
   errorHeader: {
     backgroundColor: '#8B2E0A',
     paddingVertical: 18,
@@ -293,7 +293,7 @@ export default StyleSheet.create({
     paddingRight: 12,
   },
 
-  // Close (X) button
+  // Close button for error modal
   errorCloseButton: {
     width: 48,
     height: 48,
@@ -304,7 +304,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Close button text
+  // X close icon text
   errorCloseText: {
     color: '#FFF',
     fontSize: 34,
@@ -313,7 +313,7 @@ export default StyleSheet.create({
     lineHeight: 36,
   },
 
-  // Modal body content area
+  // Error modal body section
   errorBody: {
     paddingHorizontal: 22,
     paddingTop: 28,
@@ -321,7 +321,7 @@ export default StyleSheet.create({
     minHeight: 150,
   },
 
-  // Main bold error message
+  // Bold error message text
   errorMessageBold: {
     color: '#5C2E0A',
     fontSize: 19,
@@ -331,7 +331,7 @@ export default StyleSheet.create({
     lineHeight: 26,
   },
 
-  // Secondary error message
+  // Normal error message text
   errorMessage: {
     color: '#5C2E0A',
     fontSize: 17,
@@ -358,7 +358,7 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  // OK button text
+  // OK button text style
   errorOkText: {
     color: '#FFF',
     fontFamily: FONTS.bold,

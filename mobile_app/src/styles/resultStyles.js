@@ -1,30 +1,29 @@
 // resultStyles.js
-// Purpose: Styles for ResultScreen.
-// Controls severity cards, recommendation cards,
-// emergency call button, speaker button,
-// and navigation buttons.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
-// Theme colors used based on severity level
+// Theme colors used for different severity levels
 export const resultTheme = {
 
-  // Severe result colors
+  // Severe result theme colors
   severe: {
     severityFill: '#8B070C',
     cardBackground: '#F5EAD8',
     boxBorder: '#C9B78F',
   },
 
-  // Moderate result colors
+  // Moderate result theme colors
   moderate: {
     severityFill: '#D7AE43',
     cardBackground: '#F5EAD8',
     boxBorder: '#C9B78F',
   },
 
-  // Mild result colors
+  // Mild result theme colors
   mild: {
     severityFill: '#5A8F3A',
     cardBackground: '#F5EAD8',
@@ -32,6 +31,7 @@ export const resultTheme = {
   },
 };
 
+// Export all styles for ResultScreen
 export default StyleSheet.create({
 
   // Main content wrapper
@@ -41,11 +41,7 @@ export default StyleSheet.create({
     paddingTop: 62,
   },
 
-  // ===============================
-  // Header Section
-  // ===============================
-
-  // Top header box
+  // Header bar container
   headerBar: {
     width: '100%',
     height: 72,
@@ -64,16 +60,12 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // ScrollView bottom spacing
+  // ScrollView content spacing
   scrollContent: {
     paddingBottom: 16,
   },
 
-  // ===============================
-  // Severity Card
-  // ===============================
-
-  // Main severity card container
+  // Main severity card
   severityCard: {
     width: '100%',
     minHeight: 114,
@@ -93,7 +85,7 @@ export default StyleSheet.create({
     marginRight: 14,
   },
 
-  // Text section inside severity card
+  // Severity text container
   severityTextBox: {
     flex: 1,
     paddingRight: 8,
@@ -108,7 +100,7 @@ export default StyleSheet.create({
     lineHeight: 34,
   },
 
-  // Severity subtitle/description
+  // Severity subtitle/helper text
   severitySubtitle: {
     fontSize: 16,
     fontFamily: FONTS.regular,
@@ -117,11 +109,7 @@ export default StyleSheet.create({
     lineHeight: 21,
   },
 
-  // ===============================
-  // Speaker Button
-  // ===============================
-
-  // Speaker button container
+  // Speaker button style
   speakerButton: {
     width: 58,
     height: 58,
@@ -146,11 +134,7 @@ export default StyleSheet.create({
     height: 30,
   },
 
-  // ===============================
-  // Emergency Call Button
-  // ===============================
-
-  // Base emergency call button
+  // Emergency call button
   callButton: {
     width: '100%',
     height: 54,
@@ -162,26 +146,26 @@ export default StyleSheet.create({
     backgroundColor: '#F5EAD8',
   },
 
-  // Severe emergency button border
+  // Severe emergency call button border
   callButtonSevere: {
     borderColor: '#5F1207',
     borderWidth: 3,
   },
 
-  // Moderate emergency button border
+  // Moderate emergency call button border
   callButtonModerate: {
     borderColor: '#5F1207',
     borderWidth: 3,
   },
 
-  // Call icon image
+  // Emergency call icon image
   callIcon: {
     width: 24,
     height: 24,
     marginRight: 10,
   },
 
-  // Call button text
+  // Emergency call button text
   callButtonText: {
     fontSize: 20,
     fontFamily: FONTS.bold,
@@ -189,11 +173,7 @@ export default StyleSheet.create({
     color: '#4B0900',
   },
 
-  // ===============================
-  // Information Cards
-  // ===============================
-
-  // General info card container
+  // Information card container
   infoCard: {
     width: '100%',
     minHeight: 132,
@@ -207,12 +187,12 @@ export default StyleSheet.create({
     elevation: 3,
   },
 
-  // Smaller symptom card variant
+  // Symptom card height adjustment
   symptomCard: {
     minHeight: 98,
   },
 
-  // Large info icon image
+  // Large information icon image
   infoIconLarge: {
     width: 58,
     height: 58,
@@ -220,12 +200,12 @@ export default StyleSheet.create({
     marginTop: 4,
   },
 
-  // Right-side content section
+  // Info text content wrapper
   infoContent: {
     flex: 1,
   },
 
-  // Main info title
+  // Info card title text
   infoTitle: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -234,7 +214,7 @@ export default StyleSheet.create({
     marginBottom: 10,
   },
 
-  // Small section heading
+  // Smaller info section heading
   infoHeading: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -251,11 +231,7 @@ export default StyleSheet.create({
     lineHeight: 22,
   },
 
-  // ===============================
-  // Start Again Button
-  // ===============================
-
-  // Start again button container
+  // Start Again button style
   startAgainButton: {
     width: '100%',
     height: 58,
@@ -269,14 +245,14 @@ export default StyleSheet.create({
     elevation: 4,
   },
 
-  // Start again pressed effect
+  // Start Again button pressed effect
   startAgainPressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
     transform: [{ scale: 0.96 }],
   },
 
-  // Start again text
+  // Start Again button text
   startAgainText: {
     fontSize: 20,
     fontFamily: FONTS.bold,
@@ -284,16 +260,12 @@ export default StyleSheet.create({
     color: '#111',
   },
 
-  // Pressed text color
+  // Start Again text color when pressed
   startAgainTextPressed: {
     color: '#FFFFFF',
   },
 
-  // ===============================
-  // Back Button
-  // ===============================
-
-  // Back button container
+  // Back button style
   backButton: {
     width: 170,
     height: 58,
@@ -309,14 +281,14 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Content inside back button
+  // Back button content row
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Back arrow image
+  // Back arrow image style
   backArrowImage: {
     width: 22,
     height: 22,
@@ -329,7 +301,7 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  // Back button text
+  // Back button text style
   backText: {
     fontSize: 22,
     fontFamily: FONTS.bold,
@@ -337,7 +309,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
-  // General reusable pressed effect
+  // Shared pressed animation style
   pressedButton: {
     opacity: 0.85,
     transform: [{ scale: 0.97 }],

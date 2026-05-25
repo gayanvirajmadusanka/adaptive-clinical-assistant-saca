@@ -1,5 +1,8 @@
+// httpClient.js
+
 // Import API configuration (base URL, endpoints, etc.)
 import { API_CONFIG } from '../config/apiConfig';
+
 
 // ----------------------------------------------------
 // buildApiUrl(endpoint)
@@ -16,6 +19,8 @@ import { API_CONFIG } from '../config/apiConfig';
 // → http://192.168.0.10:8000/extract/text
 // ----------------------------------------------------
 export function buildApiUrl(endpoint) {
+
+  // Combine BASE_URL with endpoint path
   return `${API_CONFIG.BASE_URL}${endpoint}`;
 }
 
@@ -51,6 +56,8 @@ export async function postJson(endpoint, payload) {
 
   // Send POST request to backend
   const response = await fetch(buildApiUrl(endpoint), {
+
+    // HTTP request method
     method: 'POST',
 
     // Tell backend we are sending JSON data
@@ -71,6 +78,7 @@ export async function postJson(endpoint, payload) {
     throw new Error(responseText || 'API request failed');
   }
 
-  // Convert text → JSON (if response exists)
+  // Convert response text → JSON object
+  // Return null if backend sends empty response
   return responseText ? JSON.parse(responseText) : null;
 }

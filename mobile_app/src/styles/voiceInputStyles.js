@@ -1,233 +1,276 @@
 // voiceInputStyles.js
-// Purpose: Styles for VoiceInputScreen.
-// Controls voice recording UI, microphone button,
-// audio playback controls, speaker button,
-// and navigation layout.
+// Purpose: Screen-specific styles for VoiceInputScreen.
+// Balanced size similar to TextInputScreen.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for VoiceInputScreen
 export default StyleSheet.create({
 
   // Main screen container
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingTop: 78,
+    paddingHorizontal: 25,
+    paddingTop: 75,
   },
 
-  // ===============================
-  // Header Section
-  // ===============================
-
-  // Header box container
+  // Header bar container
   headerBar: {
     width: '94%',
-    height: 64,
-    backgroundColor: '#C87936',
-    borderRadius: 14,
+    height: 68,
+    backgroundColor: '#D2B767',
+    borderRadius: 10,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 18,
-    position: 'relative',
-    paddingHorizontal: 56,
+    marginBottom: 28,
+    paddingHorizontal: 18,
   },
 
   // Header title text
   headerText: {
-    fontSize: 26,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
-    textAlign: 'center',
+  },
+
+  // Right side header group
+  // Contains speaker button and microphone icon
+  headerRightGroup: {
+    position: 'absolute',
+    right: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   // Header speaker button
   headerSpeakerButton: {
-    position: 'absolute',
-    right: 10,
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#E3AD35',
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 10,
   },
 
-  // Header speaker icon image
+  // Speaker button pressed effect
+  headerSpeakerPressed: {
+    backgroundColor: '#8B3A1C',
+    transform: [{ scale: 0.95 }],
+  },
+
+  // Disabled speaker button style
+  headerSpeakerDisabled: {
+    opacity: 0.45,
+  },
+
+  // Speaker icon image
   headerSpeakerIcon: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
   },
 
-  // Instruction/helper text
-  hintText: {
-    fontSize: 18,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#3D2A1A',
-    textAlign: 'center',
-    marginBottom: 26,
-    lineHeight: 26,
+  // Header microphone icon
+  headerIcon: {
+    width: 36,
+    height: 36,
   },
 
-  // ===============================
-  // Microphone Recording Section
-  // ===============================
-
-  // Wrapper around microphone area
-  micWrapper: {
+  // Main recording box container
+  recordBox: {
+    width: '92%',
+    height: 360,
+    borderWidth: 1.5,
+    borderColor: '#C8B99A',
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 28,
+    backgroundColor: 'rgba(245, 234, 212, 0.92)',
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    marginBottom: 35,
   },
 
-  // Main microphone button
-  micButton: {
+  // Outer animated pulse circle
+  pulseCircle: {
+    width: 145,
+    height: 145,
+    borderRadius: 72,
+    borderWidth: 3,
+    borderColor: '#C8B99A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+
+  // Recording active border effect
+  recordingBorder: {
+    borderColor: '#C0392B',
+    borderWidth: 4,
+    backgroundColor: 'rgba(192,57,43,0.08)',
+  },
+
+  // Inner microphone circle
+  micCircle: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#C87936',
-    borderWidth: 4,
-    borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 6,
   },
 
-  // Microphone button while recording
-  micButtonRecording: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
+  // Microphone image style
+  micImage: {
+    width: 72,
+    height: 72,
   },
 
-  // Microphone icon image
-  micIcon: {
-    width: 60,
-    height: 60,
+  // Audio waveform animation container
+  waveformContainer: {
+    height: 75,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 22,
   },
 
-  // Tap to record text
-  tapToRecordText: {
-    marginTop: 14,
-    fontSize: 18,
+  // Individual waveform bar
+  waveBar: {
+    width: 8,
+    borderRadius: 10,
+    backgroundColor: '#8B3A1C',
+  },
+
+  // Instruction text below microphone
+  recordText: {
+    marginTop: 18,
+    fontSize: 20,
     fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    color: '#5C2E0A',
+    fontWeight: '600',
+    color: '#7A6A52',
     textAlign: 'center',
+    lineHeight: 28,
+    paddingHorizontal: 10,
   },
 
-  // ===============================
-  // Recorded Audio Box
-  // ===============================
-
-  // Audio playback container
-  recordedBox: {
-    width: 220,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: '#EFE2CC',
-    borderWidth: 2,
-    borderColor: '#B9A57F',
+  // Bottom control box
+  // Contains play, delete, timer, and continue button
+  bottomBox: {
+    width: '92%',
+    minHeight: 96,
+    borderRadius: 50,
+    borderWidth: 1.5,
+    borderColor: '#C8B99A',
+    backgroundColor: 'rgba(245, 234, 212, 0.95)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     marginBottom: 28,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
 
-  // Play audio button
-  playButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#3E8B3A',
+  // Left side controls container
+  leftControls: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Audio duration text
-  durationText: {
-    fontSize: 15,
-    fontFamily: FONTS.bold,
-    color: '#000',
+    gap: 12,
   },
 
   // Delete recording button
   deleteButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#A3361A',
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#C8A18C',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // ===============================
-  // Continue Button
-  // ===============================
+  // Play recording button
+  playButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#A8C89A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-  // Continue button container
+  // Disabled control style
+  disabledControl: {
+    opacity: 0.35,
+  },
+
+  // Audio duration timer text
+  timeText: {
+    minWidth: 48,
+    fontSize: 18,
+    fontFamily: FONTS.bold,
+    fontWeight: 'bold',
+    color: '#3A2A1A',
+  },
+
+  // Continue button style
   continueButton: {
-    width: '94%',
-    height: 64,
+    minWidth: 128,
+    height: 58,
+    borderRadius: 28,
     backgroundColor: '#E3AD35',
-    borderRadius: 34,
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 5,
-    marginBottom: 14,
-  },
-
-  // Continue button pressed effect
-  continuePressed: {
-    backgroundColor: '#8B1E0D',
-    borderColor: '#5F1207',
-    transform: [{ scale: 0.96 }],
+    paddingHorizontal: 22,
   },
 
   // Continue button text
   continueText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
   },
 
-  // ===============================
-  // Back Button
-  // ===============================
-
-  // Back button container
+  // Back button style
   backButton: {
-    width: 170,
-    height: 58,
-    borderRadius: 30,
-    borderWidth: 3,
+    width: 160,
+    height: 60,
+    borderRadius: 28,
+    borderWidth: 2,
     borderColor: '#000',
     backgroundColor: '#F5EAD8',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    marginBottom: 12,
+    elevation: 3,
   },
 
-  // Content inside back button
+  // Back button content row
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Back arrow image
+  // Back arrow image style
   backArrowImage: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     marginRight: 10,
   },
 
@@ -237,127 +280,11 @@ export default StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
 
-  // Back button text
+  // Back button text style
   backText: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: FONTS.bold,
     fontWeight: 'bold',
     color: '#000',
-  },
-
-  // ===============================
-  // Error Modal Styling
-  // ===============================
-
-  // Dark overlay behind modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Main modal box
-  errorModalBox: {
-    width: '92%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#F5EAD8',
-    borderWidth: 1,
-    borderColor: '#8B3A1C',
-    elevation: 8,
-  },
-
-  // Modal top header
-  errorHeader: {
-    backgroundColor: '#8B2E0A',
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  // Error title text
-  errorTitle: {
-    color: '#FFF',
-    fontSize: 21,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    flex: 1,
-    paddingRight: 12,
-  },
-
-  // Close (X) button
-  errorCloseButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 9,
-    borderWidth: 3,
-    borderColor: '#FFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Close button text
-  errorCloseText: {
-    color: '#FFF',
-    fontSize: 34,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    lineHeight: 36,
-  },
-
-  // Modal body content
-  errorBody: {
-    paddingHorizontal: 22,
-    paddingTop: 28,
-    paddingBottom: 20,
-    minHeight: 150,
-  },
-
-  // Main bold error message
-  errorMessageBold: {
-    color: '#5C2E0A',
-    fontSize: 19,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    marginBottom: 22,
-    lineHeight: 26,
-  },
-
-  // Secondary error message
-  errorMessage: {
-    color: '#5C2E0A',
-    fontSize: 17,
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    marginBottom: 28,
-    lineHeight: 24,
-  },
-
-  // OK button inside modal
-  errorOkButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#E3AD35',
-    borderWidth: 2,
-    borderColor: '#000',
-    paddingHorizontal: 28,
-    paddingVertical: 10,
-    borderRadius: 22,
-  },
-
-  // OK button pressed effect
-  errorOkButtonPressed: {
-    backgroundColor: '#8B1E0D',
-    transform: [{ scale: 0.96 }],
-  },
-
-  // OK button text
-  errorOkText: {
-    color: '#FFF',
-    fontFamily: FONTS.bold,
-    fontWeight: 'bold',
-    fontSize: 18,
   },
 });
