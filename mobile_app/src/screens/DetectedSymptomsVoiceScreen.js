@@ -41,6 +41,11 @@ const CONFIRM_SYMPTOMS_QUESTION_ID = 'confirm_symptoms';
 const CONFIRM_SYMPTOMS_ANSWER_YES = 'confirm_symptomsy';
 const CONFIRM_SYMPTOMS_ANSWER_NO = 'confirm_symptomsn';
 
+const alertAudioMap = {
+  en: require('../../assets/audio/ui/could_not_catch_en.wav'),
+  wp: require('../../assets/audio/ui/could_not_catch_wp.wav'),
+};
+
 const INVALID_SYMPTOM_VALUES = [
   '',
   'none',
@@ -213,6 +218,56 @@ export default function DetectedSymptomsVoiceScreen() {
     }
   }
 
+  async function playAlertAudio() {
+    try {
+      await stopCurrentAudio();
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: false,
+        playThroughEarpieceAndroid: false,
+      });
+
+      const selectedLang =
+        lang === 'wp' ? 'wp' : 'en';
+
+      const audioSource =
+        alertAudioMap[selectedLang];
+
+      const { sound } =
+        await Audio.Sound.createAsync(
+          audioSource,
+          {
+            shouldPlay: true,
+            volume: 1.0,
+          }
+        );
+
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(
+        async (status) => {
+          if (
+            status.isLoaded &&
+            status.didJustFinish
+          ) {
+            if (soundRef.current === sound) {
+              soundRef.current = null;
+            }
+
+            await sound.unloadAsync();
+          }
+        }
+      );
+    } catch (error) {
+      console.log(
+        'Play alert audio error:',
+        error
+      );
+    }
+  }
+
   async function stopAnswerRecordingIfActive() {
     try {
       if (answerRecording) {
@@ -231,15 +286,7 @@ export default function DetectedSymptomsVoiceScreen() {
 
   async function readNoSymptomsAlertText() {
     try {
-      await stopCurrentAudio();
-
-      const alertText = `${noSymptomsTitle}. ${noSymptomsMessage1} ${noSymptomsMessage2}`;
-
-      Speech.speak(alertText, {
-        language: 'en-AU',
-        pitch: 1.0,
-        rate: 0.85,
-      });
+      await playAlertAudio();
     } catch (error) {
       console.log(
         'Read no symptoms alert text error:',
@@ -250,15 +297,7 @@ export default function DetectedSymptomsVoiceScreen() {
 
   async function readAnswerErrorText() {
     try {
-      await stopCurrentAudio();
-
-      const alertText = `${answerErrorTitle}. ${answerErrorMessage1}. ${answerErrorMessage2}`;
-
-      Speech.speak(alertText, {
-        language: 'en-AU',
-        pitch: 1.0,
-        rate: 0.85,
-      });
+      await playAlertAudio();
     } catch (error) {
       console.log(
         'Read answer error text error:',
