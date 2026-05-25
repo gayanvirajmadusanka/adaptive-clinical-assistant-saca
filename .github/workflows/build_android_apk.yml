@@ -59,7 +59,7 @@ jobs:
       - name: Re-train models with sklearn 1.1.3 (Android-compatible pickles)
         run: |
           python -m venv /tmp/venv_sklearn113
-          /tmp/venv_sklearn113/bin/pip install --quiet "numpy<2" scikit-learn==1.1.3 pandas rapidfuzz "imbalanced-learn==0.10.1"
+          /tmp/venv_sklearn113/bin/pip install --quiet "numpy<2" "scipy<1.14" scikit-learn==1.1.3 pandas rapidfuzz "imbalanced-learn==0.10.1"
           /tmp/venv_sklearn113/bin/python backend/scripts/retrain_nlp_sklearn113.py
           /tmp/venv_sklearn113/bin/python backend/scripts/retrain_ml_sklearn113.py
 
