@@ -99,10 +99,12 @@
                                        styleClass="result-match-label"/>
 
                                 <Button text="%result_yes"
+                                        fx:id="voiceResultYesBtn"
                                         styleClass="result-yes-btn"
                                         onAction="#handleYes"/>
 
                                 <Button text="%result_no"
+                                        fx:id="voiceResultNoBtn"
                                         styleClass="result-no-btn"
                                         onAction="#handleNo"/>
 

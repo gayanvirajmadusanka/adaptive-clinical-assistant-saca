@@ -12,9 +12,10 @@
 }
 
 .write-title {
-    -fx-text-fill: #000000;
+    -fx-text-fill: #1a0e00;
     -fx-font-size: 28px;
-    -fx-font-family: "Kreon";
+    -fx-font-weight: bold;
+    -fx-font-family: "Kreon", "Georgia", serif;
     -fx-alignment: CENTER;
 }
 
