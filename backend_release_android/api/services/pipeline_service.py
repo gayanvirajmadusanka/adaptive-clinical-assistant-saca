@@ -67,7 +67,7 @@ def classify(symptoms: list, answers: list, language: Language = Language.EN) ->
 def _translate_symptoms(symptoms: list, language: Language) -> list:
     if language != Language.WP:
         return symptoms
-    return [_ID_TO_WP.get(symptom, symptom) for symptom in symptoms]
+    return [_EN_TO_WP.get(symptom, symptom) for symptom in symptoms]
 
 
 def process_text(text: str, language: Language) -> dict:

@@ -193,7 +193,7 @@ def _resolve_warlpiri(tmp_path: str, question_id: str, base: dict) -> dict:
     answer_id = _resolve_keyword(best_keyword, question_id)
     if not answer_id:
         return _unrecognised(
-            base, f'Keyword matched but not an answer for this question: {best_keyword}',
+            base, f'Wangkaya nyangu, kala japi-wangu: {best_keyword}',
             confidence=result.get('confidence', 0.0)
         )
     return _recognised(base, answer_id, result.get('confidence', 0.0))
