@@ -75,8 +75,10 @@ jobs:
       - name: Copy saca_server.exe and main JAR into lib
         shell: pwsh
         run: |
-          Copy-Item backend_release_windows\dist\saca_server.exe windows_app\target\lib\saca_server.exe -Force
-          Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar windows_app\target\lib\SACA-1.0-SNAPSHOT.jar -Force
+          Copy-Item backend_release_windows\dist\saca_server.exe `
+                    windows_app\target\lib\saca_server.exe -Force
+          Copy-Item windows_app\target\SACA-1.0-SNAPSHOT.jar `
+                    windows_app\target\lib\SACA-1.0-SNAPSHOT.jar -Force
 
       - name: Copy fonts into jpackage input
         shell: pwsh
@@ -86,6 +88,15 @@ jobs:
                     windows_app\target\lib\fonts\ -Force
           Write-Host "=== Fonts copied ==="
           Get-ChildItem windows_app\target\lib\fonts\
+
+      - name: Convert PNG icon to ICO
+        shell: pwsh
+        run: |
+          choco install imagemagick -y --no-progress
+          magick windows_app\src\main\resources\images\app-logo.png `
+                 -resize 256x256 `
+                 windows_app\src\main\resources\images\app-logo.ico
+          Write-Host "Icon converted successfully"
 
       - name: Create custom JRE with jlink
         shell: pwsh
@@ -113,6 +124,7 @@ jobs:
             --input windows_app\target\lib `
             --main-jar SACA-1.0-SNAPSHOT.jar `
             --main-class org.saca.Launcher `
+            --icon windows_app\src\main\resources\images\app-logo.ico `
             --win-dir-chooser `
             --win-shortcut `
             --win-menu `

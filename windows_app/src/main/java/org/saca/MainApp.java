@@ -17,7 +17,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ResourceBundle;
 
@@ -55,7 +54,8 @@ public class MainApp extends Application {
         loadingCtrl.setDuration(Integer.MAX_VALUE);
 
         Scene loadingScene = new Scene(loadingRoot, APP_WIDTH, APP_HEIGHT);
-        loadingScene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
+        loadingScene.getStylesheets().add(
+                getClass().getResource("/styles/style.css").toExternalForm());
         stage.setScene(loadingScene);
         stage.show();
 
@@ -90,7 +90,6 @@ public class MainApp extends Application {
         try {
             File installDir = new File(System.getProperty("java.home")).getParentFile();
             File fontsDir = new File(installDir, "app\\fonts");
-            File windowsFonts = new File("C:\\Windows\\Fonts");
 
             if (!fontsDir.exists()) {
                 System.out.println("[SACA] No fonts directory found, skipping font install");
@@ -106,31 +105,47 @@ public class MainApp extends Application {
                 return;
             }
 
+            // Build PowerShell script using Shell.Application
+            // This installs fonts without requiring admin rights
+            StringBuilder psScript = new StringBuilder();
+            psScript.append("$shellApp = New-Object -ComObject Shell.Application\n");
+            psScript.append("$fonts = $shellApp.Namespace(0x14)\n");
+
+            boolean anyToInstall = false;
             for (File font : fontFiles) {
-                File dest = new File(windowsFonts, font.getName());
+                File dest = new File("C:\\Windows\\Fonts", font.getName());
                 if (!dest.exists()) {
-                    Files.copy(
-                            font.toPath(),
-                            dest.toPath(),
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
-
-                    // Register font in Windows registry
-                    String fontName = font.getName().replace(".ttf", "");
-                    Runtime.getRuntime().exec(new String[]{
-                            "reg", "add",
-                            "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts",
-                            "/v", fontName,
-                            "/t", "REG_SZ",
-                            "/d", font.getName(),
-                            "/f"
-                    });
-
-                    System.out.println("[SACA] Installed font: " + font.getName());
+                    psScript.append(String.format(
+                            "$fonts.CopyHere('%s', 0x10)\n",
+                            font.getAbsolutePath().replace("\\", "\\\\")
+                    ));
+                    System.out.println("[SACA] Queued font: " + font.getName());
+                    anyToInstall = true;
                 } else {
-                    System.out.println("[SACA] Font already installed: " + font.getName());
+                    System.out.println("[SACA] Already installed: " + font.getName());
                 }
             }
+
+            if (!anyToInstall) {
+                System.out.println("[SACA] All fonts already installed");
+                return;
+            }
+
+            // Write PowerShell script to temp file
+            File scriptFile = File.createTempFile("saca_fonts", ".ps1");
+            Files.writeString(scriptFile.toPath(), psScript.toString());
+            scriptFile.deleteOnExit();
+
+            // Execute the script
+            ProcessBuilder pb = new ProcessBuilder(
+                    "powershell.exe",
+                    "-ExecutionPolicy", "Bypass",
+                    "-NonInteractive",
+                    "-File", scriptFile.getAbsolutePath()
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+            p.waitFor();
 
             System.out.println("[SACA] Font installation complete");
 
@@ -163,7 +178,6 @@ public class MainApp extends Application {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(POLL_INTERVAL_MS))
                 .build();
-
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(BACKEND_HEALTH_URL))
                 .POST(HttpRequest.BodyPublishers.ofString("{\"symptoms\":[]}"))
@@ -172,7 +186,6 @@ public class MainApp extends Application {
                 .build();
 
         long deadline = System.currentTimeMillis() + POLL_TIMEOUT_MS;
-
         while (System.currentTimeMillis() < deadline) {
             try {
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
@@ -196,7 +209,8 @@ public class MainApp extends Application {
                     getClass().getResource("/view/MainView.fxml"), bundle);
             Parent root = loader.load();
             Scene scene = new Scene(root, APP_WIDTH, APP_HEIGHT);
-            scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
+            scene.getStylesheets().add(
+                    getClass().getResource("/styles/style.css").toExternalForm());
             stage.setScene(scene);
         } catch (Exception e) {
             showFatalError(stage, "Failed to load main view: " + e.getMessage());
