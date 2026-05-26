@@ -103,7 +103,15 @@ jobs:
           PYTHON_DIR="mobile_app/android/app/src/main/python"
           mkdir -p "$PYTHON_DIR"
           cp server.py "$PYTHON_DIR/"
-          cp -r backend_release_android "$PYTHON_DIR/"
+          cp -rL backend_release_android "$PYTHON_DIR/"
+
+      - name: Verify Python source data files
+        run: |
+          PYTHON_DIR="mobile_app/android/app/src/main/python"
+          echo "=== audio_map.json check ==="
+          ls -la "$PYTHON_DIR/backend_release_android/data/audio/" 2>/dev/null || echo "ERROR: data/audio/ not found"
+          echo "=== WAV count ==="
+          find "$PYTHON_DIR/backend_release_android/data" -name "*.wav" | wc -l || echo "0"
 
       - name: Copy NativeModule Java files
         run: |

@@ -27,8 +27,12 @@ _TARGET_RATE = 22050  # output sample rate for all stitched audio
 _SILENCE_MS  = 400    # silence gap between stitched clips
 _TARGET_PEAK = 0.80   # normalisation target peak level
 
-with open(_MAP_PATH, 'r') as _f:
-    _AUDIO_MAP = json.load(_f)
+try:
+    with open(_MAP_PATH, 'r') as _f:
+        _AUDIO_MAP = json.load(_f)
+except Exception as _e:
+    logger.error(f'Failed to load audio_map.json: {_e}')
+    _AUDIO_MAP = {}
 
 _SUBFOLDER_MAP = {
     'questions': 'questions',
