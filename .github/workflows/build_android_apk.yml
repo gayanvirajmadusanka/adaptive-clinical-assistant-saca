@@ -104,6 +104,12 @@ jobs:
           mkdir -p "$PYTHON_DIR"
           cp server.py "$PYTHON_DIR/"
           cp -rL backend_release_android "$PYTHON_DIR/"
+          # Add __init__.py to data directories so Chaquopy bundles all files inside them
+          touch "$PYTHON_DIR/backend_release_android/data/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/audio/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/audio/output/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/warlpiri/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/models/__init__.py" 2>/dev/null || true
 
       - name: Verify Python source data files
         run: |
