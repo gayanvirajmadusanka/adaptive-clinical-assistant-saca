@@ -44,7 +44,8 @@ def transcribe(audio_path: str, model_size: str = "base") -> dict:
         audio_path,
         language="en",
         fp16=False,
-        verbose=False
+        verbose=False,
+        initial_prompt="The speaker is describing medical symptoms or answering health questions."
     )
 
     text = result["text"].strip()
