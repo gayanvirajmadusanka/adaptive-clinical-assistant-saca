@@ -69,6 +69,7 @@ function withChaquopyAppBuild(config) {
             abiFilters "arm64-v8a", "x86_64"
         }
         python {
+            version "3.11"
             pip {
 ${pipLines}
             }
