@@ -19,7 +19,7 @@ const CHAQUOPY_VERSION = '15.0.1';
 const PIP_PACKAGES = [
   'fastapi==0.115.0',
   'uvicorn==0.33.0',
-  'scikit-learn',
+  'scikit-learn==1.1.3',
   'xgboost',
   'numpy',
   'scipy',
