@@ -13,14 +13,13 @@ const { withAppBuildGradle, withProjectBuildGradle } = require('@expo/config-plu
 
 const CHAQUOPY_VERSION = '15.0.1';
 
-// Packages exactly as listed in backend_release_android/requirements_android.txt.
-// Native packages (sklearn, xgboost, numpy, scipy, spacy, soundfile, webrtcvad-wheels)
-// are unpinned so Chaquopy resolves the latest available pre-built Android wheel.
+// Pinned to versions with pre-built Android wheels in Chaquopy's pypi-13.1 mirror.
+// Python 3.10 is used because it supports modern type hints (str | None) and has
+// pre-built wheels for all required native packages. xgboost removed - not used.
 const PIP_PACKAGES = [
   'fastapi==0.115.0',
   'uvicorn==0.33.0',
-  'scikit-learn==1.1.3',
-  'xgboost',
+  'scikit-learn==1.3.2',
   'numpy',
   'scipy',
   'rapidfuzz',
@@ -69,7 +68,7 @@ function withChaquopyAppBuild(config) {
             abiFilters "arm64-v8a", "x86_64"
         }
         python {
-            version "3.11"
+            version "3.10"
             pip {
 ${pipLines}
             }
