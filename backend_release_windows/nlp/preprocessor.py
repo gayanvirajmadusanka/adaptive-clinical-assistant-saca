@@ -11,18 +11,32 @@ def _load_spacy_model():
     except OSError:
         pass
 
-    # If frozen (PyInstaller), search for config.cfg recursively in bundle
+    # If frozen (PyInstaller), search for config.cfg recursively
     if getattr(sys, 'frozen', False):
         bundle_dir = sys._MEIPASS
-        print(f"[SACA] Searching for spaCy model in bundle: {bundle_dir}")
+        print(f"[SACA] Searching for spaCy model in: {bundle_dir}")
 
+        # Try known paths first
+        known_paths = [
+            os.path.join(bundle_dir, 'en_core_web_sm', 'en_core_web_sm-3.7.1'),
+            os.path.join(bundle_dir, 'en_core_web_sm-3.7.1'),
+            os.path.join(bundle_dir, 'en_core_web_sm'),
+        ]
+
+        for path in known_paths:
+            if os.path.exists(os.path.join(path, 'config.cfg')):
+                try:
+                    print(f"[SACA] Loading spaCy from: {path}")
+                    return spacy.load(path)
+                except Exception as e:
+                    print(f"[SACA] Failed at {path}: {e}")
+
+        # Last resort - walk entire bundle
         for root, dirs, files in os.walk(bundle_dir):
             if 'config.cfg' in files:
                 try:
-                    print(f"[SACA] Trying spaCy model at: {root}")
-                    nlp = spacy.load(root)
-                    print(f"[SACA] spaCy model loaded from: {root}")
-                    return nlp
+                    print(f"[SACA] Found config.cfg at: {root}")
+                    return spacy.load(root)
                 except Exception as e:
                     print(f"[SACA] Failed at {root}: {e}")
                     continue
@@ -34,17 +48,9 @@ _nlp = _load_spacy_model()
 
 
 def preprocess_text(text: str) -> dict:
-    """
-    Clean and normalise raw English text before symptom extraction.
-    Applies lowercase, noise removal, tokenisation, stop word removal
-    and lemmatisation using spaCy en_core_web_sm pipeline.
-    :param text: raw input string
-    :return: dict with tokens list and space-joined clean_text string
-    """
     if not text or not text.strip():
         return {"tokens": [], "clean_text": ""}
 
-    # lowercase and strip non-alpha characters
     text = text.lower()
     text = re.sub(r"[^a-z\s]", " ", text)
     text = re.sub(r"\s+",      " ", text).strip()
