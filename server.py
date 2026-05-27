@@ -1,46 +1,40 @@
 """
-SACA Flask server startup for Chaquopy Android integration.
-Placed at the Python source root so Chaquopy can call:
+SACA backend for Chaquopy Android integration.
+
+No HTTP server — Java calls Python functions directly via Chaquopy JNI.
+This avoids all Android socket/network-stack issues that prevented HTTP
+responses from ever reaching OkHttp despite the server accepting connections.
+
+Java calls:
     Python.getInstance().getModule("server").callAttr("start")
-
-Uses wsgiref.simple_server (stdlib, HTTP/1.0, no keep-alive) so it works
-reliably in a background daemon thread on Android.
-
-Werkzeug make_server defaulted to HTTP/1.1 with keep-alive — in single-threaded
-mode the server thread blocks on the keep-alive socket after the first response,
-preventing all subsequent connections from being processed.
-wsgiref sends Connection: close after every response, so the thread is always
-free to accept the next connection immediately.
+    Python.getInstance().getModule("server").callAttr("handle", path, bodyJson)
 """
 
 import os
-import threading
-import time
+import json
 
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 os.environ['XGB_NTHREAD'] = '1'
 
-_started = False
-_lock    = threading.Lock()
+_flask_app = None
+_ready = False
 
 
 def start():
-    """Start the Flask server on 127.0.0.1:8000 in a daemon thread."""
-    global _started
-    with _lock:
-        if _started:
-            return
-        _started = True
+    """
+    Preloads all models and audio. Called from Java in a background thread.
+    Blocks until fully ready, then returns. Java resolves its Promise.
+    """
+    global _flask_app, _ready
+    if _ready:
+        return
 
-    thread = threading.Thread(target=_run, daemon=True, name="saca-server")
-    thread.start()
-    time.sleep(1.0)
-    print("[SACA] Server started on http://127.0.0.1:8000", flush=True)
+    print("[SACA] creating Flask app...", flush=True)
+    from backend_release_android.api.flask_app import create_app
+    _flask_app = create_app()
+    print("[SACA] Flask app ready", flush=True)
 
-
-def _preload_models():
-    """Preload all slow resources so every handler is fast on first request."""
     try:
         print("[SACA] preloading NLP model...", flush=True)
         from backend_release_android.nlp.symptom_extractor import _load_model
@@ -57,32 +51,28 @@ def _preload_models():
     except Exception as e:
         print(f"[SACA] audio preload failed: {e}", flush=True)
 
+    _ready = True
+    print("[SACA] backend ready", flush=True)
 
-def _run():
+
+def handle(path: str, body_json: str) -> str:
+    """
+    Process one API request in-process using Flask's test client.
+    No socket, no HTTP — direct WSGI call. Returns JSON response string.
+    Called from Java for every API request.
+    """
+    if not _flask_app:
+        return json.dumps({"error": "backend not initialized"})
+
+    if path == '/health':
+        return json.dumps({"status": "ok"})
+
     try:
-        print("[SACA] importing Flask app...", flush=True)
-        from backend_release_android.api.flask_app import create_app
-        from wsgiref.simple_server import make_server as wsgi_make_server
-        from wsgiref.simple_server import WSGIRequestHandler
-
-        class _Handler(WSGIRequestHandler):
-            def log_message(self, fmt, *args):
-                print(f"[SACA-HTTP] {fmt % args}", flush=True)
-            def log_error(self, fmt, *args):
-                print(f"[SACA-HTTP-ERR] {fmt % args}", flush=True)
-
-        print("[SACA] creating Flask app...", flush=True)
-        app = create_app()
-
-        print("[SACA] preloading before server starts...", flush=True)
-        _preload_models()
-
-        print("[SACA] binding to 127.0.0.1:8000...", flush=True)
-        srv = wsgi_make_server('127.0.0.1', 8000, app, handler_class=_Handler)
-
-        print("[SACA] Flask server listening on :8000", flush=True)
-        srv.serve_forever()
-    except BaseException as exc:
+        data = json.loads(body_json) if body_json else {}
+        with _flask_app.test_client() as c:
+            resp = c.post(path, json=data)
+            return resp.get_data(as_text=True)
+    except Exception as e:
         import traceback
-        print(f"[SACA] Server CRASHED: {type(exc).__name__}: {exc}", flush=True)
         traceback.print_exc()
+        return json.dumps({"error": str(e)})

@@ -10,9 +10,6 @@ import {
 import { LanguageProvider } from '../src/context/LanguageContext';
 
 const IS_ANDROID_RELEASE = Platform.OS === 'android' && !__DEV__;
-const HEALTH_URL = 'http://127.0.0.1:8000/health';
-const POLL_INTERVAL_MS = 600;
-const POLL_TIMEOUT_MS  = 300000;
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -27,36 +24,16 @@ export default function RootLayout() {
   useEffect(() => {
     if (!IS_ANDROID_RELEASE) return;
 
-    try {
-      const { PythonServer } = NativeModules;
-      if (PythonServer) PythonServer.start();
-    } catch (e) {
-      console.warn('PythonServer NativeModule not available:', e);
+    const { PythonServer } = NativeModules;
+    if (!PythonServer) {
+      setServerReady(true);
+      return;
     }
 
-    const startTime = Date.now();
-    const poll = setInterval(async () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed > POLL_TIMEOUT_MS) {
-        clearInterval(poll);
-        setServerReady(true);
-        return;
-      }
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
-      try {
-        const res = await fetch(HEALTH_URL, { method: 'GET', signal: controller.signal });
-        clearTimeout(timer);
-        if (res.ok) {
-          clearInterval(poll);
-          setServerReady(true);
-        }
-      } catch (_) {
-        clearTimeout(timer);
-      }
-    }, POLL_INTERVAL_MS);
-
-    return () => clearInterval(poll);
+    // start() preloads everything and resolves when ready — no HTTP polling needed
+    PythonServer.start()
+      .then(() => setServerReady(true))
+      .catch(() => setServerReady(true));
   }, []);
 
   if (!fontsLoaded) return null;
