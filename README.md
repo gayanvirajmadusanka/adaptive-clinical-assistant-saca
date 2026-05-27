@@ -6,7 +6,39 @@ An AI-powered medical triage system for remote Indigenous Australian communities
 **Community:** Yuendumu, Warlpiri, Northern Territory
  
 ---
- 
+
+## How It Works
+
+```
+User input (text / voice / body map)
+        |
+        v
+  Symptom Extraction (NLP)
+  - Stage 1: token + bigram matching against 33-symptom vocabulary
+             via synonym map and fuzzy token-sort (spaCy, threshold 0.75+)
+  - Stage 2: TF-IDF + Random Forest fallback (200 estimators, 20k features)
+             when Stage 1 finds no confident matches
+        |
+        v
+  Follow-up Questions
+  - Dynamic mandatory questions (age, duration, severity, gender)
+  - Symptom-specific questions loaded from questions.json
+        |
+        v
+  Triage Classification (MLP)
+  - Input: TF-IDF symptom features + demographics (age, gender, duration) + severity signal
+  - Model: 3-layer MLP (256 -> 128 -> 64), trained on ~176k samples
+  - Output: Doctor Consultation or OTC Drug, mapped to Mild / Moderate / Severe
+```
+
+**English audio** is transcribed using Whisper (base model) with a medical symptom prompt, then passed through the same NLP pipeline above.
+
+**Warlpiri audio** bypasses ASR entirely. Instead, MFCC features are extracted per voice segment and matched against pre-computed keyword references using Dynamic Time Warping (DTW). Matched Warlpiri keywords are translated to English symptoms via `keyword_symptom_map.json` before entering the NLP pipeline.
+
+For more detail see the training notebooks in `backend/notebooks/` and the evaluation results in `backend/results/`.
+
+---
+
 ## Team
  
 | Name | Student ID | Component |
