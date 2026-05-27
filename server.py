@@ -1,10 +1,12 @@
 """
-SACA FastAPI server startup for Chaquopy Android integration.
+SACA Flask server startup for Chaquopy Android integration.
 Placed at the Python source root so Chaquopy can call:
     Python.getInstance().getModule("server").callAttr("start")
+
+Uses Flask + Werkzeug make_server (blocking I/O, no asyncio) so it works
+reliably in a background daemon thread on Android.
 """
 
-import asyncio
 import os
 import threading
 import time
@@ -18,7 +20,7 @@ _lock    = threading.Lock()
 
 
 def start():
-    """Start the FastAPI server on 127.0.0.1:8000 in a daemon thread."""
+    """Start the Flask server on 127.0.0.1:8000 in a daemon thread."""
     global _started
     with _lock:
         if _started:
@@ -44,38 +46,20 @@ def _preload_models():
 
 def _run():
     try:
-        print("[SACA] importing uvicorn...", flush=True)
-        import uvicorn
-        print("[SACA] importing app...", flush=True)
-        from backend_release_android.api.main import app
+        print("[SACA] importing Flask app...", flush=True)
+        from backend_release_android.api.flask_app import create_app
+        from werkzeug.serving import make_server
 
-        print("[SACA] creating config...", flush=True)
-        config = uvicorn.Config(
-            app,
-            host="127.0.0.1",
-            port=8000,
-            log_level="info",
-            log_config=None,  # skip dictConfig() — hangs on Android
-            lifespan="off",   # skip lifespan protocol — avoids LifespanAuto hang
-        )
+        print("[SACA] creating Flask app...", flush=True)
+        app = create_app()
 
-        print("[SACA] loading config...", flush=True)
-        config.load()
-        print("[SACA] config loaded, creating server...", flush=True)
+        print("[SACA] binding to 127.0.0.1:8000...", flush=True)
+        srv = make_server('127.0.0.1', 8000, app)
 
-        server = uvicorn.Server(config)
-        server.install_signal_handlers = lambda: None
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        print("[SACA] starting event loop...", flush=True)
         threading.Thread(target=_preload_models, daemon=True, name="saca-preload").start()
-        try:
-            loop.run_until_complete(server.serve())
-        finally:
-            loop.close()
-        print("[SACA] uvicorn exited", flush=True)
+
+        print("[SACA] Flask server listening on :8000", flush=True)
+        srv.serve_forever()
     except BaseException as exc:
         import traceback
         print(f"[SACA] Server CRASHED: {type(exc).__name__}: {exc}", flush=True)
