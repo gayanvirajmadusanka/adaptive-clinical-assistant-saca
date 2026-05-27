@@ -111,6 +111,19 @@ jobs:
           touch "$PYTHON_DIR/backend_release_android/data/warlpiri/__init__.py"
           touch "$PYTHON_DIR/backend_release_android/data/models/__init__.py" 2>/dev/null || true
 
+      - name: Generate _audio_map.py from audio_map.json
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          src = 'backend_release_android/data/audio/audio_map.json'
+          dst = 'mobile_app/android/app/src/main/python/backend_release_android/_audio_map.py'
+          with open(src) as f:
+              data = json.load(f)
+          with open(dst, 'w') as f:
+              f.write(f'AUDIO_MAP = {repr(data)}\n')
+          print(f'Generated {dst}')
+          EOF
+
       - name: Verify Python source data files
         run: |
           PYTHON_DIR="mobile_app/android/app/src/main/python"

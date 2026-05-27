@@ -28,11 +28,14 @@ _SILENCE_MS  = 400    # silence gap between stitched clips
 _TARGET_PEAK = 0.80   # normalisation target peak level
 
 try:
-    with open(_MAP_PATH, 'r') as _f:
-        _AUDIO_MAP = json.load(_f)
-except Exception as _e:
-    logger.error(f'Failed to load audio_map.json: {_e}')
-    _AUDIO_MAP = {}
+    from backend_release_android._audio_map import AUDIO_MAP as _AUDIO_MAP
+except ImportError:
+    try:
+        with open(_MAP_PATH, 'r') as _f:
+            _AUDIO_MAP = json.load(_f)
+    except Exception as _e:
+        logger.error(f'Failed to load audio_map.json: {_e}')
+        _AUDIO_MAP = {}
 
 _SUBFOLDER_MAP = {
     'questions': 'questions',
