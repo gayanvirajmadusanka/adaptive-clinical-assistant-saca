@@ -36,18 +36,23 @@ export default function RootLayout() {
 
     const startTime = Date.now();
     const poll = setInterval(async () => {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > POLL_TIMEOUT_MS) {
+        clearInterval(poll);
+        setServerReady(true);
+        return;
+      }
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
       try {
-        const res = await fetch(HEALTH_URL, { method: 'GET' });
+        const res = await fetch(HEALTH_URL, { method: 'GET', signal: controller.signal });
+        clearTimeout(timer);
         if (res.ok) {
           clearInterval(poll);
           setServerReady(true);
         }
       } catch (_) {
-        // server not up yet — keep polling
-        if (Date.now() - startTime > POLL_TIMEOUT_MS) {
-          clearInterval(poll);
-          setServerReady(true); // unblock UI even if server failed; errors surface naturally
-        }
+        clearTimeout(timer);
       }
     }, POLL_INTERVAL_MS);
 

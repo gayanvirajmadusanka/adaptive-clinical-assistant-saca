@@ -5,6 +5,11 @@ Placed at the Python source root so Chaquopy can call:
 
 Uses Flask + Werkzeug make_server (blocking I/O, no asyncio) so it works
 reliably in a background daemon thread on Android.
+
+threaded=False: requests handled directly in the server thread, no per-request
+thread spawning. Avoids JVM thread re-attachment overhead on Android/Chaquopy
+which caused request threads to silently hang and never send responses.
+All slow work (audio, models) is preloaded before serve_forever() starts.
 """
 
 import os
@@ -34,7 +39,7 @@ def start():
 
 
 def _preload_models():
-    """Warm up slow imports in background so they're ready before first request."""
+    """Preload all slow resources so every handler is fast on first request."""
     try:
         print("[SACA] preloading NLP model...", flush=True)
         from backend_release_android.nlp.symptom_extractor import _load_model
@@ -44,12 +49,10 @@ def _preload_models():
         print(f"[SACA] NLP preload failed: {e}", flush=True)
 
     try:
-        print("[SACA] warming question audio cache...", flush=True)
-        from backend_release_android.api.questions.questions_module import get_questions
-        from backend_release_android.constants import Language
-        get_questions([], Language.EN)
-        get_questions([], Language.WP)
-        print("[SACA] question audio cache ready", flush=True)
+        print("[SACA] warming audio cache...", flush=True)
+        from backend_release_android.api.services.audio_service import preload_all_audio
+        preload_all_audio()
+        print("[SACA] audio cache ready", flush=True)
     except Exception as e:
         print(f"[SACA] audio preload failed: {e}", flush=True)
 
@@ -63,10 +66,11 @@ def _run():
         print("[SACA] creating Flask app...", flush=True)
         app = create_app()
 
-        print("[SACA] binding to 127.0.0.1:8000...", flush=True)
-        srv = make_server('127.0.0.1', 8000, app, threaded=True)
+        print("[SACA] preloading before server starts...", flush=True)
+        _preload_models()
 
-        threading.Thread(target=_preload_models, daemon=True, name="saca-preload").start()
+        print("[SACA] binding to 127.0.0.1:8000...", flush=True)
+        srv = make_server('127.0.0.1', 8000, app)
 
         print("[SACA] Flask server listening on :8000", flush=True)
         srv.serve_forever()

@@ -230,6 +230,20 @@ def get_severity_audio(severity: str, language: str) -> str:
     return _to_b64(clip)
 
 
+def preload_all_audio() -> None:
+    """Load every audio clip in the audio map into the in-memory cache."""
+    loaded = 0
+    for section, keys in _AUDIO_MAP.items():
+        subfolder = _SUBFOLDER_MAP.get(section, section)
+        for key, lang_map in keys.items():
+            for lang, filename in lang_map.items():
+                path = os.path.join(_AUDIO_DIR, subfolder, filename)
+                if os.path.exists(path) and path not in _clip_cache:
+                    _load_clip(path)
+                    loaded += 1
+    logger.info(f'preload_all_audio: loaded {loaded} clips into cache')
+
+
 def get_answer_selected_audio(answer_id: str, language: str) -> str:
     clips = [_get_clip_samples('ui', 'you_selected', language)]
     if answer_id.endswith('y'):
