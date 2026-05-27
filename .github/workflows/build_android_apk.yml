@@ -131,6 +131,13 @@ jobs:
           ls -la "$PYTHON_DIR/backend_release_android/data/audio/" 2>/dev/null || echo "ERROR: data/audio/ not found"
           echo "=== WAV count ==="
           find "$PYTHON_DIR/backend_release_android/data" -name "*.wav" | wc -l || echo "0"
+          echo "=== PKL count ==="
+          find "$PYTHON_DIR/backend_release_android/models" -name "*.pkl" | wc -l || echo "0"
+          echo "=== _audio_map.py check ==="
+          ls -la "$PYTHON_DIR/backend_release_android/_audio_map.py" 2>/dev/null || echo "ERROR: _audio_map.py not found"
+
+      - name: Clear Gradle build cache to force fresh Python bundling
+        run: rm -rf ~/.gradle/caches/build-cache-*
 
       - name: Copy NativeModule Java files
         run: |
