@@ -17,6 +17,7 @@ const CHAQUOPY_VERSION = '15.0.1';
 // Python 3.10 is used because it supports modern type hints (str | None) and has
 // pre-built wheels for all required native packages. xgboost removed - not used.
 const PIP_PACKAGES = [
+  'flask==3.1.0',
   'fastapi==0.115.0',
   'uvicorn==0.33.0',
   'scikit-learn==1.3.2',
