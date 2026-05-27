@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "mobile_app",
+    "name": "SACA",
     "slug": "mobile_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/SACA_logo.png",
     "scheme": "mobileapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,9 +14,8 @@
     "android": {
       "package": "com.ishant.mobile_app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
+        "foregroundImage": "./assets/images/SACA_logo.png",
+        "backgroundColor": "#000000",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
