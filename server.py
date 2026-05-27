@@ -27,7 +27,6 @@ def start():
 
     thread = threading.Thread(target=_run, daemon=True, name="saca-server")
     thread.start()
-    # Give uvicorn a moment to bind the port before React Native makes its first call
     time.sleep(1.0)
     print("[SACA] Server started on http://127.0.0.1:8000", flush=True)
 
@@ -40,26 +39,37 @@ def _preload_models():
         _load_model()
         print("[SACA] NLP model ready", flush=True)
     except Exception as e:
-        print(f"[SACA] NLP preload failed (will retry on first request): {e}", flush=True)
+        print(f"[SACA] NLP preload failed: {e}", flush=True)
 
 
 def _run():
-    # uvicorn.run() hangs on Android because install_signal_handlers() deadlocks
-    # in a non-main thread (signal module restriction). Use Server directly and
-    # bypass signal handlers.
     try:
         print("[SACA] importing uvicorn...", flush=True)
         import uvicorn
         print("[SACA] importing app...", flush=True)
         from backend_release_android.api.main import app
 
-        config = uvicorn.Config(app, host="127.0.0.1", port=8000, log_level="info")
+        print("[SACA] creating config...", flush=True)
+        config = uvicorn.Config(
+            app,
+            host="127.0.0.1",
+            port=8000,
+            log_level="info",
+            log_config=None,  # skip dictConfig() — hangs on Android
+            lifespan="off",   # skip lifespan protocol — avoids LifespanAuto hang
+        )
+
+        print("[SACA] loading config...", flush=True)
+        config.load()
+        print("[SACA] config loaded, creating server...", flush=True)
+
         server = uvicorn.Server(config)
-        server.install_signal_handlers = lambda: None  # signal API requires main thread
+        server.install_signal_handlers = lambda: None
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        print("[SACA] starting uvicorn on :8000", flush=True)
+
+        print("[SACA] starting event loop...", flush=True)
         threading.Thread(target=_preload_models, daemon=True, name="saca-preload").start()
         try:
             loop.run_until_complete(server.serve())
