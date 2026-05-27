@@ -39,6 +39,10 @@ export default function VoiceInputScreen() {
   const router = useRouter();
   const { t, lang } = useLanguage();
 
+  // Native Android STT is English-only; Warlpiri (and any future language) uses the
+  // audio-recording + Python backend path even on Android.
+  const USE_ANDROID_STT = IS_ANDROID && lang === 'en';
+
   // ── shared state ──────────────────────────────────────────────────────────
   const [recording, setRecording] = useState(null);
   const [recordedSound, setRecordedSound] = useState(null);
@@ -66,27 +70,25 @@ export default function VoiceInputScreen() {
 
   // ── Android STT events (hooks must be at top level regardless of platform) ─
   useSpeechRecognitionEvent('start', () => {
-    if (IS_ANDROID) { setIsActive(true); startPulse(); animateBars(); }
+    if (USE_ANDROID_STT) { setIsActive(true); startPulse(); animateBars(); }
   });
   useSpeechRecognitionEvent('end', () => {
-    if (IS_ANDROID) { setIsActive(false); stopPulse(); stopBars(); }
+    if (USE_ANDROID_STT) { setIsActive(false); stopPulse(); stopBars(); }
   });
   useSpeechRecognitionEvent('result', (event) => {
-    if (!IS_ANDROID) return;
+    if (!USE_ANDROID_STT) return;
     const text = event.results[0]?.transcript || '';
     setTranscript(text);
     if (event.isFinal) { setIsActive(false); stopPulse(); stopBars(); }
   });
   useSpeechRecognitionEvent('error', (event) => {
-    if (!IS_ANDROID) return;
+    if (!USE_ANDROID_STT) return;
     setIsActive(false); stopPulse(); stopBars();
     if (event.error !== 'aborted') {
-      const isOfflineUnavailable =
-        event.error === 'language-not-supported' || event.error === 'client';
       Alert.alert(
         'Speech recognition unavailable',
-        isOfflineUnavailable
-          ? 'Offline speech model not installed. Go to Android Settings → General Management → Language → Speech Recognition to download the English offline model, or use the text input instead.'
+        event.error === 'language-not-supported'
+          ? 'Offline English speech model not found. Go to Android Settings → General Management → Language → Speech Recognition to download the English offline model.'
           : (event.message || 'Please try again or use the text input.'),
       );
     }
@@ -235,11 +237,26 @@ export default function VoiceInputScreen() {
       return;
     }
     setTranscript('');
+
+    // Detect which English offline locale is actually installed on this device.
+    // Hardcoding 'en-US' fails on devices where the downloaded model is 'en-AU', 'en-GB', etc.
+    let lang = 'en-US';
+    let requiresOnDeviceRecognition = true;
+    try {
+      const { installedLocales } = await ExpoSpeechRecognitionModule.getSupportedLocales({});
+      const installedEnglish = installedLocales.find(l => l.startsWith('en'));
+      if (installedEnglish) {
+        lang = installedEnglish;
+      } else {
+        requiresOnDeviceRecognition = false;
+      }
+    } catch (_) {}
+
     ExpoSpeechRecognitionModule.start({
-      lang: 'en-US',
+      lang,
       interimResults: true,
       continuous: false,
-      requiresOnDeviceRecognition: true,
+      requiresOnDeviceRecognition,
     });
   };
 
@@ -314,7 +331,7 @@ export default function VoiceInputScreen() {
   // ── mic button ────────────────────────────────────────────────────────────
   const handleMicPress = async () => {
     try {
-      if (IS_ANDROID) {
+      if (USE_ANDROID_STT) {
         isActive ? stopAndroidSTT() : await startAndroidSTT();
       } else {
         if (isRecording) {
@@ -331,7 +348,7 @@ export default function VoiceInputScreen() {
 
   // ── iOS playback ──────────────────────────────────────────────────────────
   const handlePlay = async () => {
-    if (IS_ANDROID) return;
+    if (USE_ANDROID_STT) return;
     try {
       await stopInstructionAudio();
       const playableUri = safeRecordingUri || recordingUri;
@@ -378,7 +395,7 @@ export default function VoiceInputScreen() {
   const handleDelete = async () => {
     try {
       await stopInstructionAudio();
-      if (IS_ANDROID) {
+      if (USE_ANDROID_STT) {
         if (isActive) stopAndroidSTT();
         setTranscript('');
         setIsActive(false);
@@ -401,7 +418,7 @@ export default function VoiceInputScreen() {
 
   // ── continue ──────────────────────────────────────────────────────────────
   const handleContinue = async () => {
-    if (IS_ANDROID) {
+    if (USE_ANDROID_STT) {
       if (!transcript.trim()) {
         Alert.alert('Nothing recorded', 'Please speak before continuing.');
         return;
@@ -443,8 +460,8 @@ export default function VoiceInputScreen() {
     }
   };
 
-  const hasResult = IS_ANDROID ? transcript.trim().length > 0 : !!recordingUri;
-  const isActiveState = IS_ANDROID ? isActive : isRecording;
+  const hasResult = USE_ANDROID_STT ? transcript.trim().length > 0 : !!recordingUri;
+  const isActiveState = USE_ANDROID_STT ? isActive : isRecording;
 
   return (
     <AppScreen
@@ -511,15 +528,15 @@ export default function VoiceInputScreen() {
             <Animated.View style={[styles.waveBar, { height: bar5 }]} />
           </View>
 
-          {IS_ANDROID && transcript ? (
+          {USE_ANDROID_STT && transcript ? (
             <Text style={[styles.recordText, { fontStyle: 'italic' }]}>"{transcript}"</Text>
           ) : (
             <Text style={styles.recordText}>
               {isActiveState
-                ? IS_ANDROID
+                ? USE_ANDROID_STT
                   ? 'Listening... tap to stop'
                   : t('recording_hint') || 'Recording... tap to stop'
-                : IS_ANDROID
+                : USE_ANDROID_STT
                   ? 'Tap mic and speak clearly'
                   : t('speak_hint') || 'Click on mic to record voice'}
             </Text>
@@ -539,7 +556,7 @@ export default function VoiceInputScreen() {
               <MaterialIcons name="delete-outline" size={28} color="#000" />
             </Pressable>
 
-            {!IS_ANDROID && (
+            {!USE_ANDROID_STT && (
               <>
                 <Pressable
                   onPress={handlePlay}

@@ -9,6 +9,7 @@ import json
 import logging
 import math
 import os
+import pkgutil
 import tempfile
 import wave
 
@@ -33,9 +34,13 @@ except ImportError:
     try:
         with open(_MAP_PATH, 'r') as _f:
             _AUDIO_MAP = json.load(_f)
-    except Exception as _e:
-        logger.error(f'Failed to load audio_map.json: {_e}')
-        _AUDIO_MAP = {}
+    except Exception:
+        try:
+            _raw = pkgutil.get_data('backend_release_android.data.audio', 'audio_map.json')
+            _AUDIO_MAP = json.loads(_raw.decode()) if _raw else {}
+        except Exception as _e:
+            logger.error(f'Failed to load audio_map.json: {_e}')
+            _AUDIO_MAP = {}
 
 _SUBFOLDER_MAP = {
     'questions': 'questions',
@@ -46,31 +51,52 @@ _SUBFOLDER_MAP = {
 }
 
 
-def _read_wav(path: str) -> tuple[np.ndarray, int] | tuple[None, None]:
-    """Read WAV file as (float32 mono samples, framerate)."""
-    try:
-        with wave.open(path, 'rb') as w:
-            n_channels = w.getnchannels()
-            sampwidth  = w.getsampwidth()
-            framerate  = w.getframerate()
-            raw        = w.readframes(w.getnframes())
-
-        if sampwidth == 2:
-            samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
-        elif sampwidth == 1:
-            samples = np.frombuffer(raw, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
-        elif sampwidth == 4:
-            samples = np.frombuffer(raw, dtype=np.int32).astype(np.float32) / 2147483648.0
-        else:
-            return None, None
-
-        if n_channels > 1:
-            samples = samples.reshape(-1, n_channels).mean(axis=1)
-
-        return samples.astype(np.float32), framerate
-    except Exception as e:
-        logger.error(f'Failed to read WAV {path}: {e}')
+def _decode_wav_filelike(filelike) -> tuple[np.ndarray, int] | tuple[None, None]:
+    with wave.open(filelike, 'rb') as w:
+        n_channels = w.getnchannels()
+        sampwidth  = w.getsampwidth()
+        framerate  = w.getframerate()
+        raw        = w.readframes(w.getnframes())
+    if sampwidth == 2:
+        samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    elif sampwidth == 1:
+        samples = np.frombuffer(raw, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
+    elif sampwidth == 4:
+        samples = np.frombuffer(raw, dtype=np.int32).astype(np.float32) / 2147483648.0
+    else:
         return None, None
+    if n_channels > 1:
+        samples = samples.reshape(-1, n_channels).mean(axis=1)
+    return samples.astype(np.float32), framerate
+
+
+def _read_wav(path: str) -> tuple[np.ndarray, int] | tuple[None, None]:
+    """Read WAV file as (float32 mono samples, framerate).
+
+    Falls back to pkgutil.get_data() for Chaquopy APK assets when the
+    filesystem path is not extractable (binary files in Python packages).
+    """
+    # Filesystem path
+    try:
+        return _decode_wav_filelike(path)
+    except Exception:
+        pass
+
+    # Chaquopy APK fallback: derive dotted package from path and read via pkgutil
+    try:
+        norm  = os.path.normpath(path).replace('\\', '/')
+        parts = norm.split('/')
+        idx   = next(i for i, p in enumerate(parts) if p == 'backend_release_android')
+        pkg   = '.'.join(parts[idx:-1])
+        fname = parts[-1]
+        data  = pkgutil.get_data(pkg, fname)
+        if data:
+            return _decode_wav_filelike(io.BytesIO(data))
+    except Exception:
+        pass
+
+    logger.error(f'Failed to read WAV {path}')
+    return None, None
 
 
 def _resample(samples: np.ndarray, in_rate: int, out_rate: int) -> np.ndarray:
@@ -238,9 +264,10 @@ def preload_all_audio() -> None:
         for key, lang_map in keys.items():
             for lang, filename in lang_map.items():
                 path = os.path.join(_AUDIO_DIR, subfolder, filename)
-                if os.path.exists(path) and path not in _clip_cache:
-                    _load_clip(path)
-                    loaded += 1
+                if path not in _clip_cache:
+                    clip = _load_clip(path)
+                    if clip is not None:
+                        loaded += 1
     logger.info(f'preload_all_audio: loaded {loaded} clips into cache')
 
 
