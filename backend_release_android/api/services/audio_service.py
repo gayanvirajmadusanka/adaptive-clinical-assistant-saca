@@ -181,9 +181,6 @@ def _get_clip_samples(section: str, key: str, language: str) -> np.ndarray | Non
 
     subfolder = _SUBFOLDER_MAP.get(section, section)
     path      = os.path.join(_AUDIO_DIR, subfolder, filename)
-    if not os.path.exists(path):
-        logger.warning(f'Audio file not found: {path}')
-        return None
     return _load_clip(path)
 
 
