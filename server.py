@@ -31,6 +31,17 @@ def start():
     print("[SACA] Server started on http://127.0.0.1:8000")
 
 
+def _preload_models():
+    """Warm up slow imports in background so they're ready before first request."""
+    try:
+        print("[SACA] preloading NLP model...")
+        from backend_release_android.nlp.symptom_extractor import _load_model
+        _load_model()
+        print("[SACA] NLP model ready")
+    except Exception as e:
+        print(f"[SACA] NLP preload failed (will retry on first request): {e}")
+
+
 def _run():
     try:
         print("[SACA] importing uvicorn...")
@@ -38,6 +49,7 @@ def _run():
         print("[SACA] importing app...")
         from backend_release_android.api.main import app
         print("[SACA] starting uvicorn on :8000")
+        threading.Thread(target=_preload_models, daemon=True, name="saca-preload").start()
         uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
     except Exception as exc:
         print(f"[SACA] Server error: {exc}")
