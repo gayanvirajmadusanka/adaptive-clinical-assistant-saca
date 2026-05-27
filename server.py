@@ -54,7 +54,7 @@ def _run():
         app = create_app()
 
         print("[SACA] binding to 127.0.0.1:8000...", flush=True)
-        srv = make_server('127.0.0.1', 8000, app)
+        srv = make_server('127.0.0.1', 8000, app, threaded=True)
 
         threading.Thread(target=_preload_models, daemon=True, name="saca-preload").start()
 
