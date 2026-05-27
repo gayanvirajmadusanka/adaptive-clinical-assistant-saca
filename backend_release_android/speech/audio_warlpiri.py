@@ -49,28 +49,45 @@ _DELTA_N  = 4       # half-window for delta; matches librosa width=9 approximati
 DTW_THRESHOLD    = 200.0
 FRAME_RATIO_LIMIT = 3.0
 
-# prefer android-specific precomputed MFCCs; fall back to original
-_MFCC_FILE = "keyword_mfcc_android.json"
-if not os.path.exists(os.path.join(_DATA_DIR, _MFCC_FILE)):
-    _MFCC_FILE = "keyword_mfcc.json"
-
-
 def _load(filename: str) -> dict:
     path = os.path.join(_DATA_DIR, filename)
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-KEYWORD_MFCC        = _load(_MFCC_FILE)
-KEYWORD_SYMPTOM_MAP = _load("keyword_symptom_map.json")
+# Loaded lazily on first Warlpiri audio request (867 KB JSON → numpy takes 10-30s on Android)
+_KEYWORD_REFS: dict[str, list[np.ndarray]] | None = None
+_KEYWORD_SYMPTOM_MAP: dict | None = None
 
-_KEYWORD_REFS: dict[str, list[np.ndarray]] = {}
-for keyword, data in KEYWORD_MFCC.items():
-    arr = np.array(data)
-    if arr.ndim == 2:
-        _KEYWORD_REFS[keyword] = [arr]
-    elif arr.ndim == 3:
-        _KEYWORD_REFS[keyword] = [arr[i] for i in range(arr.shape[0])]
+
+def _ensure_refs_loaded() -> None:
+    global _KEYWORD_REFS, _KEYWORD_SYMPTOM_MAP
+    if _KEYWORD_REFS is not None:
+        return
+
+    # prefer android-specific precomputed MFCCs; fall back to original
+    mfcc_file = "keyword_mfcc_android.json"
+    if not os.path.exists(os.path.join(_DATA_DIR, mfcc_file)):
+        mfcc_file = "keyword_mfcc.json"
+
+    try:
+        keyword_mfcc = _load(mfcc_file)
+    except Exception as e:
+        print(f"Failed to load MFCC data: {e}")
+        _KEYWORD_REFS = {}
+        _KEYWORD_SYMPTOM_MAP = {}
+        return
+
+    _KEYWORD_SYMPTOM_MAP = _load("keyword_symptom_map.json")
+
+    refs: dict[str, list[np.ndarray]] = {}
+    for keyword, data in keyword_mfcc.items():
+        arr = np.array(data)
+        if arr.ndim == 2:
+            refs[keyword] = [arr]
+        elif arr.ndim == 3:
+            refs[keyword] = [arr[i] for i in range(arr.shape[0])]
+    _KEYWORD_REFS = refs
 
 
 def _load_wav(audio_path: str) -> tuple[np.ndarray, int] | tuple[None, None]:
@@ -237,6 +254,7 @@ def _distance_to_confidence(distance: float) -> float:
 
 
 def recognize(audio_path: str, allowed_keywords=None) -> dict:
+    _ensure_refs_loaded()
     base = {"input_type": "audio_warlpiri", "audio_path": audio_path}
 
     if not _KEYWORD_REFS:
@@ -281,7 +299,7 @@ def recognize(audio_path: str, allowed_keywords=None) -> dict:
     symptoms       = []
     keyword_scores = {}
     for keyword, distance in matched_keywords.items():
-        symptom = KEYWORD_SYMPTOM_MAP.get(keyword)
+        symptom = _KEYWORD_SYMPTOM_MAP.get(keyword)
         if symptom and symptom not in symptoms:
             symptoms.append(symptom)
         keyword_scores[keyword] = round(distance, 3)
@@ -298,4 +316,5 @@ def recognize(audio_path: str, allowed_keywords=None) -> dict:
 
 
 def list_keywords() -> list:
-    return list(_KEYWORD_REFS.keys())
+    _ensure_refs_loaded()
+    return list((_KEYWORD_REFS or {}).keys())

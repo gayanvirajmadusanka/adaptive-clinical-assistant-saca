@@ -12,7 +12,7 @@ import { LanguageProvider } from '../src/context/LanguageContext';
 const IS_ANDROID_RELEASE = Platform.OS === 'android' && !__DEV__;
 const HEALTH_URL = 'http://127.0.0.1:8000/health';
 const POLL_INTERVAL_MS = 600;
-const POLL_TIMEOUT_MS  = 60000;
+const POLL_TIMEOUT_MS  = 120000;
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
