@@ -104,12 +104,16 @@ jobs:
           mkdir -p "$PYTHON_DIR"
           cp server.py "$PYTHON_DIR/"
           cp -rL backend_release_android "$PYTHON_DIR/"
-          # Add __init__.py to data directories so Chaquopy bundles all files inside them
+          # Add __init__.py so Chaquopy extracts all files (not just .py) from these dirs
+          touch "$PYTHON_DIR/backend_release_android/models/__init__.py"
           touch "$PYTHON_DIR/backend_release_android/data/__init__.py"
           touch "$PYTHON_DIR/backend_release_android/data/audio/__init__.py"
           touch "$PYTHON_DIR/backend_release_android/data/audio/output/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/audio/output/answers/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/audio/output/questions/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/audio/output/symptoms/__init__.py"
+          touch "$PYTHON_DIR/backend_release_android/data/audio/output/ui/__init__.py"
           touch "$PYTHON_DIR/backend_release_android/data/warlpiri/__init__.py"
-          touch "$PYTHON_DIR/backend_release_android/data/models/__init__.py" 2>/dev/null || true
 
       - name: Generate _audio_map.py from audio_map.json
         run: |

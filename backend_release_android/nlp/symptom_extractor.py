@@ -1,6 +1,7 @@
 import os
 import json
 import pickle
+import pkgutil
 from rapidfuzz import fuzz
 
 _BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,16 +50,25 @@ def _get_en_vocab() -> list:
     return _en_vocab
 
 
+def _load_pkl_file(path: str) -> object:
+    try:
+        with open(path, 'rb') as f:
+            return pickle.load(f)
+    except (OSError, IOError):
+        return pickle.loads(pkgutil.get_data('backend_release_android.models', os.path.basename(path)))
+
+
 def _load_model() -> bool:
     global _model, _tfidf, _label_enc
     if _model is not None:
         return True
-    if all(os.path.exists(p) for p in [_MODEL_PATH, _TFIDF_PATH, _ENCODER_PATH]):
-        with open(_MODEL_PATH,   "rb") as f: _model     = pickle.load(f)
-        with open(_TFIDF_PATH,   "rb") as f: _tfidf     = pickle.load(f)
-        with open(_ENCODER_PATH, "rb") as f: _label_enc = pickle.load(f)
+    try:
+        _model     = _load_pkl_file(_MODEL_PATH)
+        _tfidf     = _load_pkl_file(_TFIDF_PATH)
+        _label_enc = _load_pkl_file(_ENCODER_PATH)
         return True
-    return False
+    except Exception:
+        return False
 
 
 def _apply_synonyms(text: str) -> list:

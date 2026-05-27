@@ -1,5 +1,6 @@
 import os
 import pickle
+import pkgutil
 from dataclasses import dataclass
 
 import numpy as np
@@ -10,6 +11,15 @@ from backend_release_android.constants import Language, Recommendation, Severity
 
 _RELEASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _MODEL_DIR   = os.path.join(_RELEASE_DIR, "models")
+
+
+def _load_pkl(path: str):
+    try:
+        with open(path, 'rb') as f:
+            return pickle.load(f)
+    except (OSError, IOError):
+        data = pkgutil.get_data('backend_release_android.models', os.path.basename(path))
+        return pickle.loads(data)
 
 
 @dataclass
@@ -68,9 +78,9 @@ RECOMMENDATION_TRANSLATIONS = {
 
 class TriagePredictor:
     def __init__(self, model_path: str, tfidf_path: str, le_path: str):
-        with open(model_path, 'rb') as f: self.model = pickle.load(f)
-        with open(tfidf_path, 'rb') as f: self.tfidf = pickle.load(f)
-        with open(le_path,    'rb') as f: self.le    = pickle.load(f)
+        self.model = _load_pkl(model_path)
+        self.tfidf = _load_pkl(tfidf_path)
+        self.le    = _load_pkl(le_path)
 
     def predict(
         self, symptoms: list, age: str, gender: str, duration_value: int,
