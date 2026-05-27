@@ -3,13 +3,14 @@ SACA Flask server startup for Chaquopy Android integration.
 Placed at the Python source root so Chaquopy can call:
     Python.getInstance().getModule("server").callAttr("start")
 
-Uses Flask + Werkzeug make_server (blocking I/O, no asyncio) so it works
+Uses wsgiref.simple_server (stdlib, HTTP/1.0, no keep-alive) so it works
 reliably in a background daemon thread on Android.
 
-threaded=False: requests handled directly in the server thread, no per-request
-thread spawning. Avoids JVM thread re-attachment overhead on Android/Chaquopy
-which caused request threads to silently hang and never send responses.
-All slow work (audio, models) is preloaded before serve_forever() starts.
+Werkzeug make_server defaulted to HTTP/1.1 with keep-alive — in single-threaded
+mode the server thread blocks on the keep-alive socket after the first response,
+preventing all subsequent connections from being processed.
+wsgiref sends Connection: close after every response, so the thread is always
+free to accept the next connection immediately.
 """
 
 import os
@@ -61,7 +62,14 @@ def _run():
     try:
         print("[SACA] importing Flask app...", flush=True)
         from backend_release_android.api.flask_app import create_app
-        from werkzeug.serving import make_server
+        from wsgiref.simple_server import make_server as wsgi_make_server
+        from wsgiref.simple_server import WSGIRequestHandler
+
+        class _Handler(WSGIRequestHandler):
+            def log_message(self, fmt, *args):
+                print(f"[SACA-HTTP] {fmt % args}", flush=True)
+            def log_error(self, fmt, *args):
+                print(f"[SACA-HTTP-ERR] {fmt % args}", flush=True)
 
         print("[SACA] creating Flask app...", flush=True)
         app = create_app()
@@ -70,7 +78,7 @@ def _run():
         _preload_models()
 
         print("[SACA] binding to 127.0.0.1:8000...", flush=True)
-        srv = make_server('127.0.0.1', 8000, app)
+        srv = wsgi_make_server('127.0.0.1', 8000, app, handler_class=_Handler)
 
         print("[SACA] Flask server listening on :8000", flush=True)
         srv.serve_forever()
