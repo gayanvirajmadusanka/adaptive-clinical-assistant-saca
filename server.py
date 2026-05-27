@@ -43,6 +43,16 @@ def _preload_models():
     except Exception as e:
         print(f"[SACA] NLP preload failed: {e}", flush=True)
 
+    try:
+        print("[SACA] warming question audio cache...", flush=True)
+        from backend_release_android.api.questions.questions_module import get_questions
+        from backend_release_android.constants import Language
+        get_questions([], Language.EN)
+        get_questions([], Language.WP)
+        print("[SACA] question audio cache ready", flush=True)
+    except Exception as e:
+        print(f"[SACA] audio preload failed: {e}", flush=True)
+
 
 def _run():
     try:

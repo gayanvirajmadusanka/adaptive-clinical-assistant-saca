@@ -106,14 +106,22 @@ def _to_b64(samples: np.ndarray | None) -> str:
     return base64.b64encode(_samples_to_wav_bytes(samples)).decode()
 
 
+_clip_cache: dict = {}
+
+
 def _load_clip(path: str) -> np.ndarray | None:
-    """Load WAV, resample to target rate, and normalize."""
+    """Load WAV, resample to target rate, and normalize. Results are cached in memory."""
+    if path in _clip_cache:
+        return _clip_cache[path]
     samples, rate = _read_wav(path)
     if samples is None:
+        _clip_cache[path] = None
         return None
     if rate != _TARGET_RATE:
         samples = _resample(samples, rate, _TARGET_RATE)
-    return _normalize(samples)
+    result = _normalize(samples)
+    _clip_cache[path] = result
+    return result
 
 
 def _stitch(clips: list) -> np.ndarray:
