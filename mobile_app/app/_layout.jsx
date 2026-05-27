@@ -27,16 +27,15 @@ function LoadingSplash() {
   const dot3  = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
-    // Gentle logo breathing
-    Animated.loop(
+    const pulseLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, { toValue: 1.06, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
         Animated.timing(pulse, { toValue: 1.00, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       ])
-    ).start();
+    );
+    pulseLoop.start();
 
-    // Staggered dots
-    const dotAnim = (dot, delay) =>
+    const makeDotLoop = (dot, delay) =>
       Animated.loop(
         Animated.sequence([
           Animated.delay(delay),
@@ -45,9 +44,12 @@ function LoadingSplash() {
           Animated.delay(700 - delay),
         ])
       );
-    dotAnim(dot1,   0).start();
-    dotAnim(dot2, 233).start();
-    dotAnim(dot3, 466).start();
+    const d1 = makeDotLoop(dot1,   0);
+    const d2 = makeDotLoop(dot2, 233);
+    const d3 = makeDotLoop(dot3, 466);
+    d1.start(); d2.start(); d3.start();
+
+    return () => { pulseLoop.stop(); d1.stop(); d2.stop(); d3.stop(); };
   }, []);
 
   return (
