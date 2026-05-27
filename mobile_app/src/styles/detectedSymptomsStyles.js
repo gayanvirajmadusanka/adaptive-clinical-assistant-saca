@@ -1,9 +1,15 @@
 // detectedSymptomsStyles.js
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for DetectedSymptomsScreen
 export default StyleSheet.create({
+
+  // Main screen container
   container: {
     flex: 1,
     alignItems: 'center',
@@ -11,6 +17,7 @@ export default StyleSheet.create({
     paddingTop: 85,
   },
 
+  // Header bar container
   headerBar: {
     width: '94%',
     height: 64,
@@ -22,6 +29,7 @@ export default StyleSheet.create({
     marginBottom: 28,
   },
 
+  // Header title text
   headerText: {
     fontSize: 26,
     fontFamily: FONTS.bold,
@@ -29,6 +37,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // Main detected symptom box
   symptomBox: {
     width: '94%',
     minHeight: 300,
@@ -39,6 +48,7 @@ export default StyleSheet.create({
     position: 'relative',
   },
 
+  // Detected symptom text
   symptomText: {
     fontSize: 24,
     lineHeight: 38,
@@ -47,6 +57,7 @@ export default StyleSheet.create({
     paddingRight: 70,
   },
 
+  // Speaker button for symptom audio
   speakerButton: {
     position: 'absolute',
     right: 16,
@@ -61,16 +72,19 @@ export default StyleSheet.create({
     borderColor: '#000',
   },
 
+  // Speaker button pressed effect
   speakerPressed: {
     backgroundColor: '#8B3A1C',
     borderColor: '#5C2E0A',
   },
 
+  // Speaker icon image
   speakerIcon: {
     width: 30,
     height: 30,
   },
 
+  // Question text below symptom box
   questionText: {
     fontSize: 28,
     fontFamily: FONTS.bold,
@@ -80,6 +94,7 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
 
+  // Row containing Yes and No buttons
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -87,6 +102,7 @@ export default StyleSheet.create({
     marginBottom: 34,
   },
 
+  // Yes/No button style
   choiceButton: {
     width: 145,
     height: 64,
@@ -99,11 +115,13 @@ export default StyleSheet.create({
     elevation: 5,
   },
 
+  // Yes/No button pressed effect
   choicePressed: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
   },
 
+  // Yes/No button text
   choiceText: {
     fontSize: 26,
     fontFamily: FONTS.bold,
@@ -111,6 +129,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // Voice answer section row
   voiceAnswerRow: {
     width: '100%',
     flexDirection: 'row',
@@ -119,6 +138,7 @@ export default StyleSheet.create({
     marginBottom: 30,
   },
 
+  // Voice Yes/No button style
   voiceYesNoButton: {
     width: 112,
     height: 54,
@@ -132,6 +152,7 @@ export default StyleSheet.create({
     elevation: 4,
   },
 
+  // Voice Yes/No text style
   voiceYesNoText: {
     fontSize: 18,
     fontFamily: FONTS.bold,
@@ -139,15 +160,18 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // Selected voice answer style
   voiceAnswerSelected: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
   },
 
+  // Selected voice answer text color
   voiceAnswerSelectedText: {
     color: '#FFF',
   },
 
+  // Wrapper around microphone section
   voiceMicWrapper: {
     alignItems: 'center',
     justifyContent: 'flex-start',
@@ -155,6 +179,7 @@ export default StyleSheet.create({
     width: 110,
   },
 
+  // Microphone button style
   detectedMicButton: {
     width: 64,
     height: 64,
@@ -166,16 +191,19 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Recording microphone style
   detectedMicRecording: {
     backgroundColor: '#8B1E0D',
     borderColor: '#5F1207',
   },
 
+  // Microphone icon image
   detectedMicIcon: {
     width: 34,
     height: 34,
   },
 
+  // Instruction text below microphone
   tapToAnswerText: {
     marginTop: 6,
     fontSize: 11,
@@ -185,6 +213,7 @@ export default StyleSheet.create({
     minHeight: 24,
   },
 
+  // Recorded voice playback box
   detectedRecordedBox: {
     marginTop: 8,
     width: 108,
@@ -199,6 +228,7 @@ export default StyleSheet.create({
     paddingHorizontal: 6,
   },
 
+  // Play button inside recorded box
   detectedPlayButton: {
     width: 30,
     height: 30,
@@ -208,12 +238,14 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Voice recording duration text
   detectedDurationText: {
     fontSize: 11,
     fontFamily: FONTS.bold,
     color: '#000',
   },
 
+  // Delete recording button
   detectedDeleteButton: {
     width: 30,
     height: 30,
@@ -223,6 +255,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Row containing icon-based Yes/No options
   iconButtonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -230,18 +263,20 @@ export default StyleSheet.create({
     marginBottom: 30,
   },
 
- iconChoiceButton: {
-  width: 140,
-  height: 120,
-  borderRadius: 20,
-  backgroundColor: '#F5EAD8',
-  borderWidth: 2,
-  borderColor: '#CDBE9D',
-  alignItems: 'center',
-  justifyContent: 'center',
-  elevation: 3,
-},
+  // Icon choice button style
+  iconChoiceButton: {
+    width: 140,
+    height: 120,
+    borderRadius: 20,
+    backgroundColor: '#F5EAD8',
+    borderWidth: 2,
+    borderColor: '#CDBE9D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+  },
 
+  // Selected icon choice style
   iconChoiceSelected: {
     borderWidth: 3,
     borderColor: '#C94B32',
@@ -256,19 +291,23 @@ export default StyleSheet.create({
     elevation: 6,
   },
 
+  // Pressed icon button effect
   iconChoicePressed: {
     transform: [{ scale: 0.96 }],
   },
 
+  // Yes/No image icon style
   yesNoIcon: {
     width: 98,
     height: 98,
   },
 
+  // Selected Yes/No icon effect
   yesNoIconSelected: {
     transform: [{ scale: 1.08 }],
   },
 
+  // Back button style
   backButton: {
     width: 190,
     height: 70,
@@ -281,22 +320,26 @@ export default StyleSheet.create({
     elevation: 4,
   },
 
+  // Back button content layout
   backButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  // Back arrow image style
   backArrowImage: {
     width: 26,
     height: 26,
     marginRight: 10,
   },
 
+  // Back button pressed effect
   backPressedGrey: {
     backgroundColor: '#A9A9A9',
   },
 
+  // Back button text
   backText: {
     fontSize: 28,
     fontFamily: FONTS.bold,
@@ -304,6 +347,7 @@ export default StyleSheet.create({
     color: '#000',
   },
 
+  // Dark overlay behind modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.35)',
@@ -311,6 +355,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Error modal container
   errorModalBox: {
     width: '92%',
     borderRadius: 12,
@@ -321,6 +366,7 @@ export default StyleSheet.create({
     elevation: 8,
   },
 
+  // Error modal header
   errorHeader: {
     backgroundColor: '#8B2E0A',
     paddingVertical: 18,
@@ -330,6 +376,7 @@ export default StyleSheet.create({
     justifyContent: 'space-between',
   },
 
+  // Error modal title text
   errorTitle: {
     color: '#FFF',
     fontSize: 21,
@@ -339,6 +386,7 @@ export default StyleSheet.create({
     paddingRight: 12,
   },
 
+  // Error modal close button
   errorCloseButton: {
     width: 48,
     height: 48,
@@ -349,6 +397,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // Error modal X icon
   errorCloseText: {
     color: '#FFF',
     fontSize: 34,
@@ -357,6 +406,7 @@ export default StyleSheet.create({
     lineHeight: 36,
   },
 
+  // Error modal body section
   errorBody: {
     paddingHorizontal: 22,
     paddingTop: 28,
@@ -364,6 +414,7 @@ export default StyleSheet.create({
     minHeight: 155,
   },
 
+  // Bold error message
   errorMessageBold: {
     color: '#5C2E0A',
     fontSize: 19,
@@ -373,6 +424,7 @@ export default StyleSheet.create({
     lineHeight: 26,
   },
 
+  // Normal error message
   errorMessage: {
     color: '#5C2E0A',
     fontSize: 17,
@@ -382,6 +434,7 @@ export default StyleSheet.create({
     lineHeight: 24,
   },
 
+  // OK button style
   errorOkButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#E3AD35',
@@ -392,11 +445,13 @@ export default StyleSheet.create({
     borderRadius: 22,
   },
 
+  // OK button pressed effect
   errorOkButtonPressed: {
     backgroundColor: '#8B1E0D',
     transform: [{ scale: 0.96 }],
   },
 
+  // OK button text
   errorOkText: {
     color: '#FFF',
     fontFamily: FONTS.bold,

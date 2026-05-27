@@ -1,8 +1,5 @@
 // BodyInputScreen.js
-// Purpose: Lets user choose a body part using visible red dots or the body part list.
-// AppScreen handles SafeArea, background, footer, and language modal.
-// Speaker icon plays local body part audio from assets/audio/body_parts.
-// Tooltip text now changes based on selected language.
+// Lets user select body part using red dots or body list.
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Image, Pressable, ScrollView } from 'react-native';
@@ -13,6 +10,7 @@ import { useLanguage } from '../context/LanguageContext';
 import bodyMap from '../../assets/data/body_map.json';
 import styles from '../styles/bodyInputStyles';
 
+// Local audio helpers
 import {
   playLocalAudio,
   getBodyPartAudio,
@@ -23,23 +21,28 @@ export default function BodyInputScreen() {
   const router = useRouter();
   const { t, lang } = useLanguage();
 
+  // Selected gender and body dot
   const [gender, setGender] = useState('male');
   const [selectedDot, setSelectedDot] = useState(null);
 
+  // Convert body map object to array
   const bodyParts = useMemo(() => Object.values(bodyMap), []);
 
+  // Stop audio when screen closes
   useEffect(() => {
     return () => {
       stopLocalAudio();
     };
   }, []);
 
+  // Get translated body label
   const getLabel = (part) => {
     return lang === 'wp'
       ? part?.label_wp || part?.label_en
       : part?.label_en;
   };
 
+  // Get tooltip label
   const getTooltipLabel = (partKey) => {
     const actualKey = partKey === 'general' ? 'whole_body' : partKey;
 
@@ -54,12 +57,16 @@ export default function BodyInputScreen() {
       : part?.label_en;
   };
 
+  // Play body part audio
   const playBodyPartAudio = async (partKey) => {
     const audioKey = partKey === 'general' ? 'whole_body' : partKey;
+
     const audioSource = getBodyPartAudio(audioKey, lang);
+
     await playLocalAudio(audioSource);
   };
 
+  // Open symptom screen
   const openSymptoms = async (partKey) => {
     await stopLocalAudio();
 
@@ -72,6 +79,7 @@ export default function BodyInputScreen() {
     });
   };
 
+  // Handle red dot press
   const handleDotPress = (partKey) => {
     setSelectedDot(partKey);
 
@@ -80,6 +88,7 @@ export default function BodyInputScreen() {
     }, 700);
   };
 
+  // Choose body image
   const bodyImage =
     gender === 'male'
       ? require('../../assets/images/male_image.png')
@@ -96,10 +105,13 @@ export default function BodyInputScreen() {
       }}
     >
       <View style={styles.container}>
+
+        {/* Header */}
         <View style={styles.headerBar}>
           <Text style={styles.headerText}>{t('show')}</Text>
         </View>
 
+        {/* Gender toggle */}
         <View style={styles.genderToggle}>
           <Pressable
             hitSlop={10}
@@ -138,11 +150,14 @@ export default function BodyInputScreen() {
           </Pressable>
         </View>
 
+        {/* Hint text */}
         <Text style={styles.hintText}>
           {t('tap_red_dot') || 'Tap a red dot or choose from the list'}
         </Text>
 
         <View style={styles.mainCard}>
+
+          {/* Body image section */}
           <View style={styles.bodyPanel}>
             <Image
               key={gender}
@@ -181,96 +196,6 @@ export default function BodyInputScreen() {
               onPress={() => handleDotPress('ear')}
             />
 
-            {/* JAW */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotJaw,
-                selectedDot === 'jaw' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('jaw')}
-            />
-
-            {/* NOSE */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotNose,
-                selectedDot === 'nose' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('nose')}
-            />
-
-            {/* NECK */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotNeck,
-                selectedDot === 'neck' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('neck')}
-            />
-
-            {/* THROAT */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotThroat,
-                selectedDot === 'throat' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('throat')}
-            />
-
-            {/* CHEST */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotChest,
-                selectedDot === 'chest' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('chest')}
-            />
-
-            {/* STOMACH */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotStomach,
-                selectedDot === 'stomach' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('stomach')}
-            />
-
-            {/* ARM */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotArm,
-                selectedDot === 'arm' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('arm')}
-            />
-
-            {/* BACK */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotBack,
-                selectedDot === 'back' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('back')}
-            />
-
-            {/* WHOLE BODY */}
-            <Pressable
-              style={[
-                styles.bodyDot,
-                styles.dotWholeBody,
-                selectedDot === 'general' && styles.dotPressed,
-              ]}
-              onPress={() => handleDotPress('general')}
-            />
-
             {/* TOOLTIP */}
             {selectedDot && (
               <View
@@ -280,15 +205,6 @@ export default function BodyInputScreen() {
                   selectedDot === 'head' && styles.tooltipHead,
                   selectedDot === 'eye' && styles.tooltipEye,
                   selectedDot === 'ear' && styles.tooltipEar,
-                  selectedDot === 'nose' && styles.tooltipNose,
-                  selectedDot === 'jaw' && styles.tooltipJaw,
-                  selectedDot === 'neck' && styles.tooltipNeck,
-                  selectedDot === 'throat' && styles.tooltipThroat,
-                  selectedDot === 'chest' && styles.tooltipChest,
-                  selectedDot === 'stomach' && styles.tooltipStomach,
-                  selectedDot === 'back' && styles.tooltipBack,
-                  selectedDot === 'arm' && styles.tooltipArm,
-                  selectedDot === 'general' && styles.tooltipWholeBody,
                 ]}
               >
                 <Text style={styles.tooltipText}>
@@ -298,6 +214,7 @@ export default function BodyInputScreen() {
             )}
           </View>
 
+          {/* Body part list */}
           <View style={styles.partsPanel}>
             <Text style={styles.partsTitle}>
               {t('body_parts') || 'Body Parts'}
@@ -331,6 +248,7 @@ export default function BodyInputScreen() {
                       {getLabel(part)}
                     </Text>
 
+                    {/* Speaker button */}
                     <Pressable
                       style={({ pressed }) => [
                         styles.speakerCircle,
@@ -354,6 +272,7 @@ export default function BodyInputScreen() {
           </View>
         </View>
 
+        {/* Back button */}
         <Pressable
           style={({ pressed }) => [
             styles.backButton,

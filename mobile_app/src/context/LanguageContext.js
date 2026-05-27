@@ -1,3 +1,5 @@
+// LanguageContext.js
+
 // Import React hooks for context and state management
 import React, { createContext, useContext, useState } from 'react';
 
@@ -30,8 +32,10 @@ const LanguageContext = createContext();
 // ----------------------------------------------------
 export function LanguageProvider({ children }) {
 
-  // Stores current language (default = English)
+  // Stores current language
+  // Default language = English
   const [lang, setLang] = useState('en');
+
 
   // ----------------------------------------------------
   // t(key) → Translation Function
@@ -46,11 +50,15 @@ export function LanguageProvider({ children }) {
   //
   // Example:
   // t('continue') → "Continue" or Warlpiri equivalent
+  // ----------------------------------------------------
   const t = (key) => {
+
+    // Return translated value
     return translations[lang]?.[key] || translations.en[key] || key;
   };
 
-  // Provide language data and functions to all child components
+
+  // Provide language data and functions globally
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>
       {children}
@@ -72,5 +80,7 @@ export function LanguageProvider({ children }) {
 // Simplifies accessing global language state in screens
 // ----------------------------------------------------
 export function useLanguage() {
+
+  // Return current language context
   return useContext(LanguageContext);
 }

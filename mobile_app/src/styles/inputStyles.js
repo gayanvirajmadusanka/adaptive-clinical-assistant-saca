@@ -2,10 +2,15 @@
 // Purpose: Screen-specific styles for InputScreen.
 // Shared SafeArea, background, footer, and language modal styles are now in commonLayoutStyles.js.
 
+// Import StyleSheet from React Native
 import { StyleSheet } from 'react-native';
+
+// Import custom font constants
 import { FONTS } from '../constants/fonts';
 
+// Export all styles for InputScreen
 export default StyleSheet.create({
+
   // Main centered container for input cards.
   container: {
     flex: 1,
@@ -72,19 +77,20 @@ export default StyleSheet.create({
   },
 
   // Card press feedback effect.
+  // Slightly shrinks and changes color when pressed.
   cardPressedGrey: {
     backgroundColor: '#A9A9A9',
     transform: [{ scale: 0.96 }],
   },
 
-  // Input card icon.
+  // Input card icon image.
   cardImage: {
     width: 65,
     height: 65,
     marginBottom: 14,
   },
 
-  // Input card label.
+  // Input card label text.
   cardText: {
     fontSize: 24,
     fontFamily: FONTS.bold,
