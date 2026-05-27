@@ -184,7 +184,7 @@ def _match_keywords(spoken_text: str, question_id: str) -> tuple | None:
     best_answer_id = None
     best_score = 0.0
 
-    for keyword, mapped in KEYWORD_TO_ANSWER.items():
+    for keyword, mapped in sorted(KEYWORD_TO_ANSWER.items(), key=lambda x: len(x[0]), reverse=True):
         if keyword in spoken_lower:
             answer_id = _resolve_keyword(keyword, question_id)
             if not answer_id:

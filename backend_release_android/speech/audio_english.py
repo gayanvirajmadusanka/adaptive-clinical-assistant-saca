@@ -35,7 +35,10 @@ def transcribe(audio_path: str, model_size: str = "tiny") -> dict:
 
     model = _get_model()
 
-    segments_gen, info = model.transcribe(audio_path, language="en", vad_filter=True)
+    segments_gen, info = model.transcribe(
+        audio_path, language="en", vad_filter=True,
+        initial_prompt="The speaker is describing medical symptoms or answering health questions."
+    )
     segments = list(segments_gen)
 
     text = " ".join(s.text for s in segments).strip()
