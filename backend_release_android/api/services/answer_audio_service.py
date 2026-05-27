@@ -173,6 +173,29 @@ def resolve_answer_audio(
         _cleanup(tmp_path)
 
 
+def resolve_answer_text(
+        text: str,
+        question_id: str,
+        language: Language = Language.EN
+) -> AnswerAudioResponse:
+    """Match a spoken transcript (from device STT) against answer keywords."""
+    base = {'question_id': question_id}
+    if not text or not text.strip():
+        return AnswerAudioResponse(
+            **_unrecognised(base, 'No text received.'),
+            voice_b64=get_unrecognized_audio(language)
+        )
+    result = _match_keywords(text, question_id)
+    if result:
+        answer_id, confidence = result
+        r = _recognised(base, answer_id, confidence)
+        voice_b64 = get_answer_selected_audio(answer_id, language)
+    else:
+        r = _unrecognised(base, 'Could not match spoken answer. Please tap your answer instead.')
+        voice_b64 = get_unrecognized_audio(language)
+    return AnswerAudioResponse(**r, voice_b64=voice_b64)
+
+
 def _resolve_english(tmp_path: str, question_id: str, base: dict) -> dict:
     transcription = transcribe_english(tmp_path)
     if not transcription['success'] or not transcription['text']:

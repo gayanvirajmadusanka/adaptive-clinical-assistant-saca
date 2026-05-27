@@ -12,7 +12,14 @@ import {
   BackHandler,
   Modal,
   ImageBackground,
+  Platform,
 } from 'react-native';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
+
+const IS_ANDROID = Platform.OS === 'android';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Audio } from 'expo-av';
@@ -26,6 +33,7 @@ import styles from '../styles/tellUsMoreVoiceStyles';
 import {
   getFollowUpQuestions,
   submitAnswerAudio,
+  submitAnswerText,
 } from '../services/triageApi';
 
 import {
@@ -70,6 +78,26 @@ export default function TellUsMoreVoiceScreen() {
   const [recordDuration, setRecordDuration] = useState('0.00');
   const [resolvingVoice, setResolvingVoice] = useState(false);
   const [voiceAnswerMap, setVoiceAnswerMap] = useState({});
+  const [isSTTActive, setIsSTTActive] = useState(false);
+
+  const USE_ANDROID_STT = IS_ANDROID && lang === 'en';
+
+  useSpeechRecognitionEvent('result', (event) => {
+    if (!USE_ANDROID_STT) return;
+    const text = event.results[0]?.transcript || '';
+    if (event.isFinal && text && currentQuestion?.id) {
+      setIsSTTActive(false);
+      resolveSTTAnswer(text, currentQuestion.id);
+    }
+  });
+  useSpeechRecognitionEvent('end', () => {
+    if (USE_ANDROID_STT) setIsSTTActive(false);
+  });
+  useSpeechRecognitionEvent('error', (event) => {
+    if (!USE_ANDROID_STT) return;
+    setIsSTTActive(false);
+    if (event.error !== 'aborted') showVoiceErrorModal();
+  });
 
   const soundRef = useRef(null);
   const timerRef = useRef(null);
@@ -353,6 +381,12 @@ export default function TellUsMoreVoiceScreen() {
 
   async function handleMicPress() {
     try {
+      if (USE_ANDROID_STT) {
+        if (isSTTActive) { ExpoSpeechRecognitionModule.stop(); return; }
+        await stopCurrentAudio();
+        await startAndroidSTT();
+        return;
+      }
       if (isRecording) {
         await stopVoiceRecording();
       } else {
@@ -361,6 +395,54 @@ export default function TellUsMoreVoiceScreen() {
     } catch (error) {
       console.log('Voice answer recording error:', error);
       await showVoiceErrorModal();
+    }
+  }
+
+  async function startAndroidSTT() {
+    const { granted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+    if (!granted) { await showVoiceErrorModal(); return; }
+    try {
+      const { installedLocales } = await ExpoSpeechRecognitionModule.getSupportedLocales({});
+      const locale = installedLocales.find(l => l.startsWith('en')) || 'en-US';
+      const onDevice = installedLocales.some(l => l.startsWith('en'));
+      setIsSTTActive(true);
+      ExpoSpeechRecognitionModule.start({ lang: locale, interimResults: false, continuous: false, requiresOnDeviceRecognition: onDevice });
+    } catch {
+      setIsSTTActive(false);
+      await showVoiceErrorModal();
+    }
+  }
+
+  async function resolveSTTAnswer(text, questionId) {
+    try {
+      if (!text || !questionId) return;
+      setResolvingVoice(true);
+      const data = await submitAnswerText(text, questionId, lang || 'en');
+      if (data?.recognized && data?.answer_id) {
+        const matchedOption = currentQuestion?.options?.find(
+          (item) => item.id === data.answer_id
+        );
+        if (!matchedOption) {
+          await showVoiceErrorModal();
+          return;
+        }
+        setSelectedOption(data.answer_id);
+        setAnswers((prev) => ({
+          ...prev,
+          [questionId]: {
+            question_id: questionId,
+            answer_id: data.answer_id,
+            answer_text: matchedOption.text || '',
+          },
+        }));
+      } else {
+        await showVoiceErrorModal();
+      }
+    } catch (error) {
+      console.log('Resolve STT answer error:', error);
+      await showVoiceErrorModal();
+    } finally {
+      setResolvingVoice(false);
     }
   }
 
@@ -850,7 +932,7 @@ export default function TellUsMoreVoiceScreen() {
             <Animated.View
               style={[
                 styles.pulseCircle,
-                isRecording && styles.recordingBorder,
+                (isRecording || isSTTActive) && styles.recordingBorder,
                 {
                   transform: [{ scale: pulseAnim }],
                 },
@@ -876,7 +958,7 @@ export default function TellUsMoreVoiceScreen() {
             )}
 
             <Text style={styles.voiceHint}>
-              {isRecording
+              {(isRecording || isSTTActive)
                 ? t('voice_recording_stop')
                 : t('voice_click_mic')}
             </Text>

@@ -69,6 +69,17 @@ export function resolveAnswerAudio(audioBase64, questionId, language = 'en') {
 }
 
 
+// Submit an STT transcript for keyword-based answer matching.
+// Used on Android English where faster-whisper is not available.
+export function submitAnswerText(text, questionId, language = 'en') {
+  return postJson('/answer/text', {
+    text,
+    question_id: questionId,
+    language,
+  });
+}
+
+
 // Extract symptoms selected from body map/body input flow
 // Sends selected symptoms and language to backend
 export function extractSymptomsFromBody(symptoms, language = 'en') {

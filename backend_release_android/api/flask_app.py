@@ -10,7 +10,7 @@ import base64
 from flask import Flask, jsonify, request as flask_request
 
 from backend_release_android.api.questions.questions_module import get_questions
-from backend_release_android.api.services.answer_audio_service import resolve_answer_audio
+from backend_release_android.api.services.answer_audio_service import resolve_answer_audio, resolve_answer_text
 from backend_release_android.api.services.audio_service import get_detected_symptoms_audio
 from backend_release_android.api.services.pipeline_service import (
     classify as run_classify, process_text, process_audio, symptoms_to_ids,
@@ -104,6 +104,18 @@ def create_app() -> Flask:
 
         response = resolve_answer_audio(
             audio_b64=audio_b64, question_id=question_id, language=language
+        )
+        return jsonify(response.dict())
+
+    @app.post('/answer/text')
+    def answer_text_endpoint():
+        data        = flask_request.get_json(force=True)
+        text        = data.get('text', '')
+        question_id = data.get('question_id', '')
+        language    = data.get('language', Language.EN)
+
+        response = resolve_answer_text(
+            text=text, question_id=question_id, language=language
         )
         return jsonify(response.dict())
 

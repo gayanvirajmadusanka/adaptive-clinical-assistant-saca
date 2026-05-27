@@ -9,7 +9,12 @@ import {
   Image,
   Modal,
   ImageBackground,
+  Platform,
 } from 'react-native';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -23,7 +28,10 @@ import styles from '../styles/detectedSymptomsStyles';
 import {
   extractSymptomsFromText,
   submitAnswerAudio,
+  submitAnswerText,
 } from '../services/triageApi';
+
+const IS_ANDROID = Platform.OS === 'android';
 
 import {
   readAudioFileAsBase64,
@@ -95,8 +103,27 @@ export default function DetectedSymptomsVoiceScreen() {
     useState(null);
 
   const [answerRecording, setAnswerRecording] = useState(null);
-  const [isAnswerRecording, setIsAnswerRecording] =
-    useState(false);
+  const [isAnswerRecording, setIsAnswerRecording] = useState(false);
+  const [isSTTActive, setIsSTTActive] = useState(false);
+
+  const USE_ANDROID_STT = IS_ANDROID && lang === 'en';
+
+  useSpeechRecognitionEvent('result', (event) => {
+    if (!USE_ANDROID_STT) return;
+    const text = event.results[0]?.transcript || '';
+    if (event.isFinal && text) {
+      setIsSTTActive(false);
+      detectYesNoFromText(text);
+    }
+  });
+  useSpeechRecognitionEvent('end', () => {
+    if (USE_ANDROID_STT) setIsSTTActive(false);
+  });
+  useSpeechRecognitionEvent('error', (event) => {
+    if (!USE_ANDROID_STT) return;
+    setIsSTTActive(false);
+    if (event.error !== 'aborted') showAnswerNotRecognizedModal();
+  });
 
   const soundRef = useRef(null);
   const autoPlayedRef = useRef(false);
@@ -532,9 +559,55 @@ export default function DetectedSymptomsVoiceScreen() {
     }, 350);
   }
 
+  async function startAndroidSTT() {
+    const { granted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+    if (!granted) { await showAnswerNotRecognizedModal(); return; }
+    try {
+      const { installedLocales } = await ExpoSpeechRecognitionModule.getSupportedLocales({});
+      const locale = installedLocales.find(l => l.startsWith('en')) || 'en-US';
+      const onDevice = installedLocales.some(l => l.startsWith('en'));
+      setIsSTTActive(true);
+      ExpoSpeechRecognitionModule.start({ lang: locale, interimResults: false, continuous: false, requiresOnDeviceRecognition: onDevice });
+    } catch {
+      setIsSTTActive(false);
+      await showAnswerNotRecognizedModal();
+    }
+  }
+
+  async function detectYesNoFromText(text) {
+    try {
+      setAudioLoading(true);
+      const data = await submitAnswerText(text, CONFIRM_SYMPTOMS_QUESTION_ID, lang);
+      const recognized = data?.recognized === true;
+      const answerId = String(data?.answer_id || '').toLowerCase();
+      if (recognized && answerId === CONFIRM_SYMPTOMS_ANSWER_YES) {
+        setSelectedVoiceAnswer('yes');
+        setTimeout(() => handleYesPress(), 450);
+        return;
+      }
+      if (recognized && answerId === CONFIRM_SYMPTOMS_ANSWER_NO) {
+        setSelectedVoiceAnswer('no');
+        setTimeout(() => handleNoPress(), 450);
+        return;
+      }
+      await showAnswerNotRecognizedModal();
+    } catch {
+      await showAnswerNotRecognizedModal();
+    } finally {
+      setAudioLoading(false);
+    }
+  }
+
   async function handleAnswerMicPress() {
     try {
       if (audioLoading) {
+        return;
+      }
+
+      if (USE_ANDROID_STT) {
+        if (isSTTActive) { ExpoSpeechRecognitionModule.stop(); return; }
+        await stopCurrentAudio();
+        await startAndroidSTT();
         return;
       }
 
@@ -853,7 +926,7 @@ export default function DetectedSymptomsVoiceScreen() {
             <Pressable
               style={[
                 styles.detectedMicButton,
-                isAnswerRecording &&
+                (isAnswerRecording || isSTTActive) &&
                   styles.detectedMicRecording,
               ]}
               onPress={
@@ -874,7 +947,7 @@ export default function DetectedSymptomsVoiceScreen() {
             >
               {audioLoading
                 ? t('voice_processing')
-                : isAnswerRecording
+                : (isAnswerRecording || isSTTActive)
                 ? t(
                     'voice_recording_hint'
                   )
