@@ -23,7 +23,7 @@ _BASE_DIR  = os.path.dirname(__file__)
 _AUDIO_DIR = os.path.join(_BASE_DIR, '..', '..', 'data', 'audio', 'output')
 _MAP_PATH  = os.path.join(_BASE_DIR, '..', '..', 'data', 'audio', 'audio_map.json')
 
-_TARGET_RATE = 22050  # output sample rate for all stitched audio
+_TARGET_RATE = 24000  # output sample rate — matches source WAVs (24kHz UI, 48kHz→24kHz questions)
 _SILENCE_MS  = 400    # silence gap between stitched clips
 _TARGET_PEAK = 0.80   # normalisation target peak level
 

@@ -59,16 +59,9 @@ def _load_pkl_file(path: str) -> object:
 
 
 def _load_model() -> bool:
-    global _model, _tfidf, _label_enc
-    if _model is not None:
-        return True
-    try:
-        _model     = _load_pkl_file(_MODEL_PATH)
-        _tfidf     = _load_pkl_file(_TFIDF_PATH)
-        _label_enc = _load_pkl_file(_ENCODER_PATH)
-        return True
-    except Exception:
-        return False
+    # Disabled on Android: pickle.load triggers slow sklearn C-extension imports at request time
+    # causing OkHttp read timeout. Stage 1 fuzzy matching is sufficient for demo.
+    return False
 
 
 def _apply_synonyms(text: str) -> list:

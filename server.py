@@ -33,8 +33,11 @@ def start():
 
 def _run():
     try:
+        print("[SACA] importing uvicorn...")
         import uvicorn
+        print("[SACA] importing app...")
         from backend_release_android.api.main import app
+        print("[SACA] starting uvicorn on :8000")
         uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
     except Exception as exc:
         print(f"[SACA] Server error: {exc}")

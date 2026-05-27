@@ -12,7 +12,7 @@ import { LanguageProvider } from '../src/context/LanguageContext';
 const IS_ANDROID_RELEASE = Platform.OS === 'android' && !__DEV__;
 const HEALTH_URL = 'http://127.0.0.1:8000/health';
 const POLL_INTERVAL_MS = 600;
-const POLL_TIMEOUT_MS  = 120000;
+const POLL_TIMEOUT_MS  = 300000;
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -61,7 +61,7 @@ export default function RootLayout() {
       <View style={styles.splash}>
         <ActivityIndicator size="large" color="#8B2E0A" />
         <Text style={styles.splashText}>Starting SACA…</Text>
-        <Text style={styles.splashSub}>First launch may take up to 30 seconds</Text>
+        <Text style={styles.splashSub}>First launch may take 1–3 minutes</Text>
       </View>
     );
   }
