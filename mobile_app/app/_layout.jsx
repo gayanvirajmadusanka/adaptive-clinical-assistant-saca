@@ -30,8 +30,8 @@ function LoadingSplash() {
     // Gentle logo breathing
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.06, duration: 1200, easing: Easing.inOut(Easing.sine), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1.00, duration: 1200, easing: Easing.inOut(Easing.sine), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1.06, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1.00, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       ])
     ).start();
 
